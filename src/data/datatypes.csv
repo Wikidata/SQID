@@ -1,0 +1,10 @@
+IRI,Label
+"http://www.wikidata.org/ontology#propertyTypeItem",Item
+"http://www.wikidata.org/ontology#propertyTypeString",String
+"http://www.wikidata.org/ontology#propertyTypeQuantity",Quantity
+"http://www.wikidata.org/ontology#propertyTypeTime",Time
+"http://www.wikidata.org/ontology#propertyTypeCommonsMedia",Commons media
+"http://www.wikidata.org/ontology#propertyTypeUrl",URL
+"http://www.wikidata.org/ontology#propertyTypeGlobeCoordinates",Globe coordinates
+"http://www.wikidata.org/ontology#propertyTypeMonolingualText",Monolingual text
+"http://www.wikidata.org/ontology#propertyTypeProperty",Property
