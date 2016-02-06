@@ -2,29 +2,78 @@
 <head>
   <meta charset="utf8" />
   <title>Wikidata Class Browser</title>
-  <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="bootstrap-3.3.6-dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="style.css">
+  <script src="//code.jquery.com/jquery-1.12.0.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <nav class="navbar navbar-default" style="margin-top: 20px;">
-      <ul class="nav navbar-nav">
-        <li><a href="#/">Start</a></li>
-        <li><a href="#/about">Über</a></li>
-      </ul>
-      <form class="navbar-form pull-right" role="search">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search" ng-model="search">
+    <nav id="navigation" class="navbar navbar-default" style="margin-top: 20px;">
+      <div class="nav col-xs-9 nav-bar-sides" >
+        <div>
+          <div class="nav navbar-nav"><a href="#/"><img id="icon" src="img/icon.svg"></img></a></div>
+          <div class="nav navbar-nav" id="header-title">WIKIDATA<br/>CLASS BROWSER</div>
         </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-      </form>
+        <div class="nav navbar-nav">
+        <ul class="nav navbar-nav nav-link"> 
+          <li class="nav-link"><a href="#/">Start</a></li>
+          <li class="nav-link"><a href="#/browse">Browse Data</a></li>
+          <li class="nav-link"><a href="#/datatypes">Datatypes</a></li>
+          <li class="nav-link"><a href="#/about">About</a></li>
+        </ul>
+      </div>
+      </div>
+      <div class="nav navbar-nav col-xs-3 nav-bar-sides">
+        <div class="pull-right">
+          <div id="lang-selection"><a data-toggle="modal" data-target="#langModal">Change Language (English)</a></div>
+          <div id="custom-search-input">
+                <div class="input-group">
+                    <input type="text" class="form-control input-md" placeholder="Search" />
+                    <span class="input-group-btn">
+                        <button class="btn btn-info btn-sm" type="button">
+                            <i class="glyphicon glyphicon-search"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+        </div>
+      </div>
     </nav>
-    <div ng-view id="wrapper"></div>
 
+    <!-- Modal -->
+    <div id="langModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Select a language</h4>
+          </div>
+          <div class="modal-body" style="">
+            <div id="lang-search-bar" class="row">
+              <div class="col-xs-1 btn-lg">
+                <i class="glyphicon glyphicon-search"></i>
+              </div>
+              <div class="col-xs-10">
+                <input type="text" class="form-control input-md" placeholder="Search" />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div ng-view id="wrapper">
+    </div>
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-animate.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-route.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

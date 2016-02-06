@@ -22,7 +22,9 @@ function parseClassesCSV(content) {
 angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   .config(function($routeProvider) {
     $routeProvider
-      .when('/', {templateUrl: 'views/startpage.html'})
+      .when('/', {templateUrl: 'views/start.html'})
+      .when('/browse', { templateUrl: 'views/browseData.html' })
+      .when('/datatypes', { templateUrl: 'views/datatypes.html' })
       .when('/about', { templateUrl: 'views/about.html' })
       .otherwise({redirectTo: '/'});
     /*
