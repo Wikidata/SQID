@@ -1,5 +1,12 @@
 'use strict'; // indicate that code is executed strict
 
+
+var JSON_LABEL = "l";
+var JSON_INSTANCES = "i";
+var JSON_SUBCLASSES = "s";
+var JSON_RELATED_PROPERTIES = "r";
+
+
 function httpGet(url) {
   var xmlHttp = new XMLHttpRequest();
   xmlHttp.open( "GET", url, false ); // false for synchronous request
@@ -19,6 +26,10 @@ function parseClassesCSV(content) {
   return result;
 }
 
+function getJsonHeader(){
+	return [["ID","Label","Items","Subclasses"]];
+}
+
 angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   .config(function($routeProvider) {
     $routeProvider
@@ -34,23 +45,24 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       */
   })
   .factory('Classes', function() {
-    var classes = parseClassesCSV(httpGet("data/classes.csv"));
+	var classes = JSON.parse(httpGet("data/classes.json"));
     return {
       getClasses: function() {
         return classes;
       },
       getClasses: function(from, to){
-        var subarray = classes.slice(from, to);
-        for (var i = 0; i < (to-from); i++){
-          for (var j = 0; j < subarray[i].length; j++){
-            if (subarray[i][j].length > 20){
-              subarray[i][j] = subarray[i][j].substring(0, 20) + " ...";
-            }
-            subarray[i][j] = subarray[i][j].replace("@", ", ");
-            subarray[i][j] = subarray[i][j].replace("\"", "");
-          }
-        }
-        return subarray;
+		var i = 0;
+		var ret = getJsonHeader();
+	    for (var entry in classes) {
+			i++;
+			var obj = classes[entry];
+			var subarray = [entry,obj[JSON_LABEL],obj[JSON_INSTANCES],obj[JSON_SUBCLASSES]];
+			ret.push(subarray);
+			if (i == 10){
+				break;
+			}
+		}
+		return ret;
       } 
     };
   })
