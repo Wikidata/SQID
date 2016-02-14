@@ -12,3 +12,4 @@ w: Uses in statements with qualifiers
 q: Uses in qualifiers
 e: Uses in references
 p: Uses in properties
+d: Datatype
