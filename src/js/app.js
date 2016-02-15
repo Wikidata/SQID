@@ -27,7 +27,7 @@ function parseClassesCSV(content) {
 }
 
 function getJsonHeader(){
-	return [["ID","Label","Items","Subclasses"]];
+	return ["ID","Label","Items","Subclasses"];
 }
 
 angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
@@ -45,24 +45,25 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       */
   })
   .factory('Classes', function() {
-	var classes = JSON.parse(httpGet("data/classes.json"));
+	  var classes = JSON.parse(httpGet("data/classes.json"));
     return {
-      getClasses: function() {
-        return classes;
-      },
       getClasses: function(from, to){
-		var i = 0;
-		var ret = getJsonHeader();
-	    for (var entry in classes) {
-			i++;
-			var obj = classes[entry];
-			var subarray = [entry,obj[JSON_LABEL],obj[JSON_INSTANCES],obj[JSON_SUBCLASSES]];
-			ret.push(subarray);
-			if (i == 10){
-				break;
-			}
-		}
-		return ret;
+		    var i = 0;
+        var ret = [];
+        if (from == 0){
+		      ret.push(getJsonHeader());
+        }
+	      for (var entry in classes) {
+			    i++;
+			    var obj = classes[entry];
+			    var subarray = [entry,obj[JSON_LABEL],obj[JSON_INSTANCES],obj[JSON_SUBCLASSES]];
+			    
+			    if ((i >= from) && (i <= to)){
+				    ret.push(subarray);
+			    }
+		    }
+        console.log("x");
+		    return ret;
       } 
     };
   })

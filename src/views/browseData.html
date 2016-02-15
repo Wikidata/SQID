@@ -4,18 +4,18 @@
 <br/><b>Note:</b> table is to large -> unwanted resizing</div>
 
 <div ng-controller="MyController">
-	<table class="table table-condensed/416741">
-	<thead>
+	<table class="table table-condensed">
+    <thead>
       <tr>
-        <th ng-repeat="hitem in classesForClasses.getClasses()[0]">{{hitem}}</th>
+        <th ng-repeat="hitem in classesForClasses.getClasses(0, 5)[0]">{{hitem}}</th>
       </tr>
     </thead>
     <tbody>
-    	<tr ng-repeat="entry in classesForClasses.getClasses(1, 12) | filter:search">
-    		<td ng-repeat="item in entry">
-    			{{item}}
-    		</td>
-    	</tr>
+        <tr ng-repeat="lol in classesForClasses.getClasses(1, 12) | filter:search">
+            <td ng-repeat="item in lol">
+                {{item}}
+            </td>
+        </tr>
     </tbody>
 	</table> 
 </div>
