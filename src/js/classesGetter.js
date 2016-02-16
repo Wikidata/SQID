@@ -38,6 +38,18 @@ function getClassData( qid ) {
 	return ret;
 }
 
+function getNumberForClass(itemID) {
+	var instanceOf = "P31";
+	var subclassOf = "P279";
+	return {instances: getNumber(itemID,instanceOf), subclasses: getNumber(itemID,subclassOf)};
+}
+
+function getNumber(itemID, propertyID) {
+	var url = buildUrlForSparQLRequest(getQueryForNumberRequest(itemID, propertyID));
+	var result = util.httpGet(url);
+	var number = JSON.parse(result);
+	return number.results.bindings[0].c.value;
+}
 
 function getExampleInstances (itemID) {
 	instances = [];
@@ -45,7 +57,6 @@ function getExampleInstances (itemID) {
 		var limit = 9;
 		var url = buildUrlForSparQLRequest(getQueryForInstances (itemID, limit));
 		var result = util.httpGet( url );
-		alert(result);
 		var length = 0;
 		var instanceJson = JSON.parse(result).results.bindings;
 		length = instanceJson.length;
@@ -78,4 +89,8 @@ function buildUrlForSparQLRequest (query) {
 
 function buildUrlForApiRequest( itemID ) {
 	return "https://www.wikidata.org/wiki/Special:EntityData/" + itemID + ".json";
+}
+
+function getQueryForNumberRequest( itemID, propertyID ){
+	return "PREFIX wikibase%3A <http%3A%2F%2Fwikiba.se%2Fontology%23>%0APREFIX wd%3A <http%3A%2F%2Fwww.wikidata.org%2Fentity%2F> %0APREFIX wdt%3A <http%3A%2F%2Fwww.wikidata.org%2Fprop%2Fdirect%2F>%0APREFIX rdfs%3A <http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0APREFIX p%3A <http%3A%2F%2Fwww.wikidata.org%2Fprop%2F>%0APREFIX v%3A <http%3A%2F%2Fwww.wikidata.org%2Fprop%2Fstatement%2F>%0A%0ASELECT (count(*) as %3Fc)%0AWHERE {%0A    %3Fp wdt%3A" + propertyID + " wd%3A" + itemID + " .%0A}";
 }

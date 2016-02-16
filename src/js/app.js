@@ -108,6 +108,7 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 	$scope.qid = ClassView.getQid();
 	$scope.classData = getClassData($scope.qid);
 	$scope.exampleInstances = getExampleInstances($scope.qid);
+	$scope.classNumbers = getNumberForClass($scope.qid);
   })
   .controller('MyController', function($scope, Classes){
     $scope.classesForClasses = Classes; 
