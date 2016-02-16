@@ -12,7 +12,8 @@ var util = {
   httpGet: function(url) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", url, false ); // false for synchronous request
-    xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
+    //xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
+	xmlHttp.setRequestHeader("Accept","application/sparql-results+json");
     xmlHttp.send( null );
     return xmlHttp.responseText;
   },
@@ -44,12 +45,21 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/browse', { templateUrl: 'views/browseData.html' })
       .when('/datatypes', { templateUrl: 'views/datatypes.html' })
       .when('/about', { templateUrl: 'views/about.html' })
+	  .when('/classview', { templateUrl: 'views/classview.html' })
       .otherwise({redirectTo: '/'});
     /*
       .when('/', { templateUrl: 'articles.html' })
       .when('/about', { templateUrl: 'about.html' })
       .otherwise({ redirectTo: '/'});
       */
+  })
+  .factory('ClassView', function() {
+	var qid = "Q5";	
+	return {
+	  getQid: function(){
+		  return qid;
+	  }
+    };
   })
   .factory('Classes', function() {
 
@@ -93,6 +103,11 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
         refreshArgs();
       }
     };
+  })
+  .controller('ClassViewController', function($scope,Classes,ClassView){
+	$scope.qid = ClassView.getQid();
+	$scope.classData = getClassData($scope.qid);
+	$scope.exampleInstances = getExampleInstances($scope.qid);
   })
   .controller('MyController', function($scope, Classes){
     $scope.classesForClasses = Classes; 

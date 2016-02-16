@@ -1,0 +1,18 @@
+<h1>Class</h1>
+
+<div class="alert alert-warning" role="alert">This will be a classes view.</div>
+
+<div ng-controller="ClassViewController">
+{{qid}} <br>
+<b>Label:</b> {{classData.label}}<br>
+<b>Aliases:</b> {{classData.aliases}}<br>
+<b>Description:</b> {{classData.description}}<br>
+<b>Image:</b> <img src = {{classData.image}}></img><br>
+<b>Example instances</b>
+<table>
+              <tr ng-repeat="instance in exampleInstances">
+                <td>
+                    <a href = {{instance.uri}}>{{instance.label}}</a>
+                </td>
+              </tr></table>
+</div>
