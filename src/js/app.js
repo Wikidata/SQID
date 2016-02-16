@@ -106,9 +106,12 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   })
   .controller('ClassViewController', function($scope,Classes,ClassView){
 	$scope.qid = ClassView.getQid();
+	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 	$scope.classData = getClassData($scope.qid);
 	$scope.exampleInstances = getExampleInstances($scope.qid);
 	$scope.classNumbers = getNumberForClass($scope.qid);
+
+
   })
   .controller('MyController', function($scope, Classes){
     $scope.classesForClasses = Classes; 
