@@ -1,34 +1,41 @@
 'use strict'; // indicate that code is executed strict
 
+// namespace to avoid huge amount of global variables
+var util = {
 
-var JSON_LABEL = "l";
-var JSON_INSTANCES = "i";
-var JSON_SUBCLASSES = "s";
-var JSON_RELATED_PROPERTIES = "r";
+  JSON_LABEL: "l",
+  JSON_INSTANCES: "i",
+  JSON_SUBCLASSES: "s",
+  JSON_RELATED_PROPERTIES: "r",
 
 
-function httpGet(url) {
-  var xmlHttp = new XMLHttpRequest();
-  xmlHttp.open( "GET", url, false ); // false for synchronous request
-  xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
-  xmlHttp.send( null );
-  return xmlHttp.responseText;
-}
+  httpGet: function(url) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", url, false ); // false for synchronous request
+    xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+  },
 
-function parseClassesCSV(content) {
-  var lines = content.split("\n")
-  var result = []
-  for (var i = 0; i < lines.length; i++){
-    var l = lines[i];
-    var data = l.split(',');
-    result.push(data);
+  parseClassesCSV: function(content) {
+    var lines = content.split("\n")
+    var result = []
+    for (var i = 0; i < lines.length; i++){
+      var l = lines[i];
+      var data = l.split(',');
+      result.push(data);
+    }
+    return result;
+  },
+
+  getQueryString: function (field) {
+    var href = window.location.href;
+    var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
+    var string = reg.exec(href);
+    return string ? string[1] : null;
   }
-  return result;
-}
 
-function getJsonHeader(){
-	return ["ID","Label","Items","Subclasses"];
-}
+};
 
 angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   .config(function($routeProvider) {
@@ -45,28 +52,49 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       */
   })
   .factory('Classes', function() {
-	  var classes = JSON.parse(httpGet("data/classes.json"));
-    return {
-      getClasses: function(from, to){
-		    var i = 0;
-        var ret = [];
-        if (from == 0){
-		      ret.push(getJsonHeader());
+
+	  var classes = JSON.parse(util.httpGet("data/classes.json"));
+    var args; 
+
+    var refreshArgs = function(){
+      args = {
+        from: (util.getQueryString("from")) ? parseInt(util.getQueryString("from")) : 0,
+        to: (util.getQueryString("to")) ? parseInt(util.getQueryString("to")) : 10,
+        type: (util.getQueryString("type")) ? util.getQueryString("type") : "classes"
+      }
+    }
+
+    var initArray = function(json){
+      var ret = []
+      for (var entry in json) {
+          var obj = json[entry];
+          var subobj = {id: entry, 
+              label: obj[util.JSON_LABEL], 
+              numberOfInstances: obj[util.JSON_INSTANCES], 
+              numberOfSubclasses: obj[util.JSON_SUBCLASSES]
+            };
+          ret.push(subobj);
         }
-	      for (var entry in classes) {
-			    i++;
-			    var obj = classes[entry];
-			    var subarray = [entry,obj[JSON_LABEL],obj[JSON_INSTANCES],obj[JSON_SUBCLASSES]];
-			    
-			    if ((i >= from) && (i <= to)){
-				    ret.push(subarray);
-			    }
-		    }
-        console.log("x");
-		    return ret;
-      } 
+      return ret;
+    }
+
+    args = refreshArgs();
+    var classesArray = initArray(classes);
+
+    return {
+
+      classesHeader: ["ID","Label","Instances","Subclasses"],
+
+      getContent: function(){
+        console.log(classesArray.slice(args.from, args.to));
+		    return classesArray.slice(args.from, args.to);
+      },
+      refresh: function(){
+        refreshArgs();
+      }
     };
   })
   .controller('MyController', function($scope, Classes){
     $scope.classesForClasses = Classes; 
+    $scope.classesForClasses.refresh();
   });

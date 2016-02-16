@@ -1,21 +1,65 @@
-<h1>Data Example</h1>
+<!-- <h1>Data Example</h1>
 
 <div class="alert alert-warning" role="alert">This is only an example to show the paring of the CSV files. It is not the proposed content for this site.
 <br/><b>Note:</b> table is to large -> unwanted resizing</div>
-
-<div ng-controller="MyController">
-	<table class="table table-condensed">
-    <thead>
-      <tr>
-        <th ng-repeat="hitem in classesForClasses.getClasses(0, 5)[0]">{{hitem}}</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr ng-repeat="lol in classesForClasses.getClasses(1, 12) | filter:search">
-            <td ng-repeat="item in lol">
-                {{item}}
-            </td>
-        </tr>
-    </tbody>
-	</table> 
+ -->
+<div class="row">
+    <div class="col-xs-9">
+<!--         <div id="typeSelector" class="btn-group btn-group-lg" role="group" aria-label="...">
+            <button type="button" class="btn btn-default active">Classes</button>
+            <button type="button" class="btn btn-default">Properties</button>
+        </div> -->
+        <ul id="typeSelector" class="nav nav-pills">
+          <li role="presentation" class="active"><a href="#/browse?type=&quot;classes&quot;">Classes</a></li>
+          <li role="presentation"><a href="#/browse?type=&quot;classes&quot;">Properties</a></li>
+        </ul>
+        <div class="p-x-2" ng-controller="MyController">
+        	<table class="table table-condensed">
+            <thead>
+              <tr>
+                <th ng-repeat="hitem in classesForClasses.classesHeader">{{hitem}}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="item in classesForClasses.getContent() | filter:search">
+                <td>
+                    {{item.id}}
+                </td>
+                <td>
+                    {{item.label}}
+                </td>
+                <td>
+                    {{item.numberOfInstances}}
+                </td>
+                <td>
+                    {{item.numberOfSubclasses}}
+                </td>
+              </tr>
+            </tbody>
+        	</table> 
+        </div>
+        <nav id="pageSelector">
+          <ul class="pagination">
+            <li>
+              <a href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li><a href="#/browse?from=0&to=10">1</a></li>
+            <li><a href="#/browse?from=10&to=20">2</a></li>
+            <li><a href="#/browse?from=20&to=30">3</a></li>
+            <li><a href="#/browse?from=30&to=40">4</a></li>
+            <li><a href="#/browse?from=40&to=50">5</a></li>
+            <li>
+              <a href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+    </div>
+    <div class="col-xs-3">
+        <h2>Filters</h2>
+        test</br>test
+    </div>
 </div>

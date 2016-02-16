@@ -19,6 +19,16 @@
     cursor: pointer;
 }
 
+#typeSelector{
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+#pageSelector{
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
 .nav-bar-sides{
 	height: 100%;
 }
