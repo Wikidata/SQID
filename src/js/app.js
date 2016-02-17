@@ -18,6 +18,16 @@ var util = {
 	xmlHttp.setRequestHeader("Accept","application/sparql-results+json");
     xmlHttp.send( null );
     return xmlHttp.responseText;
+  },
+  
+  
+  parseRelatedProperties: function(qid, json){
+	var ret = [];
+	var relProps = json[qid]["r"];
+	for (var prop in relProps){
+	  ret.push(prop);
+	}
+	return ret;
   }
 
 };
@@ -32,11 +42,10 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 	  .when('/classview', { templateUrl: 'views/classview.html' })
       .otherwise({redirectTo: '/'});
   })
-  .factory('ClassView', function() {
-	var qid = "Q5";	
+  .factory('ClassView', function($http, $route) {
 	return {
 	  getQid: function(){
-		  return qid;
+		  return ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 	  }
     };
   })
@@ -133,6 +142,9 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
         classesArray = initArray(classes);
 
         return {
+		  getClasses: function(){
+			  return classes;
+		  },
           classesHeader: ["ID","Label","Instances","Subclasses"],
 
           getContent: function(){
@@ -157,11 +169,16 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     return promise;
   })
   .controller('ClassViewController', function($scope,Classes,ClassView){
-	$scope.qid = ClassView.getQid();
-	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-	$scope.classData = getClassData($scope.qid);
-	$scope.exampleInstances = getExampleInstances($scope.qid);
-	$scope.classNumbers = getNumberForClass($scope.qid);
+	Classes.then(function(data){
+	  $scope.qid = ClassView.getQid();
+	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
+	  $scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+	  console.log("getting ClassData");
+	  $scope.classData = getClassData($scope.qid);
+	  console.log("getting numbers");
+	  $scope.exampleInstances = getExampleInstances($scope.qid);
+	  $scope.classNumbers = getNumberForClass($scope.qid);	
+	});
 
 
   })

@@ -15,4 +15,8 @@
               </tr></table>
 <b>Number of direct instances: </b> {{classNumbers.instances}}<br>
 <b>Number of direct subclasses: </b> {{classNumbers.subclasses}}<br>
+<b>Related Properties:</b>
+<table>         <tr ng-repeat="property in relatedProperties">
+                <td> {{property}} </td>
+              </tr></table>
 </div>
