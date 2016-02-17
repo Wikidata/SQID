@@ -30,14 +30,6 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/about', { templateUrl: 'views/about.html' })
       .otherwise({redirectTo: '/'});
   })
-  // .directive('page-selection', function(){
-  //   // var gen = function()
-  //   return {
-  //     restrict: 'A',
-  //     scope: ,
-  //     template: gen(),  
-  //   }
-  // })
   .factory('Classes', function($http, $route) {
     
     var promise;
@@ -127,7 +119,6 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     if (!promise){
       promise = $http.get("data/classes.json").then(function(response){
         classes = response.data;
-        args = refreshArgs();
         classesArray = initArray(classes);
 
         return {
@@ -138,7 +129,7 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
             return tableContent;
           },
           getPageSelectorData: function(){
-            conolse.log("CALL: getPageSelectorData()");
+            console.log("CALL: getPageSelectorData()");
             return pageSelectorData;
           },
           refresh: function(){
@@ -154,6 +145,30 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 
     return promise;
   })
+  .directive('pageSelection', ['$compile', 'Classes', function($compile, Classes){
+    var generatePagnition = function(promise){
+      console.log(promise);
+      promise.then(function(data){
+        data.refresh();
+
+        console.log(data.getPageSelectorData());
+
+      });
+    //   ret = "";
+    //   for (var i = from)
+    // return "<div>" + arg + "</div>";
+    };
+    return {
+      restrict: 'E',
+      scope: {
+        properties: '=' 
+      },
+      template: generatePagnition(Classes),
+      link: function(element){
+        console.log(element);
+      }
+    }
+  }])
   .controller('MyController', function($scope, Classes){
     Classes.then(function(data){
       $scope.classesForClasses = data;
