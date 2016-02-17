@@ -7,6 +7,8 @@ var util = {
   JSON_INSTANCES: "i",
   JSON_SUBCLASSES: "s",
   JSON_RELATED_PROPERTIES: "r",
+  TABLE_SIZE: 10,
+  PAGE_SELECTOR_SIZE: 2,
 
 
   httpGet: function(url) {
@@ -15,17 +17,6 @@ var util = {
     xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
     xmlHttp.send( null );
     return xmlHttp.responseText;
-  },
-
-  parseClassesCSV: function(content) {
-    var lines = content.split("\n")
-    var result = []
-    for (var i = 0; i < lines.length; i++){
-      var l = lines[i];
-      var data = l.split(',');
-      result.push(data);
-    }
-    return result;
   },
 
   getQueryString: function (field) {
@@ -45,16 +36,23 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/datatypes', { templateUrl: 'views/datatypes.html' })
       .when('/about', { templateUrl: 'views/about.html' })
       .otherwise({redirectTo: '/'});
-    /*
-      .when('/', { templateUrl: 'articles.html' })
-      .when('/about', { templateUrl: 'about.html' })
-      .otherwise({ redirectTo: '/'});
-      */
   })
-  .factory('Classes', function() {
-
-	  var classes = JSON.parse(util.httpGet("data/classes.json"));
-    var args; 
+  // .directive('page-selection', function(){
+  //   // var gen = function()
+  //   return {
+  //     restrict: 'A',
+  //     scope: ,
+  //     template: gen(),  
+  //   }
+  // })
+  .factory('Classes', function($http) {
+    
+    var promise;
+	  var classes; 
+    var args = {}; 
+    var pageSelectorData = {};
+    var classesArray = [];
+    var tableContent = [];
 
     var refreshArgs = function(){
       args = {
@@ -67,34 +65,106 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     var initArray = function(json){
       var ret = []
       for (var entry in json) {
-          var obj = json[entry];
-          var subobj = {id: entry, 
-              label: obj[util.JSON_LABEL], 
-              numberOfInstances: obj[util.JSON_INSTANCES], 
-              numberOfSubclasses: obj[util.JSON_SUBCLASSES]
-            };
-          ret.push(subobj);
+          ret.push(entry);
         }
+      console.log("size:" + ret.length);
       return ret;
     }
 
-    args = refreshArgs();
-    var classesArray = initArray(classes);
-
-    return {
-
-      classesHeader: ["ID","Label","Instances","Subclasses"],
-
-      getContent: function(){
-        console.log(classesArray.slice(args.from, args.to));
-		    return classesArray.slice(args.from, args.to);
-      },
-      refresh: function(){
-        refreshArgs();
+    var getEntityFromId = function(id){
+      return {
+        id: id,
+        label: classes[id][util.JSON_LABEL],
+        numberOfInstances: classes[id][util.JSON_INSTANCES],
+        numberOfSubclasses: classes[id][util.JSON_SUBCLASSES],
+        relatedProperties: classes[id][util.JSON_RELATED_PROPERTIES]
       }
-    };
+    }
+
+    var refreshTableContent = function(){
+      tableContent = [];
+      for (var i = args.from; i < args.to; i++){
+        tableContent.push(getEntityFromId(classesArray[i]));
+      }
+    }
+
+    var refreshPageSelectorData = function(){
+      var from;
+      var to;
+      var active = Math.floor(args.from / util.TABLE_SIZE) + 1;
+      
+      if ((2*2 +1) * util.TABLE_SIZE >= classesArray.length){
+        if (util.TABLE_SIZE >= classesArray.length){
+          pageSelectorData = {
+            enabled: false
+          }
+          return;
+        }else{
+          to = Math.floor(classesArray.length / util.TABLE_SIZE);
+          if ((classesArray.length % util.TABLE_SIZE) > 0){
+            to++;
+          }
+          from = 1;
+        }
+      }else{
+        if (active > 2){
+          if ((2*util.TABLE_SIZE) > (classesArray.length - args.from)){
+            from = active - 2;
+          }else{ // there are not enough succesors
+            // assertion: there are enough predecessors
+            var offset = Math.floor((classesArray.length - args.from) / util.TABLE_SIZE) - 1; // number of following pages
+            if (((classesArray.length - args.from) % util.TABLE_SIZE) > 0){
+              offset++;
+            }
+            from = active - (2-offset) - 2
+            to = active + offset;
+          }
+        }else{ // active lower than or equal PAGE_SELECTOR_SIZE
+          from = 1;
+          to = 2*2+1;
+        }
+      }
+      pageSelectorData = {
+        start: from,
+        end: to,
+        current: active,
+        enabled: true
+      }
+    }
+
+    if (!promise){
+      promise = $http.get("data/classes.json").then(function(response){
+        classes = response.data;
+        args = refreshArgs();
+        classesArray = initArray(classes);
+
+        return {
+          classesHeader: ["ID","Label","Instances","Subclasses"],
+
+          getContent: function(){
+            console.log("CALL: getContent()");
+            return tableContent;
+          },
+          getPageSelectorData: function(){
+            conolse.log("CALL: getPageSelectorData()");
+            return pageSelectorData;
+          },
+          refresh: function(){
+            console.log("CALL: refresh()")
+            refreshArgs();
+            refreshPageSelectorData();
+            refreshTableContent();
+          }
+        };
+
+      });
+    }
+
+    return promise;
   })
   .controller('MyController', function($scope, Classes){
-    $scope.classesForClasses = Classes; 
-    $scope.classesForClasses.refresh();
+    Classes.then(function(data){
+      $scope.classesForClasses = data;
+      $scope.classesForClasses.refresh();
+    });
   });
