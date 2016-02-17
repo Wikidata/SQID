@@ -17,13 +17,6 @@ var util = {
     xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
     xmlHttp.send( null );
     return xmlHttp.responseText;
-  },
-
-  getQueryString: function (field) {
-    var href = window.location.href;
-    var reg = new RegExp( '[?&]' + field + '=([^&#]*)', 'i' );
-    var string = reg.exec(href);
-    return string ? string[1] : null;
   }
 
 };
@@ -45,7 +38,7 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   //     template: gen(),  
   //   }
   // })
-  .factory('Classes', function($http) {
+  .factory('Classes', function($http, $route) {
     
     var promise;
 	  var classes; 
@@ -56,9 +49,9 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 
     var refreshArgs = function(){
       args = {
-        from: (util.getQueryString("from")) ? parseInt(util.getQueryString("from")) : 0,
-        to: (util.getQueryString("to")) ? parseInt(util.getQueryString("to")) : 10,
-        type: (util.getQueryString("type")) ? util.getQueryString("type") : "classes"
+        from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
+        to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : 10,
+        type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
       }
     }
 
@@ -67,7 +60,6 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       for (var entry in json) {
           ret.push(entry);
         }
-      console.log("size:" + ret.length);
       return ret;
     }
 
