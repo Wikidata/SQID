@@ -185,34 +185,26 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   .controller('ClassViewController', function($scope,Classes,ClassView){
 	$scope.qid = ClassView.getQid();
 	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-
-	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
-		$scope.classData = parseClassDataFromJson(response, $scope.qid);
-		console.log("parsed class data");
-	});
-
+	
 		
 	var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
-
-	
 	xhr(url).then(function(response) {
 	  $scope.exampleInstances = parseExampleInstances(response);
 	  console.log("parsed ExampleInstances");
 	});
 	
-	
-
-	
-
+	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
+		$scope.classData = parseClassDataFromJson(response, $scope.qid);
+		console.log("parsed class data");
+	});
 	
 	Classes.then(function(data){
 	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
 	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
 	  //$scope.exampleInstances = getExampleInstances($scope.qid);
-	  //$scope.classNumbers = getNumberForClass($scope.qid);	
+	  //$scope.classNumbers = getNumberForClass($scope.qid);
+	  console.log("fetched ClassData");
 	});
-
-
   })
   .controller('MyController', function($scope, Classes){
     Classes.then(function(data){
