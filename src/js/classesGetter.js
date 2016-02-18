@@ -1,42 +1,76 @@
 
 var language = "en";
 
-function getClassData( qid ) {
+
+
+function xhr(url) {
+  // Return a new promise.
+  return new Promise(function(resolve, reject) {
+    // Do the usual XHR stuff
+    var req = new XMLHttpRequest();
+    req.open('GET', url);
+
+	req.setRequestHeader("Accept","application/sparql-results+json");
+    req.onload = function() {
+      // This is called even on 404 etc
+      // so check the status
+      if (req.status == 200) {
+        // Resolve the promise with the response text
+        resolve(req.response);
+      }
+      else {
+        // Otherwise reject with the status text
+        // which will hopefully be a meaningful error
+        reject(Error(req.statusText));
+      }
+    };
+
+    // Handle network errors
+    req.onerror = function() {
+      reject(Error("Network Error"));
+    };
+
+    // Make the request
+    req.send();
+  });
+}
+
+
+
+function parseClassDataFromJson ( data, qid ){
 	var ret = {
 		label: "",
 		description: "",
 		image: "",
 		aliases: ""
-	}
+	};
 	try {
-		var url = buildUrlForApiRequest(qid);
-	    var result = util.httpGet( url );
-		var resultJson = JSON.parse(result);
-		ret.label = resultJson.entities[qid].labels[language].value;
-		ret.description = resultJson.entities[qid].descriptions[language].value;
-		aliasesJson = resultJson.entities[qid].aliases[language];
-		if (aliasesJson != undefined) {
-			for (var entry in aliasesJson){
-				if (entry == 0){
-					ret.aliases = aliasesJson[entry].value;
-				} else {
-					ret.aliases = ret.aliases + " | " + aliasesJson[entry].value;
-				}
-			}
+	  parsedData = JSON.parse(data);
+	  ret.label = parsedData.entities[qid].labels[language].value;
+	  ret.description = parsedData.entities[qid].descriptions[language].value;
+	  aliasesJson = parsedData.entities[qid].aliases[language];
+	  if (aliasesJson != undefined) {
+		for (var entry in aliasesJson){
+		  if (entry == 0){
+			ret.aliases = aliasesJson[entry].value;
+		  } else {
+			ret.aliases = ret.aliases + " | " + aliasesJson[entry].value;
+		  }
 		}
-		var imageJson = resultJson.entities[qid].claims.P18;
-
-		if (imageJson == undefined) {
-			ret.image = "http://commons.wikimedia.org/w/thumb.php?f=MA_Route_blank.svg&w=50";
-		} else {
-			imageJson = imageJson.pop();
-			ret.image = "http://commons.wikimedia.org/w/thumb.php?f=" + (imageJson.mainsnak.datavalue.value).replace(" ","_") + "&w=200";
-		}
+	  }
+	  var imageJson = parsedData.entities[qid].claims.P18;
+	  if (imageJson == undefined) {
+		ret.image = "http://commons.wikimedia.org/w/thumb.php?f=MA_Route_blank.svg&w=50";
+	  } else {
+		imageJson = imageJson.pop();
+		ret.image = "http://commons.wikimedia.org/w/thumb.php?f=" + (imageJson.mainsnak.datavalue.value).replace(" ","_") + "&w=200";
+	  }
 	}
 	catch (err) {
 	}
 	return ret;
 }
+
 
 function getNumberForClass(itemID) {
 	var instanceOf = "P31";
@@ -59,6 +93,24 @@ function getExampleInstances (itemID) {
 		var result = util.httpGet( url );
 		var length = 0;
 		var instanceJson = JSON.parse(result).results.bindings;
+		length = instanceJson.length;
+		for (var i = 0; i < length; i++) {
+			var element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
+			instances.push(element);
+		}
+	}
+	catch (err) {
+		//nothing to do here
+	}
+	return instances;
+}
+
+
+function parseExampleInstances (data) {
+	instances = [];
+	try {
+		var length = 0;
+		var instanceJson = JSON.parse(data).results.bindings;
 		length = instanceJson.length;
 		for (var i = 0; i < length; i++) {
 			element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
