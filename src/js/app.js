@@ -9,14 +9,35 @@ var util = {
   JSON_RELATED_PROPERTIES: "r",
   TABLE_SIZE: 10,
   PAGE_SELECTOR_SIZE: 2,
-
-
+  
   httpGet: function(url) {
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", url, false ); // false for synchronous request
-    xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
+    //xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
+	xmlHttp.setRequestHeader("Accept","application/sparql-results+json");
     xmlHttp.send( null );
     return xmlHttp.responseText;
+  },
+  
+  parseClassNumbers: function (qid, json){
+	var numbers = {instances : "", subclasses: ""};
+	try {
+		numbers.instances = json[qid][util.JSON_INSTANCES];
+		numbers.subclasses = json[qid][util.JSON_SUBCLASSES];
+	} catch(e){}
+	return numbers;
+  },
+  
+  parseRelatedProperties: function(qid, json){
+	var ret = [];
+	try {
+	  var relProps = json[qid][util.JSON_RELATED_PROPERTIES];
+	}
+	catch (e){}
+	for (var prop in relProps){
+	  ret.push(prop);
+	}
+	return ret;
   }
 
 };
@@ -28,12 +49,24 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/browse', { templateUrl: 'views/browseData.html' })
       .when('/datatypes', { templateUrl: 'views/datatypes.html' })
       .when('/about', { templateUrl: 'views/about.html' })
+	  .when('/classview', { templateUrl: 'views/classview.html' })
       .otherwise({redirectTo: '/'});
+  })
+  .factory('ClassView', function($http, $route) {
+	
+	var qid;
+	
+    return {
+		getQid: function(){
+		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
+		  return qid;
+		}
+      };
   })
   .factory('Classes', function($http, $route) {
     
     var promise;
-	  var classes; 
+	var classes; 
     var args = {}; 
     var pageSelectorData = {};
     var classesArray = [];
@@ -127,6 +160,7 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     if (!promise){
       promise = $http.get("data/classes.json").then(function(response){
         classes = response.data;
+        args = refreshArgs();
         classesArray = initArray(classes);
 
         return {
@@ -134,6 +168,9 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 
           getArgs: function(){
             return args;
+          },
+          getClasses: function(){
+            return classes;
           },
 
           getContent: function(){
@@ -150,12 +187,34 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
             refreshPageSelectorData();
             refreshTableContent();
           }
-        };
-
+        }
       });
     }
-
     return promise;
+  })
+  .controller('ClassViewController', function($scope,Classes,ClassView){
+  	$scope.qid = ClassView.getQid();
+  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+  	
+  		
+  	var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
+  	xhr(url).then(function(response) {
+  	  $scope.exampleInstances = parseExampleInstances(response);
+  	  console.log("parsed ExampleInstances");
+  	});
+  	 
+  	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
+  		$scope.classData = parseClassDataFromJson(response, $scope.qid);
+  		console.log("parsed class data");
+  	});
+  	
+  	Classes.then(function(data){
+  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
+  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
+  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
+  	  //$scope.classNumbers = getNumberForClass($scope.qid);
+  	  console.log("fetched ClassData");
+  	});
   })
   .controller('MyController', function($scope, Classes){
     Classes.then(function(data){
