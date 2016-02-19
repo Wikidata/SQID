@@ -13,16 +13,16 @@
         <li role="presentation" class="active"><a href="#/browse?type=&quot;classes&quot;">Classes</a></li>
         <li role="presentation"><a href="#/browse?type=&quot;classes&quot;">Properties</a></li>
       </ul>
-      <div ng-controller="MyController">
+      <div ng-controller="TableController">
         <div class="p-x-2">
         	<table class="table table-condensed">
             <thead>
               <tr>
-                <th ng-repeat="hitem in classesForClasses.classesHeader">{{hitem}}</th>
+                <th ng-repeat="hitem in tableHeader">{{hitem}}</th>
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="item in classesForClasses.getContent() | filter:search">
+              <tr ng-repeat="item in content | filter:search">
                 <td class="col-xs-2">
                     {{item.id}}
                 </td>

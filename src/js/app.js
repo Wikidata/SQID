@@ -63,22 +63,75 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 		}
       };
   })
+  .factory('Arguments', function($http, $route){
+    var args = {}; 
+    return {
+      refreshArgs: function(){
+        args = {
+          from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
+          to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : 10,
+          type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
+        }
+      },
+      getArgs: function(){
+        return args;
+      }
+    }
+  })
+  .factory('Properties', function($http, $route){
+    return {};
+  })
   .factory('Classes', function($http, $route) {
     
     var promise;
 	var classes; 
-    var args = {}; 
+
+    if (!promise){
+      promise = $http.get("data/classes.json").then(function(response){
+        classes = response.data;
+
+        return {
+          classesHeader: ["ID","Label","Instances","Subclasses"],
+
+          getClasses: function(){
+            return classes;
+          }
+        }
+      });
+    }
+    return promise;
+  })
+  .controller('ClassViewController', function($scope,Classes,ClassView){
+  	$scope.qid = ClassView.getQid();
+  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+  	
+  		
+  	var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
+  	xhr(url).then(function(response) {
+  	  $scope.exampleInstances = parseExampleInstances(response);
+  	  console.log("parsed ExampleInstances");
+  	});
+  	 
+  	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
+  		$scope.classData = parseClassDataFromJson(response, $scope.qid);
+  		console.log("parsed class data");
+  	});
+  	
+  	Classes.then(function(data){
+  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
+  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
+  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
+  	  //$scope.classNumbers = getNumberForClass($scope.qid);
+  	  console.log("fetched ClassData");
+  	});
+  })
+  .controller('TableController', function($scope, Arguments, Classes, Properties){
+
+    // definition part
+  
     var pageSelectorData = {};
     var classesArray = [];
     var tableContent = [];
-
-    var refreshArgs = function(){
-      args = {
-        from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
-        to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : 10,
-        type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
-      }
-    }
 
     var initArray = function(json){
       var ret = []
@@ -86,27 +139,26 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
           ret.push(entry);
         }
       return ret;
-    }
+    };
 
-    var getEntityFromId = function(id){
+    var getEntityFromId = function(id, data){
       return {
         id: id,
-        label: classes[id][util.JSON_LABEL],
-        numberOfInstances: classes[id][util.JSON_INSTANCES],
-        numberOfSubclasses: classes[id][util.JSON_SUBCLASSES],
-        relatedProperties: classes[id][util.JSON_RELATED_PROPERTIES]
+        label: data[id][util.JSON_LABEL],
+        numberOfInstances: data[id][util.JSON_INSTANCES],
+        numberOfSubclasses: data[id][util.JSON_SUBCLASSES],
+        relatedProperties: data[id][util.JSON_RELATED_PROPERTIES]
       }
-    }
-
-    var refreshTableContent = function(){
+    };
+    
+    var refreshTableContent = function(args, classes){
       tableContent = [];
       for (var i = args.from; i < args.to; i++){
-        tableContent.push(getEntityFromId(classesArray[i]));
+        tableContent.push(getEntityFromId(classesArray[i], classes));
       }
-    }
+    };
 
-    var refreshPageSelectorData = function(){
-      console.log("CALL: refreshPageSelectorData()");
+    var refreshPageSelectorData = function(args){
       var from;
       var to;
       var active = Math.floor(args.from / util.TABLE_SIZE) + 1;
@@ -154,112 +206,61 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
         prevEnabled: (from != active),
         nextEnabled: (to != active)
       }
-      console.log(pageSelectorData);
-    }
-
-    if (!promise){
-      promise = $http.get("data/classes.json").then(function(response){
-        classes = response.data;
-        args = refreshArgs();
-        classesArray = initArray(classes);
-
-        return {
-          classesHeader: ["ID","Label","Instances","Subclasses"],
-
-          getArgs: function(){
-            return args;
-          },
-          getClasses: function(){
-            return classes;
-          },
-
-          getContent: function(){
-            console.log("CALL: getContent()");
-            return tableContent;
-          },
-          getPageSelectorData: function(){
-            console.log("CALL: getPageSelectorData()");
-            return pageSelectorData;
-          },
-          refresh: function(){
-            console.log("CALL: refresh()")
-            refreshArgs();
-            refreshPageSelectorData();
-            refreshTableContent();
+    };
+    
+    var refresh = function(args, content){
+      refreshPageSelectorData(args);
+      refreshTableContent(args, content);
+    };
+    
+    // execution part
+    Arguments.refreshArgs();
+    var args = Arguments.getArgs();
+    if (Arguments.getArgs().type == "classes") {
+      Classes.then(function(data){
+        classesArray = initArray(data.getClasses());
+        refresh(args, data.getClasses());
+        $scope.content = tableContent;
+        $scope.tableHeader = data.classesHeader;
+        
+        var array = [];
+        if (pageSelectorData.enabled){
+          for (var i = pageSelectorData.start; i <= pageSelectorData.end; i++){
+            if (i == pageSelectorData.current){
+              array.push([i, "active"])
+            }else{
+              array.push([i, ""]);
+            }
           }
+        }
+        $scope.args=args;
+        $scope.pagination = array;
+        $scope.tableSize = util.TABLE_SIZE;
+        if (pageSelectorData.prevEnabled){
+          $scope.prevEnabled = "enabled";
+          $scope.prevLink= '#/browse?from=' 
+            + ($scope.args.from - util.TABLE_SIZE)
+            + '&to=' + ($scope.args.to - util.TABLE_SIZE)
+            + '&type=' + $scope.args.type;
+          $scope.prevClass= "";
+        }else{
+          $scope.prevEnabled = "disabled";
+          $scope.prevLink = '';
+          $scope.prevClass= "not-active";
+        }
+        if (pageSelectorData.nextEnabled){
+          $scope.nextEnabled = "enabled";
+          $scope.nextLink= '#/browse?from=' 
+            + ($scope.args.from + util.TABLE_SIZE)
+            + '&to=' + ($scope.args.to + util.TABLE_SIZE)
+            + '&type=' + $scope.args.type;
+          $scope.nextClass="";
+        }else{
+          $scope.nextEnabled = "disabled";
+          $scope.nextLink = '';
+          $scope.nextClass = "not-active";  
         }
       });
+      
     }
-    return promise;
-  })
-  .controller('ClassViewController', function($scope,Classes,ClassView){
-  	$scope.qid = ClassView.getQid();
-  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-  	
-  		
-  	var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
-  	xhr(url).then(function(response) {
-  	  $scope.exampleInstances = parseExampleInstances(response);
-  	  console.log("parsed ExampleInstances");
-  	});
-  	 
-  	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
-  		$scope.classData = parseClassDataFromJson(response, $scope.qid);
-  		console.log("parsed class data");
-  	});
-  	
-  	Classes.then(function(data){
-  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
-  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
-  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
-  	  //$scope.classNumbers = getNumberForClass($scope.qid);
-  	  console.log("fetched ClassData");
-  	});
-  })
-  .controller('MyController', function($scope, Classes){
-    Classes.then(function(data){
-      $scope.classesForClasses = data;
-      $scope.classesForClasses.refresh();
-      var psd = data.getPageSelectorData();
-      var array = [];
-      if (psd.enabled){
-        for (var i = psd.start; i <= psd.end; i++){
-          if (i == psd.current){
-            array.push([i, "active"])
-          }else{
-            array.push([i, ""]);
-          }
-        }
-      }
-      console.log(data.getArgs());
-      $scope.args=data.getArgs();
-      $scope.pagination = array;
-      $scope.tableSize = util.TABLE_SIZE;
-      if (psd.prevEnabled){
-        $scope.prevEnabled = "enabled";
-        $scope.prevLink= '#/browse?from=' 
-          + ($scope.args.from - util.TABLE_SIZE)
-          + '&to=' + ($scope.args.to - util.TABLE_SIZE)
-          + '&type=' + $scope.args.type;
-        $scope.prevClass= "";
-      }else{
-        $scope.prevEnabled = "disabled";
-        $scope.prevLink = '';
-        $scope.prevClass= "not-active";
-      }
-      if (psd.nextEnabled){
-        $scope.nextEnabled = "enabled";
-        $scope.nextLink= '#/browse?from=' 
-          + ($scope.args.from + util.TABLE_SIZE)
-          + '&to=' + ($scope.args.to + util.TABLE_SIZE)
-          + '&type=' + $scope.args.type;
-        $scope.nextClass="";
-      }else{
-        $scope.nextEnabled = "disabled";
-        $scope.nextLink = '';
-        $scope.nextClass = "not-active";  
-      }
-
-      console.log(array);
-    });
   });
