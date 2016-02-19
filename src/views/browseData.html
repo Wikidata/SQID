@@ -9,9 +9,9 @@
             <button type="button" class="btn btn-default active">Classes</button>
             <button type="button" class="btn btn-default">Properties</button>
         </div> -->
-      <ul id="typeSelector" class="nav nav-pills">
-        <li role="presentation" class="active"><a href="#/browse?type=&quot;classes&quot;">Classes</a></li>
-        <li role="presentation"><a href="#/browse?type=&quot;classes&quot;">Properties</a></li>
+      <ul id="typeSelector" class="nav nav-pills" ng-controller="TypeSelectorController">
+        <li role="presentation" class="{{firstActive}}"><a href="#/browse?type=classes">Classes</a></li>
+        <li role="presentation" class="{{secondActive}}"><a href="#/browse?type=properties">Properties</a></li>
       </ul>
       <div ng-controller="TableController">
         <div class="p-x-2">
