@@ -73,10 +73,13 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     }
 
     var refreshPageSelectorData = function(){
+      console.log("CALL: refreshPageSelectorData()");
       var from;
       var to;
       var active = Math.floor(args.from / util.TABLE_SIZE) + 1;
-      
+      var prev;
+      var next;
+
       if ((2*2 +1) * util.TABLE_SIZE >= classesArray.length){
         if (util.TABLE_SIZE >= classesArray.length){
           pageSelectorData = {
@@ -89,11 +92,13 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
             to++;
           }
           from = 1;
+
         }
       }else{
         if (active > 2){
-          if ((2*util.TABLE_SIZE) > (classesArray.length - args.from)){
+          if ((2*util.TABLE_SIZE) < (classesArray.length - args.from)){
             from = active - 2;
+            to = from + 2*2;
           }else{ // there are not enough succesors
             // assertion: there are enough predecessors
             var offset = Math.floor((classesArray.length - args.from) / util.TABLE_SIZE) - 1; // number of following pages
@@ -112,8 +117,11 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
         start: from,
         end: to,
         current: active,
-        enabled: true
+        enabled: true,
+        prevEnabled: (from != active),
+        nextEnabled: (to != active)
       }
+      console.log(pageSelectorData);
     }
 
     if (!promise){
@@ -123,6 +131,10 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 
         return {
           classesHeader: ["ID","Label","Instances","Subclasses"],
+
+          getArgs: function(){
+            return args;
+          },
 
           getContent: function(){
             console.log("CALL: getContent()");
@@ -145,33 +157,50 @@ angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 
     return promise;
   })
-  .directive('pageSelection', ['$compile', 'Classes', function($compile, Classes){
-    var generatePagnition = function(promise){
-      console.log(promise);
-      promise.then(function(data){
-        data.refresh();
-
-        console.log(data.getPageSelectorData());
-
-      });
-    //   ret = "";
-    //   for (var i = from)
-    // return "<div>" + arg + "</div>";
-    };
-    return {
-      restrict: 'E',
-      scope: {
-        properties: '=' 
-      },
-      template: generatePagnition(Classes),
-      link: function(element){
-        console.log(element);
-      }
-    }
-  }])
   .controller('MyController', function($scope, Classes){
     Classes.then(function(data){
       $scope.classesForClasses = data;
       $scope.classesForClasses.refresh();
+      var psd = data.getPageSelectorData();
+      var array = [];
+      if (psd.enabled){
+        for (var i = psd.start; i <= psd.end; i++){
+          if (i == psd.current){
+            array.push([i, "active"])
+          }else{
+            array.push([i, ""]);
+          }
+        }
+      }
+      console.log(data.getArgs());
+      $scope.args=data.getArgs();
+      $scope.pagination = array;
+      $scope.tableSize = util.TABLE_SIZE;
+      if (psd.prevEnabled){
+        $scope.prevEnabled = "enabled";
+        $scope.prevLink= '#/browse?from=' 
+          + ($scope.args.from - util.TABLE_SIZE)
+          + '&to=' + ($scope.args.to - util.TABLE_SIZE)
+          + '&type=' + $scope.args.type;
+        $scope.prevClass= "";
+      }else{
+        $scope.prevEnabled = "disabled";
+        $scope.prevLink = '';
+        $scope.prevClass= "not-active";
+      }
+      if (psd.nextEnabled){
+        $scope.nextEnabled = "enabled";
+        $scope.nextLink= '#/browse?from=' 
+          + ($scope.args.from + util.TABLE_SIZE)
+          + '&to=' + ($scope.args.to + util.TABLE_SIZE)
+          + '&type=' + $scope.args.type;
+        $scope.nextClass="";
+      }else{
+        $scope.nextEnabled = "disabled";
+        $scope.nextLink = '';
+        $scope.nextClass = "not-active";  
+      }
+
+      console.log(array);
     });
   });

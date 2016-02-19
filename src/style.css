@@ -141,3 +141,7 @@ background: rgba(255,255,255,1);
     font-size: 1.2em;
     font-weight: 900;
 }
+
+.not-active{
+    pointer-events: none;
+}

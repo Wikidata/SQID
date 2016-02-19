@@ -9,11 +9,12 @@
             <button type="button" class="btn btn-default active">Classes</button>
             <button type="button" class="btn btn-default">Properties</button>
         </div> -->
-        <ul id="typeSelector" class="nav nav-pills">
-          <li role="presentation" class="active"><a href="#/browse?type=&quot;classes&quot;">Classes</a></li>
-          <li role="presentation"><a href="#/browse?type=&quot;classes&quot;">Properties</a></li>
-        </ul>
-        <div class="p-x-2" ng-controller="MyController">
+      <ul id="typeSelector" class="nav nav-pills">
+        <li role="presentation" class="active"><a href="#/browse?type=&quot;classes&quot;">Classes</a></li>
+        <li role="presentation"><a href="#/browse?type=&quot;classes&quot;">Properties</a></li>
+      </ul>
+      <div ng-controller="MyController">
+        <div class="p-x-2">
         	<table class="table table-condensed">
             <thead>
               <tr>
@@ -22,16 +23,16 @@
             </thead>
             <tbody>
               <tr ng-repeat="item in classesForClasses.getContent() | filter:search">
-                <td>
+                <td class="col-xs-2">
                     {{item.id}}
                 </td>
-                <td>
+                <td class="col-xs-6">
                     {{item.label}}
                 </td>
-                <td>
+                <td class="col-xs-2">
                     {{item.numberOfInstances}}
                 </td>
-                <td>
+                <td class="col-xs-2">
                     {{item.numberOfSubclasses}}
                 </td>
               </tr>
@@ -40,27 +41,23 @@
         </div>
         <nav id="pageSelector">
           <ul class="pagination">
-            <li>
-              <a href="#" aria-label="Previous">
+            <li class="{{prevEnabled}}">
+              <a href="{{prevLink}}" class="{{prevClass}}" aria-label="Previous">
                 <span aria-hidden="true">&laquo;</span>
               </a>
             </li>
-            <li><a href="#/browse?from=0&to=10">1</a></li>
-            <li><a href="#/browse?from=10&to=20">2</a></li>
-            <li><a href="#/browse?from=20&to=30">3</a></li>
-            <li><a href="#/browse?from=30&to=40">4</a></li>
-            <li><a href="#/browse?from=40&to=50">5</a></li>
-            <li>
-              <a href="#" aria-label="Next">
+            <li ng-repeat="item in pagination" class="{{item[1]}}">
+              <a href="#/browse?from={{(item[0]-1)*tableSize}}&to={{item[0]*tableSize}}&type={{args.type}}">{{item[0]}}</a>
+            </li>
+            <li class="{{nextEnabled}}">
+              <a href="{{nextLink}}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>
           </ul>
         </nav>
+      </div>
     </div>
     <div class="col-xs-3">
-        <h2>Filters</h2>
-        test</br>test
-        <page-selection property="asdfa"></page-selection>
     </div>
 </div>
