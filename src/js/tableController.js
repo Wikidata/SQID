@@ -15,23 +15,10 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     var getClassFromId = function(id, data){
       return [id, data[id][util.JSON_LABEL],  data[id][util.JSON_INSTANCES], data[id][util.JSON_SUBCLASSES]];
-      //  id: id,
-      //  label: data[id][util.JSON_LABEL],
-      //  numberOfInstances: data[id][util.JSON_INSTANCES],
-      //  numberOfSubclasses: data[id][util.JSON_SUBCLASSES],
-      //  relatedProperties: data[id][util.JSON_RELATED_PROPERTIES]
-      //}
     };
     
     var getPropertyFromId = function(id, data){
       return [id, data[id][util.JSON_LABEL], data[id][util.JSON_USES_IN_STATEMENTS], data[id][util.JSON_USES_IN_QUALIFIERS], data[id][util.JSON_USES_IN_REFERENCES]];
-      //{
-      //  id: id,
-      //  label: data[id][util.JSON_LABEL],
-      //  usesStatements: data[id][util.JSON_USES_IN_STATEMENTS],
-      //  usesQualifiers: data[id][util.JSON_USES_IN_QUALIFIERS],
-      //  usesReferences: data[id][util.JSON_USES_IN_REFERENCES]
-      //}
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
