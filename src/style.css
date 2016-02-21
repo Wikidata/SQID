@@ -106,6 +106,9 @@ background: rgba(255,255,255,1);
     font-size: 1.4em;
 }
 
+#head-browse{
+    height: 60px;
+}
 
 .wd-red{
     background-color: #960000;

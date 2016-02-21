@@ -16,28 +16,18 @@
       <div ng-controller="TableController">
         <div class="p-x-2">
         	<table class="table table-condensed">
-            <thead>
-              <tr>
-                <th ng-repeat="hitem in tableHeader">{{hitem}}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr ng-repeat="item in content | filter:search">
-                <td class="col-xs-2">
-                    {{item.id}}
-                </td>
-                <td class="col-xs-6">
-                    {{item.label}}
-                </td>
-                <td class="col-xs-2">
-                    {{item.numberOfInstances}}
-                </td>
-                <td class="col-xs-2">
-                    {{item.numberOfSubclasses}}
-                </td>
-              </tr>
-            </tbody>
-        	</table> 
+				<thead>
+					<tr id="head-browse">
+						<th ng-repeat="hitem in tableHeader" class="{{hitem[1]}}">{{hitem[0]}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="item in content">
+						<td ng-repeat="elem in item track by $index">{{elem}}</td>
+					</tr>
+				</tbody>
+			</table>
+
         </div>
         <nav id="pageSelector">
           <ul class="pagination">
@@ -50,7 +40,7 @@
               <a href="#/browse?from={{(item[0]-1)*tableSize}}&to={{item[0]*tableSize}}&type={{args.type}}">{{item[0]}}</a>
             </li>
             <li class="{{nextEnabled}}">
-              <a href="{{nextLink}}" aria-label="Next">
+              <a href="{{nextLink}}" class="{{nextClass}}" aria-label="Next">
                 <span aria-hidden="true">&raquo;</span>
               </a>
             </li>

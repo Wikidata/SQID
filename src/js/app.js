@@ -1,13 +1,22 @@
 'use strict'; // indicate that code is executed strict
 
-// namespace to avoid huge amount of global variables
+// namespace to avoid huge amount of global variablesC
 var util = {
 
   JSON_LABEL: "l",
   JSON_INSTANCES: "i",
   JSON_SUBCLASSES: "s",
   JSON_RELATED_PROPERTIES: "r",
-  TABLE_SIZE: 10,
+  
+  JSON_ITEMS_WITH_SUCH_STATEMENTS: "i",
+  JSON_USES_IN_STATEMENTS: "s",
+  JSON_USES_IN_STATEMENTS_WITH_QUALIFIERS: "w",
+  JSON_USES_IN_QUALIFIERS: "q",
+  JSON_USES_IN_PROPERTIES: "p",
+  JSON_USES_IN_REFERENCES: "e",
+  JSON_DATATYPE: "d",
+  
+  TABLE_SIZE: 15,
   PAGE_SELECTOR_SIZE: 2,
   
   httpGet: function(url) {
@@ -50,6 +59,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/datatypes', { templateUrl: 'views/datatypes.html' })
       .when('/about', { templateUrl: 'views/about.html' })
 	  .when('/classview', { templateUrl: 'views/classview.html' })
+      .when('/browseProperties', {templateUrl: 'views/browseData.html'})
       .otherwise({redirectTo: '/'});
   })
   .factory('ClassView', function($http, $route) {
@@ -69,7 +79,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       refreshArgs: function(){
         args = {
           from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
-          to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : 10,
+          to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : util.TABLE_SIZE,
           type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
         }
       },
@@ -85,16 +95,16 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     if (!promise) {
         promise = $http.get("data/properties.json").then(function(response){
           properties = response.data;
-        });
         return {
-          propertiesHeader: ["ID", "Label", "Uses in statements", "Uses in qualifiers", "Uses in references"],
+          propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
           
           getProperties: function(){
             return properties;
           }
         }
+      });
     }
-    return {};
+    return promise;
   })
   .factory('Classes', function($http, $route) {
     
@@ -106,7 +116,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
         classes = response.data;
 
         return {
-          classesHeader: ["ID","Label","Instances","Subclasses"],
+          classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-6"], ["Instances", "col-xs-2"], ["Subclasses", "col-xs-2"]],
 
           getClasses: function(){
             return classes;
