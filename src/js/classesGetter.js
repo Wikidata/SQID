@@ -45,7 +45,8 @@ function parseClassDataFromJson ( data, qid ){
 		aliases: ""
 	};
 	try {
-	  parsedData = JSON.parse(data);
+	  //var parsedData = data;
+	  var parsedData = JSON.parse(data);
 	  ret.label = parsedData.entities[qid].labels[language].value;
 	  ret.description = parsedData.entities[qid].descriptions[language].value;
 	  aliasesJson = parsedData.entities[qid].aliases[language];
@@ -110,7 +111,7 @@ function parseExampleInstances (data) {
 	instances = [];
 	try {
 		var length = 0;
-		var instanceJson = JSON.parse(data).results.bindings;
+		var instanceJson = data.results.bindings;
 		length = instanceJson.length;
 		for (var i = 0; i < length; i++) {
 			element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
