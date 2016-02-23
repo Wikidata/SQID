@@ -60,50 +60,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/about', { templateUrl: 'views/about.html' })
 	  .when('/classview', { templateUrl: 'views/classview.html' })
       .when('/browseProperties', {templateUrl: 'views/browseData.html'})
+	  .when('/propertyview', { templateUrl: 'views/propertyview.html'})
       .otherwise({redirectTo: '/'});
-  })
-  .factory('InstancesFactory', function($http, $route) {
-	return {
-		refresh: function(){
-		  var qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-	      var url = buildUrlForSparQLRequest(getQueryForInstances(qid, 10));
-		  console.log(url);
-		  var promise = xhr(url).then(function(response){
-		    var instances = parseExampleInstances(response, qid);
-			console.log(instances);
-		    return {
-			  getInstances: function(){
-			    return isntances;
-		      }
-		    }
-		  });
-		  return promise;
-		}
-	};
-  })
-  .factory('ClassView', function($http, $route) {
-	
-	var qid;
-	return {
-		refresh: function(){
-	      var url = buildUrlForApiRequest(qid);
-		  console.log(url);
-		  var promise = xhr(url).then(function(response){
-		    var classData = parseClassDataFromJson(response, qid);
-			console.log(classData);
-		    return {
-			  getClassData: function(){
-			    return classData;
-		      }
-		    }
-		  });
-		  return promise;
-		},
-		getQid: function(){
-		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-		  return qid;
-		}
-	};
   })
   .factory('Arguments', function($http, $route){
     var args = {}; 
@@ -175,38 +133,4 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       $scope.firstActive = "active";
       $scope.secondActive = "";
     }
-  })
-  .controller('ClassViewController', function($scope,$route, ClassView, InstancesFactory, Classes){
-  	
-	$scope.qid = ClassView.getQid();
-	//$scope.qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-	console.log($scope.qid);
-	ClassView.refresh().then(function(data){
-		$scope.classData = data.getClassData();
-		console.log($scope.classData);
-	});
-  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-  	
-	InstancesFactory.refresh().then(function(data){
-		$scope.exampleInstances = data.getInstances;
-	});
-  		
-  	//var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
-  	//xhr(url).then(function(response) {
-  	//  $scope.exampleInstances = parseExampleInstances(response);
-  	//  console.log("parsed ExampleInstances");
-  	//});
-  	 
-  	//xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
-  	//	$scope.classData = parseClassDataFromJson(response, $scope.qid);
-  	//	console.log("parsed class data");
-  	//});
-  	
-  	//Classes.then(function(data){
-  	//  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
-  	//  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
-  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
-  	  //$scope.classNumbers = getNumberForClass($scope.qid);
-  	//  console.log("fetched ClassData");
-  	//});
   });
