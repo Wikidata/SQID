@@ -3,37 +3,75 @@ var language = "en";
 
 
 
-function xhr(url) {
-  // Return a new promise.
-  return new Promise(function(resolve, reject) {
-    // Do the usual XHR stuff
-    var req = new XMLHttpRequest();
-    req.open('GET', url);
 
-	req.setRequestHeader("Accept","application/sparql-results+json");
-    req.onload = function() {
-      // This is called even on 404 etc
-      // so check the status
-      if (req.status == 200) {
-        // Resolve the promise with the response text
-        resolve(req.response);
-      }
-      else {
-        // Otherwise reject with the status text
-        // which will hopefully be a meaningful error
-        reject(Error(req.statusText));
-      }
-    };
-
-    // Handle network errors
-    req.onerror = function() {
-      reject(Error("Network Error"));
-    };
-
-    // Make the request
-    req.send();
+classBrowser.factory('ClassView', function($http, $route, $q) {
+	var qid;
+	return {
+		updateQid: function() {
+		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
+		},
+		getInstances: function() {	
+		  var url = buildUrlForSparQLRequest(getQueryForInstances(qid, 10));
+		  return $http.get(url).then(function(response) {
+			if (typeof response.data === 'object') {
+				return response.data;
+			} else {
+			// invalid response
+			return $q.reject(response.data);
+			}
+		  },
+		  function(response) {
+			// something went wrong
+			return $q.reject(response.data);
+		  });
+        },
+		
+		getClassData: function() {	
+		  var url = buildUrlForApiRequest(qid);
+		  return $http.get(url).then(function(response) {
+			if (typeof response.data === 'object') {
+				return response.data;
+			} else {
+			// invalid response
+			return $q.reject(response.data);
+			}
+		  },
+		  function(response) {
+			// something went wrong
+			return $q.reject(response.data);
+		  });
+        },
+		
+		getQid: function(){
+		  return qid;
+		}
+	};
+  })
+  .controller('ClassViewController', function($scope,$route, ClassView, Classes){
+	ClassView.updateQid();
+	$scope.qid = ClassView.getQid();
+	
+    ClassView.getInstances().then(function(data) {
+		$scope.exampleInstances = parseExampleInstances(data);
+		console.log($scope.exampleInstances);
+	  });
+	
+	ClassView.getClassData().then(function(data) {
+		$scope.classData = parseClassDataFromJson(data, $scope.qid);
+		console.log(data);
+	  });
+	console.log($scope.qid);
+  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+  	
+  	Classes.then(function(data){
+  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
+  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
+  	  //$scope.classNumbers = getNumberForClass($scope.qid);
+  	  console.log("fetched ClassData");
+  	});
   });
-}
+
+
 
 
 
@@ -45,11 +83,9 @@ function parseClassDataFromJson ( data, qid ){
 		aliases: ""
 	};
 	try {
-	  //var parsedData = data;
-	  var parsedData = JSON.parse(data);
-	  ret.label = parsedData.entities[qid].labels[language].value;
-	  ret.description = parsedData.entities[qid].descriptions[language].value;
-	  aliasesJson = parsedData.entities[qid].aliases[language];
+	  ret.label = data.entities[qid].labels[language].value;
+	  ret.description = data.entities[qid].descriptions[language].value;
+	  aliasesJson = data.entities[qid].aliases[language];
 	  if (aliasesJson != undefined) {
 		for (var entry in aliasesJson){
 		  if (entry == 0){
@@ -59,7 +95,7 @@ function parseClassDataFromJson ( data, qid ){
 		  }
 		}
 	  }
-	  var imageJson = parsedData.entities[qid].claims.P18;
+	  var imageJson = data.entities[qid].claims.P18;
 	  if (imageJson == undefined) {
 		ret.image = "http://commons.wikimedia.org/w/thumb.php?f=MA_Route_blank.svg&w=50";
 	  } else {
@@ -85,27 +121,6 @@ function getNumber(itemID, propertyID) {
 	var number = JSON.parse(result);
 	return number.results.bindings[0].c.value;
 }
-
-function getExampleInstances (itemID) {
-	instances = [];
-	try {
-		var limit = 9;
-		var url = buildUrlForSparQLRequest(getQueryForInstances (itemID, limit));
-		var result = util.httpGet( url );
-		var length = 0;
-		var instanceJson = JSON.parse(result).results.bindings;
-		length = instanceJson.length;
-		for (var i = 0; i < length; i++) {
-			var element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
-			instances.push(element);
-		}
-	}
-	catch (err) {
-		//nothing to do here
-	}
-	return instances;
-}
-
 
 function parseExampleInstances (data) {
 	instances = [];

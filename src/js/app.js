@@ -63,71 +63,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
 	  .when('/propertyview', { templateUrl: 'views/propertyview.html'})
       .otherwise({redirectTo: '/'});
   })
-  .factory('InstancesFactory', function($http, $route) {
-	var qid = "Q5";
-	var url = buildUrlForSparQLRequest(getQueryForInstances(qid, 10));
-	return {
-		getData: function() {
-		// the $http API is based on the deferred/promise APIs exposed by the $q service
-		// so it returns a promise for us by default
-		return $http.get(url)
-		  .then(function(response) {
-			if (typeof response.data === 'object') {
-				return response.data;
-			} else {
-			// invalid response
-			return $q.reject(response.data);
-			}
-		  },
-		  function(response) {
-			// something went wrong
-			return $q.reject(response.data);
-		  });
-        }
-    };
-	
-	//return {
-	//	refresh: function(){
-	//	  var qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-	 //     var url = buildUrlForSparQLRequest(getQueryForInstances(qid, 10));
-	//	  console.log(url);
-	//	  var promise = xhr(url).then(function(response){
-	//	    var instances = parseExampleInstances(response, qid);
-	//		console.log(instances);
-	//	    return {
-	//		  getInstances: function(){
-	//		    return isntances;
-	//	      }
-	//	    }
-	//	  });
-	//	  return promise;
-	//	}
-	//};
-  })
-  .factory('ClassView', function($http, $route, $q) {
-	
-	var qid;
-	return {
-		refresh: function(){
-	      var url = buildUrlForApiRequest(qid);
-		  console.log(url);
-		  var promise = xhr(url).then(function(response){
-		    var classData = parseClassDataFromJson(response, qid);
-			console.log(classData);
-		    return {
-			  getClassData: function(){
-			    return classData;
-		      }
-		    }
-		  });
-		  return promise;
-		},
-		getQid: function(){
-		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-		  return qid;
-		}
-	};
-  })
   .factory('Arguments', function($http, $route){
     var args = {}; 
     return {
@@ -198,44 +133,4 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       $scope.firstActive = "active";
       $scope.secondActive = "";
     }
-  })
-  .controller('ClassViewController', function($scope,$route, ClassView, InstancesFactory, Classes){
-    InstancesFactory.getData().then(function(data) {
-		// promise fulfilled
-		$scope.exampleInstances = parseExampleInstances(data);
-		console.log($scope.exampleInstances);
-	  });
-	
-	
-	$scope.qid = ClassView.getQid();
-	//$scope.qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-	console.log($scope.qid);
-	ClassView.refresh().then(function(data){
-		$scope.classData = data.getClassData();
-		console.log($scope.classData);
-	});
-  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-  	
-	//InstancesFactory.refresh().then(function(data){
-	//	$scope.exampleInstances = data.getInstances;
-	//});
-  		
-  	//var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
-  	//xhr(url).then(function(response) {
-  	//  $scope.exampleInstances = parseExampleInstances(response);
-  	//  console.log("parsed ExampleInstances");
-  	//});
-  	 
-  	//xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
-  	//	$scope.classData = parseClassDataFromJson(response, $scope.qid);
-  	//	console.log("parsed class data");
-  	//});
-  	
-  	//Classes.then(function(data){
-  	//  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
-  	//  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
-  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
-  	  //$scope.classNumbers = getNumberForClass($scope.qid);
-  	//  console.log("fetched ClassData");
-  	//});
   });
