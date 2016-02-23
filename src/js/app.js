@@ -59,9 +59,19 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/datatypes', { templateUrl: 'views/datatypes.html' })
       .when('/about', { templateUrl: 'views/about.html' })
 	  .when('/classview', { templateUrl: 'views/classview.html' })
-      .when('/browseProperties', {templateUrl: 'views/browseData.html'})
-	  .when('/propertyview', { templateUrl: 'views/propertyview.html'})
+      .when('/propertyview', { templateUrl: 'views/propertyview.html'})
       .otherwise({redirectTo: '/'});
+  })
+  .factory('ClassView', function($http, $route) {
+	
+	var qid;
+	
+    return {
+		getQid: function(){
+		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
+		  return qid;
+		}
+      };
   })
   .factory('Arguments', function($http, $route){
     var args = {}; 
@@ -116,6 +126,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     }
     return promise;
   })
+  .filter('to_trusted', ['$sce', function($sce){
+        return function(text) {
+            return $sce.trustAsHtml(text);
+        };
+  }])
   .controller('TypeSelectorController', function($scope, Arguments){
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
@@ -133,4 +148,28 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       $scope.firstActive = "active";
       $scope.secondActive = "";
     }
+  })
+  .controller('ClassViewController', function($scope,Classes,ClassView){
+  	$scope.qid = ClassView.getQid();
+  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+  	
+  		
+  	var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
+  	xhr(url).then(function(response) {
+  	  $scope.exampleInstances = parseExampleInstances(response);
+  	  console.log("parsed ExampleInstances");
+  	});
+  	 
+  	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
+  		$scope.classData = parseClassDataFromJson(response, $scope.qid);
+  		console.log("parsed class data");
+  	});
+  	
+  	Classes.then(function(data){
+  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
+  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
+  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
+  	  //$scope.classNumbers = getNumberForClass($scope.qid);
+  	  console.log("fetched ClassData");
+  	});
   });

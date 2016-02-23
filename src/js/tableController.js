@@ -16,11 +16,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
 
     var getClassFromId = function(id, data){
-      return [id, data[id][util.JSON_LABEL],  data[id][util.JSON_INSTANCES], data[id][util.JSON_SUBCLASSES]];
+      return ['<a href="#/classview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL],  data[id][util.JSON_INSTANCES].toString(), data[id][util.JSON_SUBCLASSES].toString()];
     };
     
     var getPropertyFromId = function(id, data){
-      return [id, data[id][util.JSON_LABEL], data[id][util.JSON_USES_IN_STATEMENTS], data[id][util.JSON_USES_IN_QUALIFIERS], data[id][util.JSON_USES_IN_REFERENCES]];
+      return ['<a href="#/propertyview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL], data[id][util.JSON_USES_IN_STATEMENTS].toString(), data[id][util.JSON_USES_IN_QUALIFIERS].toString(), data[id][util.JSON_USES_IN_REFERENCES].toString()];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){

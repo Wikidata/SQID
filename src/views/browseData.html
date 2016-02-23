@@ -23,7 +23,7 @@
 				</thead>
 				<tbody>
 					<tr ng-repeat="item in content">
-						<td ng-repeat="elem in item track by $index">{{elem}}</td>
+						<td ng-repeat="elem in item track by $index" ng-bind-html="elem | to_trusted"></td>
 					</tr>
 				</tbody>
 			</table>
