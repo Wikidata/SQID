@@ -1,7 +1,20 @@
 
 var language = "en";
 
-
+function httpRequest($http, $q, url){
+  return $http.get(url).then(function(response) {
+	if (typeof response.data === 'object') {
+	  return response.data;
+	} else {
+	  // invalid response
+	  return $q.reject(response.data);
+	}
+  },
+  function(response) {
+	// something went wrong
+	return $q.reject(response.data);
+  });
+}
 
 
 classBrowser.factory('ClassView', function($http, $route, $q) {
@@ -12,34 +25,12 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 		},
 		getInstances: function() {	
 		  var url = buildUrlForSparQLRequest(getQueryForInstances(qid, 10));
-		  return $http.get(url).then(function(response) {
-			if (typeof response.data === 'object') {
-				return response.data;
-			} else {
-			// invalid response
-			return $q.reject(response.data);
-			}
-		  },
-		  function(response) {
-			// something went wrong
-			return $q.reject(response.data);
-		  });
+		  return httpRequest($http, $q, url);
         },
 		
 		getClassData: function() {	
 		  var url = buildUrlForApiRequest(qid);
-		  return $http.get(url).then(function(response) {
-			if (typeof response.data === 'object') {
-				return response.data;
-			} else {
-			// invalid response
-			return $q.reject(response.data);
-			}
-		  },
-		  function(response) {
-			// something went wrong
-			return $q.reject(response.data);
-		  });
+		  return httpRequest($http, $q, url);
         },
 		
 		getQid: function(){
@@ -70,8 +61,6 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
   	  console.log("fetched ClassData");
   	});
   });
-
-
 
 
 
