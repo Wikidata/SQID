@@ -131,6 +131,27 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
             return $sce.trustAsHtml(text);
         };
   }])
+  .directive('ngSlider', function(){
+    
+    function link(scope, element, attrs){
+      element.slider({
+        range: true,
+        min: 0,
+        max: 500,
+        values: [ 75, 300 ],
+        slide: function( event, ui ) {
+          scope.filterValStart = ui.values[0];
+          scope.filterValEnd = ui.values[1];
+          scope.$apply();
+          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+        }
+      });
+    }
+    
+    return {
+      link: link
+    };
+  })
   .controller('TypeSelectorController', function($scope, Arguments){
     Arguments.refreshArgs();
     var args = Arguments.getArgs();

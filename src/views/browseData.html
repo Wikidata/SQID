@@ -51,11 +51,13 @@
     <div class="col-xs-3">
 		<div id="filter-menue">
 			<h3>Filters</h3>
-			
 			<p><strong>filter labels (english):</strong></p>
 			<div class="form-group">
 				<input type="text" class="form-control input-md" placeholder="Search" ng-model="filterLabels" ng-change="searchFilter()" />
 			</div>
+			<div ng-slider id="slider-range"></div>
+			<div class="pull-left">{{ filterValStart }}</div>
+			<div class="pull-right">{{ filterValEnd }}</div>
 		</div>
 		<hr/>
 		<div id="content-statisics">

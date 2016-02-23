@@ -170,6 +170,9 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.args=args;
     $scope.filterdata;
     if (!$scope.filterLabels) {$scope.filterLabels = ""};
+    $scope.filterValStart = 0;
+    $scope.filterValEnd = 0;
+    
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
     $scope.searchFilter = function(){
