@@ -5,11 +5,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var pageSelectorData = {};
     var tableContent = [];
 
-    var initArray = function(json){
+    var initArray = function(json, filterfunc){
       var ret = []
       for (var entry in json) {
-          if (($scope.filterText == "") || (entry.indexOf($scope.filterText) > -1)) {
-            ret.push(entry);
+          if (filterfunc(json[entry])) {
+              ret.push(entry);
           }
         }
       return ret;
@@ -124,10 +124,24 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
     
+    var applyFilter = function(entry){
+      if (($scope.filterLabels == "") ) {
+        return true;
+      }
+      if (!entry[util.JSON_LABEL]) {
+        return false;
+      }
+      if (entry[util.JSON_LABEL].indexOf($scope.filterLabels) > -1) {
+        return true;
+      }else{
+        return false;
+      }
+    }
+    
     var updateTable = function(){
       if (args.type == "classes") {
         Classes.then(function(data){
-          var classesArray = initArray(data.getClasses(), $scope.filterString);
+          var classesArray = initArray(data.getClasses(), applyFilter);
           // todo: apply filter
           refresh(args, data.getClasses(), classesArray, getClassFromId);
           $scope.content = tableContent;
@@ -138,7 +152,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       if (args.type == "properties") {
           Properties.then(function(data){
-          var propertiesArray = initArray(data.getProperties(), $scope.filterString);
+          var propertiesArray = initArray(data.getProperties(), applyFilter);
           refresh(args, data.getProperties(), propertiesArray, getPropertyFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.propertiesHeader;
@@ -155,7 +169,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.tableSize = util.TABLE_SIZE;
     $scope.args=args;
     $scope.filterdata;
-    if (!$scope.filterText) {$scope.filterText = ""};
+    if (!$scope.filterLabels) {$scope.filterLabels = ""};
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
     $scope.searchFilter = function(){

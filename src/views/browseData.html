@@ -52,12 +52,9 @@
 		<div id="filter-menue">
 			<h3>Filters</h3>
 			
-			<p><strong>Apply textual filters:</strong></p>
+			<p><strong>filter labels (english):</strong></p>
 			<div class="form-group">
-				<select id="header-item-select" class="form-control form-horizontal">
-					<option ng-repeat="item in tableHeader">{{item[0]}}</option>
-				</select>
-				<input type="text" class="form-control input-md" placeholder="Search" ng-model="filterText" ng-change="searchFilter()" />
+				<input type="text" class="form-control input-md" placeholder="Search" ng-model="filterLabels" ng-change="searchFilter()" />
 			</div>
 		</div>
 		<hr/>
