@@ -60,6 +60,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       .when('/about', { templateUrl: 'views/about.html' })
 	  .when('/classview', { templateUrl: 'views/classview.html' })
       .when('/browseProperties', {templateUrl: 'views/browseData.html'})
+	  .when('/propertyview', { templateUrl: 'views/propertyview.html'})
       .otherwise({redirectTo: '/'});
   })
   .factory('InstancesFactory', function($http, $route) {
