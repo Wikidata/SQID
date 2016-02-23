@@ -110,6 +110,14 @@ background: rgba(255,255,255,1);
     height: 60px;
 }
 
+#filter-menue{
+    margin-top: 100px;
+}
+
+#header-item-select{
+    margin-bottom: 20px;
+}
+
 .wd-red{
     background-color: #960000;
     color: #fff;

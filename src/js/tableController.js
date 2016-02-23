@@ -8,7 +8,9 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var initArray = function(json){
       var ret = []
       for (var entry in json) {
-          ret.push(entry);
+          if (($scope.filterText == "") || (entry.indexOf($scope.filterText) > -1)) {
+            ret.push(entry);
+          }
         }
       return ret;
     };
@@ -42,7 +44,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           }
           return;
         }else{
-          to = Math.floor(idArrray.length / util.TABLE_SIZE);
+          to = Math.floor(idArray.length / util.TABLE_SIZE);
           if ((idArray.length % util.TABLE_SIZE) > 0){
             to++;
           }
@@ -122,27 +124,42 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
     
+    var updateTable = function(){
+      if (args.type == "classes") {
+        Classes.then(function(data){
+          var classesArray = initArray(data.getClasses(), $scope.filterString);
+          // todo: apply filter
+          refresh(args, data.getClasses(), classesArray, getClassFromId);
+          $scope.content = tableContent;
+          $scope.tableHeader = data.classesHeader;
+          setPageSelectorScopes();
+          $scope.entityCount = classesArray.length;
+        });
+      }
+      if (args.type == "properties") {
+          Properties.then(function(data){
+          var propertiesArray = initArray(data.getProperties(), $scope.filterString);
+          refresh(args, data.getProperties(), propertiesArray, getPropertyFromId);
+          $scope.content = tableContent;
+          $scope.tableHeader = data.propertiesHeader;
+          setPageSelectorScopes();
+          $scope.entityCount = propertiesArray.length;
+          });
+      }
+      
+    }
+    
     // execution part
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
     $scope.tableSize = util.TABLE_SIZE;
     $scope.args=args;
-    if (args.type == "classes") {
-      Classes.then(function(data){
-        var classesArray = initArray(data.getClasses());
-        refresh(args, data.getClasses(), classesArray, getClassFromId);
-        $scope.content = tableContent;
-        $scope.tableHeader = data.classesHeader;
-        setPageSelectorScopes();
-      });
+    $scope.filterdata;
+    if (!$scope.filterText) {$scope.filterText = ""};
+    updateTable();
+    //$scope.searchfilter = angular.copy(searchfilter);
+    $scope.searchFilter = function(){
+      updateTable();
     }
-    if (args.type == "properties") {
-        Properties.then(function(data){
-        var propertiesArray = initArray(data.getProperties());
-        refresh(args, data.getProperties(), propertiesArray, getPropertyFromId);
-        $scope.content = tableContent;
-        $scope.tableHeader = data.propertiesHeader;
-        setPageSelectorScopes();
-        });
-    }
+    
   });

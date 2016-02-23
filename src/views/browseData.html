@@ -3,7 +3,7 @@
 <div class="alert alert-warning" role="alert">This is only an example to show the paring of the CSV files. It is not the proposed content for this site.
 <br/><b>Note:</b> table is to large -> unwanted resizing</div>
  -->
-<div class="row">
+<div class="row" ng-controller="TableController">
     <div class="col-xs-9">
 <!--         <div id="typeSelector" class="btn-group btn-group-lg" role="group" aria-label="...">
             <button type="button" class="btn btn-default active">Classes</button>
@@ -13,7 +13,7 @@
         <li role="presentation" class="{{firstActive}}"><a href="#/browse?type=classes">Classes</a></li>
         <li role="presentation" class="{{secondActive}}"><a href="#/browse?type=properties">Properties</a></li>
       </ul>
-      <div ng-controller="TableController">
+      <div>
         <div class="p-x-2">
         	<table class="table table-condensed">
 				<thead>
@@ -45,9 +45,25 @@
               </a>
             </li>
           </ul>
-        </nav>
+		</nav>
       </div>
     </div>
     <div class="col-xs-3">
-    </div>
+		<div id="filter-menue">
+			<h3>Filters</h3>
+			
+			<p><strong>Apply textual filters:</strong></p>
+			<div class="form-group">
+				<select id="header-item-select" class="form-control form-horizontal">
+					<option ng-repeat="item in tableHeader">{{item[0]}}</option>
+				</select>
+				<input type="text" class="form-control input-md" placeholder="Search" ng-model="filterText" ng-change="searchFilter()" />
+			</div>
+		</div>
+		<hr/>
+		<div id="content-statisics">
+			<h3>Statistics</h3>
+			<strong>Number of entities: </strong>{{entityCount}}
+		</div>
+	</div>
 </div>
