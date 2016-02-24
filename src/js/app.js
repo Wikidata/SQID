@@ -19,15 +19,6 @@ var util = {
   TABLE_SIZE: 15,
   PAGE_SELECTOR_SIZE: 2,
   
-  httpGet: function(url) {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", url, false ); // false for synchronous request
-    //xmlHttp.setRequestHeader("Accept","text/csv; charset=utf-8");
-	xmlHttp.setRequestHeader("Accept","application/sparql-results+json");
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-  },
-  
   parseClassNumbers: function (qid, json){
 	var numbers = {instances : "", subclasses: ""};
 	try {
@@ -37,16 +28,21 @@ var util = {
 	return numbers;
   },
   
-  parseRelatedProperties: function(qid, json){
-	var ret = [];
-	try {
-	  var relProps = json[qid][util.JSON_RELATED_PROPERTIES];
-	}
-	catch (e){}
-	for (var prop in relProps){
-	  ret.push(prop);
-	}
-	return ret;
+  parseLabel: function (data, id){
+		return data[id][util.JSON_LABEL];
+	},
+  
+  parseRelatedProperties: function(qid, classesJson, propertyJson){
+		var ret = [];
+		try {
+			var relProps = classesJson[qid][util.JSON_RELATED_PROPERTIES];
+		}
+		catch (e){}
+		for (var prop in relProps){
+			var relProp = {label : util.parseLabel(propertyJson, prop), link: "#/propertyview?id=" + prop};
+			ret.push(relProp);
+		}
+		return ret;
   }
 
 };
@@ -65,15 +61,14 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
   .factory('ClassView', function($http, $route) {
 	
 	var qid;
-	
     return {
-		getQid: function(){
+			getQid: function(){
 		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 		  return qid;
-		}
-      };
-  })
-  .factory('Arguments', function($http, $route){
+			}
+		};
+	})
+	.factory('Arguments', function($http, $route){
     var args = {}; 
     return {
       refreshArgs: function(){
@@ -148,28 +143,4 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
       $scope.firstActive = "active";
       $scope.secondActive = "";
     }
-  })
-  .controller('ClassViewController', function($scope,Classes,ClassView){
-  	$scope.qid = ClassView.getQid();
-  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-  	
-  		
-  	var url = buildUrlForSparQLRequest(getQueryForInstances ($scope.qid, 10));
-  	xhr(url).then(function(response) {
-  	  $scope.exampleInstances = parseExampleInstances(response);
-  	  console.log("parsed ExampleInstances");
-  	});
-  	 
-  	xhr(buildUrlForApiRequest($scope.qid)).then(function(response){
-  		$scope.classData = parseClassDataFromJson(response, $scope.qid);
-  		console.log("parsed class data");
-  	});
-  	
-  	Classes.then(function(data){
-  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
-  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
-  	  //$scope.exampleInstances = getExampleInstances($scope.qid);
-  	  //$scope.classNumbers = getNumberForClass($scope.qid);
-  	  console.log("fetched ClassData");
-  	});
   });
