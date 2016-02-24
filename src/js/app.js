@@ -132,16 +132,33 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
         };
   }])
   .directive('ngSlider', function(){
+    var SCALE_FACTOR = 1.005;
+    var scale = function(val){
+      if (val > 0) {
+      console.log(Math.round(Math.log(val) / Math.log(SCALE_FACTOR)));
+      return Math.round(Math.log(val) / Math.log(SCALE_FACTOR));
+      }
+      else {
+        return 0;
+      }
+    }
     
+    var antiScale = function(val){
+       if (val > 0) {
+      return Math.round(Math.pow(SCALE_FACTOR, val));
+       }else{
+        return 0;
+       }
+    }
     function link(scope, element, attrs){
       element.slider({
         range: true,
-        min: 0,
-        max: 500,
-        values: [ 75, 300 ],
+        min: scale(parseInt(scope.begin)),
+        max: scale(parseInt(scope.end)),
+        values: [ scale(scope.$parent.slider[parseInt(scope.index)].startVal), scale(scope.$parent.slider[parseInt(scope.index)].endVal) ],
         slide: function( event, ui ) {
-          scope.filterValStart = ui.values[0];
-          scope.filterValEnd = ui.values[1];
+          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
+          scope.$parent.slider[parseInt(scope.index)].endVal = antiScale(ui.values[1]);
           scope.$apply();
           //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
         }
@@ -149,6 +166,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute'])
     }
     
     return {
+      scope:{
+        begin: '=begin',
+        end: '=end',
+        index: '=index'
+      },
       link: link
     };
   })
