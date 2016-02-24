@@ -17,6 +17,6 @@
 <b>Number of direct subclasses: </b> {{classNumbers.subclasses}}<br>
 <b>Related Properties:</b>
 <table>         <tr ng-repeat="property in relatedProperties">
-                <td> {{property}} </td>
+                <td> <a href= {{property.link}}>{{property.label}}</a></td>
               </tr></table>
 </div>

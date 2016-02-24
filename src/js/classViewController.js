@@ -1,6 +1,7 @@
 
 var language = "en";
 
+
 function httpRequest($http, $q, url){
   return $http.get(url).then(function(response) {
 	if (typeof response.data === 'object') {
@@ -38,7 +39,7 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 		}
 	};
   })
-  .controller('ClassViewController', function($scope,$route, ClassView, Classes){
+  .controller('ClassViewController', function($scope,$route, ClassView, Classes, Properties){
 	ClassView.updateQid();
 	$scope.qid = ClassView.getQid();
 	
@@ -55,7 +56,9 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
   	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
   	
   	Classes.then(function(data){
-  	  $scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses());
+			Properties.then(function(props){
+				$scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses(), props.getProperties());
+			});
   	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
   	  //$scope.classNumbers = getNumberForClass($scope.qid);
   	  console.log("fetched ClassData");
@@ -97,6 +100,9 @@ function parseClassDataFromJson ( data, qid ){
 	return ret;
 }
 
+function getPropertyLabel(data, pid) {
+	return data[pid][util.JSON_LABEL];
+}
 
 function getNumberForClass(itemID) {
 	var instanceOf = "P31";
