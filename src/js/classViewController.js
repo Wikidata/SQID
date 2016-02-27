@@ -22,52 +22,58 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 	var qid;
 	return {
 		updateQid: function() {
-		  qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
+			qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 		},
+
 		getInstances: function() {	
-		  var url = buildUrlForSparQLRequest(getQueryForInstances(qid, 10));
-		  return httpRequest($http, $q, url);
-        },
-		
+			var url = buildUrlForSparQLRequest(getQueryForPropertySubjects("P31", qid, 21));
+			return httpRequest($http, $q, url);
+		},
+
+		getSubclasses: function() {	
+			var url = buildUrlForSparQLRequest(getQueryForPropertySubjects("P279", qid, 21));
+			return httpRequest($http, $q, url);
+		},
+
 		getClassData: function() {	
-		  var url = buildUrlForApiRequest(qid);
-		  return httpRequest($http, $q, url);
-        },
-		
+			var url = buildUrlForApiRequest(qid);
+			return httpRequest($http, $q, url);
+		},
+
 		getQid: function(){
-		  return qid;
+			return qid;
 		}
 	};
-  })
-  .controller('ClassViewController', function($scope,$route, ClassView, Classes, Properties){
+})
+.controller('ClassViewController', function($scope,$route, ClassView, Classes, Properties){
 	ClassView.updateQid();
 	$scope.qid = ClassView.getQid();
-	
-    ClassView.getInstances().then(function(data) {
-		$scope.exampleInstances = parseExampleInstances(data);
-		console.log($scope.exampleInstances);
-	  });
-	
+
+	ClassView.getInstances().then(function(data) {
+		$scope.exampleInstances = parseExampleInstances(data,getQueryForPropertySubjects("P31", ClassView.getQid(), 1000));
+	});
+
+	ClassView.getSubclasses().then(function(data) {
+		$scope.exampleSubclasses = parseExampleInstances(data,getQueryForPropertySubjects("P279", ClassView.getQid(), 1000));
+	});
+
 	ClassView.getClassData().then(function(data) {
 		$scope.classData = parseClassDataFromJson(data, $scope.qid);
-		console.log(data);
-	  });
-	console.log($scope.qid);
-  	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-  	
-  	Classes.then(function(data){
-			Properties.then(function(props){
-				$scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses(), props.getProperties());
-			});
-  	  $scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
-  	  //$scope.classNumbers = getNumberForClass($scope.qid);
-  	  console.log("fetched ClassData");
-  	});
-  });
+	});
+	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+
+	Classes.then(function(data){
+		Properties.then(function(props){
+			$scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses(), props.getProperties());
+		});
+		$scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
+		//$scope.classNumbers = getNumberForClass($scope.qid);
+	});
+});
 
 
 
-function parseClassDataFromJson ( data, qid ){
+function parseClassDataFromJson( data, qid ){
 	var ret = {
 		label: "",
 		description: "",
@@ -117,14 +123,16 @@ function getNumber(itemID, propertyID) {
 	return number.results.bindings[0].c.value;
 }
 
-function parseExampleInstances (data) {
+function parseExampleInstances(data, continuationQuery) {
 	instances = [];
 	try {
-		var length = 0;
 		var instanceJson = data.results.bindings;
-		length = instanceJson.length;
-		for (var i = 0; i < length; i++) {
-			element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
+		for (var i = 0; i < instanceJson.length; i++) {
+			if ( i < 20 ) {
+				element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
+			} else {
+				element = {label: "... further results", uri: "https://query.wikidata.org/#" + continuationQuery};
+			}
 			instances.push(element);
 		}
 	}
@@ -142,14 +150,15 @@ function parseUriFromJson ( instance ) {
 	return instance.p.value;
 }
 
-function getQueryForInstances ( itemID, limit ) {
+function getQueryForPropertySubjects ( propertyId, objectId, limit ) {
 	return encodeURIComponent(
-"PREFIX wikibase: <http://wikiba.se/ontology#> \
- PREFIX wdt: <http://www.wikidata.org/prop/direct/> \
- PREFIX wd: <http://www.wikidata.org/entity/> \
- SELECT $p $pLabel \
- WHERE{ $p wdt:P31 wd:" + itemID + " . \
-        SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \
+"PREFIX wikibase: <http://wikiba.se/ontology#> \n\
+ PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
+ PREFIX wd: <http://www.wikidata.org/entity/> \n\
+ SELECT $p $pLabel \n\
+ WHERE { \n\
+   $p wdt:" + propertyId + " wd:" + objectId + " . \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
  } LIMIT " + limit
 	);
 }

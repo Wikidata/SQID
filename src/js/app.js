@@ -53,13 +53,7 @@ var util = {
 			}
 		}
 		catch (e){}
-// 		for (var prop in relProps){
-// 			if (relProps[prop] < 15) {
-// 				continue;
-// 			}
-// 			var relProp = {label : util.parseLabel(propertyJson, prop) , link: "#/propertyview?id=" + prop};
-// 			ret.push(relProp);
-// 		}
+
 		return ret;
   }
 
