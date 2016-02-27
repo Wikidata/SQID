@@ -1,11 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# This simple example script retrieves all Wikidata properties, their English
-# labels, datatype name, and how often they are currently used as the main property
-# in statements, as a qualifier in statements, and in references.
-# Currently, the result is just printed. It could also be written to a file in
-# some format of choice.
+# This script retrieves data about the use of classes and properties
+# on Wikidata from SPARQL. The results are processed and stored in the
+# files properties.json and classes.json. The script must be run in a
+# directory that already contains these files (possibly with no content
+# other than an empty map {}). Normally, the files are first generated
+# by the Java export tool, which provides some statistics that cannot
+# be obtained in an acceptable time from SPARQL.
 
 import requests
 import json
