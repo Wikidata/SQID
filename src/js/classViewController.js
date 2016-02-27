@@ -75,25 +75,25 @@ function parseClassDataFromJson ( data, qid ){
 		aliases: ""
 	};
 	try {
-	  ret.label = data.entities[qid].labels[language].value;
-	  ret.description = data.entities[qid].descriptions[language].value;
-	  aliasesJson = data.entities[qid].aliases[language];
-	  if (aliasesJson != undefined) {
-		for (var entry in aliasesJson){
-		  if (entry == 0){
-			ret.aliases = aliasesJson[entry].value;
-		  } else {
-			ret.aliases = ret.aliases + " | " + aliasesJson[entry].value;
-		  }
+		ret.label = data.entities[qid].labels[language].value;
+		ret.description = data.entities[qid].descriptions[language].value;
+		aliasesJson = data.entities[qid].aliases[language];
+		if (aliasesJson != undefined) {
+			for (var entry in aliasesJson){
+				if (entry == 0){
+					ret.aliases = aliasesJson[entry].value;
+				} else {
+					ret.aliases = ret.aliases + " | " + aliasesJson[entry].value;
+				}
+			}
 		}
-	  }
-	  var imageJson = data.entities[qid].claims.P18;
-	  if (imageJson == undefined) {
-		ret.image = "http://commons.wikimedia.org/w/thumb.php?f=MA_Route_blank.svg&w=50";
-	  } else {
-		imageJson = imageJson.pop();
-		ret.image = "http://commons.wikimedia.org/w/thumb.php?f=" + (imageJson.mainsnak.datavalue.value).replace(" ","_") + "&w=200";
-	  }
+		var imageJson = data.entities[qid].claims.P18;
+		if (imageJson == undefined) {
+			ret.image = null;
+		} else {
+			imageJson = imageJson.pop();
+			ret.image = "http://commons.wikimedia.org/w/thumb.php?f=" + (imageJson.mainsnak.datavalue.value).replace(" ","_") + "&w=260";
+		}
 	}
 	catch (err) {
 	}
@@ -143,7 +143,15 @@ function parseUriFromJson ( instance ) {
 }
 
 function getQueryForInstances ( itemID, limit ) {
-	return "PREFIX%20wikibase%3A%20%3Chttp%3A%2F%2Fwikiba.se%2Fontology%23%3E%0APREFIX%20wd%3A%20%3Chttp%3A%2F%2Fwww.wikidata.org%2Fentity%2F%3E%20%0APREFIX%20wdt%3A%20%3Chttp%3A%2F%2Fwww.wikidata.org%2Fprop%2Fdirect%2F%3E%0APREFIX%20rdfs%3A%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%0A%0ASELECT%20%3Fp%20%3FpLabel%20WHERE%20{%0A%20%20%20%20%3Fp%20wdt%3AP31%20wd%3A" + itemID + "%20.%0A%20%20%20SERVICE%20wikibase%3Alabel%20{%0A%20%20%20%20bd%3AserviceParam%20wikibase%3Alanguage%20%22en%22%20.%0A%20%20%20}%0A%20}%20LIMIT%20" + limit;
+	return encodeURIComponent(
+"PREFIX wikibase: <http://wikiba.se/ontology#> \
+ PREFIX wdt: <http://www.wikidata.org/prop/direct/> \
+ PREFIX wd: <http://www.wikidata.org/entity/> \
+ SELECT $p $pLabel \
+ WHERE{ $p wdt:P31 wd:" + itemID + " . \
+        SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \
+ } LIMIT " + limit
+	);
 }
 
 function buildUrlForSparQLRequest (query) {
@@ -155,5 +163,9 @@ function buildUrlForApiRequest( itemID ) {
 }
 
 function getQueryForNumberRequest( itemID, propertyID ){
-	return "PREFIX wikibase%3A <http%3A%2F%2Fwikiba.se%2Fontology%23>%0APREFIX wd%3A <http%3A%2F%2Fwww.wikidata.org%2Fentity%2F> %0APREFIX wdt%3A <http%3A%2F%2Fwww.wikidata.org%2Fprop%2Fdirect%2F>%0APREFIX rdfs%3A <http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23>%0APREFIX p%3A <http%3A%2F%2Fwww.wikidata.org%2Fprop%2F>%0APREFIX v%3A <http%3A%2F%2Fwww.wikidata.org%2Fprop%2Fstatement%2F>%0A%0ASELECT (count(*) as %3Fc)%0AWHERE {%0A    %3Fp wdt%3A" + propertyID + " wd%3A" + itemID + " .%0A}";
+	return encodeURIComponent(
+"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \
+ PREFIX wd: <http://www.wikidata.org/entity/> \
+ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + itemID + " . }"
+	);
 }

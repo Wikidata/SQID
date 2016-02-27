@@ -1,22 +1,72 @@
 <div ng-controller="ClassViewController">
-<h1><a href = {{url}}><b>{{classData.label}}</b> ({{qid}})</a></h1>
-<br>
-<div class="alert alert-warning" role="alert">This will be a classes view.</div>
-<br>
-<b>Aliases:</b> {{classData.aliases}}<br>
-<b>Description:</b> {{classData.description}}<br>
-<b>Image:</b> <img src = {{classData.image}}></img><br>
-<b>Example instances</b>
-<table>
-              <tr ng-repeat="instance in exampleInstances">
-                <td>
-				<a href = {{instance.uri}}>{{instance.label}}</a>
-                </td>
-              </tr></table>
-<b>Number of direct instances: </b> {{classNumbers.instances}}<br>
-<b>Number of direct subclasses: </b> {{classNumbers.subclasses}}<br>
-<b>Related Properties:</b>
-<table>         <tr ng-repeat="property in relatedProperties">
-                <td> <a href= {{property.link}}>{{property.label}}</a></td>
-              </tr></table>
+
+	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
+
+		<h1>{{classData.label}} <small>(<a href="{{url}}" target="_blank">{{qid}}</a>)</small></h1>
+		<div ngIf="{{classData.image}}" class="aliases">
+			{{classData.aliases}}
+		</div>
+		<div class="lead">
+			{{classData.description}}
+		</div>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#instances_panel" style="cursor:pointer;cursor:hand">Instances</a>
+			</h2></div>
+
+			<div id='instances_panel' class='collapse in padded'>
+				<p>
+				This class has {{classNumbers.instances}} direct instances.
+				<ul class="list-inline comma-separated">
+					<li ng-repeat="instance in exampleInstances">
+						<a href = {{instance.uri}}>{{instance.label}}</a>
+					</li>
+				</ul>
+				</p>
+			</div>
+		</div>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#subclasses_panel" style="cursor:pointer;cursor:hand">Subclasses</a>
+			</h2></div>
+
+			<div id='subclasses_panel' class='collapse in padded'>
+				<p>
+				This class has {{classNumbers.subclasses}} direct subclasses.
+				<!--<ul class="list-inline comma-separated">
+					<li ng-repeat="instance in exampleInstances">
+						<a href = {{instance.uri}}>{{instance.label}}</a>
+					</li>
+				</ul>-->
+				</p>
+			</div>
+		</div>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+				<a data-toggle="collapse" data-target="#relprops_panel" style="cursor:pointer;cursor:hand">Related properties</a>
+			</h2></div>
+
+			<div id='relprops_panel' class='collapse in padded'>
+				<ul class="list-inline comma-separated">
+					<li ng-repeat="property in relatedProperties">
+						<a href= {{property.link}}>{{property.label}}</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="sidebar col-md-3 col-md-12 col-sm-12">
+		<img ngIf="{{classData.image}}" src="{{classData.image}}" style="display: block; margin-left: auto; margin-right: auto; padding-bottom: 15px;"></img>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+				External links
+			</h2></div>
+			<div class="padded">
+				<ul>
+					<li><a href="{{url}}" target="_blank">Wikidata page</a></li>
+					<li><a href="https://tools.wmflabs.org/reasonator/?q={{qid}}" target="_blank">Reasonator</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
 </div>

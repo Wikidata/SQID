@@ -36,12 +36,30 @@ var util = {
 		var ret = [];
 		try {
 			var relProps = classesJson[qid][util.JSON_RELATED_PROPERTIES];
+			var relPropsList = [];
+			for (var relProp in relProps) relPropsList.push([relProp, relProps[relProp]]);
+
+			relPropsList.sort(function(a, b) {
+				a = a[1];
+				b = b[1];
+				return a < b ? 1 : (a > b ? -1 : 0);
+			});
+
+			for (var i = 0; i < relPropsList.length; i++) {
+				if (relPropsList[i][1] < 15) break;
+				var propId = relPropsList[i][0];
+				var resultObj = {label : util.parseLabel(propertyJson, propId) , link: "#/propertyview?id=" + propId};
+				ret.push(resultObj);
+			}
 		}
 		catch (e){}
-		for (var prop in relProps){
-			var relProp = {label : util.parseLabel(propertyJson, prop), link: "#/propertyview?id=" + prop};
-			ret.push(relProp);
-		}
+// 		for (var prop in relProps){
+// 			if (relProps[prop] < 15) {
+// 				continue;
+// 			}
+// 			var relProp = {label : util.parseLabel(propertyJson, prop) , link: "#/propertyview?id=" + prop};
+// 			ret.push(relProp);
+// 		}
 		return ret;
   }
 
