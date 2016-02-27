@@ -54,7 +54,7 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 	});
 
 	ClassView.getSubclasses().then(function(data) {
-		$scope.exampleSubclasses = parseExampleInstances(data,getQueryForPropertySubjects("P279", ClassView.getQid(), 1000));
+		$scope.exampleSubclasses = parseExampleClasses(data,getQueryForPropertySubjects("P279", ClassView.getQid(), 1000));
 	});
 
 	ClassView.getClassData().then(function(data) {
@@ -127,6 +127,7 @@ function parseExampleInstances(data, continuationQuery) {
 	instances = [];
 	try {
 		var instanceJson = data.results.bindings;
+		var element;
 		for (var i = 0; i < instanceJson.length; i++) {
 			if ( i < 20 ) {
 				element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
@@ -142,12 +143,41 @@ function parseExampleInstances(data, continuationQuery) {
 	return instances;
 }
 
+function parseExampleClasses(data, continuationQuery) {
+	results = [];
+	try {
+		var instanceJson = data.results.bindings;
+		var element;
+		for (var i = 0; i < instanceJson.length; i++) {
+			if ( i < 20 ) {
+				element = {label: parseLabelFromJson(instanceJson[i]), uri: "#/classview?id=" + parseIdFromJson(instanceJson[i])};
+			} else {
+				element = {label: "... further results", uri: "https://query.wikidata.org/#" + continuationQuery};
+			}
+			results.push(element);
+		}
+	}
+	catch (err) {
+		//nothing to do here
+	}
+	return results;
+}
+
 function parseLabelFromJson ( json ) {
 	return json.pLabel.value;
 }
 
 function parseUriFromJson ( instance ) {
 	return instance.p.value;
+}
+
+function parseIdFromJson ( binding ) {
+	var uri = binding.p.value;
+	if ( uri.substring(0, "http://www.wikidata.org/entity/".length) === "http://www.wikidata.org/entity/" ) {
+		return uri.substring("http://www.wikidata.org/entity/".length, uri.length);
+	} else {
+		return null;
+	}
 }
 
 function getQueryForPropertySubjects ( propertyId, objectId, limit ) {
