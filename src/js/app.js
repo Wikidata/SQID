@@ -43,14 +43,28 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var promise;
 		var properties;
     
+		var getData = function(qid, key, defaultValue) {
+			try {
+				return properties[qid][key];
+			} catch(e){
+				return defaultValue;
+			}
+		}
+
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				return {
 					propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
-					getProperties: function(){
-						return properties;
-					}
+					getProperties: function(){ return properties; },
+					getLabel: function(qid){ return getData(qid, 'l', null); },
+					getItemCount: function(qid){ return getData(qid, 'i', 0); },
+					getDatatype: function(qid){ return getData(qid, 'd', null); },
+					getStatementCount: function(qid){ return getData(qid, 's', 0); },
+					getQualifierCount: function(qid){ return getData(qid, 'q', 0); },
+					getReferenceCount: function(qid){ return getData(qid, 'e', 0); },
+					getRelatedProperties: function(qid){ return getData(qid, 'r', {}); },
+					getQualifiers: function(qid){ return getData(qid, 'qs', []); }
 				}
 			});
 		}
@@ -58,18 +72,32 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	})
 
 	.factory('Classes', function($http, $route) {
-
 		var promise;
 		var classes; 
+		
+		var getData = function(qid, key, defaultValue) {
+			try {
+				return classes[qid][key];
+			} catch(e){
+				return defaultValue;
+			}
+		}
 
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
 					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-6"], ["Instances", "col-xs-2"], ["Subclasses", "col-xs-2"]],
-					getClasses: function(){
-						return classes;
-					}
+					getClasses: function(){ return classes; },
+					hasEntity: function(qid){ return (qid in classes); },
+					getLabel: function(qid){ return getData(qid, 'l', null); },
+					getDirectInstanceCount: function(qid){ return getData(qid, 'i', 0); },
+					getDirectSubclassCount: function(qid){ return getData(qid, 's', 0); },
+					getAllInstanceCount: function(qid){ return getData(qid, 'ai', 0); },
+					getAllSubclassCount: function(qid){ return getData(qid, 'as', 0); },
+					getRelatedProperties: function(qid){ return getData(qid, 'r', {}); },
+					getSuperClasses: function(qid){ return getData(qid, 'sc', []); },
+					getUrl: function(qid) { return "#/classview?id=" + qid }
 				}
 			});
 		}

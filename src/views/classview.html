@@ -16,7 +16,7 @@
 
 			<div id='instances_panel' class='collapse in padded'>
 				<p>
-				This class has {{classNumbers.instances}} direct instances.
+				This class has {{directInstances}} direct instances.
 				<ul class="list-inline comma-separated">
 					<li ng-repeat="instance in exampleInstances">
 						<a href = {{instance.uri}}>{{instance.label}}</a>
@@ -32,7 +32,7 @@
 
 			<div id='subclasses_panel' class='collapse in padded'>
 				<p>
-				This class has {{classNumbers.subclasses}} direct subclasses.
+				This class has {{directSubclasses}} direct subclasses.
 				<ul class="list-inline comma-separated">
 					<li ng-repeat="subclass in exampleSubclasses">
 						<a href = {{subclass.uri}}>{{subclass.label}}</a>

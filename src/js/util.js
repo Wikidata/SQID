@@ -6,24 +6,11 @@ angular.module('utilities', [])
 	var JSON_INSTANCES = "i";
 	var JSON_SUBCLASSES = "s";
 	var JSON_RELATED_PROPERTIES = "r";
-
-	var parseClassNumbers = function (qid, json){
-		var numbers = {instances : "", subclasses: ""};
-		try {
-			numbers.instances = json[qid][JSON_INSTANCES];
-			numbers.subclasses = json[qid][JSON_SUBCLASSES];
-		} catch(e){}
-		return numbers;
-	};
   
-	var parseLabel = function (data, id){
-		return data[id][JSON_LABEL];
-	};
-  
-	var parseRelatedProperties = function(qid, classesJson, propertyJson){
+	var parseRelatedProperties = function(qid, classes, properties){
 		var ret = [];
 		try {
-			var relProps = classesJson[qid][JSON_RELATED_PROPERTIES];
+			var relProps = classes.getRelatedProperties(qid);
 			var relPropsList = [];
 			for (var relProp in relProps) relPropsList.push([relProp, relProps[relProp]]);
 
@@ -36,11 +23,10 @@ angular.module('utilities', [])
 			for (var i = 0; i < relPropsList.length; i++) {
 				if (relPropsList[i][1] < 15) break;
 				var propId = relPropsList[i][0];
-				var resultObj = {label : parseLabel(propertyJson, propId) , link: "#/propertyview?id=" + propId};
+				var resultObj = {label : properties.getLabel(propId) , link: "#/propertyview?id=" + propId};
 				ret.push(resultObj);
 			}
-		}
-		catch (e){}
+		} catch (e){}
 
 		return ret;
 	};
@@ -62,9 +48,122 @@ angular.module('utilities', [])
 		TABLE_SIZE: 15,
 		PAGE_SELECTOR_SIZE: 2,
 
-		parseClassNumbers: parseClassNumbers,
-		parseLabel: parseLabel,
 		parseRelatedProperties: parseRelatedProperties
+	};
+
+})
+
+.factory('util', function($http, $q) {
+
+	var httpRequest = function(url) {
+		return $http.get(url).then(function(response) {
+			if (typeof response.data === 'object') {
+				return response.data;
+			} else {
+				// invalid response
+				return $q.reject(response.data);
+			}
+		},
+		function(response) {
+			// something went wrong
+			return $q.reject(response.data);
+		});
+	}
+	
+	return {
+		httpRequest: httpRequest
+	};
+})
+
+.factory('sparql', function(util) {
+
+	var SPARQL_SERVICE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql";
+	var SPARQL_UI_PREFIX = "https://query.wikidata.org/#";
+
+	var getQueryUrl = function(sparqlQuery) {
+		return SPARQL_SERVICE + "?query=" + encodeURIComponent(sparqlQuery);
+	}
+
+	var getQueryUiUrl = function(sparqlQuery) {
+		return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
+	}
+	
+	var getQueryForPropertySubjects = function(propertyId, objectId, limit) {
+		return "PREFIX wikibase: <http://wikiba.se/ontology#> \n\
+PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
+PREFIX wd: <http://www.wikidata.org/entity/> \n\
+SELECT $p $pLabel \n\
+WHERE { \n\
+   $p wdt:" + propertyId + " wd:" + objectId + " . \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
+} LIMIT " + limit;
+	}
+
+	var getPropertySubjects = function(propertyId, objectId, limit) {
+		var url = getQueryUrl(getQueryForPropertySubjects(propertyId, objectId, limit));
+		return util.httpRequest(url);
+	}
+
+	var getInstance = function(sparqlQuery) {
+		return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
+	}
+
+	var getInlinkCount = function(propertyID, objectItemId) {
+		var query = "PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
+PREFIX wd: <http://www.wikidata.org/entity/> \n\
+SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + " . }";
+		var result = JSON.parse(httpGet(getQueryUrl(query)));
+		return result.results.bindings[0].c.value;
+	}
+
+	var prepareInstanceQueryResult = function(data, propertyId, objectId, limit, entities) {
+		instances = [];
+		try {
+			var instanceJson = data.results.bindings;
+			var element;
+			for (var i = 0; i < instanceJson.length; i++) {
+				if ( i < limit-1 ) {
+					id = getIdFromUri(instanceJson[i].p.value);
+					var uri;
+					if ( entities !== null && entities.hasEntity(id) ) {
+						uri = entities.getUrl(id);
+					} else {
+						uri = instanceJson[i].p.value;
+					}
+					element = {
+						label: instanceJson[i].pLabel.value,
+						uri: uri
+					};
+				} else {
+					element = {
+						label: "... further results",
+						uri: getQueryUiUrl(getQueryForPropertySubjects(propertyId, objectId, 1000))
+					};
+				}
+				instances.push(element);
+			}
+		}
+		catch (err) {
+			//nothing to do here
+		}
+		return instances;
+	}
+
+	var getIdFromUri = function(uri) {
+		if ( uri.substring(0, "http://www.wikidata.org/entity/".length) === "http://www.wikidata.org/entity/" ) {
+			return uri.substring("http://www.wikidata.org/entity/".length, uri.length);
+		} else {
+			return null;
+		}
+	}
+
+	return {
+		getQueryUrl: getQueryUrl,
+		getQueryUiUrl: getQueryUiUrl,
+		getInlinkCount: getInlinkCount,
+		getPropertySubjects: getPropertySubjects,
+		getIdFromUri: getIdFromUri,
+		prepareInstanceQueryResult: prepareInstanceQueryResult
 	};
 
 });

@@ -1,43 +1,30 @@
 
 var language = "en";
 
+classBrowser.factory('ClassView', function($route, util, sparql) {
+	var MAX_EXAMPLE_INSTANCES = 20;
+	var MAX_DIRECT_SUBCLASSES = 20;
 
-function httpRequest($http, $q, url){
-  return $http.get(url).then(function(response) {
-	if (typeof response.data === 'object') {
-	  return response.data;
-	} else {
-	  // invalid response
-	  return $q.reject(response.data);
-	}
-  },
-  function(response) {
-	// something went wrong
-	return $q.reject(response.data);
-  });
-}
-
-
-classBrowser.factory('ClassView', function($http, $route, $q) {
 	var qid;
 	return {
+		MAX_EXAMPLE_INSTANCES: MAX_EXAMPLE_INSTANCES,
+		MAX_DIRECT_SUBCLASSES: MAX_DIRECT_SUBCLASSES,
+
 		updateQid: function() {
 			qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 		},
 
 		getInstances: function() {
-			var url = buildUrlForSparQLRequest(getQueryForPropertySubjects("P31", qid, 21));
-			return httpRequest($http, $q, url);
+			return sparql.getPropertySubjects("P31", qid, MAX_EXAMPLE_INSTANCES + 1);
 		},
 
 		getSubclasses: function() {
-			var url = buildUrlForSparQLRequest(getQueryForPropertySubjects("P279", qid, 21));
-			return httpRequest($http, $q, url);
+			return sparql.getPropertySubjects("P279", qid, MAX_DIRECT_SUBCLASSES + 1);
 		},
 
 		getClassData: function() {
 			var url = buildUrlForApiRequest(qid);
-			return httpRequest($http, $q, url);
+			return util.httpRequest(url);
 		},
 
 		getQid: function(){
@@ -46,29 +33,30 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 	};
 })
 .controller('ClassViewController',
-	function($scope, $route, ClassView, Classes, Properties, jsonData){
+	function($scope, $route, ClassView, Classes, Properties, jsonData, sparql){
 		ClassView.updateQid();
 		$scope.qid = ClassView.getQid();
 
 		ClassView.getInstances().then(function(data) {
-			$scope.exampleInstances = parseExampleInstances(data,getQueryForPropertySubjects("P31", ClassView.getQid(), 1000));
-		});
-
-		ClassView.getSubclasses().then(function(data) {
-			$scope.exampleSubclasses = parseExampleClasses(data,getQueryForPropertySubjects("P279", ClassView.getQid(), 1000));
+			$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
 		});
 
 		ClassView.getClassData().then(function(data) {
 			$scope.classData = parseClassDataFromJson(data, $scope.qid);
 		});
+
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
-		Classes.then(function(data){
+		Classes.then(function(classes){
 			Properties.then(function(props){
-				$scope.relatedProperties = jsonData.parseRelatedProperties($scope.qid, data.getClasses(), props.getProperties());
+				$scope.relatedProperties = jsonData.parseRelatedProperties($scope.qid, classes, props);
 			});
-			$scope.classNumbers = jsonData.parseClassNumbers($scope.qid, data.getClasses());
-			//$scope.classNumbers = getNumberForClass($scope.qid);
+			ClassView.getSubclasses().then(function(data) {
+				$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);
+			});
+			$scope.directInstances = classes.getDirectInstanceCount($scope.qid);
+			$scope.directSubclasses = classes.getDirectSubclassCount($scope.qid);
+
 		});
 	}
 );
@@ -108,105 +96,7 @@ function parseClassDataFromJson( data, qid ){
 	return ret;
 }
 
-function getPropertyLabel(data, pid) {
-	return data[pid][jsonData.JSON_LABEL];
-}
-
-function getNumberForClass(itemID) {
-	var instanceOf = "P31";
-	var subclassOf = "P279";
-	return {instances: getNumber(itemID,instanceOf), subclasses: getNumber(itemID,subclassOf)};
-}
-
-function getNumber(itemID, propertyID) {
-	var url = buildUrlForSparQLRequest(getQueryForNumberRequest(itemID, propertyID));
-	var result = jsonData.httpGet(url);
-	var number = JSON.parse(result);
-	return number.results.bindings[0].c.value;
-}
-
-function parseExampleInstances(data, continuationQuery) {
-	instances = [];
-	try {
-		var instanceJson = data.results.bindings;
-		var element;
-		for (var i = 0; i < instanceJson.length; i++) {
-			if ( i < 20 ) {
-				element = {label: parseLabelFromJson(instanceJson[i]), uri: parseUriFromJson(instanceJson[i])};
-			} else {
-				element = {label: "... further results", uri: "https://query.wikidata.org/#" + continuationQuery};
-			}
-			instances.push(element);
-		}
-	}
-	catch (err) {
-		//nothing to do here
-	}
-	return instances;
-}
-
-function parseExampleClasses(data, continuationQuery) {
-	results = [];
-	try {
-		var instanceJson = data.results.bindings;
-		var element;
-		for (var i = 0; i < instanceJson.length; i++) {
-			if ( i < 20 ) {
-				element = {label: parseLabelFromJson(instanceJson[i]), uri: "#/classview?id=" + parseIdFromJson(instanceJson[i])};
-			} else {
-				element = {label: "... further results", uri: "https://query.wikidata.org/#" + continuationQuery};
-			}
-			results.push(element);
-		}
-	}
-	catch (err) {
-		//nothing to do here
-	}
-	return results;
-}
-
-function parseLabelFromJson ( json ) {
-	return json.pLabel.value;
-}
-
-function parseUriFromJson ( instance ) {
-	return instance.p.value;
-}
-
-function parseIdFromJson ( binding ) {
-	var uri = binding.p.value;
-	if ( uri.substring(0, "http://www.wikidata.org/entity/".length) === "http://www.wikidata.org/entity/" ) {
-		return uri.substring("http://www.wikidata.org/entity/".length, uri.length);
-	} else {
-		return null;
-	}
-}
-
-function getQueryForPropertySubjects ( propertyId, objectId, limit ) {
-	return encodeURIComponent(
-"PREFIX wikibase: <http://wikiba.se/ontology#> \n\
- PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
- PREFIX wd: <http://www.wikidata.org/entity/> \n\
- SELECT $p $pLabel \n\
- WHERE { \n\
-   $p wdt:" + propertyId + " wd:" + objectId + " . \n\
-   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
- } LIMIT " + limit
-	);
-}
-
-function buildUrlForSparQLRequest (query) {
-	return "https://query.wikidata.org/bigdata/namespace/wdq/sparql?query=" + query;
-}
-
 function buildUrlForApiRequest( itemID ) {
 	return "https://www.wikidata.org/wiki/Special:EntityData/" + itemID + ".json";
 }
 
-function getQueryForNumberRequest( itemID, propertyID ){
-	return encodeURIComponent(
-"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \
- PREFIX wd: <http://www.wikidata.org/entity/> \
- SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + itemID + " . }"
-	);
-}
