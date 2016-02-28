@@ -25,17 +25,17 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 			qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 		},
 
-		getInstances: function() {	
+		getInstances: function() {
 			var url = buildUrlForSparQLRequest(getQueryForPropertySubjects("P31", qid, 21));
 			return httpRequest($http, $q, url);
 		},
 
-		getSubclasses: function() {	
+		getSubclasses: function() {
 			var url = buildUrlForSparQLRequest(getQueryForPropertySubjects("P279", qid, 21));
 			return httpRequest($http, $q, url);
 		},
 
-		getClassData: function() {	
+		getClassData: function() {
 			var url = buildUrlForApiRequest(qid);
 			return httpRequest($http, $q, url);
 		},
@@ -45,31 +45,33 @@ classBrowser.factory('ClassView', function($http, $route, $q) {
 		}
 	};
 })
-.controller('ClassViewController', function($scope,$route, ClassView, Classes, Properties){
-	ClassView.updateQid();
-	$scope.qid = ClassView.getQid();
+.controller('ClassViewController',
+	function($scope, $route, ClassView, Classes, Properties, jsonData){
+		ClassView.updateQid();
+		$scope.qid = ClassView.getQid();
 
-	ClassView.getInstances().then(function(data) {
-		$scope.exampleInstances = parseExampleInstances(data,getQueryForPropertySubjects("P31", ClassView.getQid(), 1000));
-	});
-
-	ClassView.getSubclasses().then(function(data) {
-		$scope.exampleSubclasses = parseExampleClasses(data,getQueryForPropertySubjects("P279", ClassView.getQid(), 1000));
-	});
-
-	ClassView.getClassData().then(function(data) {
-		$scope.classData = parseClassDataFromJson(data, $scope.qid);
-	});
-	$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
-
-	Classes.then(function(data){
-		Properties.then(function(props){
-			$scope.relatedProperties = util.parseRelatedProperties($scope.qid, data.getClasses(), props.getProperties());
+		ClassView.getInstances().then(function(data) {
+			$scope.exampleInstances = parseExampleInstances(data,getQueryForPropertySubjects("P31", ClassView.getQid(), 1000));
 		});
-		$scope.classNumbers = util.parseClassNumbers($scope.qid, data.getClasses());
-		//$scope.classNumbers = getNumberForClass($scope.qid);
-	});
-});
+
+		ClassView.getSubclasses().then(function(data) {
+			$scope.exampleSubclasses = parseExampleClasses(data,getQueryForPropertySubjects("P279", ClassView.getQid(), 1000));
+		});
+
+		ClassView.getClassData().then(function(data) {
+			$scope.classData = parseClassDataFromJson(data, $scope.qid);
+		});
+		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
+
+		Classes.then(function(data){
+			Properties.then(function(props){
+				$scope.relatedProperties = jsonData.parseRelatedProperties($scope.qid, data.getClasses(), props.getProperties());
+			});
+			$scope.classNumbers = jsonData.parseClassNumbers($scope.qid, data.getClasses());
+			//$scope.classNumbers = getNumberForClass($scope.qid);
+		});
+	}
+);
 
 
 
@@ -107,7 +109,7 @@ function parseClassDataFromJson( data, qid ){
 }
 
 function getPropertyLabel(data, pid) {
-	return data[pid][util.JSON_LABEL];
+	return data[pid][jsonData.JSON_LABEL];
 }
 
 function getNumberForClass(itemID) {
@@ -118,7 +120,7 @@ function getNumberForClass(itemID) {
 
 function getNumber(itemID, propertyID) {
 	var url = buildUrlForSparQLRequest(getQueryForNumberRequest(itemID, propertyID));
-	var result = util.httpGet(url);
+	var result = jsonData.httpGet(url);
 	var number = JSON.parse(result);
 	return number.results.bindings[0].c.value;
 }
