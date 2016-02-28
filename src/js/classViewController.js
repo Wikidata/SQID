@@ -36,6 +36,8 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 	function($scope, $route, ClassView, Classes, Properties, jsonData, sparql){
 		ClassView.updateQid();
 		$scope.qid = ClassView.getQid();
+		$scope.exampleInstances = null;
+		$scope.exampleSubclasses = null;
 
 		ClassView.getInstances().then(function(data) {
 			$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
@@ -56,6 +58,8 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 			});
 			$scope.directInstances = classes.getDirectInstanceCount($scope.qid);
 			$scope.directSubclasses = classes.getDirectSubclassCount($scope.qid);
+			$scope.allInstances = classes.getAllInstanceCount($scope.qid);
+			$scope.allSubclasses = classes.getAllSubclassCount($scope.qid);
 
 		});
 	}

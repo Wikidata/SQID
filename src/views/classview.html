@@ -13,16 +13,25 @@
 			<div class="panel-heading"><h2 class="panel-title">
 			<a data-toggle="collapse" data-target="#instances_panel" style="cursor:pointer;cursor:hand">Instances</a>
 			</h2></div>
-
-			<div id='instances_panel' class='collapse in padded'>
-				<p>
-				This class has {{directInstances}} direct instances.
-				<ul class="list-inline comma-separated">
-					<li ng-repeat="instance in exampleInstances">
-						<a href = {{instance.uri}}>{{instance.label}}</a>
-					</li>
-				</ul>
-				</p>
+			<div id='instances_panel' class='panel-body panel-collapse collapse in'>
+				<div ng-if="exampleInstances===null" style="padding: 20px;">
+					<i>Loading direct instances &hellip;</i>
+				</div>
+				<div ng-if="exampleInstances.length === 0"><div ng-if="allInstances > 0">
+					<p>This class has <b>no</b> direct instances.</p>
+				</div></div>
+				<div ng-if="exampleInstances.length > 0">
+					<p>This class has <b>{{directInstances}}</b> direct instance<span ng-if="directSubclasses != 1">s</span>:</p>
+					<ul class="list-inline comma-separated">
+						<li ng-repeat="instance in exampleInstances">
+							<a href="{{instance.uri}}" target="_blank">{{instance.label}}</a>
+						</li>
+					</ul>
+				</div>
+				<div ng-if="allSubclasses > 0">
+					<p ng-if="allInstances > 0">Together with its {{allSubclasses}} direct and indirect subclasses, this class has a total of  <b>{{allInstances}}</b> instances.</p>
+					<p ng-if="allInstances == 0">Neither this class nor any of its {{allSubclasses}} direct or indirect subclasses has any instances.</p>
+				</div>
 			</div>
 		</div>
 		<div class="panel panel-info">
@@ -30,33 +39,47 @@
 			<a data-toggle="collapse" data-target="#subclasses_panel" style="cursor:pointer;cursor:hand">Subclasses</a>
 			</h2></div>
 
-			<div id='subclasses_panel' class='collapse in padded'>
-				<p>
-				This class has {{directSubclasses}} direct subclasses.
-				<ul class="list-inline comma-separated">
+			<div id='subclasses_panel' class='panel-body panel-collapse collapse in'>
+				<div ng-if="exampleSubclasses===null" style="padding: 20px;">
+					<i>Loading direct subclasses &hellip;</i>
+				</div>
+				<div ng-if="exampleSubclasses.length === 0">
+					<p>This class has <b>no</b> subclasses.</p>
+				</div>
+				<div ng-if="exampleSubclasses.length > 0">
+					<p>This class has <b>{{directSubclasses}}</b> direct subclass<span ng-if="directSubclasses != 1">es</span>:</p>
+					<ul class="list-inline comma-separated">
 					<li ng-repeat="subclass in exampleSubclasses">
 						<a href = {{subclass.uri}}>{{subclass.label}}</a>
 					</li>
-				</ul>
-				</p>
+					</ul>
+					<p>
+					In total, there are <b>{{allSubclasses}}</b> direct and indirect subclasses.
+					</p>
+				</div>
 			</div>
 		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
-				<a data-toggle="collapse" data-target="#relprops_panel" style="cursor:pointer;cursor:hand">Related properties</a>
+				<a data-toggle="collapse" data-target="#relprops_panel" style="cursor:pointer;cursor:hand">Related Properties</a>
 			</h2></div>
 
-			<div id='relprops_panel' class='collapse in padded'>
+			<div id='relprops_panel' class='panel-body collapse in'>
+				<div ng-if="relatedProperties.length === 0">
+					There are no related properties for this class.
+				</div>
+				<div ng-if="relatedProperties.length > 0">
 				<ul class="list-inline comma-separated">
 					<li ng-repeat="property in relatedProperties">
 						<a href= {{property.link}}>{{property.label}}</a>
 					</li>
 				</ul>
+				</div>
 			</div>
 		</div>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
-		<img ngIf="{{classData.image}}" src="{{classData.image}}" style="display: block; margin-left: auto; margin-right: auto; padding-bottom: 15px;"></img>
+		<img ng-if="classData.image" src="{{classData.image}}" style="display: block; margin-left: auto; margin-right: auto; padding-bottom: 15px;"></img>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
 				External links
