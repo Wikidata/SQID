@@ -156,3 +156,45 @@ background: rgba(255,255,255,1);
 .not-active{
     pointer-events: none;
 }
+
+.sidebar {
+    margin-bottom: 10px;
+    border-left: 1px solid #DDD;
+    padding-left: 5px;
+    min-height: 1000px;  /*enforce scrollbar to avoid jumping page width when collapsing main content*/
+}
+
+.aliases {
+    color: #999999;
+    margin-bottom: 5px;
+    max-height: 100px;
+    overflow: auto;
+}
+
+/* Collapsible panels */
+.panel-heading a:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e114";    
+    float: right; 
+    color: grey; 
+}
+.panel-heading a.collapsed:after {
+    content: "\e080";
+}
+
+.padded {
+	padding-left: 15px;
+	padding-right: 15px;
+	padding-top: 10px;
+}
+
+.list-inline.comma-separated li {
+	padding-right: 0px;
+}
+.list-inline.comma-separated li::after {
+	content: ", ";
+}
+.list-inline.comma-separated li:last-child::after {
+	content: "";
+}
+

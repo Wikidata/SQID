@@ -1,4 +1,4 @@
-classBrowser.controller('TableController', function($scope, Arguments, Classes, Properties){
+classBrowser.controller('TableController', function($scope, Arguments, Classes, Properties, jsonData){
 
     // definition part
   
@@ -16,11 +16,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
 
     var getClassFromId = function(id, data){
-      return ['<a href="#/classview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL],  data[id][util.JSON_INSTANCES].toString(), data[id][util.JSON_SUBCLASSES].toString()];
+      return ['<a href="#/classview?id=' + id + '">' + id + '</a>', data[id][jsonData.JSON_LABEL],  data[id][jsonData.JSON_INSTANCES].toString(), data[id][jsonData.JSON_SUBCLASSES].toString()];
     };
     
     var getPropertyFromId = function(id, data){
-      return ['<a href="#/propertyview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL], data[id][util.JSON_USES_IN_STATEMENTS].toString(), data[id][util.JSON_USES_IN_QUALIFIERS].toString(), data[id][util.JSON_USES_IN_REFERENCES].toString()];
+      return ['<a href="#/propertyview?id=' + id + '">' + id + '</a>', data[id][jsonData.JSON_LABEL], data[id][jsonData.JSON_USES_IN_STATEMENTS].toString(), data[id][jsonData.JSON_USES_IN_QUALIFIERS].toString(), data[id][jsonData.JSON_USES_IN_REFERENCES].toString()];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
@@ -33,19 +33,19 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var refreshPageSelectorData = function(args, idArray){
       var from;
       var to;
-      var active = Math.floor(args.from / util.TABLE_SIZE) + 1;
+      var active = Math.floor(args.from / jsonData.TABLE_SIZE) + 1;
       var prev;
       var next;
 
-      if ((2*2 +1) * util.TABLE_SIZE >= idArray.length){
-        if (util.TABLE_SIZE >= idArray.length){
+      if ((2*2 +1) * jsonData.TABLE_SIZE >= idArray.length){
+        if (jsonData.TABLE_SIZE >= idArray.length){
           pageSelectorData = {
             enabled: false
           }
           return;
         }else{
-          to = Math.floor(idArray.length / util.TABLE_SIZE);
-          if ((idArray.length % util.TABLE_SIZE) > 0){
+          to = Math.floor(idArray.length / jsonData.TABLE_SIZE);
+          if ((idArray.length % jsonData.TABLE_SIZE) > 0){
             to++;
           }
           from = 1;
@@ -53,13 +53,13 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         }
       }else{
         if (active > 2){
-          if ((2*util.TABLE_SIZE) < (idArray.length - args.from)){
+          if ((2*jsonData.TABLE_SIZE) < (idArray.length - args.from)){
             from = active - 2;
             to = from + 2*2;
           }else{ // there are not enough succesors
             // assertion: there are enough predecessors
-            var offset = Math.floor((idArray.length - args.from) / util.TABLE_SIZE) - 1; // number of following pages
-            if (((idArray.length - args.from) % util.TABLE_SIZE) > 0){
+            var offset = Math.floor((idArray.length - args.from) / jsonData.TABLE_SIZE) - 1; // number of following pages
+            if (((idArray.length - args.from) % jsonData.TABLE_SIZE) > 0){
               offset++;
             }
             from = active - (2-offset) - 2
@@ -101,8 +101,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (pageSelectorData.prevEnabled){
         $scope.prevEnabled = "enabled";
         $scope.prevLink= '#/browse?from=' 
-          + ($scope.args.from - util.TABLE_SIZE)
-          + '&to=' + ($scope.args.to - util.TABLE_SIZE)
+          + ($scope.args.from - jsonData.TABLE_SIZE)
+          + '&to=' + ($scope.args.to - jsonData.TABLE_SIZE)
           + '&type=' + $scope.args.type;
         $scope.prevClass= "";
       }else{
@@ -113,8 +113,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (pageSelectorData.nextEnabled){
         $scope.nextEnabled = "enabled";
         $scope.nextLink= '#/browse?from=' 
-          + ($scope.args.from + util.TABLE_SIZE)
-          + '&to=' + ($scope.args.to + util.TABLE_SIZE)
+          + ($scope.args.from + jsonData.TABLE_SIZE)
+          + '&to=' + ($scope.args.to + jsonData.TABLE_SIZE)
           + '&type=' + $scope.args.type;
         $scope.nextClass="";
       }else{
@@ -152,7 +152,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     // execution part
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
-    $scope.tableSize = util.TABLE_SIZE;
+    $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     $scope.filterdata;
     if (!$scope.filterText) {$scope.filterText = ""};
