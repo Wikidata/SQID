@@ -1,7 +1,5 @@
 
-var language = "en";
-
-classBrowser.factory('ClassView', function($route, util, sparql) {
+classBrowser.factory('ClassView', function($route, util, sparql, wikidataapi) {
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 20;
 	var RELATED_PROPERTIES_THRESHOLD = 5;
@@ -25,8 +23,7 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 		},
 
 		getClassData: function() {
-			var url = buildUrlForApiRequest(qid);
-			return util.httpRequest(url);
+			return wikidataapi.fetchEntityData(qid);
 		},
 
 		getQid: function(){
@@ -35,14 +32,15 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 	};
 })
 .controller('ClassViewController',
-	function($scope, $route, ClassView, Classes, Properties, jsonData, sparql){
+	function($scope, $route, ClassView, Classes, Properties, sparql, wikidataapi){
 		ClassView.updateQid();
 		$scope.qid = ClassView.getQid();
 		$scope.exampleInstances = null;
 		$scope.exampleSubclasses = null;
+		$scope.classData = null;
 
 		ClassView.getClassData().then(function(data) {
-			$scope.classData = parseClassDataFromJson(data, $scope.qid);
+			$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
 		});
 
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
@@ -67,43 +65,4 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 		});
 	}
 );
-
-
-
-function parseClassDataFromJson( data, qid ){
-	var ret = {
-		label: "",
-		description: "",
-		image: "",
-		aliases: ""
-	};
-	try {
-		ret.label = data.entities[qid].labels[language].value;
-		ret.description = data.entities[qid].descriptions[language].value;
-		aliasesJson = data.entities[qid].aliases[language];
-		if (aliasesJson != undefined) {
-			for (var entry in aliasesJson){
-				if (entry == 0){
-					ret.aliases = aliasesJson[entry].value;
-				} else {
-					ret.aliases = ret.aliases + " | " + aliasesJson[entry].value;
-				}
-			}
-		}
-		var imageJson = data.entities[qid].claims.P18;
-		if (imageJson == undefined) {
-			ret.image = null;
-		} else {
-			imageJson = imageJson.pop();
-			ret.image = "http://commons.wikimedia.org/w/thumb.php?f=" + (imageJson.mainsnak.datavalue.value).replace(" ","_") + "&w=260";
-		}
-	}
-	catch (err) {
-	}
-	return ret;
-}
-
-function buildUrlForApiRequest( itemID ) {
-	return "https://www.wikidata.org/wiki/Special:EntityData/" + itemID + ".json";
-}
 

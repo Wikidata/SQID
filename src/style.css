@@ -188,13 +188,27 @@ background: rgba(255,255,255,1);
 	padding-top: 10px;
 }
 
+.entity-description {
+	font-size: 1.3em;
+}
+
 .list-inline.comma-separated li {
 	padding-right: 0px;
 }
 .list-inline.comma-separated li::after {
-	content: ", ";
+	content: ",";
 }
 .list-inline.comma-separated li:last-child::after {
+	content: "";
+}
+
+.list-inline.pipe-separated li {
+	padding-right: 0px;
+}
+.list-inline.pipe-separated li::after {
+	content: " |";
+}
+.list-inline.pipe-separated li:last-child::after {
 	content: "";
 }
 
