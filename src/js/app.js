@@ -75,7 +75,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			} catch (e){}
 
 			return ret;
-		}
+		};
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
@@ -103,14 +103,32 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	.factory('Classes', function($http, $route) {
 		var promise;
 		var classes; 
-		
+
 		var getData = function(id, key, defaultValue) {
 			try {
 				return classes[id][key];
 			} catch(e){
 				return defaultValue;
 			}
-		}
+		};
+
+		var getLabel = function(id){ return getData(id, 'l', null); };
+		var getUrl = function(id) { return "#/classview?id=Q" + id; };
+		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
+
+		var getNonemptySubclasses = function(id) {
+			var ret = [];
+			var subClasses = getData(id,'sb', []);
+			for ( var i in subClasses ) {
+				var label = getLabel(subClasses[i]);
+				if ( label === null ) label = "Q" + subClasses[i];
+				ret.push( {label: label, url: getUrl(subClasses[i]), icount: getAllInstanceCount(subClasses[i])} );
+			}
+			ret.sort(function(a, b) {
+				return a.icount < b.icount ? 1 : (a.icount > b.icount ? -1 : 0);
+			});
+			return ret;
+		};
 
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
@@ -119,14 +137,15 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-6"], ["Instances", "col-xs-2"], ["Subclasses", "col-xs-2"]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
-					getLabel: function(id){ return getData(id, 'l', null); },
+					getLabel: getLabel,
 					getDirectInstanceCount: function(id){ return getData(id, 'i', 0); },
 					getDirectSubclassCount: function(id){ return getData(id, 's', 0); },
-					getAllInstanceCount: function(id){ return getData(id, 'ai', 0); },
+					getAllInstanceCount: getAllInstanceCount,
 					getAllSubclassCount: function(id){ return getData(id, 'as', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
-					getUrl: function(id) { return "#/classview?id=Q" + id; }
+					getUrl: getUrl,
+					getNonemptySubclasses: getNonemptySubclasses
 				}
 			});
 		}

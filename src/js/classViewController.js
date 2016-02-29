@@ -1,7 +1,7 @@
 
 classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 	var MAX_EXAMPLE_INSTANCES = 20;
-	var MAX_DIRECT_SUBCLASSES = 20;
+	var MAX_DIRECT_SUBCLASSES = 10;
 	var RELATED_PROPERTIES_THRESHOLD = 5;
 
 	var qid;
@@ -59,6 +59,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 			$scope.directSubclasses = classes.getDirectSubclassCount(numId);
 			$scope.allInstances = classes.getAllInstanceCount(numId);
 			$scope.allSubclasses = classes.getAllSubclassCount(numId);
+			$scope.nonemptySubclasses = classes.getNonemptySubclasses(numId);
 
 			if ($scope.directInstances > 0) {
 				ClassView.getInstances().then(function(data) {
