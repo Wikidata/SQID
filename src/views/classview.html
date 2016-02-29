@@ -1,12 +1,17 @@
 <div ng-controller="ClassViewController">
 
 	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
-
-		<h1>{{classData.label}} <small>(<a href="{{url}}" target="_blank">{{qid}}</a>)</small></h1>
-		<div ngIf="{{classData.image}}" class="aliases">
-			{{classData.aliases}}
+		<div ng-if="classData.banner" style="overflow: hidden;">
+			<img ng-src="http://commons.wikimedia.org/w/thumb.php?f={{classData.banner}}&amp;w=850" border="0" height="121px" width="850px" />
 		</div>
-		<div class="lead">
+		
+		<h1>{{classData.label}} <small>(<a href="{{url}}" target="_blank">{{qid}}</a>)</small></h1>
+		<div ng-if="classData.aliases.length > 0" class="aliases">
+			<ul class="list-inline pipe-separated">
+				<li ng-repeat="alias in classData.aliases">{{alias}}</li>
+			</ul>
+		</div>
+		<div class="lead entity-description">
 			{{classData.description}}
 		</div>
 		<div class="panel panel-info">
@@ -81,7 +86,11 @@
 		</div>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
-		<img ng-if="classData.image" src="{{classData.image}}" style="display: block; margin-left: auto; margin-right: auto; padding-bottom: 15px;" />
+		<div ng-if="classData.images[0]" style="padding-bottom: 15px;">
+			<a href="https://commons.wikimedia.org/wiki/File:{{classData.images[0]}}" taget="_blank">
+				<img ng-src="http://commons.wikimedia.org/w/thumb.php?f={{classData.images[0]}}&amp;w=260" style="display: block; margin-left: auto; margin-right: auto;"/>
+			</a>
+		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
 				External links

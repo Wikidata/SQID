@@ -140,5 +140,58 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		prepareInstanceQueryResult: prepareInstanceQueryResult
 	};
 
+})
+
+.factory('wikidataapi', function(util) {
+
+	var language = "en";
+
+	var fetchEntityData = function(id) {
+		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json");
+	}
+
+	var extractEntityData = function(response, id) {
+		var ret = {
+			label: "",
+			description: "",
+			images: [],
+			aliases: [],
+			banner: null
+		};
+		try {
+			var entityData = response.entities[id];
+
+			ret.label = entityData.labels[language].value;
+			ret.description = entityData.descriptions[language].value;
+
+			if (language in entityData.aliases) {
+				var aliasesData = entityData.aliases[language];
+				for (var i in aliasesData){
+					ret.aliases.push(aliasesData[i].value);
+				}
+			}
+
+			if ("P18" in entityData.claims) {
+				for (var i in entityData.claims.P18) {
+					var imageFileName = entityData.claims.P18[i].mainsnak.datavalue.value;
+					ret.images.push(imageFileName.replace(" ","_"));
+				}
+			}
+
+			// only pick the first banner if multiple
+			if ("P948" in entityData.claims) {
+				var imageFileName = entityData.claims.P948[0].mainsnak.datavalue.value;
+				ret.banner = imageFileName.replace(" ","_");
+			}
+		}
+		catch (err) {
+		}
+		return ret;
+	}
+
+	return {
+		fetchEntityData: fetchEntityData,
+		extractEntityData: extractEntityData
+	};
 });
 
