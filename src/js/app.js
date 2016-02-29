@@ -43,16 +43,16 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var promise;
 		var properties;
     
-		var getData = function(qid, key, defaultValue) {
+		var getData = function(id, key, defaultValue) {
 			try {
-				return properties[qid][key];
+				return properties[id][key];
 			} catch(e){
 				return defaultValue;
 			}
 		};
 
-		var getLabel = function(qid) { return getData(qid, 'l', null); };
-		var getUrl = function(qid) { return "#/propertyview?id=" + qid };
+		var getLabel = function(id) { return getData(id, 'l', null); };
+		var getUrl = function(id) { return "#/propertyview?id=P" + id; };
 
 		var formatRelatedProperties = function(relatedProperties, threshold){
 			var ret = [];
@@ -83,15 +83,15 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return {
 					propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
 					getProperties: function(){ return properties; },
-					hasEntity: function(qid){ return (qid in properties); },
+					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
-					getItemCount: function(qid){ return getData(qid, 'i', 0); },
-					getDatatype: function(qid){ return getData(qid, 'd', null); },
-					getStatementCount: function(qid){ return getData(qid, 's', 0); },
-					getQualifierCount: function(qid){ return getData(qid, 'q', 0); },
-					getReferenceCount: function(qid){ return getData(qid, 'e', 0); },
-					getRelatedProperties: function(qid){ return getData(qid, 'r', {}); },
-					getQualifiers: function(qid){ return getData(qid, 'qs', []); },
+					getItemCount: function(id){ return getData(id, 'i', 0); },
+					getDatatype: function(id){ return getData(id, 'd', null); },
+					getStatementCount: function(id){ return getData(id, 's', 0); },
+					getQualifierCount: function(id){ return getData(id, 'q', 0); },
+					getReferenceCount: function(id){ return getData(id, 'e', 0); },
+					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
+					getQualifiers: function(id){ return getData(qid, 'qs', []); },
 					getUrl: getUrl,
 					formatRelatedProperties: formatRelatedProperties,
 				}
@@ -104,9 +104,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var promise;
 		var classes; 
 		
-		var getData = function(qid, key, defaultValue) {
+		var getData = function(id, key, defaultValue) {
 			try {
-				return classes[qid][key];
+				return classes[id][key];
 			} catch(e){
 				return defaultValue;
 			}
@@ -118,15 +118,15 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return {
 					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-6"], ["Instances", "col-xs-2"], ["Subclasses", "col-xs-2"]],
 					getClasses: function(){ return classes; },
-					hasEntity: function(qid){ return (qid in classes); },
-					getLabel: function(qid){ return getData(qid, 'l', null); },
-					getDirectInstanceCount: function(qid){ return getData(qid, 'i', 0); },
-					getDirectSubclassCount: function(qid){ return getData(qid, 's', 0); },
-					getAllInstanceCount: function(qid){ return getData(qid, 'ai', 0); },
-					getAllSubclassCount: function(qid){ return getData(qid, 'as', 0); },
-					getRelatedProperties: function(qid){ return getData(qid, 'r', {}); },
-					getSuperClasses: function(qid){ return getData(qid, 'sc', []); },
-					getUrl: function(qid) { return "#/classview?id=" + qid }
+					hasEntity: function(id){ return (id in classes); },
+					getLabel: function(id){ return getData(id, 'l', null); },
+					getDirectInstanceCount: function(id){ return getData(id, 'i', 0); },
+					getDirectSubclassCount: function(id){ return getData(id, 's', 0); },
+					getAllInstanceCount: function(id){ return getData(id, 'ai', 0); },
+					getAllSubclassCount: function(id){ return getData(id, 'as', 0); },
+					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
+					getSuperClasses: function(id){ return getData(id, 'sc', []); },
+					getUrl: function(id) { return "#/classview?id=Q" + id; }
 				}
 			});
 		}

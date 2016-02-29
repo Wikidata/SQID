@@ -100,7 +100,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					id = getIdFromUri(instanceJson[i].p.value);
 					var uri;
 					if ( entities !== null ) {
-						uri = entities.getUrl(id);
+						uri = entities.getUrl(id.substring(1));
 					} else {
 						uri = instanceJson[i].p.value;
 					}
