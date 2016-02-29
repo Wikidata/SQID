@@ -41,10 +41,6 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 		$scope.exampleInstances = null;
 		$scope.exampleSubclasses = null;
 
-		ClassView.getInstances().then(function(data) {
-			$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
-		});
-
 		ClassView.getClassData().then(function(data) {
 			$scope.classData = parseClassDataFromJson(data, $scope.qid);
 		});
@@ -63,6 +59,11 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 			$scope.allInstances = classes.getAllInstanceCount($scope.qid);
 			$scope.allSubclasses = classes.getAllSubclassCount($scope.qid);
 
+			if ($scope.directInstances > 0) {
+				ClassView.getInstances().then(function(data) {
+					$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
+				});
+			}
 		});
 	}
 );
