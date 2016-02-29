@@ -235,3 +235,12 @@ background: rgba(255,255,255,1);
     border-radius: 10px;
 }
 
+.four-lines {
+	overflow: auto;
+	max-height: 80px;
+	margin-bottom: 10px;
+}
+.four-lines ul {
+	margin-bottom: 0px;
+}
+

@@ -38,10 +38,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		$scope.exampleInstances = null;
 		$scope.exampleSubclasses = null;
 		$scope.classData = null;
-
-		ClassView.getClassData().then(function(data) {
-			$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
-		});
+		$scope.superClasses = null;
 
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
@@ -51,8 +48,14 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 			Properties.then(function(properties){
 				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties(numId), ClassView.RELATED_PROPERTIES_THRESHOLD);
 			});
-			ClassView.getSubclasses().then(function(data) {
-				$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);
+			ClassView.getClassData().then(function(data) {
+				$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
+				var superClasses = [];
+				for (var i in $scope.classData.superclasses) {
+					var superNumId = $scope.classData.superclasses[i];
+					superClasses.push({label: classes.getLabel(superNumId), url: classes.getUrl(superNumId), icount: classes.getAllInstanceCount(superNumId)});
+				}
+				$scope.superClasses = superClasses;
 			});
 
 			$scope.directInstances = classes.getDirectInstanceCount(numId);
@@ -64,6 +67,11 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 			if ($scope.directInstances > 0) {
 				ClassView.getInstances().then(function(data) {
 					$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
+				});
+			}
+			if ($scope.directSubclasses > 0) {
+				ClassView.getSubclasses().then(function(data) {
+					$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);
 				});
 			}
 		});
