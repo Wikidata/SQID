@@ -39,6 +39,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		$scope.exampleSubclasses = null;
 		$scope.classData = null;
 		$scope.superClasses = null;
+		$scope.instanceClasses = null;
 
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
@@ -47,6 +48,8 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 
 			Properties.then(function(properties){
 				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties(numId), ClassView.RELATED_PROPERTIES_THRESHOLD);
+				$scope.instanceOfUrl = properties.getUrl("31");
+				$scope.subclassOfUrl = properties.getUrl("279");
 			});
 			ClassView.getClassData().then(function(data) {
 				$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
@@ -56,6 +59,13 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 					superClasses.push({label: classes.getLabel(superNumId), url: classes.getUrl(superNumId), icount: classes.getAllInstanceCount(superNumId)});
 				}
 				$scope.superClasses = superClasses;
+				
+				var instanceClasses = [];
+				for (var i in $scope.classData.instanceClasses) {
+					var superNumId = $scope.classData.instanceClasses[i];
+					instanceClasses.push({label: classes.getLabel(superNumId), url: classes.getUrl(superNumId), icount: classes.getAllInstanceCount(superNumId)});
+				}
+				$scope.instanceClasses = instanceClasses;
 			});
 
 			$scope.directInstances = classes.getDirectInstanceCount(numId);

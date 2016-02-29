@@ -14,6 +14,35 @@
 		<div class="lead entity-description">
 			{{classData.description}}
 		</div>
+		<div ng-if="instanceClasses !== null" style="margin-bottom: 15px;">
+			<b><a href="{{subclassOfUrl}}">Subclass of</a>:</b> 
+				<span ng-if="superClasses.length > 0">
+					every {{classData.labelorid}} is also a<span ng-if="superClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
+					<ul class="list-inline comma-separated" style="display: inline;">
+						<li ng-repeat="superclass in superClasses">
+							<a href = {{superclass.url}}>{{superclass.label}}</a>
+						</li>
+					</ul>
+				</span>
+				<span ng-if="superClasses.length == 0">
+					{{classData.labelorid}} is not a subclass of any other class
+				</span>
+			<br />
+			<b><a href="{{instanceOfUrl}}">Instance of</a>:</b>
+				<span ng-if="instanceClasses.length > 0">
+					{{classData.label}} is a<span ng-if="instanceClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
+					<ul class="list-inline comma-separated" style="display: inline;">
+						<li ng-repeat="instanceclass in instanceClasses">
+							<a href = {{instanceclass.url}}>{{instanceclass.label}}</a>
+						</li>
+					</ul>
+				</span>
+				<span ng-if="instanceClasses.length == 0">
+					{{classData.label}} is not an instance of any other class
+				</span>
+			
+		</div>
+		
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
 			<a data-toggle="collapse" data-target="#instances_panel" style="cursor:pointer;cursor:hand">Instances</a>

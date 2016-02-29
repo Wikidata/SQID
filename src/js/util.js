@@ -163,17 +163,20 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var extractEntityData = function(response, id) {
 		var ret = {
 			label: "",
+			labelorid: id,
 			description: "",
 			images: [],
 			aliases: [],
 			banner: null,
-			superclasses: []
+			superclasses: [],
+			instanceClasses: [],
 		};
 
 		var entityData = response.entities[id];
 
 		if (language in entityData.labels) {
 			ret.label = entityData.labels[language].value;
+			ret.labelorid = entityData.labels[language].value;
 		}
 		if (language in entityData.descriptions) {
 			ret.description = entityData.descriptions[language].value;
@@ -191,6 +194,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				for (var i in entityData.claims.P18) {
 					var imageFileName = getStatementValue(entityData.claims.P18[i],"");
 					ret.images.push(imageFileName.replace(" ","_"));
+				}
+			}
+			// instance of
+			if ("P31" in entityData.claims) {
+				for (var i in entityData.claims.P31) {
+					ret.instanceClasses.push(getStatementValue(entityData.claims.P31[i],{"numeric-id": 0})["numeric-id"].toString());
 				}
 			}
 			// subclass of
