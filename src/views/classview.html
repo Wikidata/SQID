@@ -14,24 +14,44 @@
 			<a data-toggle="collapse" data-target="#instances_panel" style="cursor:pointer;cursor:hand">Instances</a>
 			</h2></div>
 			<div id='instances_panel' class='panel-body panel-collapse collapse in'>
-				<div ng-if="exampleInstances===null" style="padding: 20px;">
-					<i>Loading direct instances &hellip;</i>
+				<!-- Direct instances with live examples -->
+				<div ng-if="directInstances>0">
+					<p>This class has <b>{{directInstances}}</b> direct instance<span ng-if="directInstancesgit cc != 1">s</span>:</p>
+					<div ng-if="exampleInstances===null" style="padding: 20px;">
+						<i>Loading direct instances &hellip;</i>
+					</div>
+					<div ng-if="exampleInstances.length === 0" style="padding: 20px;">
+						<i>No direct instances found. Maybe the data changed recently. Our records will be updated soon.</i>
+					</div>
+					<div ng-if="exampleInstances.length > 0">
+						<ul class="list-inline comma-separated">
+							<li ng-repeat="instance in exampleInstances">
+								<a href="{{instance.uri}}" target="_blank">{{instance.label}}</a>
+							</li>
+						</ul>
+					</div>
 				</div>
-				<div ng-if="exampleInstances.length === 0"><div ng-if="allInstances > 0">
-					<p>This class has <b>no</b> direct instances.</p>
-				</div></div>
-				<div ng-if="exampleInstances.length > 0">
-					<p>This class has <b>{{directInstances}}</b> direct instance<span ng-if="directSubclasses != 1">s</span>:</p>
-					<ul class="list-inline comma-separated">
-						<li ng-repeat="instance in exampleInstances">
-							<a href="{{instance.uri}}" target="_blank">{{instance.label}}</a>
-						</li>
-					</ul>
+				<p ng-if="directInstances==0 && allInstances > 0">This class has <b>no</b> direct instances.</p>
+
+				<!-- All instances with related properties -->
+				<div ng-if="allInstances > 0">
+					<p>Together with its {{allSubclasses}} direct and indirect subclasses, this class has a total of  <b>{{allInstances}}</b> unique instances.</p>
+					<div ng-if="relatedProperties.length === 0">
+						<p>There are no properties that are typical for the instances of this class.</p>
+					</div>
+					<div ng-if="relatedProperties.length > 0">
+						<p>The following properties are typical for the (direct or indirect) instances of this class:</p>
+						<ul class="list-inline comma-separated">
+							<li ng-repeat="property in relatedProperties">
+								<a href= {{property.link}}>{{property.label}}</a>
+							</li>
+						</ul>
+					</div>
 				</div>
-				<div ng-if="allSubclasses > 0">
-					<p ng-if="allInstances > 0">Together with its {{allSubclasses}} direct and indirect subclasses, this class has a total of  <b>{{allInstances}}</b> instances.</p>
-					<p ng-if="allInstances == 0">Neither this class nor any of its {{allSubclasses}} direct or indirect subclasses has any instances.</p>
-				</div>
+				<p ng-if="allInstances == 0">
+					Neither this class nor any of its {{allSubclasses}} direct or indirect subclasses has any instances.
+					<span ng-if="directInstances==0">Hence, there are no typical properties either.</span>
+				</p>
 			</div>
 		</div>
 		<div class="panel panel-info">
@@ -56,24 +76,6 @@
 					<p>
 					In total, there are <b>{{allSubclasses}}</b> direct and indirect subclasses.
 					</p>
-				</div>
-			</div>
-		</div>
-		<div class="panel panel-info">
-			<div class="panel-heading"><h2 class="panel-title">
-				<a data-toggle="collapse" data-target="#relprops_panel" style="cursor:pointer;cursor:hand">Related Properties</a>
-			</h2></div>
-
-			<div id='relprops_panel' class='panel-body collapse in'>
-				<div ng-if="relatedProperties.length === 0">
-					There are no related properties for this class.
-				</div>
-				<div ng-if="relatedProperties.length > 0">
-				<ul class="list-inline comma-separated">
-					<li ng-repeat="property in relatedProperties">
-						<a href= {{property.link}}>{{property.label}}</a>
-					</li>
-				</ul>
 				</div>
 			</div>
 		</div>

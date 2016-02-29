@@ -4,11 +4,13 @@ var language = "en";
 classBrowser.factory('ClassView', function($route, util, sparql) {
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 20;
+	var RELATED_PROPERTIES_THRESHOLD = 5;
 
 	var qid;
 	return {
 		MAX_EXAMPLE_INSTANCES: MAX_EXAMPLE_INSTANCES,
 		MAX_DIRECT_SUBCLASSES: MAX_DIRECT_SUBCLASSES,
+		RELATED_PROPERTIES_THRESHOLD: RELATED_PROPERTIES_THRESHOLD,
 
 		updateQid: function() {
 			qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
@@ -50,8 +52,8 @@ classBrowser.factory('ClassView', function($route, util, sparql) {
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
 		Classes.then(function(classes){
-			Properties.then(function(props){
-				$scope.relatedProperties = jsonData.parseRelatedProperties($scope.qid, classes, props);
+			Properties.then(function(properties){
+				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties($scope.qid), ClassView.RELATED_PROPERTIES_THRESHOLD);
 			});
 			ClassView.getSubclasses().then(function(data) {
 				$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);

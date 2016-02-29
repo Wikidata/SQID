@@ -49,6 +49,32 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			} catch(e){
 				return defaultValue;
 			}
+		};
+
+		var getLabel = function(qid) { return getData(qid, 'l', null); };
+		var getUrl = function(qid) { return "#/propertyview?id=" + qid };
+
+		var formatRelatedProperties = function(relatedProperties, threshold){
+			var ret = [];
+			try {
+				var relPropsList = [];
+				for (var relProp in relatedProperties) relPropsList.push([relProp, relatedProperties[relProp]]);
+
+				relPropsList.sort(function(a, b) {
+					var a = a[1];
+					var b = b[1];
+					return a < b ? 1 : (a > b ? -1 : 0);
+				});
+
+				for (var i = 0; i < relPropsList.length; i++) {
+					if (relPropsList[i][1] < threshold) break;
+					var propId = relPropsList[i][0];
+					var resultObj = {label : getLabel(propId) , link: getUrl(propId)};
+					ret.push(resultObj);
+				}
+			} catch (e){}
+
+			return ret;
 		}
 
 		if (!promise) {
@@ -57,14 +83,17 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return {
 					propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
 					getProperties: function(){ return properties; },
-					getLabel: function(qid){ return getData(qid, 'l', null); },
+					hasEntity: function(qid){ return (qid in properties); },
+					getLabel: getLabel,
 					getItemCount: function(qid){ return getData(qid, 'i', 0); },
 					getDatatype: function(qid){ return getData(qid, 'd', null); },
 					getStatementCount: function(qid){ return getData(qid, 's', 0); },
 					getQualifierCount: function(qid){ return getData(qid, 'q', 0); },
 					getReferenceCount: function(qid){ return getData(qid, 'e', 0); },
 					getRelatedProperties: function(qid){ return getData(qid, 'r', {}); },
-					getQualifiers: function(qid){ return getData(qid, 'qs', []); }
+					getQualifiers: function(qid){ return getData(qid, 'qs', []); },
+					getUrl: getUrl,
+					formatRelatedProperties: formatRelatedProperties,
 				}
 			});
 		}

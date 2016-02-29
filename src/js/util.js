@@ -6,31 +6,7 @@ angular.module('utilities', [])
 	var JSON_INSTANCES = "i";
 	var JSON_SUBCLASSES = "s";
 	var JSON_RELATED_PROPERTIES = "r";
-  
-	var parseRelatedProperties = function(qid, classes, properties){
-		var ret = [];
-		try {
-			var relProps = classes.getRelatedProperties(qid);
-			var relPropsList = [];
-			for (var relProp in relProps) relPropsList.push([relProp, relProps[relProp]]);
 
-			relPropsList.sort(function(a, b) {
-				a = a[1];
-				b = b[1];
-				return a < b ? 1 : (a > b ? -1 : 0);
-			});
-
-			for (var i = 0; i < relPropsList.length; i++) {
-				if (relPropsList[i][1] < 15) break;
-				var propId = relPropsList[i][0];
-				var resultObj = {label : properties.getLabel(propId) , link: "#/propertyview?id=" + propId};
-				ret.push(resultObj);
-			}
-		} catch (e){}
-
-		return ret;
-	};
-	
 	return {
 		JSON_LABEL: JSON_LABEL,
 		JSON_INSTANCES: JSON_INSTANCES,
@@ -46,9 +22,7 @@ angular.module('utilities', [])
 		JSON_DATATYPE: "d",
 
 		TABLE_SIZE: 15,
-		PAGE_SELECTOR_SIZE: 2,
-
-		parseRelatedProperties: parseRelatedProperties
+		PAGE_SELECTOR_SIZE: 2
 	};
 
 })
