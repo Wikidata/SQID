@@ -109,11 +109,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
   };
 
   var getClassFromId = function(id, data){
-    return ['<a href="#/classview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL],  data[id][util.JSON_INSTANCES].toString(), data[id][util.JSON_SUBCLASSES].toString()];
+    return ['<a href="#/classview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL],  '<div class="text-right">' + data[id][util.JSON_INSTANCES].toString() + '</div>', '<div class="text-right">' + data[id][util.JSON_SUBCLASSES].toString()];
   };
   
   var getPropertyFromId = function(id, data){
-    return ['<a href="#/propertyview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL], data[id][util.JSON_USES_IN_STATEMENTS].toString(), data[id][util.JSON_USES_IN_QUALIFIERS].toString(), data[id][util.JSON_USES_IN_REFERENCES].toString()];
+    return ['<a href="#/propertyview?id=' + id + '">' + id + '</a>', data[id][util.JSON_LABEL], '<div class="text-right">' + data[id][util.JSON_USES_IN_STATEMENTS].toString()  + '</div>', '<div class="text-right">' + data[id][util.JSON_USES_IN_QUALIFIERS].toString()  + '</div>', '<div class="text-right">' + data[id][util.JSON_USES_IN_REFERENCES].toString()  + '</div>'];
   };
   
   var refreshTableContent = function(args, idArray, content, entityConstructor){
