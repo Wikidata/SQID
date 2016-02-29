@@ -29,11 +29,13 @@
 						<i>No direct instances found. Maybe the data changed recently. Our records will be updated soon.</i>
 					</div>
 					<div ng-if="exampleInstances.length > 0">
-						<ul class="list-inline comma-separated">
-							<li ng-repeat="instance in exampleInstances">
-								<a href="{{instance.uri}}" target="_blank">{{instance.label}}</a>
-							</li>
-						</ul>
+						<div class="four-lines">
+							<ul class="list-inline comma-separated">
+								<li ng-repeat="instance in exampleInstances">
+									<a href="{{instance.uri}}" target="_blank">{{instance.label}}</a>
+								</li>
+							</ul>
+						</div>
 					</div>
 				</div>
 				<p ng-if="directInstances==0 && allInstances > 0">This class has <b>no</b> direct instances.</p>
@@ -46,11 +48,13 @@
 					</div>
 					<div ng-if="relatedProperties.length > 0">
 						<p>The following properties are typical for the (direct or indirect) instances of this class:</p>
-						<ul class="list-inline comma-separated">
-							<li ng-repeat="property in relatedProperties">
-								<a href= {{property.link}}>{{property.label}}</a>
-							</li>
-						</ul>
+						<div class="four-lines">
+							<ul class="list-inline comma-separated">
+								<li ng-repeat="property in relatedProperties">
+									<a href= {{property.link}}>{{property.label}}</a>
+								</li>
+							</ul>
+						</div>
 					</div>
 				</div>
 				<p ng-if="allInstances == 0">
@@ -61,13 +65,59 @@
 		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
-			<a data-toggle="collapse" data-target="#subclasses_panel" style="cursor:pointer;cursor:hand">Subclasses</a>
+			<a data-toggle="collapse" data-target="#classes_panel" style="cursor:pointer;cursor:hand">Classification</a>
 			</h2></div>
 
-			<div id='subclasses_panel' class='panel-body panel-collapse collapse in'>
-				<div ng-if="exampleSubclasses===null" style="padding: 20px;">
-					<i>Loading direct subclasses &hellip;</i>
+			<div id='classes_panel' class='panel-body panel-collapse collapse in'>
+				<!-- Super classes -->
+				<div ng-if="superClasses !== null">
+					<p ng-if="superClasses.length === 0">This class has <b>no</b> super classes.</p>
+					<div ng-if="superClasses.length > 0">
+						<p>This class has <b>{{superClasses.length}}</b> direct super class<span ng-if="superClasses.length != 1">es</span> (shown with <span class="info-badge">total number of instances</span> here):</p>
+						<ul class="list-inline comma-separated">
+							<li ng-repeat="superclass in superClasses">
+								<a href = {{superclass.url}}>{{superclass.label}}</a> <span class="info-badge">{{superclass.icount}}</span>
+							</li>
+						</ul>
+					</div>
 				</div>
+
+				<!-- Nonempty direct subclasses with their total instance counts -->
+				<div ng-if="nonemptySubclasses.length > 0">
+					<p>This class has <b>{{nonemptySubclasses.length}}</b> subclass<span ng-if="nonemptySubclasses.length != 1">es</span>
+					with at least one instance or subclass (shown with <span class="info-badge">total number of instances</span> here):</p>
+					<ul class="list-inline comma-separated">
+						<li ng-repeat="subclass in nonemptySubclasses">
+							<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.icount}}</span>
+						</li>
+					</ul>
+				</div>
+				<div ng-if="nonemptySubclasses.length == 0 && directSubclasses > 0">
+					<p>This class has <b>no</b> subclasses with at least one instance or subclass.</p>
+				</div>
+
+				<!-- Direct subclasses with examples -->
+				<div ng-if="directSubclasses > 0">
+					<p>This class has <b>{{directSubclasses}}</b> direct subclass<span ng-if="directSubclasses != 1">es</span>:</p>
+					<div ng-if="exampleSubclasses===null" style="padding: 20px;">
+						<i>Loading direct subclasses &hellip;</i>
+					</div>
+					<div ng-if="exampleSubclasses.length > 0">
+						<ul class="list-inline comma-separated">
+							<li ng-repeat="subclass in exampleSubclasses">
+								<a href = {{subclass.uri}}>{{subclass.label}}</a>
+							</li>
+						</ul>
+					</div>
+					<p>
+						In total, there are <b>{{allSubclasses}}</b> direct and indirect subclasses.
+					</p>
+				</div>
+				<div ng-if="directSubclasses === 0">
+					<p>This class has <b>no</b> subclasses.</p>
+				</div>
+<!--				
+				
 				<div ng-if="exampleSubclasses.length === 0">
 					<p>This class has <b>no</b> subclasses.</p>
 				</div>
@@ -81,7 +131,7 @@
 					<p>
 					In total, there are <b>{{allSubclasses}}</b> direct and indirect subclasses.
 					</p>
-				</div>
+				</div>-->
 			</div>
 		</div>
 	</div>

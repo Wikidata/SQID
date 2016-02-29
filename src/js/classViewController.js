@@ -1,7 +1,7 @@
 
-classBrowser.factory('ClassView', function($route, util, sparql, wikidataapi) {
+classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 	var MAX_EXAMPLE_INSTANCES = 20;
-	var MAX_DIRECT_SUBCLASSES = 20;
+	var MAX_DIRECT_SUBCLASSES = 10;
 	var RELATED_PROPERTIES_THRESHOLD = 5;
 
 	var qid;
@@ -38,28 +38,40 @@ classBrowser.factory('ClassView', function($route, util, sparql, wikidataapi) {
 		$scope.exampleInstances = null;
 		$scope.exampleSubclasses = null;
 		$scope.classData = null;
-
-		ClassView.getClassData().then(function(data) {
-			$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
-		});
+		$scope.superClasses = null;
 
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
 		Classes.then(function(classes){
+			var numId = $scope.qid.substring(1);
+
 			Properties.then(function(properties){
-				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties($scope.qid), ClassView.RELATED_PROPERTIES_THRESHOLD);
+				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties(numId), ClassView.RELATED_PROPERTIES_THRESHOLD);
 			});
-			ClassView.getSubclasses().then(function(data) {
-				$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);
+			ClassView.getClassData().then(function(data) {
+				$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
+				var superClasses = [];
+				for (var i in $scope.classData.superclasses) {
+					var superNumId = $scope.classData.superclasses[i];
+					superClasses.push({label: classes.getLabel(superNumId), url: classes.getUrl(superNumId), icount: classes.getAllInstanceCount(superNumId)});
+				}
+				$scope.superClasses = superClasses;
 			});
-			$scope.directInstances = classes.getDirectInstanceCount($scope.qid);
-			$scope.directSubclasses = classes.getDirectSubclassCount($scope.qid);
-			$scope.allInstances = classes.getAllInstanceCount($scope.qid);
-			$scope.allSubclasses = classes.getAllSubclassCount($scope.qid);
+
+			$scope.directInstances = classes.getDirectInstanceCount(numId);
+			$scope.directSubclasses = classes.getDirectSubclassCount(numId);
+			$scope.allInstances = classes.getAllInstanceCount(numId);
+			$scope.allSubclasses = classes.getAllSubclassCount(numId);
+			$scope.nonemptySubclasses = classes.getNonemptySubclasses(numId);
 
 			if ($scope.directInstances > 0) {
 				ClassView.getInstances().then(function(data) {
 					$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
+				});
+			}
+			if ($scope.directSubclasses > 0) {
+				ClassView.getSubclasses().then(function(data) {
+					$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);
 				});
 			}
 		});

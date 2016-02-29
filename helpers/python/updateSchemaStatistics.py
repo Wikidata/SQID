@@ -44,7 +44,7 @@ def updateClassRecords() :
 		for binding in resultsClasses['results']['bindings']:
 			classUri = binding['cl']['value']
 			if classUri[0:31] == 'http://www.wikidata.org/entity/':
-				classId = classUri[31:]
+				classId = classUri[32:]
 				classLabel = binding['clLabel']['value']
 				classInstances = int(binding['c']['value'])
 				if classId in data:
@@ -83,7 +83,7 @@ def updatePropertyRecords() :
 				typeName = typeUri[26:]
 			else:
 				typeName = 'UNKNOWN'
-			propertyStatistics[propertyUri[31:]] = {'l': propertyLabel, 't': typeName, 's': 0, 'q': 0, 'r': 0}
+			propertyStatistics[propertyUri[32:]] = {'l': propertyLabel, 't': typeName, 's': 0, 'q': 0, 'r': 0}
 		else:
 			print 'Error reading property URI ' + propertyUri
 
@@ -101,19 +101,19 @@ def updatePropertyRecords() :
 		# Note: Always check for longest matches first
 		# Checking for reference/value and quantifier/value is not necessary to get overall counts
 		#if len(propertyUri)>45 and propertyUri[0:45] == 'http://www.wikidata.org/prop/reference/value/':
-			#propertyId = propertyUri[45:]
+			#propertyId = propertyUri[46:]
 			#setPropertyStatistics(propertyStatistics, propertyId,'rv', binding['c']['value'])
 		#elif len(propertyUri)>45 and propertyUri[0:45] == 'http://www.wikidata.org/prop/qualifier/value/':
-			#propertyId = propertyUri[45:]
+			#propertyId = propertyUri[46:]
 			#setPropertyStatistics(propertyStatistics, propertyId,'qv', binding['c']['value'])
 		if len(propertyUri)>39 and propertyUri[0:39] == 'http://www.wikidata.org/prop/reference/':
-			propertyId = propertyUri[39:]
+			propertyId = propertyUri[40:]
 			setPropertyStatistics(propertyStatistics, propertyId,'r', binding['c']['value'])
 		elif len(propertyUri)>39 and propertyUri[0:39] == 'http://www.wikidata.org/prop/qualifier/':
-			propertyId = propertyUri[39:]
+			propertyId = propertyUri[40:]
 			setPropertyStatistics(propertyStatistics, propertyId,'q', binding['c']['value'])
 		elif len(propertyUri)>29 and propertyUri[0:29] == 'http://www.wikidata.org/prop/':
-			propertyId = propertyUri[29:]
+			propertyId = propertyUri[30:]
 			setPropertyStatistics(propertyStatistics, propertyId,'s', binding['c']['value'])
 		#else:
 		#	# The rest are Wikibase ontology properties and some RDF(S) and schema.org URIs:

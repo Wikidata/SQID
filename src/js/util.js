@@ -100,7 +100,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					id = getIdFromUri(instanceJson[i].p.value);
 					var uri;
 					if ( entities !== null ) {
-						uri = entities.getUrl(id);
+						uri = entities.getUrl(id.substring(1));
 					} else {
 						uri = instanceJson[i].p.value;
 					}
@@ -149,6 +149,16 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var fetchEntityData = function(id) {
 		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json");
 	}
+	
+	var getStatementValue = function(statementJson, defaultValue) {
+		try {
+			var ret = statementJson.mainsnak.datavalue.value;
+			if (ret) return ret;
+		} catch (err) {
+			// fall through
+		}
+		return defaultValue;
+	}
 
 	var extractEntityData = function(response, id) {
 		var ret = {
@@ -156,36 +166,46 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			description: "",
 			images: [],
 			aliases: [],
-			banner: null
+			banner: null,
+			superclasses: []
 		};
-		try {
-			var entityData = response.entities[id];
 
+		var entityData = response.entities[id];
+
+		if (language in entityData.labels) {
 			ret.label = entityData.labels[language].value;
+		}
+		if (language in entityData.descriptions) {
 			ret.description = entityData.descriptions[language].value;
-
-			if (language in entityData.aliases) {
-				var aliasesData = entityData.aliases[language];
-				for (var i in aliasesData){
-					ret.aliases.push(aliasesData[i].value);
-				}
+		}
+		if (language in entityData.aliases) {
+			var aliasesData = entityData.aliases[language];
+			for (var i in aliasesData){
+				ret.aliases.push(aliasesData[i].value);
 			}
-
+		}
+		
+		if ("claims" in entityData) {
+			// image
 			if ("P18" in entityData.claims) {
 				for (var i in entityData.claims.P18) {
-					var imageFileName = entityData.claims.P18[i].mainsnak.datavalue.value;
+					var imageFileName = getStatementValue(entityData.claims.P18[i],"");
 					ret.images.push(imageFileName.replace(" ","_"));
 				}
 			}
-
-			// only pick the first banner if multiple
+			// subclass of
+			if ("P279" in entityData.claims) {
+				for (var i in entityData.claims.P279) {
+					ret.superclasses.push(getStatementValue(entityData.claims.P279[i],{"numeric-id": 0})["numeric-id"].toString());
+				}
+			}
+			// Wikivoyage banner; only pick the first banner if multiple
 			if ("P948" in entityData.claims) {
-				var imageFileName = entityData.claims.P948[0].mainsnak.datavalue.value;
+				var imageFileName = getStatementValue(entityData.claims.P948[0],"");
 				ret.banner = imageFileName.replace(" ","_");
 			}
 		}
-		catch (err) {
-		}
+
 		return ret;
 	}
 

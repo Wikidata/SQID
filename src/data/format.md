@@ -1,6 +1,8 @@
 JSON Format Documentation
 =========================
 
+All entity ids in the data omit the initial "Q" or "P".
+
 classes.json
 ------------
 
@@ -12,6 +14,7 @@ Values may contain the following keys:
 * ```ai``` number of all direct and indirect instances (Java)
 * ```as``` number of all direct and indirect subclasses (Java)
 * ```sc``` list of all superclasses, given as string item ids (Java)
+* ```sb``` list of all direct subclasses that have some instance or subclass, given as string item ids (Java)
 * ```r``` related properties, documented below (Java)
 
 properties.json
