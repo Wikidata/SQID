@@ -23,7 +23,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 	})
 
-	.factory('Arguments', function($http, $route){
+	.factory('Arguments', function($http, $route, jsonData){
 		var args = {}; 
 		return {
 			refreshArgs: function(){
