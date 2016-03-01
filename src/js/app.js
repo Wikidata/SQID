@@ -29,7 +29,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			refreshArgs: function(){
 				args = {
 					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
-					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : util.TABLE_SIZE,
+					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : jsonData.TABLE_SIZE,
 					type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
 				}
 			},
