@@ -147,7 +147,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var language = "en";
 
 	var fetchEntityData = function(id) {
-		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json");
+		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json?action=purge");
 	}
 	
 	var getStatementValue = function(statementJson, defaultValue) {
