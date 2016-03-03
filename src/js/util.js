@@ -43,9 +43,35 @@ angular.module('utilities', [])
 			return $q.reject(response.data);
 		});
 	}
+
+	var jsonpRequest = function(url) {
+		return $http.jsonp(url).then(function(response) {
+			if (typeof response.data === 'object') {
+				return response.data;
+			} else {
+				// invalid response
+				return $q.reject(response.data);
+			}
+		},
+		function(response) {
+			// something went wrong
+			return $q.reject(response.data);
+		});
+	}
 	
+	var getIdFromUri = function(uri) {
+		if ( uri.substring(0, "http://www.wikidata.org/entity/".length) === "http://www.wikidata.org/entity/" ) {
+			return uri.substring("http://www.wikidata.org/entity/".length, uri.length);
+		} else {
+			return null;
+		}
+	}
+
 	return {
-		httpRequest: httpRequest
+		httpRequest: httpRequest,
+		jsonpRequest: jsonpRequest,
+		getItemUrl: function(itemId) { return "#/classview?id=" + itemId; },
+		getIdFromUri: getIdFromUri
 	};
 })
 
@@ -97,7 +123,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			var element;
 			for (var i = 0; i < instanceJson.length; i++) {
 				if ( i < limit-1 ) {
-					id = getIdFromUri(instanceJson[i].p.value);
+					id = util.getIdFromUri(instanceJson[i].p.value);
 					var uri;
 					if ( entities !== null ) {
 						uri = entities.getUrl(id.substring(1));
@@ -123,33 +149,27 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return instances;
 	}
 
-	var getIdFromUri = function(uri) {
-		if ( uri.substring(0, "http://www.wikidata.org/entity/".length) === "http://www.wikidata.org/entity/" ) {
-			return uri.substring("http://www.wikidata.org/entity/".length, uri.length);
-		} else {
-			return null;
-		}
-	}
-
 	return {
 		getQueryUrl: getQueryUrl,
 		getQueryUiUrl: getQueryUiUrl,
 		getInlinkCount: getInlinkCount,
 		getPropertySubjects: getPropertySubjects,
-		getIdFromUri: getIdFromUri,
+		getIdFromUri: util.getIdFromUri, // deprecated; only for b/c
 		prepareInstanceQueryResult: prepareInstanceQueryResult
 	};
 
 })
 
-.factory('wikidataapi', function(util) {
+.factory('wikidataapi', function(util, $q) {
 
 	var language = "en";
 
 	var fetchEntityData = function(id) {
 		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json?action=purge");
+		// Alternatively, the following API call also works. What is faster?
+		// 		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
 	}
-	
+
 	var getStatementValue = function(statementJson, defaultValue) {
 		try {
 			var ret = statementJson.mainsnak.datavalue.value;
@@ -170,6 +190,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			banner: null,
 			superclasses: [],
 			instanceClasses: [],
+			statements: {}
 		};
 
 		var entityData = response.entities[id];
@@ -213,14 +234,42 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				var imageFileName = getStatementValue(entityData.claims.P948[0],"");
 				ret.banner = imageFileName.replace(" ","_");
 			}
+			
+			ret.statements = entityData.claims;
 		}
 
 		return ret;
-	}
+	};
+
+	var getEntityTerms = function(entityIds) {
+		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&redirects=yes&props=descriptions%7Clabels&languages=' + language + '&callback=JSON_CALLBACK';
+		var requests = [];
+
+		for (var i = 0; i < entityIds.length; i += 50) {
+			requests.push(util.jsonpRequest(baseUrl + '&ids=' + entityIds.slice(i,i+50).join('|')));
+		}
+
+		return $q.all(requests).then( function(responses) {
+			var ret = {};
+			angular.forEach(responses, function(response) {
+				if ("entities" in response) {
+					angular.forEach(response.entities, function(data,entityId) {
+						var label = entityId;
+						var desc = "";
+						if (language in data.labels) label = data.labels[language].value;
+						if (language in data.descriptions) desc = data.descriptions[language].value;
+						ret[entityId] = { label: label, description: desc };
+					});
+				}
+			});
+			return ret;
+		});
+	};
 
 	return {
 		fetchEntityData: fetchEntityData,
-		extractEntityData: extractEntityData
+		extractEntityData: extractEntityData,
+		getEntityTerms: getEntityTerms
 	};
 });
 

@@ -43,7 +43,7 @@
 			
 		</div>
 		
-		<div class="panel panel-info">
+		<div ng-if="directInstances > 0 || allInstances > 0" class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
 			<a data-toggle="collapse" data-target="#instances_panel" style="cursor:pointer;cursor:hand">Instances</a>
 			</h2></div>
@@ -92,7 +92,7 @@
 				</p>
 			</div>
 		</div>
-		<div class="panel panel-info">
+		<div ng-if="directSubclasses > 0 || ( superClasses !== null && superClasses.length > 0)" class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
 			<a data-toggle="collapse" data-target="#classes_panel" style="cursor:pointer;cursor:hand">Classification</a>
 			</h2></div>
@@ -163,6 +163,15 @@
 				</div>-->
 			</div>
 		</div>
+		
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#statements_panel" style="cursor:pointer;cursor:hand">Statements</a>
+			</h2></div>
+			<div id='statements_panel' class='panel-collapse collapse in'>
+				<wdcb-statement-table ng-if="classData !== null" statements="classData.statements" show="other"></wdcb-statement-table>
+			</div>
+		</div>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
 		<div ng-if="classData.images[0]" style="padding-bottom: 15px;">
@@ -172,13 +181,21 @@
 		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
-				External links
+				Links
 			</h2></div>
 			<div class="padded">
 				<ul>
 					<li><a href="{{url}}" target="_blank">Wikidata page</a></li>
 					<li><a href="https://tools.wmflabs.org/reasonator/?q={{qid}}" target="_blank">Reasonator</a></li>
 				</ul>
+			</div>
+		</div>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#ids_panel" style="cursor:pointer;cursor:hand">External Ids</a>
+			</h2></div>
+			<div id='ids_panel' class='panel-collapse collapse in'>
+				<wdcb-statement-table ng-if="classData !== null" statements="classData.statements" show="ids"></wdcb-statement-table>
 			</div>
 		</div>
 	</div>

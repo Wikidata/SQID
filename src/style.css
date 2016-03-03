@@ -246,3 +246,8 @@ background: rgba(255,255,255,1);
 	margin-bottom: 0px;
 }
 
+span.smallnote {
+    font-size: 0.8em;
+    color: #444;
+}
+
