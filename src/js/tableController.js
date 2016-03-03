@@ -104,8 +104,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         if (filterfunc(json[entry])) {
             ret.push(entry);
         }
-      }
-    return ret;
   };
 
   var getClassFromId = function(id, data){
