@@ -67,10 +67,23 @@ angular.module('utilities', [])
 		}
 	}
 
+	var getItemUrl = function(itemId) { return "#/classview?id=" + itemId; };
+	var getPropertyUrl = function(propertyId) { return "#/propertyview?id=" + propertyId; };
+
+	var getEntityUrl = function(entityId) {
+		if (entityId.substring(0,1) == 'Q') {
+			return getItemUrl(entityId);
+		} else {
+			return getPropertyUrl(entityId);
+		}
+	}
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
-		getItemUrl: function(itemId) { return "#/classview?id=" + itemId; },
+		getEntityUrl: getEntityUrl,
+		getItemUrl: getItemUrl,
+		getPropertyUrl: getPropertyUrl,
 		getIdFromUri: getIdFromUri
 	};
 })
@@ -116,7 +129,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return result.results.bindings[0].c.value;
 	}
 
-	var prepareInstanceQueryResult = function(data, propertyId, objectId, limit, entities) {
+	var prepareInstanceQueryResult = function(data, propertyId, objectId, limit) {
 		instances = [];
 		try {
 			var instanceJson = data.results.bindings;
@@ -124,12 +137,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			for (var i = 0; i < instanceJson.length; i++) {
 				if ( i < limit-1 ) {
 					id = util.getIdFromUri(instanceJson[i].p.value);
-					var uri;
-					if ( entities !== null ) {
-						uri = entities.getUrl(id.substring(1));
-					} else {
-						uri = instanceJson[i].p.value;
-					}
+					var uri = util.getEntityUrl(id);
 					element = {
 						label: instanceJson[i].pLabel.value,
 						uri: uri
