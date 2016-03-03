@@ -1,1 +1,0 @@
-var datatypes = ["Item", "Property", "String", "URL", "CommonsMedia", "Time", "Coordinates", "Quantity", "Monolingual text", "Mathematical expression", "External ID"]
