@@ -390,7 +390,15 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					}
 					return result + epochModifier;
 				case 'string':
-					return datavalue.value;
+					switch (properties.getDatatype(numPropId)) {
+						case 'Url':
+							return '<a href="' + datavalue.value + '" target="_blank">' + datavalue.value + '</a>';
+						case 'CommonsMedia':
+							return '<a href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + datavalue.value + '</a>';
+						//case 'String':
+						default:
+							return datavalue.value;
+					}
 				case 'monolingualtext':
 					return datavalue.value.text + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
 				case 'quantity':
