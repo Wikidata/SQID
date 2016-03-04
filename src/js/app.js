@@ -13,16 +13,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.otherwise({redirectTo: '/'});
 	})
 
-	.factory('ClassView', function($http, $route) {
-		var qid;
-		return {
-			getQid: function(){
-				qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-				return qid;
-			}
-		};
-	})
-
 	.factory('Arguments', function($http, $route, jsonData){
 		var args = {}; 
 		return {
