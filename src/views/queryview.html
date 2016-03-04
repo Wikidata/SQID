@@ -1,0 +1,34 @@
+<!-- <h1>Data Example</h1>
+
+<div class="alert alert-warning" role="alert">This is only an example to show the paring of the CSV files. It is not the proposed content for this site.
+<br/><b>Note:</b> table is to large -> unwanted resizing</div>
+ -->
+<div class="row" ng-controller="QueryController">
+	<div class="col-xs-12">
+		<form novalidate>
+			<!-- ux assisted form -->
+			<div class="form-group">
+				<label for="qry-form-class">Class</label>
+				<input type="text" id="qry-form-class" class="form-control"></input>
+			</div>
+
+			<angucomplete-alt id="qry-form-class"
+				placeholder="Select a class"
+				pause="100"
+				selected-object="selectedClass"
+				local-data="classes"
+				local-search="labelSearch"
+				search-fields="l"
+				title-field="l"
+				description-field="d"
+				minlength="1"
+				input-class="form-control form-control-small"></angucomplete-alt>
+
+
+			<hr>
+			<!-- generated sparql query -->
+			<textarea class="form-control"></textarea>
+
+		</form>
+	</div>
+</div>

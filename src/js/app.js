@@ -1,6 +1,6 @@
 'use strict'; // indicate that code is executed strict
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities'])
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities','queryInterface'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -10,6 +10,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/about', { templateUrl: 'views/about.html' })
 			.when('/classview', { templateUrl: 'views/classview.html' })
 			.when('/propertyview', { templateUrl: 'views/propertyview.html'})
+			.when('/query', { templateUrl: 'views/queryview.html'})
 			.otherwise({redirectTo: '/'});
 	})
 
