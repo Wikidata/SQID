@@ -357,7 +357,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			return '<a href="' + properties.getUrl(numId) + '">' + properties.getLabelOrId(numId) + '</a>';
 		}
 
-		var getValueHtml = function(datavalue) {
+		var getValueHtml = function(datavalue, numPropId) {
 			switch (datavalue.type) {
 				case 'wikibase-entityid':
 					if (datavalue.value["entity-type"] == "item") {
@@ -420,12 +420,13 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 		var makeSnakHtml = function(snak, showProperty) {
 			ret = '';
+			var numPropId = snak.property.substring(1);
 			if (showProperty) {
-				ret += getPropertyLink(snak.property.substring(1)) + ' : ';
+				ret += getPropertyLink(numPropId) + ' : ';
 			}
 			switch (snak.snaktype) {
 				case 'value': 
-					ret += getValueHtml(snak.datavalue);
+					ret += getValueHtml(snak.datavalue, numPropId);
 					break;
 				case 'somevalue':
 					ret += '<i>unspecified value</i>';
@@ -439,6 +440,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		
 		var makeStatementValueHtml = function(statement) {
 			ret = makeSnakHtml(statement.mainsnak, false);
+			if (statement.rank == 'preferred') {
+				ret += ' <span class="glyphicon glyphicon-star" aria-hidden="true" title="This is a preferred statement"></span>';
+			} else if (statement.rank == 'deprecated') {
+				ret += ' <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" title="This is a deprecated statement"></span>';
+			} 
+			
 			if ('qualifiers' in statement) {
 				ret += '<div style="padding-left: 10px; font-size: 80%; ">';
 				angular.forEach(statement.qualifiers, function (snakList) {
