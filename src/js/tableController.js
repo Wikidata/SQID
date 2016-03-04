@@ -99,7 +99,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var initArray = function(json, filterfunc){
       var ret = []
       for (var entry in json) {
-          if (filterfunc(json[entry])) {
+          if (filterfunc(entry, json)) {
               ret.push(entry);
           }
       }
@@ -122,11 +122,12 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
     
     var refresh = function(args, content, idArray, entityConstructor){
+      //console.log("CALL");
       paginationControl.refreshPageSelectorData(args, idArray);
       refreshTableContent(args, idArray, content, entityConstructor);
     };
     
-    var applyFilter = function(entry){
+    var labelFilter = function(entry){
       if (!$scope.filterLabels){
         return true;
       }
@@ -143,6 +144,27 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
+    var applyFilter = function(entry, json){
+      if (!labelFilter(json[entry])){
+        return false;
+      }else{
+        if (status.entityType == "classes"){
+          var filter = status.classesFilter;
+          if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
+            return false;
+          }
+          if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
+            return false;
+          }
+          return true;
+        }else{
+          
+          return true;
+        }
+
+      }
+    }
+
     var initSlider = function(sliderData){
       //result = [];
       //for 
@@ -152,38 +174,55 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var updateTable = function(){
       if (args.type == "classes") {
         Classes.then(function(data){
-          var classesArray = initArray(data.getClasses(), applyFilter);
+          $scope.slider = [ // TODO replace numbers with constants
+            {name: "number of instances", from: 0, 
+              to: 4000000,
+              startVal: status.classesFilter.instances[0], 
+              endVal: status.classesFilter.instances[1]},
+            {name: "number of subclasses", from: 0,
+              to: 200000,
+              startVal: status.classesFilter.subclasses[0], 
+              endVal: status.classesFilter.subclasses[1]}];
           // todo: apply filter
+          var classesArray = initArray(data.getClasses(), applyFilter);
           refresh(args, data, classesArray, getClassFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.classesHeader;
           paginationControl.setPageSelectorScopes();
           $scope.entityCount = classesArray.length;
-          $scope.slider = [
-            {name: "number of instances", from: 0, to: 4000000, startVal: 0, endVal: 100},
-            {name: "number of subclasses", from: 0, to: 10000, startVal: 0, endVal: 100}];
+          
         });
       }
       if (args.type == "properties") {
           Properties.then(function(data){
+          $scope.slider = [ // TODO replace numbers with constants
+            {name: "uses in statements", from: 0,
+              to: 20000000,
+              startVal: status.propertiesFilter.statements[0],
+              endVal: status.propertiesFilter.statements[1]},
+            {name: "uses in qualifiers", from: 0,
+              to: 100000,
+              startVal: status.propertiesFilter.qualifiers[0],
+              endVal: status.propertiesFilter.qualifiers[1]},
+            {name: "uses in references", from: 0,
+              to: 100000,
+              startVal: status.propertiesFilter.references[0],
+              endVal: status.propertiesFilter.references[1]}];
           var propertiesArray = initArray(data.getProperties(), applyFilter);
           refresh(args, data, propertiesArray, getPropertyFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.propertiesHeader;
           paginationControl.setPageSelectorScopes();
           $scope.entityCount = propertiesArray.length;
-          $scope.slider = [
-            {name: "uses in statements", from: 0, to: 20000000, startVal: 0, endVal: 100},
-            {name: "uses in qualifiers", from: 0, to: 100000, startVal: 0, endVal: 100},
-            {name: "uses in references", from: 0, to: 100000, startVal: 0, endVal: 100}];
           });
       }
       
     }
-    $scope.slider = []; // TODO: init slider in refreshArgs()
+    // $scope.slider = []; // TODO: init slider in refreshArgs()
     // execution part
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
+    var status = Arguments.getStatus();
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     $scope.filterdata;
@@ -191,6 +230,22 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
     $scope.searchFilter = function(){
+      updateTable();
+    }
+    $scope.updateStatus = function(){
+      if (status.entityType == "classes"){
+        status.classesFilter.instances[0] = $scope.slider[0].startVal;
+        status.classesFilter.instances[1] = $scope.slider[0].endVal;
+        status.classesFilter.subclasses[0] = $scope.slider[1].startVal;
+        status.classesFilter.subclasses[1] = $scope.slider[1].endVal;
+      }else{
+        status.propertiesFilter.statements[0] = $scope.slider[0].startVal;
+        status.propertiesFilter.statements[1] = $scope.slider[0].endVal;
+        status.propertiesFilter.qualifiers[0] = $scope.slider[1].startVal;
+        status.propertiesFilter.qualifiers[1] = $scope.slider[1].endVal;
+        status.propertiesFilter.references[0] = $scope.slider[2].startVal;
+        status.propertiesFilter.references[1] = $scope.slider[2].endVal;
+      }
       updateTable();
     }
     

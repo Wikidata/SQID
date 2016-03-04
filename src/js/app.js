@@ -25,16 +25,38 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 	.factory('Arguments', function($http, $route, jsonData){
 		var args = {}; 
+		var status ={
+			entityType: "classes",
+			from: 0,
+			to:jsonData.TABLE_SIZE,
+			classesFilter: {
+				label: "",
+				instances: [0, 4000000],
+				subclasses: [0, 200000]
+			},
+			propertiesFilter: {
+				label: "",
+				statements: [0, 20000000],
+				qualifiers: [0, 100000],
+				references: [0, 100000]
+			}
+		}
 		return {
 			refreshArgs: function(){
 				args = {
-					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
-					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : jsonData.TABLE_SIZE,
-					type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
+					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : status.from,
+					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : status.to,
+					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType
 				}
+				status.from = args.from;
+				status.to = args.to;
+				status.entityType = args.type;
 			},
 			getArgs: function(){
 				return args;
+			},
+			getStatus: function(){
+				return status;
 			}
 		}
 	})
@@ -162,7 +184,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    var SCALE_FACTOR = 1.005;
 	    var scale = function(val){
 	      if (val > 0) {
-	      console.log(Math.round(Math.log(val) / Math.log(SCALE_FACTOR)));
 	      return Math.round(Math.log(val) / Math.log(SCALE_FACTOR));
 	      }
 	      else {
@@ -186,6 +207,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	        slide: function( event, ui ) {
 	          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
 	          scope.$parent.slider[parseInt(scope.index)].endVal = antiScale(ui.values[1]);
+	          scope.$parent.updateStatus();
 	          scope.$apply();
 	          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
 	        }
