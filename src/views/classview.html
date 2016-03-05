@@ -100,15 +100,15 @@
 					<tbody>
 						<tr>
 							<th>Direct superclasses</th>
-							<td><ul class="list-inline comma-separated" style="display: inline;">
+							<td><ul ng-if="superClasses.length > 0" class="list-inline comma-separated" style="display: inline;">
 									<li ng-repeat="superclass in superClasses">
 										<a href = {{superclass.url}}>{{superclass.label}}</a> <span class="info-badge">{{superclass.icount}}</span>
 									</li>
-								</ul>
+								</ul><span ng-if="superClasses.length == 0"><i>none</i></span>
 							</td>
 						</tr>
 						<tr>
-							<th>Main subclasses <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Subclasses that have at least one instance or subclass"></span></th>
+							<th>Main subclasses <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Direct subclasses that have at least one instance or subclass"></span></th>
 							<td>{{nonemptySubclasses.length}}
 								<ul ng-if="nonemptySubclasses.length > 0" class="list-inline comma-separated" style="">
 									<li ng-repeat="subclass in nonemptySubclasses">
@@ -148,7 +148,7 @@
 			<a data-toggle="collapse" data-target="#statements_panel" style="cursor:pointer;cursor:hand">Statements</a>
 			</h2></div>
 			<div id='statements_panel' class='panel-collapse collapse in'>
-				<wdcb-statement-table ng-if="classData !== null" statements="classData.statements" show="other"></wdcb-statement-table>
+				<wdcb-statement-table ng-if="classData !== null" data="classData" show="other"></wdcb-statement-table>
 			</div>
 		</div>
 	</div>
@@ -174,7 +174,7 @@
 			<a data-toggle="collapse" data-target="#ids_panel" style="cursor:pointer;cursor:hand">External Ids</a>
 			</h2></div>
 			<div id='ids_panel' class='panel-collapse collapse in'>
-				<wdcb-statement-table ng-if="classData !== null" statements="classData.statements" show="ids"></wdcb-statement-table>
+				<wdcb-statement-table ng-if="classData !== null" data="classData" show="ids"></wdcb-statement-table>
 			</div>
 		</div>
 	</div>

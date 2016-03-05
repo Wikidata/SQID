@@ -312,10 +312,11 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
-.directive('wdcbStatementTable', function(Properties, wikidataapi, util) {
+.directive('wdcbStatementTable', function(Properties, Classes, wikidataapi, util) {
 	var idTerms = {};
 	var idTermsSize = 0;
 	var properties = null;
+	var classes = null;
 
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
@@ -451,7 +452,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			if (statement.rank == 'preferred') {
 				ret += ' <span class="glyphicon glyphicon-star" aria-hidden="true" title="This is a preferred statement"></span>';
 			} else if (statement.rank == 'deprecated') {
-				ret += ' <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" title="This is a deprecated statement"></span>';
+				ret = '<span style="text-decoration: line-through;">' + ret + '</span> <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" title="This is a deprecated statement"></span>';
 			} 
 			
 			if ('qualifiers' in statement) {
@@ -466,42 +467,94 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			return ret;
 		};
 
-		var getHtml = function(statements) {
+		var getHtml = function(statements, propertyList) {
 			var html = '<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
-			angular.forEach(statements, function (statementGroup, propertyId) {
-				var numPropId = propertyId.substring(1);
-				if (includeProperty(numPropId)) {
-					angular.forEach(statementGroup, function (statement, index) {
-						html += '<tr>';
-						if (index == 0) {
-							html += '<th valign="top" rowspan="' + statementGroup.length + '" style="min-width: 20%;">'
-								+ getPropertyLink(numPropId)
-								+ '</th>';
-						}
-						html += '<td>' + makeStatementValueHtml(statement) + '</td>'
-						html += '</tr>';
-					});
-				}
+			angular.forEach(propertyList, function (numPropId) {
+				var statementGroup = statements['P' + numPropId]
+				angular.forEach(statementGroup, function (statement, index) {
+					html += '<tr>';
+					if (index == 0) {
+						html += '<th valign="top" rowspan="' + statementGroup.length + '" style="min-width: 20%;">'
+							+ getPropertyLink(numPropId)
+							+ '</th>';
+					}
+					html += '<td>' + makeStatementValueHtml(statement) + '</td>'
+					html += '</tr>';
+				});
 			});
 			html += '</tbody></table></div>';
 			return html;
 		}
 
-		scope.$watch(attrs.statements, function(statements){
-			Properties.then(function(props){
-				properties = props;
-				var html = getHtml(statements);
-				var missingTermIdList = Object.keys(missingTermIds);
-				if (missingTermIdList.length > 0) {
-					wikidataapi.getEntityTerms(missingTermIdList).then(function(terms){
-						angular.extend(idTerms, terms);
-						idTermsSize = Object.keys(idTerms).length;
-						missingTermIds = {};
-						element.replaceWith(getHtml(statements));
-					});
-				} else {
-					element.replaceWith(html);
+		var preparePropertyList = function(itemData) {
+			propertyScores = {};
+			// Class-based ranking rarely seems to help:
+			/* angular.forEach(itemData.instanceClasses, function(instanceClass) {
+				angular.forEach(classes.getRelatedProperties(instanceClass), function(relPropScore, relPropId) {
+					if (relPropId in propertyScores) {
+						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
+					} else {
+						propertyScores[relPropId] = relPropScore;
+					}
+				});
+			});*/
+			for (propertyId in itemData.statements) {
+				angular.forEach(properties.getRelatedProperties(propertyId), function(relPropScore, relPropId) {
+					if (relPropId in propertyScores) {
+						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
+					} else {
+						propertyScores[relPropId] = relPropScore;
+					}
+				});
+			}
+
+			scoredProperties = [];
+
+			for (propertyId in itemData.statements) {
+				var numPropId = propertyId.substring(1);
+				if (includeProperty(numPropId)) {
+					if (numPropId in propertyScores) {
+						scoredProperties.push([numPropId,propertyScores[numPropId]]);
+					} else {
+						scoredProperties.push([numPropId,0]);
+					}
 				}
+			}
+
+			scoredProperties.sort(function(a, b) {
+				var a = a[1];
+				var b = b[1];
+				return a < b ? 1 : (a > b ? -1 : 0);
+			});
+
+			ret = [];
+			angular.forEach(scoredProperties, function(propertyData) {
+				ret.push(propertyData[0]);
+			});
+			return ret;
+		}
+
+		scope.$watch(attrs.data, function(itemData){
+			Properties.then(function(propertyData){
+				properties = propertyData;
+				Classes.then(function(classData){
+					classes = classData;
+
+					var propertyList = preparePropertyList(itemData);
+					
+					var html = getHtml(itemData.statements, propertyList);
+					var missingTermIdList = Object.keys(missingTermIds);
+					if (missingTermIdList.length > 0) {
+						wikidataapi.getEntityTerms(missingTermIdList).then(function(terms){
+							angular.extend(idTerms, terms);
+							idTermsSize = Object.keys(idTerms).length;
+							missingTermIds = {};
+							element.replaceWith(getHtml(itemData.statements, propertyList));
+						});
+					} else {
+						element.replaceWith(html);
+					}
+				});
 			});
 		});
 	};

@@ -13,7 +13,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		getClassInfo: function(classNumIds, classes) {
 			var ret = [];
 			angular.forEach(classNumIds, function(classNumId) {
-				ret.push({label: classes.getLabel(classNumId), url: classes.getUrl(classNumId), icount: classes.getAllInstanceCount(classNumId)});
+				ret.push({label: classes.getLabelOrId(classNumId), url: classes.getUrl(classNumId), icount: classes.getAllInstanceCount(classNumId)});
 			});
 			return ret;
 		}
