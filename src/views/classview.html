@@ -78,13 +78,16 @@
 						</tr>
 						<tr>
 							<th>Typical properties <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Properties typically used with the direct and indirect instances of this class"></span></th>
-							<td><div class="four-lines">
-								<ul class="list-inline comma-separated">
-									<li ng-repeat="property in relatedProperties">
-										<a href= {{property.link}}>{{property.label}}</a>
-									</li>
-								</ul>
-							</div></td>
+							<td>
+								<div ng-if="relatedProperties.length > 0" class="four-lines">
+									<ul class="list-inline comma-separated">
+										<li ng-repeat="property in relatedProperties">
+											<a href= {{property.link}}>{{property.label}}</a>
+										</li>
+									</ul>
+								</div>
+								<span ng-if="relatedProperties.length == 0"><i>none</i></span>
+							</td>
 						</tr>
 					</tbody>
 				</table>
