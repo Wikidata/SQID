@@ -13,16 +13,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.otherwise({redirectTo: '/'});
 	})
 
-	.factory('ClassView', function($http, $route) {
-		var qid;
-		return {
-			getQid: function(){
-				qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
-				return qid;
-			}
-		};
-	})
-
 	.factory('Arguments', function($http, $route, jsonData){
 		var args = {}; 
 		return {
@@ -85,6 +75,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
+					getLabelOrId: function(id) { return getData(id, 'l', 'P' + id); },
 					getItemCount: function(id){ return getData(id, 'i', 0); },
 					getDatatype: function(id){ return getData(id, 'd', null); },
 					getStatementCount: function(id){ return getData(id, 's', 0); },
@@ -106,10 +97,14 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 		var getData = function(id, key, defaultValue) {
 			try {
-				return classes[id][key];
+				var result = classes[id][key];
+				if (result !== null) {
+					return classes[id][key];
+				}
 			} catch(e){
-				return defaultValue;
+				// fall through
 			}
+			return defaultValue;
 		};
 
 		var getLabel = function(id){ return getData(id, 'l', null); };
@@ -138,6 +133,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,
+					getLabelOrId: function(id){ return getData(id, 'l', 'Q' + id); },
 					getDirectInstanceCount: function(id){ return getData(id, 'i', 0); },
 					getDirectSubclassCount: function(id){ return getData(id, 's', 0); },
 					getAllInstanceCount: getAllInstanceCount,

@@ -194,6 +194,14 @@ background: rgba(255,255,255,1);
 	font-size: 1.3em;
 }
 
+.table-condensed {
+	margin-bottom: 0px;
+}
+
+.list-inline {
+	margin-bottom: 0px;
+}
+
 .list-inline.comma-separated li {
 	padding-right: 0px;
 }
@@ -240,9 +248,29 @@ background: rgba(255,255,255,1);
 .four-lines {
 	overflow: auto;
 	max-height: 80px;
-	margin-bottom: 10px;
 }
 .four-lines ul {
 	margin-bottom: 0px;
+}
+
+span.smallnote {
+    font-size: 0.8em;
+    color: #444;
+}
+
+.property-table th {
+	width: 20%;
+}
+
+.ext-link {
+	color: #2A5C86;
+}
+.ext-link::after {
+	font-family: FontAwesome;
+	font-size: 80%;
+	content: "\f08e";
+	position: relative;
+	top: 1px;
+	left: 4px;
 }
 

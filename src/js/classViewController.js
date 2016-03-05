@@ -1,38 +1,30 @@
 
 classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
-	var MAX_EXAMPLE_INSTANCES = 20;
-	var MAX_DIRECT_SUBCLASSES = 10;
-	var RELATED_PROPERTIES_THRESHOLD = 5;
-
 	var qid;
 	return {
-		MAX_EXAMPLE_INSTANCES: MAX_EXAMPLE_INSTANCES,
-		MAX_DIRECT_SUBCLASSES: MAX_DIRECT_SUBCLASSES,
-		RELATED_PROPERTIES_THRESHOLD: RELATED_PROPERTIES_THRESHOLD,
-
 		updateQid: function() {
 			qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 		},
 
-		getInstances: function() {
-			return sparql.getPropertySubjects("P31", qid, MAX_EXAMPLE_INSTANCES + 1);
-		},
-
-		getSubclasses: function() {
-			return sparql.getPropertySubjects("P279", qid, MAX_DIRECT_SUBCLASSES + 1);
-		},
-
-		getClassData: function() {
-			return wikidataapi.fetchEntityData(qid);
-		},
-
 		getQid: function(){
 			return qid;
+		},
+
+		getClassInfo: function(classNumIds, classes) {
+			var ret = [];
+			angular.forEach(classNumIds, function(classNumId) {
+				ret.push({label: classes.getLabelOrId(classNumId), url: classes.getUrl(classNumId), icount: classes.getAllInstanceCount(classNumId)});
+			});
+			return ret;
 		}
 	};
 })
 .controller('ClassViewController',
 	function($scope, $route, ClassView, Classes, Properties, sparql, wikidataapi){
+		var MAX_EXAMPLE_INSTANCES = 20;
+		var MAX_DIRECT_SUBCLASSES = 10;
+		var RELATED_PROPERTIES_THRESHOLD = 5;
+	
 		ClassView.updateQid();
 		$scope.qid = ClassView.getQid();
 		$scope.exampleInstances = null;
@@ -40,6 +32,8 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		$scope.classData = null;
 		$scope.superClasses = null;
 		$scope.instanceClasses = null;
+		$scope.classes = null;
+		$scope.properties = null;
 
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
@@ -47,25 +41,14 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 			var numId = $scope.qid.substring(1);
 
 			Properties.then(function(properties){
-				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties(numId), ClassView.RELATED_PROPERTIES_THRESHOLD);
+				$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD);
 				$scope.instanceOfUrl = properties.getUrl("31");
 				$scope.subclassOfUrl = properties.getUrl("279");
 			});
-			ClassView.getClassData().then(function(data) {
-				$scope.classData = wikidataapi.extractEntityData(data, $scope.qid);
-				var superClasses = [];
-				for (var i in $scope.classData.superclasses) {
-					var superNumId = $scope.classData.superclasses[i];
-					superClasses.push({label: classes.getLabel(superNumId), url: classes.getUrl(superNumId), icount: classes.getAllInstanceCount(superNumId)});
-				}
-				$scope.superClasses = superClasses;
-				
-				var instanceClasses = [];
-				for (var i in $scope.classData.instanceClasses) {
-					var superNumId = $scope.classData.instanceClasses[i];
-					instanceClasses.push({label: classes.getLabel(superNumId), url: classes.getUrl(superNumId), icount: classes.getAllInstanceCount(superNumId)});
-				}
-				$scope.instanceClasses = instanceClasses;
+			wikidataapi.getEntityData($scope.qid).then(function(data) {
+				$scope.classData = data;
+				$scope.superClasses = ClassView.getClassInfo(data.superclasses, classes);
+				$scope.instanceClasses = ClassView.getClassInfo(data.instanceClasses, classes);
 			});
 
 			$scope.directInstances = classes.getDirectInstanceCount(numId);
@@ -75,13 +58,13 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 			$scope.nonemptySubclasses = classes.getNonemptySubclasses(numId);
 
 			if ($scope.directInstances > 0) {
-				ClassView.getInstances().then(function(data) {
-					$scope.exampleInstances = sparql.prepareInstanceQueryResult(data, "P31", ClassView.getQid(), ClassView.MAX_EXAMPLE_INSTANCES + 1, null);
+				sparql.getPropertySubjects("P31", $scope.qid, MAX_EXAMPLE_INSTANCES + 1).then(function(result) {
+					$scope.exampleInstances = result;
 				});
 			}
 			if ($scope.directSubclasses > 0) {
-				ClassView.getSubclasses().then(function(data) {
-					$scope.exampleSubclasses = sparql.prepareInstanceQueryResult(data, "P279", ClassView.getQid(), ClassView.MAX_DIRECT_SUBCLASSES + 1, classes);
+				sparql.getPropertySubjects("P279", $scope.qid, MAX_DIRECT_SUBCLASSES + 1).then(function(result) {
+					$scope.exampleSubclasses = result;
 				});
 			}
 		});
