@@ -316,7 +316,6 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var idTerms = {};
 	var idTermsSize = 0;
 	var properties = null;
-	var classes = null;
 
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
@@ -488,16 +487,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 		var preparePropertyList = function(itemData) {
 			propertyScores = {};
-			// Class-based ranking rarely seems to help:
-			/* angular.forEach(itemData.instanceClasses, function(instanceClass) {
-				angular.forEach(classes.getRelatedProperties(instanceClass), function(relPropScore, relPropId) {
-					if (relPropId in propertyScores) {
-						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
-					} else {
-						propertyScores[relPropId] = relPropScore;
-					}
-				});
-			});*/
+			// Note: class-based ranking rarely seems to help; hence using properties only
 			for (propertyId in itemData.statements) {
 				angular.forEach(properties.getRelatedProperties(propertyId), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
@@ -537,24 +527,20 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		scope.$watch(attrs.data, function(itemData){
 			Properties.then(function(propertyData){
 				properties = propertyData;
-				Classes.then(function(classData){
-					classes = classData;
-
-					var propertyList = preparePropertyList(itemData);
-					
-					var html = getHtml(itemData.statements, propertyList);
-					var missingTermIdList = Object.keys(missingTermIds);
-					if (missingTermIdList.length > 0) {
-						wikidataapi.getEntityTerms(missingTermIdList).then(function(terms){
-							angular.extend(idTerms, terms);
-							idTermsSize = Object.keys(idTerms).length;
-							missingTermIds = {};
-							element.replaceWith(getHtml(itemData.statements, propertyList));
-						});
-					} else {
-						element.replaceWith(html);
-					}
-				});
+				var propertyList = preparePropertyList(itemData);
+				
+				var html = getHtml(itemData.statements, propertyList);
+				var missingTermIdList = Object.keys(missingTermIds);
+				if (missingTermIdList.length > 0) {
+					wikidataapi.getEntityTerms(missingTermIdList).then(function(terms){
+						angular.extend(idTerms, terms);
+						idTermsSize = Object.keys(idTerms).length;
+						missingTermIds = {};
+						element.replaceWith(getHtml(itemData.statements, propertyList));
+					});
+				} else {
+					element.replaceWith(html);
+				}
 			});
 		});
 	};

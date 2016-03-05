@@ -1,6 +1,8 @@
 
 classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 	var qid;
+	var fetchedEntityId = null;
+	var entityDataPromise = null;
 	return {
 		updateQid: function() {
 			qid = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
@@ -16,6 +18,16 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 				ret.push({label: classes.getLabelOrId(classNumId), url: classes.getUrl(classNumId), icount: classes.getAllInstanceCount(classNumId)});
 			});
 			return ret;
+		},
+
+		getEntityData: function(entityId) {
+			if (fetchedEntityId != entityId) {
+				entityDataPromise = wikidataapi.getEntityData(entityId).then(function(data) {
+					return data;
+				});
+				fetchedEntityId = entityId;
+			}
+			return entityDataPromise;
 		}
 	};
 })
@@ -34,6 +46,10 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		$scope.instanceClasses = null;
 		$scope.classes = null;
 		$scope.properties = null;
+		
+		ClassView.getEntityData($scope.qid).then(function(data) {
+			$scope.classData = data;
+		});
 
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.qid;
 
@@ -45,8 +61,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 				$scope.instanceOfUrl = properties.getUrl("31");
 				$scope.subclassOfUrl = properties.getUrl("279");
 			});
-			wikidataapi.getEntityData($scope.qid).then(function(data) {
-				$scope.classData = data;
+			ClassView.getEntityData($scope.qid).then(function(data) {
 				$scope.superClasses = ClassView.getClassInfo(data.superclasses, classes);
 				$scope.instanceClasses = ClassView.getClassInfo(data.instanceClasses, classes);
 			});
