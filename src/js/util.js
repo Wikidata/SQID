@@ -393,9 +393,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				case 'string':
 					switch (properties.getDatatype(numPropId)) {
 						case 'Url':
-							return '<a href="' + datavalue.value + '" target="_blank">' + datavalue.value + '</a>';
+							return '<a class="ext-link" href="' + datavalue.value + '" target="_blank">' + datavalue.value + '</a>';
 						case 'CommonsMedia':
-							return '<a href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + datavalue.value + '</a>';
+							return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + datavalue.value + '</a>';
 						//case 'String':
 						default:
 							return datavalue.value;
