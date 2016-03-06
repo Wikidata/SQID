@@ -96,14 +96,14 @@ PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
 PREFIX wd: <http://www.wikidata.org/entity/> \n\
 SELECT $p $pLabel \n\
 WHERE { \n\
-   $p wdt:" + propertyId + 
-   (objectId != null ? " wd:" + objectId : " _:bnode")  +
-   " . \n\
+   { SELECT $p WHERE { $p wdt:" + propertyId +  (objectId != null ? " wd:" + objectId : " _:bnode")  +
+   " . } LIMIT " + limit + " } \n\
    SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
-} LIMIT " + limit;
+}";
 	}
 
 	var fetchPropertySubjects = function(propertyId, objectId, limit) {
+		console.log('SPARQL: ' + getQueryForPropertySubjects(propertyId, objectId, limit));
 		var url = getQueryUrl(getQueryForPropertySubjects(propertyId, objectId, limit));
 		return util.httpRequest(url);
 	}
