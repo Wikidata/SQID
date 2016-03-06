@@ -264,6 +264,7 @@ span.smallnote {
 
 .ext-link {
 	color: #2A5C86;
+	margin-right: 5px;
 }
 .ext-link::after {
 	font-family: FontAwesome;
