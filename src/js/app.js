@@ -42,7 +42,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 
 		var getLabel = function(id) { return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/propertyview?id=P" + id; };
+		var getUrl = function(id) { return "#/classview?id=P" + id; };
 
 		var formatRelatedProperties = function(relatedProperties, threshold){
 			var ret = [];

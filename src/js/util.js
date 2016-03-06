@@ -67,23 +67,12 @@ angular.module('utilities', [])
 		}
 	}
 
-	var getItemUrl = function(itemId) { return "#/classview?id=" + itemId; };
-	var getPropertyUrl = function(propertyId) { return "#/propertyview?id=" + propertyId; };
-
-	var getEntityUrl = function(entityId) {
-		if (entityId.substring(0,1) == 'Q') {
-			return getItemUrl(entityId);
-		} else {
-			return getPropertyUrl(entityId);
-		}
-	}
+	var getEntityUrl = function(entityId) { return "#/classview?id=" + entityId; };
 
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
-		getItemUrl: getItemUrl,
-		getPropertyUrl: getPropertyUrl,
 		getIdFromUri: getIdFromUri
 	};
 })
@@ -107,7 +96,9 @@ PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
 PREFIX wd: <http://www.wikidata.org/entity/> \n\
 SELECT $p $pLabel \n\
 WHERE { \n\
-   $p wdt:" + propertyId + " wd:" + objectId + " . \n\
+   $p wdt:" + propertyId + 
+   (objectId != null ? " wd:" + objectId : " _:bnode")  +
+   " . \n\
    SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
 } LIMIT " + limit;
 	}
@@ -363,7 +354,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					if (datavalue.value["entity-type"] == "item") {
 						var itemId = "Q" + datavalue.value["numeric-id"];
 						var terms = getEntityTerms(itemId);
-						return '<a href="' + util.getItemUrl(itemId) + '">' + terms.label + '</a>' +
+						return '<a href="' + util.getEntityUrl(itemId) + '">' + terms.label + '</a>' +
 							( terms.description != '' ? ' <span class="smallnote">(' + terms.description + ')</span>' : '' );
 					} else if (datavalue.value["entity-type"] == "property") {
 						return getPropertyLink(datavalue.value["numeric-id"]);
@@ -408,7 +399,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					}
 					var unit = util.getIdFromUri(datavalue.value.unit);
 					if (unit !== null) {
-						unit = ' <a href="' + util.getItemUrl(unit) + '">' + getEntityTerms(unit).label + '</a>';
+						unit = ' <a href="' + util.getEntityUrl(unit) + '">' + getEntityTerms(unit).label + '</a>';
 					} else {
 						unit = '';
 					}
@@ -416,7 +407,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				case 'globecoordinate':
 					var globe = util.getIdFromUri(datavalue.value.globe);
 					if (globe !== null && globe != 'Q2') {
-						globe = ' on <a href="' + util.getItemUrl(globe) + '">' + getEntityTerms(globe).label + '</a>';
+						globe = ' on <a href="' + util.getEntityUrl(globe) + '">' + getEntityTerms(globe).label + '</a>';
 					} else {
 						globe = '';
 					}
