@@ -35,6 +35,8 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 	function($scope, $route, ClassView, Classes, Properties, sparql, wikidataapi){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
+		var MAX_PROP_SUBJECTS = 10;
+		var MAX_PROP_VALUES = 20;
 		var RELATED_PROPERTIES_THRESHOLD = 5;
 
 		ClassView.updateId();
@@ -51,6 +53,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		$scope.instanceClasses = null;
 		
 		$scope.examplePropertyItems = null;
+		$scope.examplePropertyValues = null;
 
 		$scope.directInstances = 0;
 		$scope.directSubclasses = 0;
@@ -58,6 +61,7 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 		$scope.allSubclasses = 0;
 		$scope.nonemptySubclasses = 0;
 		$scope.propertyStatementCount = 0;
+		$scope.propertyAverageStatements = 0;
 		$scope.propertyQualifierCount = 0;
 		$scope.propertyReferenceCount = 0;
 		$scope.propertyDatatype = null;
@@ -76,13 +80,20 @@ classBrowser.factory('ClassView', function($route, sparql, wikidataapi) {
 
 				$scope.propertyItemCount = properties.getItemCount(numId);
 				$scope.propertyStatementCount = properties.getStatementCount(numId);
+				$scope.propertyAverageStatements = Math.round($scope.propertyStatementCount/$scope.propertyItemCount*100)/100;
 				$scope.propertyQualifierCount = properties.getQualifierCount(numId);
 				$scope.propertyReferenceCount = properties.getReferenceCount(numId);
 				$scope.propertyDatatype = properties.getDatatype(numId);
+				$scope.propertyQualifiers = properties.getFormattedQualifiers(numId);
 
 				if ($scope.propertyItemCount > 0) {
-					sparql.getPropertySubjects($scope.id, null, MAX_DIRECT_SUBCLASSES + 1).then(function(result) {
+					sparql.getPropertySubjects($scope.id, null, MAX_PROP_SUBJECTS + 1).then(function(result) {
 						$scope.examplePropertyItems = result;
+					});
+				}
+				if ($scope.propertyDatatype == 'WikibaseItem' || $scope.propertyDatatype == 'WikibaseProperty') {
+					sparql.getPropertyObjects(null, $scope.id, MAX_PROP_VALUES + 1).then(function(result) {
+						$scope.examplePropertyValues = result;
 					});
 				}
 			}

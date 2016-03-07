@@ -102,14 +102,27 @@ WHERE { \n\
 }";
 	}
 
+	var getQueryForPropertyObjects = function(subjectId, propertyId, limit) {
+		return "PREFIX wikibase: <http://wikiba.se/ontology#> \n\
+PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
+PREFIX wd: <http://www.wikidata.org/entity/> \n\
+SELECT $p $pLabel \n\
+WHERE { \n\
+   { SELECT DISTINCT $p WHERE { " + (subjectId != null ? "wd:" + subjectId : "_:bnode") +
+   " wdt:" + propertyId + " ?p . \n\
+     FILTER(isIRI(?p)) } LIMIT " + limit + " } \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
+}";
+	}
+
 	var fetchPropertySubjects = function(propertyId, objectId, limit) {
-		console.log('SPARQL: ' + getQueryForPropertySubjects(propertyId, objectId, limit));
 		var url = getQueryUrl(getQueryForPropertySubjects(propertyId, objectId, limit));
 		return util.httpRequest(url);
 	}
 
-	var getInstance = function(sparqlQuery) {
-		return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
+	var fetchPropertyObjects = function(subjectId, propertyId, limit) {
+		var url = getQueryUrl(getQueryForPropertyObjects(subjectId, propertyId, limit));
+		return util.httpRequest(url);
 	}
 
 	var getInlinkCount = function(propertyID, objectItemId) {
@@ -120,32 +133,42 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return result.results.bindings[0].c.value;
 	}
 
+	var parseUnarySparqlQueryResult = function(data, limit, continueUrl) {
+		results = [];
+		try {
+			var instanceJson = data.results.bindings;
+			var element;
+			for (var i = 0; i < instanceJson.length; i++) {
+				if ( i < limit-1 ) {
+					var uri = util.getEntityUrl(util.getIdFromUri(instanceJson[i].p.value));
+					element = {
+						label: instanceJson[i].pLabel.value,
+						uri: uri
+					};
+				} else {
+					element = {
+						label: "... further results",
+						uri: getQueryUiUrl(continueUrl)
+					};
+				}
+				results.push(element);
+			}
+		}
+		catch (err) {
+			//nothing to do here
+		}
+		return results;
+	}
+
 	var getPropertySubjects = function(propertyId, objectId, limit) {
 		return fetchPropertySubjects(propertyId, objectId, limit).then(function(data){
-				results = [];
-				try {
-					var instanceJson = data.results.bindings;
-					var element;
-					for (var i = 0; i < instanceJson.length; i++) {
-						if ( i < limit-1 ) {
-							var uri = util.getEntityUrl(util.getIdFromUri(instanceJson[i].p.value));
-							element = {
-								label: instanceJson[i].pLabel.value,
-								uri: uri
-							};
-						} else {
-							element = {
-								label: "... further results",
-								uri: getQueryUiUrl(getQueryForPropertySubjects(propertyId, objectId, 1000))
-							};
-						}
-						results.push(element);
-					}
-				}
-				catch (err) {
-					//nothing to do here
-				}
-				return results;
+			return parseUnarySparqlQueryResult(data, limit, getQueryForPropertySubjects(propertyId, objectId, 1000));
+		});
+	}
+
+	var getPropertyObjects = function(subjectId, propertyId, limit) {
+		return fetchPropertyObjects(subjectId, propertyId, limit).then(function(data){
+			return parseUnarySparqlQueryResult(data, limit, getQueryForPropertyObjects(subjectId, propertyId, 1000));
 		});
 	}
 
@@ -154,6 +177,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		getQueryUiUrl: getQueryUiUrl,
 		getInlinkCount: getInlinkCount,
 		getPropertySubjects: getPropertySubjects,
+		getPropertyObjects: getPropertyObjects,
 		getIdFromUri: util.getIdFromUri // deprecated; only for b/c
 	};
 
@@ -164,9 +188,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var language = "en";
 
 	var fetchEntityData = function(id) {
+		// Special:EntityData does not always return current data, not even with "purge"
 // 		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json?action=purge");
-		// Alternatively, the following API call also works. What is faster?
-				return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
+		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
 	}
 
 	var getStatementValue = function(statementJson, defaultValue) {
@@ -195,14 +219,14 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 			var entityData = response.entities[id];
 
-			if (language in entityData.labels) {
+			if ("labels" in entityData && language in entityData.labels) {
 				ret.label = entityData.labels[language].value;
 				ret.labelorid = entityData.labels[language].value;
 			}
-			if (language in entityData.descriptions) {
+			if ("descriptions" in entityData && language in entityData.descriptions) {
 				ret.description = entityData.descriptions[language].value;
 			}
-			if (language in entityData.aliases) {
+			if ("aliases" in entityData && language in entityData.aliases) {
 				var aliasesData = entityData.aliases[language];
 				for (var i in aliasesData){
 					ret.aliases.push(aliasesData[i].value);

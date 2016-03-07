@@ -39,10 +39,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			} catch(e){
 				return defaultValue;
 			}
-		};
+		}
 
-		var getLabel = function(id) { return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/classview?id=P" + id; };
+		var getLabel = function(id) { return getData(id, 'l', null); }
+		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
+		var getUrl = function(id) { return "#/classview?id=P" + id; }
 
 		var formatRelatedProperties = function(relatedProperties, threshold){
 			var ret = [];
@@ -59,13 +60,28 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				for (var i = 0; i < relPropsList.length; i++) {
 					if (relPropsList[i][1] < threshold) break;
 					var propId = relPropsList[i][0];
-					var resultObj = {label : getLabel(propId) , link: getUrl(propId)};
+					var resultObj = {label : getLabelOrId(propId) , link: getUrl(propId)};
 					ret.push(resultObj);
 				}
 			} catch (e){}
 
 			return ret;
-		};
+		}
+		
+		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
+		
+		var getFormattedQualifiers = function(id) {
+			var ret = [];
+			angular.forEach(getQualifiers(id), function(usageCount, qualifierId) {
+				ret.push({label : getLabelOrId(qualifierId) , url: getUrl(qualifierId), count: usageCount});
+			});
+			ret.sort(function(a, b) {
+					var a = a.count;
+					var b = b.count;
+					return a < b ? 1 : (a > b ? -1 : 0);
+			});
+			return ret;
+		}
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
@@ -75,14 +91,15 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
-					getLabelOrId: function(id) { return getData(id, 'l', 'P' + id); },
+					getLabelOrId: getLabelOrId,
 					getItemCount: function(id){ return getData(id, 'i', 0); },
 					getDatatype: function(id){ return getData(id, 'd', null); },
 					getStatementCount: function(id){ return getData(id, 's', 0); },
 					getQualifierCount: function(id){ return getData(id, 'q', 0); },
 					getReferenceCount: function(id){ return getData(id, 'e', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
-					getQualifiers: function(id){ return getData(qid, 'qs', []); },
+					getQualifiers: getQualifiers,
+					getFormattedQualifiers: getFormattedQualifiers,
 					getUrl: getUrl,
 					formatRelatedProperties: formatRelatedProperties,
 				}
