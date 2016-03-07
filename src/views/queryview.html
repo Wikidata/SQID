@@ -9,21 +9,19 @@
 			<!-- ux assisted form -->
 			<div class="form-group">
 				<label for="qry-form-class">Class</label>
-				<input type="text" id="qry-form-class" class="form-control"></input>
+				<angucomplete-alt id="qry-form-class"
+					placeholder="Select a class"
+					pause="100"
+					selected-object="selectedClass"
+					local-data="classIndex"
+					local-search="classSearch"
+					title-field="title"
+					minlength="1"
+					input-class="form-control form-control-small"></angucomplete-alt>
 			</div>
-
-			<angucomplete-alt id="qry-form-class"
-				placeholder="Select a class"
-				pause="100"
-				selected-object="selectedClass"
-				local-data="classes"
-				local-search="labelSearch"
-				search-fields="l"
-				title-field="l"
-				description-field="d"
-				minlength="1"
-				input-class="form-control form-control-small"></angucomplete-alt>
-
+			<div ng-show="selectedClass" class="form-group">
+				<a href="#/classview?id={{selectedClass.originalObject.qid}}">{{selectedClass.originalObject.qid}}</a>
+			</div>
 
 			<hr>
 			<!-- generated sparql query -->

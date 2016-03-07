@@ -5,30 +5,37 @@
 	qry.controller('QueryController', ['$scope','Classes', function($scope, Classes) {
 
 		$scope.selected = false;
-		$scope.classes = [];
+		$scope.classIndex = [];
 
-		// dumb label search for auto suggestions (case insensitive) 
-		$scope.labelSearch = function(str) {
-			var i = $scope.classes.length, matches = [], l;
+		// searching classes in lokal data by id or labels (case insensitive) 
+		$scope.classSearch = function(str) {
+			var i = $scope.classIndex.length, matches = [], 
+				classId, classLabel, newMatch;
 			str = str.toString().toLowerCase();
 			while(i--) {
-				l = $scope.classData[$scope.classes[i]].l;
-				if (l !== undefined && l !== null && l.toLowerCase().indexOf(str) > -1) {
-					matches.push($scope.classData[$scope.classes[i]]);
-					matches[matches.length-1].d = "Q" + $scope.classes[i];
+				classId = $scope.classIndex[i];
+				classLabel = $scope.classData[classId].l;
+				if( (classLabel !== undefined && classLabel !== null && classLabel.toLowerCase().indexOf(str) > -1) 
+				||( ('q'+classId).indexOf(str) > -1) ) {
+					newmatch = $scope.classData[$scope.classIndex[i]];
+					newmatch.qid = 'Q' + $scope.classIndex[i];
+					newmatch.title = newmatch.l + ' [' + newmatch.qid + ']';
+					matches.push(newmatch);
 				}
 			}
-			matches.sort(function(a,b){
-				return (a.ai > b.ai) ? -1 : ( (a.ai = b.ai) ? 0 : 1);
+			matches.sort(function(a,b) { // sort by number of all instances descending
+				return (a.ai > b.ai) ? -1 : ( (a.ai === b.ai) ? 0 : 1);
 			});
 			return matches.slice(0,9);
 		};
+
+		// build classIndex array when we have the class data
 		Classes.then(function(data){
-			console.log('classes loaded');
+			//console.log('classes loaded');
 			$scope.classData = data.getClasses();
 			for(var p in $scope.classData) {
 				if($scope.classData.hasOwnProperty(p)) {
-					$scope.classes.push(p);
+					$scope.classIndex.push(p);
 				}
 			}
 			 
