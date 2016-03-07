@@ -12,7 +12,7 @@
 				<angucomplete-alt id="qry-form-class"
 					placeholder="Select a class"
 					pause="100"
-					selected-object="selectedClass"
+					selected-object="selectedClassHandler"
 					local-data="classIndex"
 					local-search="classSearch"
 					title-field="title"
@@ -25,7 +25,9 @@
 
 			<hr>
 			<!-- generated sparql query -->
-			<textarea class="form-control"></textarea>
+			<div ng-show="sparqlQuery" class="form-group">
+				<textarea class="form-control" rows="10">{{sparqlQuery}}</textarea>
+			</div>
 
 		</form>
 	</div>

@@ -2,10 +2,20 @@
 	//classBrowser.controller('QueryController', function($scope, Arguments, Classes, Properties, jsonData) {
 	qry = angular.module('queryInterface', ['angucomplete-alt']);
 
-	qry.controller('QueryController', ['$scope','Classes', function($scope, Classes) {
+	qry.controller('QueryController', ['$scope','Classes', 'sparql', function($scope, Classes, sparql) {
 
-		$scope.selected = false;
+		sparqewl = sparql;
+
+		$scope.selectedClass = false;
+		$scope.sparqlQuery = null;
 		$scope.classIndex = [];
+
+		$scope.selectedClassHandler = function(selected) {
+			if(selected) { $scope.selectedClass = selected; }
+			else { $scope.selectedClass = false; }
+			
+			$scope.buildSparql();
+		};
 
 		// searching classes in lokal data by id or labels (case insensitive) 
 		$scope.classSearch = function(str) {
@@ -40,5 +50,17 @@
 			}
 			 
 		});
+
+		// Translate form state into sparql
+		$scope.buildSparql = function() {
+			if(!$scope.selectedClass) { $scope.sparqlQuery = null; } else {
+				$scope.sparqlQuery = sparql.getStandardPrefixes() +
+				"SELECT ?instance \n" +
+				"WHERE {\n" +
+				"	?instance wdt:P31 wd:" + $scope.selectedClass.originalObject.qid + " .\n" +
+				"}";
+			}
+		};
+
 	}]);
 })();
