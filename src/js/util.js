@@ -101,16 +101,20 @@ angular.module('utilities', [])
 		return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
 	}
 
+	var getStandardPrefixes = function() {
+		return 	"PREFIX wikibase: <http://wikiba.se/ontology#> \n" +
+				"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n" +
+				"PREFIX wd: <http://www.wikidata.org/entity/> \n";
+	};
+
 	var getQueryForPropertySubjects = function(propertyId, objectId, limit) {
-		return "PREFIX wikibase: <http://wikiba.se/ontology#> \n\
-PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
-PREFIX wd: <http://www.wikidata.org/entity/> \n\
-SELECT $p $pLabel \n\
-WHERE { \n\
-   $p wdt:" + propertyId + " wd:" + objectId + " . \n\
-   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
-} LIMIT " + limit;
-	}
+		return getStandardPrefixes() +
+			"SELECT $p $pLabel \n" +
+			"WHERE { \n" +
+   			"	$p wdt:" + propertyId + " wd:" + objectId + " . \n" +
+   			"	SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n" +
+			"} LIMIT " + limit;
+	};
 
 	var fetchPropertySubjects = function(propertyId, objectId, limit) {
 		var url = getQueryUrl(getQueryForPropertySubjects(propertyId, objectId, limit));
@@ -161,6 +165,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	return {
 		getQueryUrl: getQueryUrl,
 		getQueryUiUrl: getQueryUiUrl,
+		getStandardPrefixes: getStandardPrefixes,
 		getInlinkCount: getInlinkCount,
 		getPropertySubjects: getPropertySubjects,
 		getIdFromUri: util.getIdFromUri // deprecated; only for b/c
