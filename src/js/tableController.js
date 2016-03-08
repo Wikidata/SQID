@@ -124,20 +124,32 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var refresh = function(args, content, idArray, entityConstructor){
       //console.log("CALL");
       paginationControl.refreshPageSelectorData(args, idArray);
+      if (status.entityType == "classes"){
+        $scope.filterLabels = status.classesFilter.label;
+      }else{
+        $scope.filterLabels = status.propertiesFilter.label;
+      }
       refreshTableContent(args, idArray, content, entityConstructor);
     };
     
     var labelFilter = function(entry){
-      if (!$scope.filterLabels){
+      var filter;
+      if (status.entityType == "classes"){
+        filter = status.classesFilter.label;
+      }else{
+        filter = status.propertiesFilter.label;
+      }
+
+      if (!filter){
         return true;
       }
-      if (($scope.filterLabels == "") ) {
+      if ((filter == "") ) {
         return true;
       }
       if (!entry[jsonData.JSON_LABEL]) {
         return false;
       }
-      if (entry[jsonData.JSON_LABEL].indexOf($scope.filterLabels) > -1) {
+      if (entry[jsonData.JSON_LABEL].indexOf(filter) > -1) {
         return true;
       }else{
         return false;
@@ -158,7 +170,16 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           }
           return true;
         }else{
-          
+          var filter = status.propertiesFilter;
+          if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
+            return false;
+          }
+          if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
+            return false;
+          }
+          if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
+            return false;
+          }
           return true;
         }
 
@@ -230,6 +251,12 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
     $scope.searchFilter = function(){
+      if (status.entityType == "classes"){
+        status.classesFilter.label = $scope.filterLabels;
+      }else{
+        status.propertiesFilter.label = $scope.filterLabels;
+      }
+
       updateTable();
     }
     $scope.updateStatus = function(){
