@@ -214,6 +214,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				banner: null,
 				superclasses: [],
 				instanceClasses: [],
+				superProperties: [],
 				statements: {}
 			};
 
@@ -251,6 +252,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				if ("P279" in entityData.claims) {
 					for (var i in entityData.claims.P279) {
 						ret.superclasses.push(getStatementValue(entityData.claims.P279[i],{"numeric-id": 0})["numeric-id"].toString());
+					}
+				}
+				// subproperty of
+				if ("P1647" in entityData.claims) {
+					for (var i in entityData.claims.P1647) {
+						ret.superProperties.push(getStatementValue(entityData.claims.P1647[i],{"numeric-id": 0})["numeric-id"].toString());
 					}
 				}
 				// Wikivoyage banner; only pick the first banner if multiple

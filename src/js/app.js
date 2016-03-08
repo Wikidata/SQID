@@ -81,6 +81,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			});
 			return ret;
 		}
+		
+		var getStatementCount = function(id){ return getData(id, 's', 0); }
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
@@ -93,12 +95,13 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getLabelOrId: getLabelOrId,
 					getItemCount: function(id){ return getData(id, 'i', 0); },
 					getDatatype: function(id){ return getData(id, 'd', null); },
-					getStatementCount: function(id){ return getData(id, 's', 0); },
+					getStatementCount: getStatementCount,
 					getQualifierCount: function(id){ return getData(id, 'q', 0); },
 					getReferenceCount: function(id){ return getData(id, 'e', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getQualifiers: getQualifiers,
 					getFormattedQualifiers: getFormattedQualifiers,
+					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
 					formatRelatedProperties: formatRelatedProperties,
 				}
@@ -156,6 +159,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getAllSubclassCount: function(id){ return getData(id, 'as', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
+					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
 					getNonemptySubclasses: getNonemptySubclasses
 				}

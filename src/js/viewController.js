@@ -12,10 +12,10 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 			return id;
 		},
 
-		getClassInfo: function(classNumIds, classes) {
+		getSchemaEntityInfo: function(numIds, data) {
 			var ret = [];
-			angular.forEach(classNumIds, function(classNumId) {
-				ret.push({label: classes.getLabelOrId(classNumId), url: classes.getUrl(classNumId), icount: classes.getAllInstanceCount(classNumId)});
+			angular.forEach(numIds, function(numId) {
+				ret.push({label: data.getLabelOrId(numId), url: data.getUrl(numId), icount: data.getMainUsageCount(numId)});
 			});
 			return ret;
 		},
@@ -54,6 +54,7 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 		
 		$scope.examplePropertyItems = null;
 		$scope.examplePropertyValues = null;
+		$scope.superProperties = null;
 
 		$scope.directInstances = 0;
 		$scope.directSubclasses = 0;
@@ -73,7 +74,12 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 		Properties.then(function(properties){
 			$scope.instanceOfUrl = properties.getUrl("31");
 			$scope.subclassOfUrl = properties.getUrl("279");
+			$scope.subpropertyOfUrl = properties.getUrl("1647");
 			if (!$scope.isItem) {
+				View.getEntityData().then(function(data) {
+					$scope.superProperties = View.getSchemaEntityInfo(data.superProperties, properties);
+				});
+				
 				var numId = $scope.id.substring(1);
 
 				$scope.relatedProperties = properties.formatRelatedProperties(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD);
@@ -104,9 +110,9 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 		Classes.then(function(classes){
 			View.getEntityData().then(function(data) {
 				if ($scope.isItem) {
-					$scope.superClasses = View.getClassInfo(data.superclasses, classes);
+					$scope.superClasses = View.getSchemaEntityInfo(data.superclasses, classes);
 				}
-				$scope.instanceClasses = View.getClassInfo(data.instanceClasses, classes);
+				$scope.instanceClasses = View.getSchemaEntityInfo(data.instanceClasses, classes);
 			});
 
 			if ($scope.isItem) {

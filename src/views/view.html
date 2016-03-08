@@ -19,6 +19,20 @@
 				<b>Type:</b>
 				{{propertyDatatype}}
 			</div>
+			<div ng-if="superProperties !== null">
+				<b><a href="{{subpropertyOfUrl}}">Subproperty of</a>:</b>
+				<span ng-if="superProperties.length > 0">
+					every {{entityData.labelorid}} is also a
+					<ul class="list-inline comma-separated" style="display: inline;">
+						<li ng-repeat="superprop in superProperties">
+							<a href = {{superprop.url}}>{{superprop.label}}</a>
+						</li>
+					</ul>
+				</span>
+				<span ng-if="superProperties.length == 0">
+					{{entityData.labelorid}} is not a subproperty of any other property
+				</span>
+			</div>
 			<div ng-if="superClasses !== null">
 				<b><a href="{{subclassOfUrl}}">Subclass of</a>:</b>
 				<span ng-if="superClasses.length > 0">
