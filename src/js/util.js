@@ -419,7 +419,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 							return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + datavalue.value + '</a>';
 						//case 'String':
 						default:
-							return datavalue.value;
+							var urlPattern = properties.getUrlPattern(numPropId);
+							if (urlPattern) {
+								return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank">' + datavalue.value + '</a>';
+							} else {
+								return datavalue.value;
+							}
 					}
 				case 'monolingualtext':
 					return datavalue.value.text + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';

@@ -32,6 +32,8 @@ Values may contain the following keys:
 * ```qs``` quantifier properties used in statements with this property
    this is a map from property ids to the number of occurrences of a particular quantifier property
     (Java)
+* ```u``` URL pattern for creating a link from strings (Java)
+* ```pc``` list of ids of classes that this property is a direct instance of (Java)
 
 Related properties
 ------------------

@@ -34,7 +34,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
     
 		var getData = function(id, key, defaultValue) {
 			try {
-				return properties[id][key];
+				var result = properties[id][key];
+				if (typeof result !== 'undefined' && result !== null) {
+					return result;
+				}
 			} catch(e){
 				return defaultValue;
 			}
@@ -103,6 +106,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getFormattedQualifiers: getFormattedQualifiers,
 					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
+					getUrlPattern: function(id){ return getData(id, 'u', null); },
+					getClasses: function(id){ return getData(id, 'pc', []); },
 					formatRelatedProperties: formatRelatedProperties,
 				}
 			});
@@ -117,8 +122,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = classes[id][key];
-				if (result !== null) {
-					return classes[id][key];
+				if (typeof result !== 'undefined' && result !== null) {
+					return result;
 				}
 			} catch(e){
 				// fall through
