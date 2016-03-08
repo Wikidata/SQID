@@ -8,8 +8,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/browse', { templateUrl: 'views/browseData.html' })
 			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
-			.when('/classview', { templateUrl: 'views/classview.html' })
-			.when('/propertyview', { templateUrl: 'views/propertyview.html'})
+			.when('/view', { templateUrl: 'views/view.html' })
 			.otherwise({redirectTo: '/'});
 	})
 
@@ -35,14 +34,18 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
     
 		var getData = function(id, key, defaultValue) {
 			try {
-				return properties[id][key];
+				var result = properties[id][key];
+				if (typeof result !== 'undefined' && result !== null) {
+					return result;
+				}
 			} catch(e){
 				return defaultValue;
 			}
-		};
+		}
 
-		var getLabel = function(id) { return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/propertyview?id=P" + id; };
+		var getLabel = function(id) { return getData(id, 'l', null); }
+		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
+		var getUrl = function(id) { return "#/view?id=P" + id; }
 
 		var formatRelatedProperties = function(relatedProperties, threshold){
 			var ret = [];
@@ -59,13 +62,30 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				for (var i = 0; i < relPropsList.length; i++) {
 					if (relPropsList[i][1] < threshold) break;
 					var propId = relPropsList[i][0];
-					var resultObj = {label : getLabel(propId) , link: getUrl(propId)};
+					var resultObj = {label : getLabelOrId(propId) , link: getUrl(propId)};
 					ret.push(resultObj);
 				}
 			} catch (e){}
 
 			return ret;
-		};
+		}
+		
+		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
+		
+		var getFormattedQualifiers = function(id) {
+			var ret = [];
+			angular.forEach(getQualifiers(id), function(usageCount, qualifierId) {
+				ret.push({label : getLabelOrId(qualifierId) , url: getUrl(qualifierId), count: usageCount});
+			});
+			ret.sort(function(a, b) {
+					var a = a.count;
+					var b = b.count;
+					return a < b ? 1 : (a > b ? -1 : 0);
+			});
+			return ret;
+		}
+		
+		var getStatementCount = function(id){ return getData(id, 's', 0); }
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
@@ -75,15 +95,19 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
-					getLabelOrId: function(id) { return getData(id, 'l', 'P' + id); },
+					getLabelOrId: getLabelOrId,
 					getItemCount: function(id){ return getData(id, 'i', 0); },
 					getDatatype: function(id){ return getData(id, 'd', null); },
-					getStatementCount: function(id){ return getData(id, 's', 0); },
+					getStatementCount: getStatementCount,
 					getQualifierCount: function(id){ return getData(id, 'q', 0); },
 					getReferenceCount: function(id){ return getData(id, 'e', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
-					getQualifiers: function(id){ return getData(qid, 'qs', []); },
+					getQualifiers: getQualifiers,
+					getFormattedQualifiers: getFormattedQualifiers,
+					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
+					getUrlPattern: function(id){ return getData(id, 'u', null); },
+					getClasses: function(id){ return getData(id, 'pc', []); },
 					formatRelatedProperties: formatRelatedProperties,
 				}
 			});
@@ -98,8 +122,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = classes[id][key];
-				if (result !== null) {
-					return classes[id][key];
+				if (typeof result !== 'undefined' && result !== null) {
+					return result;
 				}
 			} catch(e){
 				// fall through
@@ -108,7 +132,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 
 		var getLabel = function(id){ return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/classview?id=Q" + id; };
+		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
 		var getNonemptySubclasses = function(id) {
@@ -140,6 +164,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getAllSubclassCount: function(id){ return getData(id, 'as', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
+					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
 					getNonemptySubclasses: getNonemptySubclasses
 				}

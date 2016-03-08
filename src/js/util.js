@@ -67,23 +67,12 @@ angular.module('utilities', [])
 		}
 	}
 
-	var getItemUrl = function(itemId) { return "#/classview?id=" + itemId; };
-	var getPropertyUrl = function(propertyId) { return "#/propertyview?id=" + propertyId; };
-
-	var getEntityUrl = function(entityId) {
-		if (entityId.substring(0,1) == 'Q') {
-			return getItemUrl(entityId);
-		} else {
-			return getPropertyUrl(entityId);
-		}
-	}
+	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; };
 
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
-		getItemUrl: getItemUrl,
-		getPropertyUrl: getPropertyUrl,
 		getIdFromUri: getIdFromUri
 	};
 })
@@ -107,9 +96,23 @@ PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
 PREFIX wd: <http://www.wikidata.org/entity/> \n\
 SELECT $p $pLabel \n\
 WHERE { \n\
-   $p wdt:" + propertyId + " wd:" + objectId + " . \n\
+   { SELECT DISTINCT $p WHERE { $p wdt:" + propertyId +  (objectId != null ? " wd:" + objectId : " _:bnode")  +
+   " . } LIMIT " + limit + " } \n\
    SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
-} LIMIT " + limit;
+}";
+	}
+
+	var getQueryForPropertyObjects = function(subjectId, propertyId, limit) {
+		return "PREFIX wikibase: <http://wikiba.se/ontology#> \n\
+PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n\
+PREFIX wd: <http://www.wikidata.org/entity/> \n\
+SELECT $p $pLabel \n\
+WHERE { \n\
+   { SELECT DISTINCT $p WHERE { " + (subjectId != null ? "wd:" + subjectId : "_:bnode") +
+   " wdt:" + propertyId + " ?p . \n\
+     FILTER(isIRI(?p)) } LIMIT " + limit + " } \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
+}";
 	}
 
 	var fetchPropertySubjects = function(propertyId, objectId, limit) {
@@ -117,8 +120,9 @@ WHERE { \n\
 		return util.httpRequest(url);
 	}
 
-	var getInstance = function(sparqlQuery) {
-		return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
+	var fetchPropertyObjects = function(subjectId, propertyId, limit) {
+		var url = getQueryUrl(getQueryForPropertyObjects(subjectId, propertyId, limit));
+		return util.httpRequest(url);
 	}
 
 	var getInlinkCount = function(propertyID, objectItemId) {
@@ -129,32 +133,42 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return result.results.bindings[0].c.value;
 	}
 
+	var parseUnarySparqlQueryResult = function(data, limit, continueUrl) {
+		results = [];
+		try {
+			var instanceJson = data.results.bindings;
+			var element;
+			for (var i = 0; i < instanceJson.length; i++) {
+				if ( i < limit-1 ) {
+					var uri = util.getEntityUrl(util.getIdFromUri(instanceJson[i].p.value));
+					element = {
+						label: instanceJson[i].pLabel.value,
+						uri: uri
+					};
+				} else {
+					element = {
+						label: "... further results",
+						uri: getQueryUiUrl(continueUrl)
+					};
+				}
+				results.push(element);
+			}
+		}
+		catch (err) {
+			//nothing to do here
+		}
+		return results;
+	}
+
 	var getPropertySubjects = function(propertyId, objectId, limit) {
 		return fetchPropertySubjects(propertyId, objectId, limit).then(function(data){
-				results = [];
-				try {
-					var instanceJson = data.results.bindings;
-					var element;
-					for (var i = 0; i < instanceJson.length; i++) {
-						if ( i < limit-1 ) {
-							var uri = util.getEntityUrl(util.getIdFromUri(instanceJson[i].p.value));
-							element = {
-								label: instanceJson[i].pLabel.value,
-								uri: uri
-							};
-						} else {
-							element = {
-								label: "... further results",
-								uri: getQueryUiUrl(getQueryForPropertySubjects(propertyId, objectId, 1000))
-							};
-						}
-						results.push(element);
-					}
-				}
-				catch (err) {
-					//nothing to do here
-				}
-				return results;
+			return parseUnarySparqlQueryResult(data, limit, getQueryForPropertySubjects(propertyId, objectId, 1000));
+		});
+	}
+
+	var getPropertyObjects = function(subjectId, propertyId, limit) {
+		return fetchPropertyObjects(subjectId, propertyId, limit).then(function(data){
+			return parseUnarySparqlQueryResult(data, limit, getQueryForPropertyObjects(subjectId, propertyId, 1000));
 		});
 	}
 
@@ -163,6 +177,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		getQueryUiUrl: getQueryUiUrl,
 		getInlinkCount: getInlinkCount,
 		getPropertySubjects: getPropertySubjects,
+		getPropertyObjects: getPropertyObjects,
 		getIdFromUri: util.getIdFromUri // deprecated; only for b/c
 	};
 
@@ -173,9 +188,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var language = "en";
 
 	var fetchEntityData = function(id) {
+		// Special:EntityData does not always return current data, not even with "purge"
 // 		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json?action=purge");
-		// Alternatively, the following API call also works. What is faster?
-				return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
+		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
 	}
 
 	var getStatementValue = function(statementJson, defaultValue) {
@@ -199,19 +214,20 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				banner: null,
 				superclasses: [],
 				instanceClasses: [],
+				superProperties: [],
 				statements: {}
 			};
 
 			var entityData = response.entities[id];
 
-			if (language in entityData.labels) {
+			if ("labels" in entityData && language in entityData.labels) {
 				ret.label = entityData.labels[language].value;
 				ret.labelorid = entityData.labels[language].value;
 			}
-			if (language in entityData.descriptions) {
+			if ("descriptions" in entityData && language in entityData.descriptions) {
 				ret.description = entityData.descriptions[language].value;
 			}
-			if (language in entityData.aliases) {
+			if ("aliases" in entityData && language in entityData.aliases) {
 				var aliasesData = entityData.aliases[language];
 				for (var i in aliasesData){
 					ret.aliases.push(aliasesData[i].value);
@@ -236,6 +252,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				if ("P279" in entityData.claims) {
 					for (var i in entityData.claims.P279) {
 						ret.superclasses.push(getStatementValue(entityData.claims.P279[i],{"numeric-id": 0})["numeric-id"].toString());
+					}
+				}
+				// subproperty of
+				if ("P1647" in entityData.claims) {
+					for (var i in entityData.claims.P1647) {
+						ret.superProperties.push(getStatementValue(entityData.claims.P1647[i],{"numeric-id": 0})["numeric-id"].toString());
 					}
 				}
 				// Wikivoyage banner; only pick the first banner if multiple
@@ -363,7 +385,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					if (datavalue.value["entity-type"] == "item") {
 						var itemId = "Q" + datavalue.value["numeric-id"];
 						var terms = getEntityTerms(itemId);
-						return '<a href="' + util.getItemUrl(itemId) + '">' + terms.label + '</a>' +
+						return '<a href="' + util.getEntityUrl(itemId) + '">' + terms.label + '</a>' +
 							( terms.description != '' ? ' <span class="smallnote">(' + terms.description + ')</span>' : '' );
 					} else if (datavalue.value["entity-type"] == "property") {
 						return getPropertyLink(datavalue.value["numeric-id"]);
@@ -397,7 +419,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 							return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + datavalue.value + '</a>';
 						//case 'String':
 						default:
-							return datavalue.value;
+							var urlPattern = properties.getUrlPattern(numPropId);
+							if (urlPattern) {
+								return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank">' + datavalue.value + '</a>';
+							} else {
+								return datavalue.value;
+							}
 					}
 				case 'monolingualtext':
 					return datavalue.value.text + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
@@ -408,7 +435,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					}
 					var unit = util.getIdFromUri(datavalue.value.unit);
 					if (unit !== null) {
-						unit = ' <a href="' + util.getItemUrl(unit) + '">' + getEntityTerms(unit).label + '</a>';
+						unit = ' <a href="' + util.getEntityUrl(unit) + '">' + getEntityTerms(unit).label + '</a>';
 					} else {
 						unit = '';
 					}
@@ -416,7 +443,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				case 'globecoordinate':
 					var globe = util.getIdFromUri(datavalue.value.globe);
 					if (globe !== null && globe != 'Q2') {
-						globe = ' on <a href="' + util.getItemUrl(globe) + '">' + getEntityTerms(globe).label + '</a>';
+						globe = ' on <a href="' + util.getEntityUrl(globe) + '">' + getEntityTerms(globe).label + '</a>';
 					} else {
 						globe = '';
 					}

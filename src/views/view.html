@@ -1,0 +1,286 @@
+<div ng-controller="ViewController">
+
+	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
+		<div ng-if="entityData.banner" style="overflow: hidden;">
+			<wdcb-image file="entityData.banner" width="850"></wdcb-image>
+		</div>
+		
+		<h1>{{entityData.label}} <small>(<a href="{{url}}" target="_blank">{{id}}</a>)</small></h1>
+		<div ng-if="entityData.aliases.length > 0" class="aliases">
+			<ul class="list-inline pipe-separated">
+				<li ng-repeat="alias in entityData.aliases">{{alias}}</li>
+			</ul>
+		</div>
+		<div class="lead entity-description">
+			{{entityData.description}}
+		</div>
+		<div style="margin-bottom: 15px;">
+			<div ng-if="propertyDatatype !== null">
+				<b>Type:</b>
+				{{propertyDatatype}}
+			</div>
+			<div ng-if="superProperties !== null">
+				<b><a href="{{subpropertyOfUrl}}">Subproperty of</a>:</b>
+				<span ng-if="superProperties.length > 0">
+					every {{entityData.labelorid}} is also a
+					<ul class="list-inline comma-separated" style="display: inline;">
+						<li ng-repeat="superprop in superProperties">
+							<a href = {{superprop.url}}>{{superprop.label}}</a>
+						</li>
+					</ul>
+				</span>
+				<span ng-if="superProperties.length == 0">
+					{{entityData.labelorid}} is not a subproperty of any other property
+				</span>
+			</div>
+			<div ng-if="superClasses !== null">
+				<b><a href="{{subclassOfUrl}}">Subclass of</a>:</b>
+				<span ng-if="superClasses.length > 0">
+					every {{entityData.labelorid}} is also a<span ng-if="superClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
+					<ul class="list-inline comma-separated" style="display: inline;">
+						<li ng-repeat="superclass in superClasses">
+							<a href = {{superclass.url}}>{{superclass.label}}</a>
+						</li>
+					</ul>
+				</span>
+				<span ng-if="superClasses.length == 0">
+					{{entityData.labelorid}} is not a subclass of any other class
+				</span>
+			</div>
+			<div ng-if="instanceClasses !== null">
+				<b><a href="{{instanceOfUrl}}">Instance of</a>:</b>
+				<span ng-if="instanceClasses.length > 0">
+					{{entityData.label}} is a<span ng-if="instanceClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
+					<ul class="list-inline comma-separated" style="display: inline;">
+						<li ng-repeat="instanceclass in instanceClasses">
+							<a href = {{instanceclass.url}}>{{instanceclass.label}}</a>
+						</li>
+					</ul>
+				</span>
+				<span ng-if="instanceClasses.length == 0">
+					{{entityData.label}} is not an instance of any other class
+				</span>
+			</div>
+		</div>
+
+		<div ng-if="!isItem" class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#property_panel" style="cursor:pointer;cursor:hand">Property Usage</a>
+			</h2></div>
+			<div id='property_panel' class='panel-collapse collapse in'>
+				<table class="table table-striped table-condensed property-table">
+					<tbody>
+						<tr>
+							<th>Entities <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Number of entities with some statement for this property"></span></th>
+							<td>{{propertyItemCount}}
+								<div ng-if="propertyItemCount>0">
+									<div ng-if="examplePropertyItems===null" style="padding: 20px;">
+										<i>Loading direct instances &hellip;</i>
+									</div>
+									<div ng-if="examplePropertyItems.length === 0" style="padding: 20px;">
+										<i>No direct instances found. Maybe the data changed recently. Our records will be updated soon.</i>
+									</div>
+									<div ng-if="examplePropertyItems.length > 0">
+										<div class="four-lines">
+											<ul class="list-inline comma-separated">
+												<li ng-repeat="entity in examplePropertyItems">
+													<a href="{{entity.uri}}">{{entity.label}}</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr ng-if="examplePropertyValues !== null">
+							<th>Values <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Values used in some statement with this property"></span></th>
+							<td>
+								<ul class="list-inline comma-separated">
+									<li ng-repeat="entity in examplePropertyValues">
+										<a href= {{entity.uri}}>{{entity.label}}</a>
+									</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+							<th>Typical properties <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Other properties typically used by entities using this property"></span></th>
+							<td>
+								<div ng-if="relatedProperties.length > 0" class="four-lines">
+									<ul class="list-inline comma-separated">
+										<li ng-repeat="property in relatedProperties">
+											<a href= {{property.link}}>{{property.label}}</a>
+										</li>
+									</ul>
+								</div>
+								<span ng-if="relatedProperties.length == 0"><i>none</i></span>
+							</td>
+						</tr>
+						<tr>
+							<th>Statements <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Number of statements for this property"></span></th>
+							<td>{{propertyStatementCount}} ({{propertyAverageStatements}} per entity)
+							</td>
+						</tr>
+						<tr>
+							<th>Qualifiers <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Other properties that are used as qualifiers for this property, together with the number of uses"></span></th>
+							<td>
+								<div ng-if="propertyQualifiers.length > 0" class="four-lines">
+								<ul class="list-inline comma-separated" style="">
+									<li ng-repeat="entity in propertyQualifiers">
+										<a href = {{entity.url}}>{{entity.label}}</a> <span class="info-badge">{{entity.count}}</span>
+									</li>
+								</ul>
+								</div>
+								<span ng-if="propertyQualifiers.length == 0"><i>none</i></span>
+							</td>
+						</tr>
+						<tr>
+							<th>Uses as qualifier</th>
+							<td>{{propertyQualifierCount}}</td>
+						</tr>
+						<tr>
+							<th>Uses in references</th>
+							<td>{{propertyReferenceCount}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div ng-if="directInstances > 0 || allInstances > 0" class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#instances_panel" style="cursor:pointer;cursor:hand">Instances</a>
+			</h2></div>
+			<div id='instances_panel' class='panel-collapse collapse in'>
+				<table class="table table-striped table-condensed property-table">
+					<tbody>
+						<tr>
+							<th>Direct instances</th>
+							<td>{{directInstances}}
+								<div ng-if="directInstances>0">
+									<div ng-if="exampleInstances===null" style="padding: 20px;">
+										<i>Loading direct instances &hellip;</i>
+									</div>
+									<div ng-if="exampleInstances.length === 0" style="padding: 20px;">
+										<i>No direct instances found. Maybe the data changed recently. Our records will be updated soon.</i>
+									</div>
+									<div ng-if="exampleInstances.length > 0">
+										<div class="four-lines">
+											<ul class="list-inline comma-separated">
+												<li ng-repeat="instance in exampleInstances">
+													<a href="{{instance.uri}}">{{instance.label}}</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<th>All instances <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Total number of unique instances of this class and its {{allSubclasses}} direct and indirect subclasses"></span></th>
+							<td>{{allInstances}}</td>
+						</tr>
+						<tr>
+							<th>Typical properties <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Properties typically used with the direct and indirect instances of this class"></span></th>
+							<td>
+								<div ng-if="relatedProperties.length > 0" class="four-lines">
+									<ul class="list-inline comma-separated">
+										<li ng-repeat="property in relatedProperties">
+											<a href= {{property.link}}>{{property.label}}</a>
+										</li>
+									</ul>
+								</div>
+								<span ng-if="relatedProperties.length == 0"><i>none</i></span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div ng-if="directSubclasses > 0 || ( superClasses !== null && superClasses.length > 0)" class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#classes_panel" style="cursor:pointer;cursor:hand">Classification</a>
+			</h2></div>
+
+			<div id='classes_panel' class='panel-collapse collapse in'>
+				<table class="table table-striped table-condensed property-table">
+					<tbody>
+						<tr>
+							<th>Direct superclasses</th>
+							<td><ul ng-if="superClasses.length > 0" class="list-inline comma-separated" style="display: inline;">
+									<li ng-repeat="superclass in superClasses">
+										<a href = {{superclass.url}}>{{superclass.label}}</a> <span class="info-badge">{{superclass.icount}}</span>
+									</li>
+								</ul><span ng-if="superClasses.length == 0"><i>none</i></span>
+							</td>
+						</tr>
+						<tr>
+							<th>Main subclasses <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Direct subclasses that have at least one instance or subclass"></span></th>
+							<td>{{nonemptySubclasses.length}}
+								<ul ng-if="nonemptySubclasses.length > 0" class="list-inline comma-separated" style="">
+									<li ng-repeat="subclass in nonemptySubclasses">
+										<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.icount}}</span>
+									</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+							<th>Direct subclasses</th>
+							<td>{{directSubclasses}}
+								<div ng-if="directSubclasses > 0">
+									<div ng-if="exampleSubclasses===null" style="padding: 20px;">
+										<i>Loading direct subclasses &hellip;</i>
+									</div>
+									<div ng-if="exampleSubclasses.length > 0">
+										<ul class="list-inline comma-separated">
+											<li ng-repeat="subclass in exampleSubclasses">
+												<a href = {{subclass.uri}}>{{subclass.label}}</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<th>All subclasses <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Number of unique direct and indirect subclasses"></span></th>
+							<td>{{allSubclasses}}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#statements_panel" style="cursor:pointer;cursor:hand">Statements</a>
+			</h2></div>
+			<div id='statements_panel' class='panel-collapse collapse in'>
+				<wdcb-statement-table ng-if="entityData !== null" data="entityData" show="other"></wdcb-statement-table>
+			</div>
+		</div>
+	</div>
+	<div class="sidebar col-md-3 col-md-12 col-sm-12">
+		<div ng-if="entityData.images[0]" style="padding-bottom: 15px;">
+			<wdcb-image file="entityData.images[0]" width="260"></wdcb-image>
+		</div>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+				Links
+			</h2></div>
+			<div>
+				<table class="table table-striped table-condensed">
+					<tbody>
+						<tr><th><a href="{{url}}" target="_blank">Wikidata page</a></th></tr>
+						<tr><th><a href="https://tools.wmflabs.org/reasonator/?q={{id}}" target="_blank">Reasonator</a></th></tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="panel panel-info">
+			<div class="panel-heading"><h2 class="panel-title">
+			<a data-toggle="collapse" data-target="#ids_panel" style="cursor:pointer;cursor:hand">External Ids</a>
+			</h2></div>
+			<div id='ids_panel' class='panel-collapse collapse in'>
+				<wdcb-statement-table ng-if="entityData !== null" data="entityData" show="ids"></wdcb-statement-table>
+			</div>
+		</div>
+	</div>
+</div>
