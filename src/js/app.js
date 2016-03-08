@@ -8,8 +8,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/browse', { templateUrl: 'views/browseData.html' })
 			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
-			.when('/classview', { templateUrl: 'views/classview.html' })
-			.when('/propertyview', { templateUrl: 'views/propertyview.html'})
+			.when('/view', { templateUrl: 'views/classview.html' })
 			.otherwise({redirectTo: '/'});
 	})
 
@@ -43,7 +42,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 		var getLabel = function(id) { return getData(id, 'l', null); }
 		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
-		var getUrl = function(id) { return "#/classview?id=P" + id; }
+		var getUrl = function(id) { return "#/view?id=P" + id; }
 
 		var formatRelatedProperties = function(relatedProperties, threshold){
 			var ret = [];
@@ -125,7 +124,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 
 		var getLabel = function(id){ return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/classview?id=Q" + id; };
+		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
 		var getNonemptySubclasses = function(id) {

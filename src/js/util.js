@@ -67,7 +67,7 @@ angular.module('utilities', [])
 		}
 	}
 
-	var getEntityUrl = function(entityId) { return "#/classview?id=" + entityId; };
+	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; };
 
 	return {
 		httpRequest: httpRequest,
