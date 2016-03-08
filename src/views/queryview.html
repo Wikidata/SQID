@@ -42,8 +42,10 @@
 		<div ng-show="results">
 			<table class="table table-condensed">
 				<tbody>
-					<tr ng-repeat="binding in results.results.bindings">
-						<td><a href="#/classview?id={{binding.qid}}">{{binding.qid}}</a></td>
+					<tr ng-repeat="entity in results">
+						<td><a href="#/classview?id={{entity.qid}}">{{entity.qid}}</a></td>
+						<td>{{entity.label}}</td>
+						<td>{{entity.description}}</td>
 					</tr>
 				</tbody>
 			</table>

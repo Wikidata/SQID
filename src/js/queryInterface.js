@@ -72,9 +72,23 @@
 						data.results.bindings[i].qid = data.results.bindings[i].instance.value.split('/entity/')[1]
 					);
 				}
-				$scope.results = data;
+				$scope.results = data.results.bindings;
 				wikidataapi.getEntityTerms(entityIds).then(function(data) {
 					console.log(data);
+					for(var qid in data){
+						if(data.hasOwnProperty(qid)){
+
+						}
+					}
+					var i = $scope.results.length, e;
+					while(i--) {
+						e = $scope.results[i];
+						if(data[e.qid] !== undefined) {
+							e.label = data[e.qid].label;
+							e.description = data[e.qid].description;
+						}
+					}
+
 				});
 			});
 			
