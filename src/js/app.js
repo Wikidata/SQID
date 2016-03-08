@@ -8,7 +8,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/browse', { templateUrl: 'views/browseData.html' })
 			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
-			.when('/view', { templateUrl: 'views/classview.html' })
+			.when('/view', { templateUrl: 'views/view.html' })
 			.otherwise({redirectTo: '/'});
 	})
 
