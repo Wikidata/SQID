@@ -107,6 +107,10 @@ angular.module('utilities', [])
 				"PREFIX wd: <http://www.wikidata.org/entity/> \n";
 	};
 
+	var getQueryRequest = function(sparqlQuery) {
+		return util.httpRequest(getQueryUrl(sparqlQuery));
+	};
+
 	var getQueryForPropertySubjects = function(propertyId, objectId, limit) {
 		return getStandardPrefixes() +
 			"SELECT $p $pLabel \n" +
@@ -165,6 +169,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	return {
 		getQueryUrl: getQueryUrl,
 		getQueryUiUrl: getQueryUiUrl,
+		getQueryRequest: getQueryRequest,
 		getStandardPrefixes: getStandardPrefixes,
 		getInlinkCount: getInlinkCount,
 		getPropertySubjects: getPropertySubjects,
