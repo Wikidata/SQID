@@ -2,13 +2,14 @@
 	//classBrowser.controller('QueryController', function($scope, Arguments, Classes, Properties, jsonData) {
 	qry = angular.module('queryInterface', ['angucomplete-alt']);
 
-	qry.controller('QueryController', ['$scope','Classes', 'sparql', function($scope, Classes, sparql) {
+	qry.controller('QueryController', ['$scope','Classes', 'sparql', 'wikidataapi', function($scope, Classes, sparql, wikidataapi) {
 
 		sparqewl = sparql;
 
 		$scope.selectedClass = false;
 		$scope.sparqlQuery = null;
 		$scope.classIndex = [];
+		$scope.results = null;
 
 		$scope.selectedClassHandler = function(selected) {
 			if(selected) { $scope.selectedClass = selected; }
@@ -60,6 +61,23 @@
 				"	?instance wdt:P31 wd:" + $scope.selectedClass.originalObject.qid + " .\n" +
 				"}";
 			}
+		};
+
+		$scope.runSparql = function() {
+			sparql.getQueryRequest($scope.sparqlQuery).then(function(data) {
+				console.log(data);
+				var entityIds = [], i = data.results.bindings.length;
+				while(i--) {
+					entityIds.push(
+						data.results.bindings[i].qid = data.results.bindings[i].instance.value.split('/entity/')[1]
+					);
+				}
+				$scope.results = data;
+				wikidataapi.getEntityTerms(entityIds).then(function(data) {
+					console.log(data);
+				});
+			});
+			
 		};
 
 	}]);
