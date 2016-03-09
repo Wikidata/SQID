@@ -1,4 +1,4 @@
-'use strict'; // indicate that code is executed strict
+'use strict'; // indicate that code is executed in strict mode
 
 var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities','queryInterface'])
 
@@ -8,24 +8,45 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/browse', { templateUrl: 'views/browseData.html' })
 			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
-			.when('/classview', { templateUrl: 'views/classview.html' })
-			.when('/propertyview', { templateUrl: 'views/propertyview.html'})
+			.when('/view', { templateUrl: 'views/view.html' })
 			.when('/query', { templateUrl: 'views/queryview.html'})
 			.otherwise({redirectTo: '/'});
 	})
 
 	.factory('Arguments', function($http, $route, jsonData){
 		var args = {}; 
+		var status ={
+			entityType: "classes",
+			from: 0,
+			to:jsonData.TABLE_SIZE,
+			classesFilter: {
+				label: "",
+				instances: [0, 4000000],
+				subclasses: [0, 200000]
+			},
+			propertiesFilter: {
+				label: "",
+				statements: [0, 20000000],
+				qualifiers: [0, 100000],
+				references: [0, 100000]
+			}
+		}
 		return {
 			refreshArgs: function(){
 				args = {
-					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : 0,
-					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : jsonData.TABLE_SIZE,
-					type: ($route.current.params.type) ? ($route.current.params.type) : "classes"
+					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : status.from,
+					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : status.to,
+					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType
 				}
+				status.from = args.from;
+				status.to = args.to;
+				status.entityType = args.type;
 			},
 			getArgs: function(){
 				return args;
+			},
+			getStatus: function(){
+				return status;
 			}
 		}
 	})
@@ -36,14 +57,18 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
     
 		var getData = function(id, key, defaultValue) {
 			try {
-				return properties[id][key];
+				var result = properties[id][key];
+				if (typeof result !== 'undefined' && result !== null) {
+					return result;
+				}
 			} catch(e){
 				return defaultValue;
 			}
-		};
+		}
 
-		var getLabel = function(id) { return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/propertyview?id=P" + id; };
+		var getLabel = function(id) { return getData(id, 'l', null); }
+		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
+		var getUrl = function(id) { return "#/view?id=P" + id; }
 
 		var formatRelatedProperties = function(relatedProperties, threshold){
 			var ret = [];
@@ -60,13 +85,30 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				for (var i = 0; i < relPropsList.length; i++) {
 					if (relPropsList[i][1] < threshold) break;
 					var propId = relPropsList[i][0];
-					var resultObj = {label : getLabel(propId) , link: getUrl(propId)};
+					var resultObj = {label : getLabelOrId(propId) , link: getUrl(propId)};
 					ret.push(resultObj);
 				}
 			} catch (e){}
 
 			return ret;
-		};
+		}
+		
+		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
+		
+		var getFormattedQualifiers = function(id) {
+			var ret = [];
+			angular.forEach(getQualifiers(id), function(usageCount, qualifierId) {
+				ret.push({label : getLabelOrId(qualifierId) , url: getUrl(qualifierId), count: usageCount});
+			});
+			ret.sort(function(a, b) {
+					var a = a.count;
+					var b = b.count;
+					return a < b ? 1 : (a > b ? -1 : 0);
+			});
+			return ret;
+		}
+		
+		var getStatementCount = function(id){ return getData(id, 's', 0); }
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
@@ -76,15 +118,19 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
-					getLabelOrId: function(id) { return getData(id, 'l', 'P' + id); },
+					getLabelOrId: getLabelOrId,
 					getItemCount: function(id){ return getData(id, 'i', 0); },
 					getDatatype: function(id){ return getData(id, 'd', null); },
-					getStatementCount: function(id){ return getData(id, 's', 0); },
+					getStatementCount: getStatementCount,
 					getQualifierCount: function(id){ return getData(id, 'q', 0); },
 					getReferenceCount: function(id){ return getData(id, 'e', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
-					getQualifiers: function(id){ return getData(qid, 'qs', []); },
+					getQualifiers: getQualifiers,
+					getFormattedQualifiers: getFormattedQualifiers,
+					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
+					getUrlPattern: function(id){ return getData(id, 'u', null); },
+					getClasses: function(id){ return getData(id, 'pc', []); },
 					formatRelatedProperties: formatRelatedProperties,
 				}
 			});
@@ -99,8 +145,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = classes[id][key];
-				if (result !== null) {
-					return classes[id][key];
+				if (typeof result !== 'undefined' && result !== null) {
+					return result;
 				}
 			} catch(e){
 				// fall through
@@ -109,7 +155,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 
 		var getLabel = function(id){ return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/classview?id=Q" + id; };
+		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
 		var getNonemptySubclasses = function(id) {
@@ -141,6 +187,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getAllSubclassCount: function(id){ return getData(id, 'as', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
+					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
 					getNonemptySubclasses: getNonemptySubclasses
 				}
@@ -154,6 +201,50 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			return $sce.trustAsHtml(text);
 		};
 	}])
+
+	.directive('ngSlider', function(){
+	    var SCALE_FACTOR = 1.005;
+	    var scale = function(val){
+	      if (val > 0) {
+	      return Math.round(Math.log(val) / Math.log(SCALE_FACTOR));
+	      }
+	      else {
+	        return 0;
+	      }
+	    }
+	    
+	    var antiScale = function(val){
+	       if (val > 0) {
+	      return Math.round(Math.pow(SCALE_FACTOR, val));
+	       }else{
+	        return 0;
+	       }
+	    }
+	    function link(scope, element, attrs){
+	      element.slider({
+	        range: true,
+	        min: scale(parseInt(scope.begin)),
+	        max: scale(parseInt(scope.end)),
+	        values: [ scale(scope.$parent.slider[parseInt(scope.index)].startVal), scale(scope.$parent.slider[parseInt(scope.index)].endVal) ],
+	        slide: function( event, ui ) {
+	          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
+	          scope.$parent.slider[parseInt(scope.index)].endVal = antiScale(ui.values[1]);
+	          scope.$parent.updateStatus();
+	          scope.$apply();
+	          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
+	        }
+	      });
+	    }
+	    
+	    return {
+	      scope:{
+	        begin: '=begin',
+	        end: '=end',
+	        index: '=index'
+	      },
+	      link: link
+	    };
+	})
 
 	.controller('TypeSelectorController', function($scope, Arguments){
 		Arguments.refreshArgs();
