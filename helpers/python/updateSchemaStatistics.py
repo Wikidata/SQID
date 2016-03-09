@@ -39,12 +39,14 @@ def updateClassRecords() :
 	}""")
 
 	print "Augmenting current class data ..."
+	classesWithInstances = {}
 	with open('classes.json') as classFile:    
 		data = json.load(classFile)
 		for binding in resultsClasses['results']['bindings']:
 			classUri = binding['cl']['value']
 			if classUri[0:31] == 'http://www.wikidata.org/entity/':
 				classId = classUri[32:]
+				classesWithInstances[classId] = True
 				classLabel = binding['clLabel']['value']
 				classInstances = int(binding['c']['value'])
 				if classId in data:
@@ -52,6 +54,10 @@ def updateClassRecords() :
 					data[classId]['i'] = classInstances
 				else:
 					data[classId] = {'l':classLabel, 'i':classInstances}
+		# zero instance counts for classes not found in the query:
+		for classId in data :
+			if classId not in classesWithInstances :
+				data[classId]['i'] = 0
 
 		print "Writing json class data ..."
 		with open('classes-new.json', 'w') as outfile:
