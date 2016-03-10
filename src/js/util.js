@@ -334,6 +334,24 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
+.directive('wdcbFooter', function(statistics) {
+
+	var link = function (scope, element, attrs) {
+		statistics.then(function(stats) {
+			var innerHtml = '<div class="col-md-6">Statistics based on data dump ' + stats.getDumpDateString() + '</div>';
+			innerHtml += '<div class="col-md-6">Powered by \
+				<a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; \
+				<a href="https://query.wikidata.org/">Wikidata SPARQL Query</a></div>';
+			element.replaceWith('<hr/><div class="container-fluid"><div class="footer row">' + innerHtml + '</div></div>');
+		});
+	};
+	
+	return {
+		restrict: 'E',
+		link: link
+	};
+})
+
 .directive('wdcbStatementTable', function(Properties, Classes, wikidataapi, util) {
 	var idTerms = {};
 	var idTermsSize = 0;

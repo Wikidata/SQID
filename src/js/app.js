@@ -194,6 +194,25 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		}
 		return promise;
 	})
+	
+	.factory('statistics', function($http, $route) {
+		var promise;
+		var statistics; 
+
+		if (!promise){
+			promise = $http.get("data/statistics.json").then(function(response){
+				statistics = response.data;
+				return {
+					getDumpDateStamp: function(){ return statistics['dumpDate']; },
+					getDumpDateString: function(){
+						var dateStamp = statistics['dumpDate'];
+						return dateStamp.substring(0,4) + '-' + dateStamp.substring(4,6) + '-' + dateStamp.substring(6,8);
+					}
+				}
+			});
+		}
+		return promise;
+	})
 
 	.filter('to_trusted', ['$sce', function($sce){
 		return function(text) {
