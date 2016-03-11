@@ -175,7 +175,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
-					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-6"], ["Instances", "col-xs-2"], ["Subclasses", "col-xs-2"]],
+					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-8"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,

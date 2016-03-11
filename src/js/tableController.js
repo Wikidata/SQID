@@ -107,11 +107,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
 
     var getClassFromId = function(id, data){
-      return ['<a href="' + data.getUrl(id) + '">Q' + id + '</a>', data.getLabel(id),  data.getAllInstanceCount(id).toString(), data.getAllSubclassCount(id).toString()];
+      return ['<a href="' + data.getUrl(id) + '">Q' + id + '</a>', data.getLabel(id),   '<div class="text-right">' + data.getAllInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getAllSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
-      return ['<a href="' + data.getUrl(id) + '">P' + id + '</a>', data.getLabel(id), data.getStatementCount(id).toString(), data.getQualifierCount(id).toString(), data.getReferenceCount(id).toString()];
+      return ['<a href="' + data.getUrl(id) + '">P' + id + '</a>', data.getLabel(id),'<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
