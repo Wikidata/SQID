@@ -41,7 +41,7 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 
 		View.updateId();
 		$scope.id = View.getId();
-		$scope.isItem = ( $scope.id.substring(0,1) == 'Q' );
+		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 
 		$scope.classes = null;
 		$scope.properties = null;

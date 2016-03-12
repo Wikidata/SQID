@@ -1,6 +1,10 @@
 <div ng-controller="ViewController">
 
 	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
+		<div ng-if="entityData != null && entityData.missing == true" class="well" >
+			<h2>Sorry, I could not find any entity with ID "{{id}}".</h2>
+			<p>Maybe it was deleted. Maybe it never existed. Maybe we'll never know.</p>
+		</div>
 		<div ng-if="entityData.banner" style="overflow: hidden;">
 			<wdcb-image file="entityData.banner" width="850"></wdcb-image>
 		</div>
@@ -258,6 +262,9 @@
 		</div>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
+		<div ng-if="entityData != null && entityData.missing == true" style="padding-bottom: 15px;">
+			<wdcb-image file="'Colossal octopus by Pierre Denys de Montfort.jpg'" width="260"></wdcb-image>
+		</div>
 		<div ng-if="entityData.images[0]" style="padding-bottom: 15px;">
 			<wdcb-image file="entityData.images[0]" width="260"></wdcb-image>
 		</div>

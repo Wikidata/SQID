@@ -215,8 +215,14 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				superclasses: [],
 				instanceClasses: [],
 				superProperties: [],
-				statements: {}
+				statements: {},
+				missing: false
 			};
+
+			if ("error" in response || "missing" in response.entities[id]) {
+				ret.missing = true;
+				return ret;
+			}
 
 			var entityData = response.entities[id];
 
