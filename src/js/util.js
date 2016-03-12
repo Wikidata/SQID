@@ -490,7 +490,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 							}
 					}
 				case 'monolingualtext':
-					return datavalue.value.text + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
+					return util.autoLinkText(datavalue.value.text) + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
 				case 'quantity':
 					var amount = datavalue.value.amount;
 					if (amount.substring(0,1) == '+') {
