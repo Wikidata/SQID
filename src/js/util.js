@@ -67,13 +67,18 @@ angular.module('utilities', [])
 		}
 	}
 
-	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; };
+	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; }
+
+	var autoLinkText = function(text) {
+		return text.replace(/[QP][1-9][0-9]*/g, function(match) { return '<a href="' + getEntityUrl(match) +'">' + match + '</a>'; });
+	}
 
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
-		getIdFromUri: getIdFromUri
+		getIdFromUri: getIdFromUri,
+		autoLinkText: autoLinkText
 	};
 })
 
@@ -387,7 +392,8 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			var isId = (properties.getDatatype(numId) == 'ExternalId');
 			var isHumanRelation = false;
 			var isMedia = (properties.getDatatype(numId) == 'CommonsMedia');
-			var isAboutWikiPages = (numId == '1151'); // "topic's main Wikimedia portal"
+			var isAboutWikiPages = (numId == '1151') || // "topic's main Wikimedia portal"
+									(numId == '910'); // "topic's main category"
 			angular.forEach(properties.getClasses(numId), function(classId) {
 				if (classId == '19847637' || // "Wikidata property representing a unique identifier"
 					classId == '18614948' || // "Wikidata property for authority control"
@@ -443,7 +449,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 						var itemId = "Q" + datavalue.value["numeric-id"];
 						var terms = getEntityTerms(itemId);
 						return '<a href="' + util.getEntityUrl(itemId) + '">' + terms.label + '</a>' +
-							( terms.description != '' ? ' <span class="smallnote">(' + terms.description + ')</span>' : '' );
+							( terms.description != '' ? ' <span class="smallnote">(' + util.autoLinkText(terms.description) + ')</span>' : '' );
 					} else if (datavalue.value["entity-type"] == "property") {
 						return getPropertyLink(datavalue.value["numeric-id"]);
 					}

@@ -16,7 +16,8 @@
 			</ul>
 		</div>
 		<div class="lead entity-description">
-			{{entityData.description}}
+			<div ng-bind-html="richDescription"></div>
+<!-- 			{{entityData.description}} -->
 		</div>
 		<div style="margin-bottom: 15px;">
 			<div ng-if="propertyDatatype !== null">
