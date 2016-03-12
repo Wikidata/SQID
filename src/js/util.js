@@ -365,6 +365,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
+		var title = attrs.title;
 
 		// clear term cache when it grows too big to prevent memory leak
 		if (idTermsSize > 5000) {
@@ -382,12 +383,44 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			if (numId == '31' || numId == '279') {
 				return false;
 			}
-			if (show == 'ids') {
-				return (properties.getDatatype(numId) == 'ExternalId');
-			}
 
-			// if (show == 'other')
-			return (properties.getDatatype(numId) != 'ExternalId');
+			var isId = (properties.getDatatype(numId) == 'ExternalId');
+			var isHumanRelation = false;
+			var isMedia = (properties.getDatatype(numId) == 'CommonsMedia');
+			var isAboutWikiPages = (numId == '1151'); // "topic's main Wikimedia portal"
+			angular.forEach(properties.getClasses(numId), function(classId) {
+				if (classId == '19847637' || // "Wikidata property representing a unique identifier"
+					classId == '18614948' || // "Wikidata property for authority control"
+					classId == '19595382' || // "Wikidata property for authority control for people"
+					classId == '19829908' || // "Wikidata property for authority control for places"
+					classId == '19833377' || // "Wikidata property for authority control for works"
+					classId == '18618628' || // "Wikidata property for authority control for cultural heritage identification"
+					classId == '21745557' || // "Wikidata property for authority control for organisations"
+					classId == '19833835' || // "Wikidata property for authority control for substances"
+					classId == '22964274'  // "Wikidata property for identication in the film industry"
+				) {
+					isId = true;
+				} else if (classId == '22964231') { // "Wikidata property for human relationships"
+					isHumanRelation = true;
+				} else if (classId == '18610173') { // "Wikidata property for Commons"
+					isMedia = true;
+				} else if (classId == '18667213') { // "Wikidata property about Wikimedia categories"
+					isAboutWikiPages = true;
+				}
+			});
+
+			switch (show) {
+				case 'ids':
+					return isId;
+				case 'family':
+					return isHumanRelation;
+				case 'media':
+					return isMedia;
+				case 'wiki':
+					return isAboutWikiPages;
+				case 'other': default:
+					return !isId && !isHumanRelation && !isMedia && !isAboutWikiPages;
+			}
 		}
 
 		var getEntityTerms = function(entityId) {
@@ -518,10 +551,17 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		};
 
 		var getHtml = function(statements, propertyList) {
-			var html = '<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
+			var panelId = 'statements_' + show;
+			var html = '<div class="panel panel-info">\n' +
+						'<div class="panel-heading"><h2 class="panel-title">\n' +
+						'<a data-toggle="collapse" data-target="#' + panelId + '"  style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
+						'<div id="' + panelId + '" class="panel-collapse collapse in">' +
+						'<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
+			var hasContent = false;
 			angular.forEach(propertyList, function (numPropId) {
 				var statementGroup = statements['P' + numPropId]
 				angular.forEach(statementGroup, function (statement, index) {
+					hasContent = true;
 					html += '<tr>';
 					if (index == 0) {
 						html += '<th valign="top" rowspan="' + statementGroup.length + '" style="min-width: 20%;">'
@@ -532,7 +572,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					html += '</tr>';
 				});
 			});
-			html += '</tbody></table></div>';
+			if (!hasContent) return '';
+
+			html += '</tbody></table></div></div></div>';
 			return html;
 		}
 
