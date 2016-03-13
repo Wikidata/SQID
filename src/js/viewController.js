@@ -39,6 +39,8 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 		var MAX_PROP_VALUES = 20;
 		var RELATED_PROPERTIES_THRESHOLD = 5;
 
+		wikidataapi.checkCacheSize();
+
 		View.updateId();
 		$scope.id = View.getId();
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
