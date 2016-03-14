@@ -2,14 +2,16 @@
 	//classBrowser.controller('QueryController', function($scope, Arguments, Classes, Properties, jsonData) {
 	qry = angular.module('queryInterface', ['angucomplete-alt']);
 
-	qry.controller('QueryController', ['$scope','Classes', 'sparql', 'wikidataapi', function($scope, Classes, sparql, wikidataapi) {
+	qry.controller('QueryController', ['$scope','Classes', 'util', 'sparql', 'wikidataapi', function($scope, Classes, util, sparql, wikidataapi) {
 
 		sparqewl = sparql;
 
 		$scope.selectedClass = false;
 		$scope.sparqlQuery = null;
 		$scope.classIndex = [];
-		$scope.results = null;
+
+		var searchOrderBy = 'ai';
+		//$scope.results = null;
 
 		$scope.selectedClassHandler = function(selected) {
 			if(selected) { $scope.selectedClass = selected; }
@@ -35,7 +37,7 @@
 				}
 			}
 			matches.sort(function(a,b) { // sort by number of all instances descending
-				return (a.ai > b.ai) ? -1 : ( (a.ai === b.ai) ? 0 : 1);
+				return (a[searchOrderBy] > b[searchOrderBy]) ? -1 : ( (a[searchOrderBy] === b[searchOrderBy]) ? 0 : 1);
 			});
 			return matches.slice(0,9);
 		};
@@ -65,31 +67,39 @@
 
 		$scope.runSparql = function() {
 			sparql.getQueryRequest($scope.sparqlQuery).then(function(data) {
-				console.log(data);
-				var entityIds = [], i = data.results.bindings.length;
-				while(i--) {
-					entityIds.push(
-						data.results.bindings[i].qid = data.results.bindings[i].instance.value.split('/entity/')[1]
-					);
-				}
-				$scope.results = data.results.bindings;
-				wikidataapi.getEntityTerms(entityIds).then(function(data) {
-					console.log(data);
-					for(var qid in data){
-						if(data.hasOwnProperty(qid)){
+				//console.log(data);
+				var results = data.results.bindings;
 
-						}
-					}
-					var i = $scope.results.length, e;
+				var processEntities = function(entities) {
+					// grab Q/P ids from the full entity uri
+					var entityIds = [], i = entities.length, eid;
 					while(i--) {
-						e = $scope.results[i];
-						if(data[e.qid] !== undefined) {
-							e.label = data[e.qid].label;
-							e.description = data[e.qid].description;
+						if(entities[i].qid === undefined) { // no need to process more than once
+							eid = entities[i].instance.value.split('/entity/')[1];
+							entities[i].qid = eid;
+							entities[i].url = util.getEntityUrl(eid);
+							entityIds.push(eid);
 						}
 					}
+					// pull labels and descriptions
+					if(entityIds.length > 0) {
+						wikidataapi.getEntityTerms(entityIds).then(function(data) {
+							//console.log(data);
+							var i = entities.length, entity;
+							while(i--) {
+								entity = entities[i];
+								if(data[entity.qid] !== undefined) {
+									entity.label = data[entity.qid].label;
+									entity.description = data[entity.qid].description;
+								}
+							}
+						});
+					}
+				};
 
-				});
+				$scope.pagination.onPageChange = processEntities;
+				$scope.pagination.setIndex(results);
+				
 			});
 			
 		};
