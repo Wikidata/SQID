@@ -28,11 +28,17 @@
 			<hr>
 			<!-- generated sparql query -->
 			<div data-ng-show="sparqlQuery" class="form-group">
-				<textarea class="form-control" rows="10">{{sparqlQuery}}</textarea>
+				<textarea class="form-control" rows="10" data-ng-model="sparqlQuery">{{sparqlQuery}}</textarea>
 				<button type="submit" class="btn btn-default">Run query</button>
 			</div>
 
 		</form>
+
+		<div class="alert alert-danger alert-dismissible" role="alert" data-ng-show="queryError">
+			<button type="button" class="close" ng-click="queryError = null" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<span class="glyphicon glyphicon-alert" aria-hidden="true"></span> <strong>Query failed with the following response</strong>:
+  			<pre class="well-sm">{{queryError}}</pre>
+		</div>
 
 		<div data-ng-show="pagination.activeIndex.length" data-ng-controller="PaginationController">
 			<table class="table table-condensed">

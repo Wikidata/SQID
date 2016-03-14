@@ -10,7 +10,7 @@
 		$scope.sparqlQuery = null;
 		$scope.classIndex = [];
 
-		var searchOrderBy = 'ai';
+		var searchOrderBy = 'i';
 		//$scope.results = null;
 
 		$scope.selectedClassHandler = function(selected) {
@@ -100,6 +100,9 @@
 				$scope.pagination.onPageChange = processEntities;
 				$scope.pagination.setIndex(results);
 				
+			}, function(response) {
+				console.log(response);
+				$scope.queryError = response;
 			});
 			
 		};

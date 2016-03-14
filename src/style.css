@@ -274,3 +274,8 @@ span.smallnote {
 	top: 1px;
 	left: 4px;
 }
+
+
+.alert-danger pre {
+	max-height: 12em;
+}
