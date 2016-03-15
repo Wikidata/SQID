@@ -27,7 +27,22 @@ angular.module('utilities', [])
 
 })
 
-.factory('util', function($http, $q) {
+.factory('i18n', function() {
+	var language = 'en';
+
+	var setLanguage = function(newLang) {
+// 		if (language != newLang) {
+			language = newLang;
+// 		}
+	}
+
+	return {
+		getLanguage: function() { return language; },
+		setLanguage: setLanguage,
+	};
+})
+
+.factory('util', function(i18n, $http, $q) {
 
 	var httpRequest = function(url) {
 		return $http.get(url).then(function(response) {
@@ -67,7 +82,8 @@ angular.module('utilities', [])
 		}
 	}
 
-	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; }
+	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId +
+		( i18n.getLanguage() != 'en' ? '&lang=' + i18n.getLanguage() : ''); }
 
 	var autoLinkText = function(text) {
 		return text.replace(/[QP][1-9][0-9]*/g, function(match) { return '<a href="' + getEntityUrl(match) +'">' + match + '</a>'; });
@@ -82,7 +98,7 @@ angular.module('utilities', [])
 	};
 })
 
-.factory('sparql', function(util) {
+.factory('sparql', function(util, i18n) {
 
 	var SPARQL_SERVICE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql";
 	var SPARQL_UI_PREFIX = "https://query.wikidata.org/#";
@@ -103,7 +119,7 @@ SELECT $p $pLabel \n\
 WHERE { \n\
    { SELECT DISTINCT $p WHERE { $p wdt:" + propertyId +  (objectId != null ? " wd:" + objectId : " _:bnode")  +
    " . } LIMIT " + limit + " } \n\
-   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage() + "\" . } \n\
 }";
 	}
 
@@ -116,7 +132,7 @@ WHERE { \n\
    { SELECT DISTINCT $p WHERE { " + (subjectId != null ? "wd:" + subjectId : "_:bnode") +
    " wdt:" + propertyId + " ?p . \n\
      FILTER(isIRI(?p)) } LIMIT " + limit + " } \n\
-   SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . } \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage() + "\" . } \n\
 }";
 	}
 
@@ -188,12 +204,19 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 })
 
-.factory('wikidataapi', function(util, $q) {
+.factory('wikidataapi', function(util, i18n, $q) {
 
 	var idTerms = {}; // cache for labels/descriptions of items
 	var idTermsSize = 0; // current size of cache
+	var cacheLanguage = 'en';
 
-	var language = "en";
+	var updateCacheLanguage = function() {
+		if (cacheLanguage != i18n.getLanguage()) {
+			cacheLanguage = i18n.getLanguage();
+			idTerms = {}; // clear term cache that was based on old language
+			idTermsSize = 0;
+		}
+	}
 
 	// Clear term cache when it grows too big to prevent memory leak.
 	// This should only be called at the beginning of a new page display to ensure that
@@ -209,18 +232,19 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var fetchEntityData = function(id) {
 		// Special:EntityData does not always return current data, not even with "purge"
 // 		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json?action=purge");
-		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
+		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + i18n.getLanguage() + '&callback=JSON_CALLBACK');
 	}
-	
+
 	var hasCachedEntityTerms =  function(entityId) {
+		updateCacheLanguage();
 		return (entityId in idTerms);
 	}
 
 	var getCachedEntityTerms = function(entityId) {
-		if (entityId in idTerms) {
+		if (hasCachedEntityTerms(entityId)) {
 			return idTerms[entityId];
 		} else {
-			return { label: entityId, description: ""};
+			return { label: entityId, description: ''};
 		}
 	}
 
@@ -287,6 +311,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	}
 	
 	var getEntityTerms = function(entityIds) {
+		var language = i18n.getLanguage();
 		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&redirects=yes&props=descriptions%7Clabels&languages=' + language + '&callback=JSON_CALLBACK';
 		var requests = [];
 
@@ -314,6 +339,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var getEntityData = function(id) {
 		return fetchEntityData(id).then(function(response) {
 			var ret = {
+				language: i18n.getLanguage(), // this is fixed for this result!
 				label: "",
 				labelorid: id,
 				description: "",
@@ -342,15 +368,15 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 			var entityData = response.entities[id];
 
-			if ("labels" in entityData && language in entityData.labels) {
-				ret.label = entityData.labels[language].value;
-				ret.labelorid = entityData.labels[language].value;
+			if ("labels" in entityData && ret.language in entityData.labels) {
+				ret.label = entityData.labels[ret.language].value;
+				ret.labelorid = entityData.labels[ret.language].value;
 			}
-			if ("descriptions" in entityData && language in entityData.descriptions) {
-				ret.description = entityData.descriptions[language].value;
+			if ("descriptions" in entityData && ret.language in entityData.descriptions) {
+				ret.description = entityData.descriptions[ret.language].value;
 			}
-			if ("aliases" in entityData && language in entityData.aliases) {
-				var aliasesData = entityData.aliases[language];
+			if ("aliases" in entityData && ret.language in entityData.aliases) {
+				var aliasesData = entityData.aliases[ret.language];
 				for (var i in aliasesData){
 					ret.aliases.push(aliasesData[i].value);
 				}

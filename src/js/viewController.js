@@ -1,11 +1,17 @@
 
-classBrowser.factory('View', function($route, sparql, wikidataapi) {
+classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
 	var id;
 	var fetchedEntityId = null;
+	var fetchedEntityLanguage = null;
 	var entityDataPromise = null;
 	return {
 		updateId: function() {
 			id = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
+		},
+
+		updateLang: function() {
+			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : "en";
+			i18n.setLanguage(lang);
 		},
 
 		getId: function(){
@@ -21,11 +27,12 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 		},
 
 		getEntityData: function() {
-			if (fetchedEntityId != id) {
+			if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
 				entityDataPromise = wikidataapi.getEntityData(id).then(function(data) {
 					return data;
 				});
 				fetchedEntityId = id;
+				fetchedEntityLanguage = i18n.getLanguage();
 			}
 			return entityDataPromise;
 		}
@@ -42,6 +49,7 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 		wikidataapi.checkCacheSize();
 
 		View.updateId();
+		View.updateLang();
 		$scope.id = View.getId();
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 
