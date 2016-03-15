@@ -27,7 +27,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				label: "",
 				statements: [0, 20000000],
 				qualifiers: [0, 100000],
-				references: [0, 100000]
+				references: [0, 100000],
+				datatypes: "All"  
+
 			}
 		}
 		return {
@@ -113,7 +115,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				return {
-					propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
+					propertiesHeader: [["Label (ID)", "col-xs-5"], ["Datatype", "col-xs-1"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
@@ -175,7 +177,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
-					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-8"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
+					classesHeader: [["Label (ID)", "col-xs-10"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,

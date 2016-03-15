@@ -56,8 +56,13 @@
 				<input type="text" class="form-control input-md" placeholder="Search" ng-model="filterLabels" ng-change="searchFilter()" />
 			</div>
 			<!--<div ng-slider id="slider-range" someattr="{{slider[0].from}}" index="slider[0].from" begin="0" end="1000">-->
+			<div ng-if='args.type == "properties"'>
+				<select class="form-control" data-ng-options="datatypeOption as datatypeOption.name for datatypeOption in datatypeOptions" ng-model="datatypeSelector" ng-change="setDatatypeFilter(datatypeSelector)">
+				</select>
+		      	<br/>
+			</div>
 			<div ng-repeat="elem in slider track by $index">
-				<p><strong>Range for {{elem.name}}:</strong></p>
+				<p><strong>{{elem.name}}:</strong></p>
 				<div ng-slider id="slider-range" someattr="elem.from" index="$index" begin="elem.from" end="elem.to"></div>
 				<br/>
 				<div class="pull-left">{{ slider[$index].startVal }}</div>
