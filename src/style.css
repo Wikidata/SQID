@@ -76,6 +76,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	height: 100px;
 }*/
 
+.pagination-nav-caption {
+	margin: 20px 0 -10px 6px;
+}
+
 #custom-search-input{
     padding: 3px;
     border: solid 1px #E4E4E4;
@@ -283,4 +287,3 @@ span.smallnote {
 	top: 1px;
 	left: 4px;
 }
-
