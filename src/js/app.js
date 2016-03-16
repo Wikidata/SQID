@@ -14,7 +14,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 	.factory('Arguments', function($http, $route, jsonData){
 		var args = {}; 
-		var status ={
+		var statusStartValues = {
 			entityType: "classes",
 			from: 0,
 			to:jsonData.TABLE_SIZE,
@@ -31,7 +31,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				datatypes: "All"  
 
 			}
-		}
+		};
+		var status = statusStartValues;
 		return {
 			refreshArgs: function(){
 				args = {
@@ -48,6 +49,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			getStatus: function(){
 				return status;
+			},
+			resetFilters: function(){
+				status.classesFilter = statusStartValues.classesFilter;
+				status.propertiesFilter = statusStartValues.propertiesFilter;
 			}
 		}
 	})
@@ -226,7 +231,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    var SCALE_FACTOR = 1.005;
 	    var scale = function(val){
 	      if (val > 0) {
-	      return Math.round(Math.log(val) / Math.log(SCALE_FACTOR));
+	      	return Math.ceil(Math.log(val) / Math.log(SCALE_FACTOR));
 	      }
 	      else {
 	        return 0;
@@ -235,7 +240,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    
 	    var antiScale = function(val){
 	       if (val > 0) {
-	      return Math.round(Math.pow(SCALE_FACTOR, val));
+	       	if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
+	       		return 1;
+	       	}
+	      return Math.ceil(Math.pow(SCALE_FACTOR, val));
 	       }else{
 	        return 0;
 	       }
@@ -248,7 +256,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	        values: [ scale(scope.$parent.slider[parseInt(scope.index)].startVal), scale(scope.$parent.slider[parseInt(scope.index)].endVal) ],
 	        slide: function( event, ui ) {
 	          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
-	          scope.$parent.slider[parseInt(scope.index)].endVal = antiScale(ui.values[1]);
+	          scope.$parent.slider[parseInt(scope.index)].endVal = Math.min(antiScale(ui.values[1]), scope.end);
 	          scope.$parent.updateStatus();
 	          scope.$apply();
 	          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );

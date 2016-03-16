@@ -122,7 +122,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
     
     var refresh = function(args, content, idArray, entityConstructor){
-      //console.log("CALL");
       paginationControl.refreshPageSelectorData(args, idArray);
       if (status.entityType == "classes"){
         $scope.filterLabels = status.classesFilter.label;
@@ -217,20 +216,39 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       //resu.add()
     }
 
+    var initClassesSlider = function(){
+      $scope.slider = [ // TODO replace numbers with constants
+        {name: "Number of direct instances", from: 0, 
+          to: 4000000,
+          startVal: status.classesFilter.instances[0], 
+          endVal: status.classesFilter.instances[1]},
+        {name: "number of direct subclasses", from: 0,
+          to: 200000,
+          startVal: status.classesFilter.subclasses[0], 
+          endVal: status.classesFilter.subclasses[1]}];
+    }
+
+    var initPropertiesSlider = function(){
+      $scope.slider = [ // TODO replace numbers with constants
+        {name: "Uses in statements", from: 0,
+          to: 20000000,
+          startVal: status.propertiesFilter.statements[0],
+          endVal: status.propertiesFilter.statements[1]},
+        {name: "Uses in qualifiers", from: 0,
+          to: 100000,
+          startVal: status.propertiesFilter.qualifiers[0],
+          endVal: status.propertiesFilter.qualifiers[1]},
+        {name: "Uses in references", from: 0,
+          to: 100000,
+          startVal: status.propertiesFilter.references[0],
+          endVal: status.propertiesFilter.references[1]}]; 
+    }
+
     var updateTable = function(){
       // TODO: check if form and to are out of the table length
       if (args.type == "classes") {
         Classes.then(function(data){
-          $scope.slider = [ // TODO replace numbers with constants
-            {name: "Number of direct instances", from: 0, 
-              to: 4000000,
-              startVal: status.classesFilter.instances[0], 
-              endVal: status.classesFilter.instances[1]},
-            {name: "number of direct subclasses", from: 0,
-              to: 200000,
-              startVal: status.classesFilter.subclasses[0], 
-              endVal: status.classesFilter.subclasses[1]}];
-          // todo: apply filter
+          initClassesSlider();
           var classesArray = initArray(data.getClasses(), applyFilter);
           refresh(args, data, classesArray, getClassFromId);
           $scope.content = tableContent;
@@ -242,20 +260,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       if (args.type == "properties") {
           Properties.then(function(data){
-          $scope.slider = [ // TODO replace numbers with constants
-            {name: "Uses in statements", from: 0,
-              to: 20000000,
-              startVal: status.propertiesFilter.statements[0],
-              endVal: status.propertiesFilter.statements[1]},
-            {name: "Uses in qualifiers", from: 0,
-              to: 100000,
-              startVal: status.propertiesFilter.qualifiers[0],
-              endVal: status.propertiesFilter.qualifiers[1]},
-            {name: "Uses in references", from: 0,
-              to: 100000,
-              startVal: status.propertiesFilter.references[0],
-              endVal: status.propertiesFilter.references[1]}];
-
+          initPropertiesSlider();
           var propertiesArray = initArray(data.getProperties(), applyFilter);
           refresh(args, data, propertiesArray, getPropertyFromId);
           $scope.content = tableContent;
@@ -288,7 +293,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       {id: 11, name: "MonolingualText"}];
 
     $scope.datatypeSelector = {id: 1, name: "All", $$hashKey: "object:14"};
-    console.log("got here");
     if (!$scope.filterText) {$scope.filterText = ""};
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
@@ -303,9 +307,13 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     }
 
     $scope.setDatatypeFilter = function(data){
-      // console.log("Call");
       status.propertiesFilter.datatypes = data.name;
-      console.log(data);
+      updateTable();
+    }
+
+    $scope.resetFilters = function(){
+      Arguments.resetFilters();
+      status.classesFilter.instances[0] = 0;
       updateTable();
     }
 

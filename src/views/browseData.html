@@ -9,10 +9,6 @@
             <button type="button" class="btn btn-default active">Classes</button>
             <button type="button" class="btn btn-default">Properties</button>
         </div> -->
-      <ul id="typeSelector" class="nav nav-pills" ng-controller="TypeSelectorController">
-        <li role="presentation" class="{{firstActive}}"><a href="#/browse?type=classes">Classes</a></li>
-        <li role="presentation" class="{{secondActive}}"><a href="#/browse?type=properties">Properties</a></li>
-      </ul>
       <div>
         <div class="p-x-2">
         	<table class="table table-condensed">
@@ -69,6 +65,7 @@
 				<div class="pull-right">{{ slider[$index].endVal }}</div>
 				<br/><br/>
 			</div>
+			<button type="button" class="btn btn-default" ng-click="resetFilters()">Reset Filters</button>
 		</div>
 		<hr/>
 		<div id="content-statisics">
