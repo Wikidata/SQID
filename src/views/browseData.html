@@ -53,7 +53,7 @@
 			</div>
 			<!--<div ng-slider id="slider-range" someattr="{{slider[0].from}}" index="slider[0].from" begin="0" end="1000">-->
 			<div ng-if='args.type == "properties"'>
-				<select class="form-control" data-ng-options="datatypeOption as datatypeOption.name for datatypeOption in datatypeOptions" ng-model="datatypeSelector" ng-change="setDatatypeFilter(datatypeSelector)">
+				<select class="form-control" data-ng-options="datatypeOption.name for datatypeOption in datatypeSelector.options track by datatypeOption.id" ng-model="datatypeSelector.selected" ng-change="setDatatypeFilter(datatypeSelector.selected)">
 				</select>
 		      	<br/>
 			</div>

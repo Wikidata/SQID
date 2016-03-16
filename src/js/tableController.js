@@ -134,9 +134,9 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var labelFilter = function(entry){
       var filter;
       if (status.entityType == "classes"){
-        filter = status.classesFilter.label;
+        filter = status.classesFilter.label.toLowerCase();
       }else{
-        filter = status.propertiesFilter.label;
+        filter = status.propertiesFilter.label.toLowerCase();
       }
 
       if (!filter){
@@ -148,7 +148,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (!entry[jsonData.JSON_LABEL]) {
         return false;
       }
-      if (entry[jsonData.JSON_LABEL].indexOf(filter) > -1) {
+      if (entry[jsonData.JSON_LABEL].toLowerCase().indexOf(filter) > -1) {
         return true;
       }else{
         return false;
@@ -160,7 +160,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (status.entityType == "classes"){
         return true;
       }else{
-        filter = status.propertiesFilter.datatypes; 
+        filter = status.propertiesFilter.datatypes.name; 
       }
 
       if (!filter){
@@ -269,7 +269,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           $scope.entityCount = propertiesArray.length;
           });
       }
-      
     }
     // $scope.slider = []; // TODO: init slider in refreshArgs()
     // execution part
@@ -280,7 +279,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.args=args;
     $scope.filterdata;
 
-    $scope.datatypeOptions = [{id: 1, name: "All"},
+    $scope.datatypeSelector = {
+      options: [{id: 1, name: "All"},
       {id: 2, name: "WikibaseItem"},
       {id: 3, name: "WikibaseProperty"},
       {id: 4, name: "String"},
@@ -290,9 +290,9 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       {id: 8, name: "Time"},
       {id: 9, name: "GlobeCoordinate"},
       {id: 10, name: "Quantity"},
-      {id: 11, name: "MonolingualText"}];
-
-    $scope.datatypeSelector = {id: 1, name: "All", $$hashKey: "object:14"};
+      {id: 11, name: "MonolingualText"}],
+      selected: status.propertiesFilter.datatypes
+    }
     if (!$scope.filterText) {$scope.filterText = ""};
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
@@ -307,7 +307,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     }
 
     $scope.setDatatypeFilter = function(data){
-      status.propertiesFilter.datatypes = data.name;
+      status.propertiesFilter.datatypes = data;
       updateTable();
     }
 

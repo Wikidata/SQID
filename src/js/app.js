@@ -28,7 +28,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				statements: [0, 20000000],
 				qualifiers: [0, 100000],
 				references: [0, 100000],
-				datatypes: "All"  
+				datatypes: {id: 1, name: "All"}
 
 			}
 		};
