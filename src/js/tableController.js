@@ -107,7 +107,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
 
     var getClassFromId = function(id, data){
-      return ['<a href="' + data.getUrl(id) + '">' + data.getLabel(id) +  ' (Q' + id + ')</a>',   '<div class="text-right">' + data.getAllInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getAllSubclassCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id) + '">' + data.getLabel(id) +  ' (Q' + id + ')</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
@@ -166,7 +166,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (!filter){
         return true;
       }
-      if (filter == "All"){
+      if (filter == "Any property type"){
         return true;
       }
       if (filter == entry[jsonData.JSON_DATATYPE]){
@@ -280,7 +280,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.filterdata;
 
     $scope.datatypeSelector = {
-      options: [{id: 1, name: "All"},
+      options: [{id: 1, name: "Any property type"},
       {id: 2, name: "WikibaseItem"},
       {id: 3, name: "WikibaseProperty"},
       {id: 4, name: "String"},
@@ -290,7 +290,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       {id: 8, name: "Time"},
       {id: 9, name: "GlobeCoordinate"},
       {id: 10, name: "Quantity"},
-      {id: 11, name: "MonolingualText"}],
+      {id: 11, name: "Monolingualtext"}],
       selected: status.propertiesFilter.datatypes
     }
     if (!$scope.filterText) {$scope.filterText = ""};
