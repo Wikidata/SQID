@@ -312,8 +312,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     }
 
     $scope.resetFilters = function(){
-      Arguments.resetFilters();
-      status.classesFilter.instances[0] = 0;
+      status.classesFilter = Arguments.getStatusStartValues().classesFilter;
+      status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
       updateTable();
     }
 

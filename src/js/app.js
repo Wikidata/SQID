@@ -12,9 +12,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.otherwise({redirectTo: '/'});
 	})
 
-	.factory('Arguments', function($http, $route, jsonData){
+	.factory('Arguments', function($http, $route, jsonData, util){
 		var args = {}; 
-		var statusStartValues = {
+		const statusStartValues = {
 			entityType: "classes",
 			from: 0,
 			to:jsonData.TABLE_SIZE,
@@ -28,11 +28,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				statements: [0, 20000000],
 				qualifiers: [0, 100000],
 				references: [0, 100000],
-				datatypes: {id: 1, name: "All"}
+				datatypes: {id: 1, name: "Any property type"}
 
 			}
 		};
-		var status = statusStartValues;
+		var status = util.cloneObject(statusStartValues);
 		return {
 			refreshArgs: function(){
 				args = {
@@ -50,9 +50,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			getStatus: function(){
 				return status;
 			},
-			resetFilters: function(){
-				status.classesFilter = statusStartValues.classesFilter;
-				status.propertiesFilter = statusStartValues.propertiesFilter;
+			getStatusStartValues:function(){
+				return util.cloneObject(statusStartValues);
 			}
 		}
 	})
@@ -239,28 +238,29 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    }
 	    
 	    var antiScale = function(val){
-	       if (val > 0) {
+	      if (val > 0) {
 	       	if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
 	       		return 1;
 	       	}
-	      return Math.ceil(Math.pow(SCALE_FACTOR, val));
-	       }else{
+	        return Math.ceil(Math.pow(SCALE_FACTOR, val));
+	      }else{
 	        return 0;
-	       }
+	      }
 	    }
 	    function link(scope, element, attrs){
-	      element.slider({
-	        range: true,
-	        min: scale(parseInt(scope.begin)),
-	        max: scale(parseInt(scope.end)),
-	        values: [ scale(scope.$parent.slider[parseInt(scope.index)].startVal), scale(scope.$parent.slider[parseInt(scope.index)].endVal) ],
-	        slide: function( event, ui ) {
-	          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
-	          scope.$parent.slider[parseInt(scope.index)].endVal = Math.min(antiScale(ui.values[1]), scope.end);
-	          scope.$parent.updateStatus();
-	          scope.$apply();
-	          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-	        }
+	      scope.$watchGroup(['startval', 'endval'], function(){
+	        element.slider({
+	          range: true,
+	          min: scale(parseInt(scope.begin)),
+	          max: scale(parseInt(scope.end)),
+	          values: [ scale(scope.startval), scale(scope.endval) ],
+	          slide: function( event, ui ) {
+	            scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
+	            scope.$parent.slider[parseInt(scope.index)].endVal = Math.min(antiScale(ui.values[1]), scope.end);
+	            scope.$parent.updateStatus();
+	            scope.$apply();
+	          }
+	        });
 	      });
 	    }
 	    
@@ -268,7 +268,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	      scope:{
 	        begin: '=begin',
 	        end: '=end',
-	        index: '=index'
+	        index: '=index', // TODO and startVal and endVal
+	        startval: '=startval',
+	        endval: '=endval'
 	      },
 	      link: link
 	    };

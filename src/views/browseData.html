@@ -59,7 +59,7 @@
 			</div>
 			<div ng-repeat="elem in slider track by $index">
 				<p><strong>{{elem.name}}:</strong></p>
-				<div ng-slider id="slider-range" someattr="elem.from" index="$index" begin="elem.from" end="elem.to"></div>
+				<div ng-slider id="slider-range" someattr="elem.from" index="$index" begin="elem.from" end="elem.to" startval="elem.startVal" endval="elem.endVal"></div>
 				<br/>
 				<div class="pull-left">{{ slider[$index].startVal }}</div>
 				<div class="pull-right">{{ slider[$index].endVal }}</div>

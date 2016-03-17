@@ -67,14 +67,29 @@ angular.module('utilities', [])
 		}
 	}
 
+	var cloneObject = function(obj) {
+	    if (obj === null || typeof obj !== 'object') {
+	        return obj;
+	    }
+	 
+	    var temp = obj.constructor(); // give temp the original obj's constructor
+	    for (var key in obj) {
+	        temp[key] = cloneObject(obj[key]);
+	    }
+	 
+	    return temp;
+	};
+
 	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; };
 
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
-		getIdFromUri: getIdFromUri
+		getIdFromUri: getIdFromUri,
+		cloneObject: cloneObject
 	};
+
 })
 
 .factory('sparql', function(util) {
