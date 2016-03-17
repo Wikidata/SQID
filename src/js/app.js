@@ -14,7 +14,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 	.factory('Arguments', function($http, $route, jsonData, util){
 		var args = {}; 
-		const statusStartValues = {
+		var statusStartValues = {
 			entityType: "classes",
 			from: 0,
 			to:jsonData.TABLE_SIZE,
