@@ -67,8 +67,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					return result;
 				}
 			} catch(e){
-				return defaultValue;
+				// fall through
 			}
+			return defaultValue;
 		}
 
 		var getLabel = function(id) { return getData(id, 'l', null); }
