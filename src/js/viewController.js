@@ -32,20 +32,23 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 	};
 })
 .controller('ViewController',
-	function($scope, $route, View, Classes, Properties, sparql, wikidataapi){
+	function($scope, $route, $sce, View, Classes, Properties, sparql, wikidataapi, util){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
 		var MAX_PROP_SUBJECTS = 10;
 		var MAX_PROP_VALUES = 20;
 		var RELATED_PROPERTIES_THRESHOLD = 5;
 
+		wikidataapi.checkCacheSize();
+
 		View.updateId();
 		$scope.id = View.getId();
-		$scope.isItem = ( $scope.id.substring(0,1) == 'Q' );
+		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 
 		$scope.classes = null;
 		$scope.properties = null;
 		$scope.entityData = null;
+		$scope.richDescription = null;
 
 		$scope.exampleInstances = null;
 		$scope.exampleSubclasses = null;
@@ -69,6 +72,7 @@ classBrowser.factory('View', function($route, sparql, wikidataapi) {
 
 		View.getEntityData().then(function(data) {
 			$scope.entityData = data;
+			$scope.richDescription = $sce.trustAsHtml(util.autoLinkText($scope.entityData.description));
 		});
 
 		Properties.then(function(properties){

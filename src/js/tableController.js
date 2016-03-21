@@ -107,11 +107,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
 
     var getClassFromId = function(id, data){
-      return ['<a href="#/classview?id=Q' + id + '">Q' + id + '</a>', data.getLabel(id),  data.getAllInstanceCount(id).toString(), data.getAllSubclassCount(id).toString()];
+      return ['<a href="' + data.getUrl(id) + '">' + data.getLabel(id) +  ' (Q' + id + ')</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
-      return ['<a href="#/propertyview?id=P' + id + '">P' + id + '</a>', data.getLabel(id), data.getStatementCount(id).toString(), data.getQualifierCount(id).toString(), data.getReferenceCount(id).toString()];
+      return ['<a href="' + data.getUrl(id) + '">' + data.getLabel(id) + ' (P' + id + ')</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
@@ -122,7 +122,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     };
     
     var refresh = function(args, content, idArray, entityConstructor){
-      //console.log("CALL");
       paginationControl.refreshPageSelectorData(args, idArray);
       if (status.entityType == "classes"){
         $scope.filterLabels = status.classesFilter.label;
@@ -135,9 +134,9 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var labelFilter = function(entry){
       var filter;
       if (status.entityType == "classes"){
-        filter = status.classesFilter.label;
+        filter = status.classesFilter.label.toLowerCase();
       }else{
-        filter = status.propertiesFilter.label;
+        filter = status.propertiesFilter.label.toLowerCase();
       }
 
       if (!filter){
@@ -149,7 +148,28 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (!entry[jsonData.JSON_LABEL]) {
         return false;
       }
-      if (entry[jsonData.JSON_LABEL].indexOf(filter) > -1) {
+      if (entry[jsonData.JSON_LABEL].toLowerCase().indexOf(filter) > -1) {
+        return true;
+      }else{
+        return false;
+      }
+    }
+
+    var datatypeFilter = function(entry){
+      var filter;
+      if (status.entityType == "classes"){
+        return true;
+      }else{
+        filter = status.propertiesFilter.datatypes.name; 
+      }
+
+      if (!filter){
+        return true;
+      }
+      if (filter == "Any property type"){
+        return true;
+      }
+      if (filter == entry[jsonData.JSON_DATATYPE]){
         return true;
       }else{
         return false;
@@ -157,32 +177,36 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     }
 
     var applyFilter = function(entry, json){
-      if (!labelFilter(json[entry])){
+      if (!datatypeFilter(json[entry])){
         return false;
       }else{
-        if (status.entityType == "classes"){
-          var filter = status.classesFilter;
-          if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
-            return false;
-          }
-          if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
-            return false;
-          }
-          return true;
+        if (!labelFilter(json[entry])){
+          return false;
         }else{
-          var filter = status.propertiesFilter;
-          if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
-            return false;
+          if (status.entityType == "classes"){
+            var filter = status.classesFilter;
+            if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
+              return false;
+            }
+            if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
+              return false;
+            }
+            return true;
+          }else{
+            var filter = status.propertiesFilter;
+            if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
+              return false;
+            }
+            if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
+              return false;
+            }
+            if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
+              return false;
+            }
+            return true;
           }
-          if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
-            return false;
-          }
-          if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
-            return false;
-          }
-          return true;
-        }
 
+        }
       }
     }
 
@@ -192,19 +216,39 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       //resu.add()
     }
 
+    var initClassesSlider = function(){
+      $scope.slider = [ // TODO replace numbers with constants
+        {name: "Number of direct instances", from: 0, 
+          to: 4000000,
+          startVal: status.classesFilter.instances[0], 
+          endVal: status.classesFilter.instances[1]},
+        {name: "number of direct subclasses", from: 0,
+          to: 200000,
+          startVal: status.classesFilter.subclasses[0], 
+          endVal: status.classesFilter.subclasses[1]}];
+    }
+
+    var initPropertiesSlider = function(){
+      $scope.slider = [ // TODO replace numbers with constants
+        {name: "Uses in statements", from: 0,
+          to: 20000000,
+          startVal: status.propertiesFilter.statements[0],
+          endVal: status.propertiesFilter.statements[1]},
+        {name: "Uses in qualifiers", from: 0,
+          to: 100000,
+          startVal: status.propertiesFilter.qualifiers[0],
+          endVal: status.propertiesFilter.qualifiers[1]},
+        {name: "Uses in references", from: 0,
+          to: 100000,
+          startVal: status.propertiesFilter.references[0],
+          endVal: status.propertiesFilter.references[1]}]; 
+    }
+
     var updateTable = function(){
+      // TODO: check if form and to are out of the table length
       if (args.type == "classes") {
         Classes.then(function(data){
-          $scope.slider = [ // TODO replace numbers with constants
-            {name: "number of instances", from: 0, 
-              to: 4000000,
-              startVal: status.classesFilter.instances[0], 
-              endVal: status.classesFilter.instances[1]},
-            {name: "number of subclasses", from: 0,
-              to: 200000,
-              startVal: status.classesFilter.subclasses[0], 
-              endVal: status.classesFilter.subclasses[1]}];
-          // todo: apply filter
+          initClassesSlider();
           var classesArray = initArray(data.getClasses(), applyFilter);
           refresh(args, data, classesArray, getClassFromId);
           $scope.content = tableContent;
@@ -216,19 +260,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       if (args.type == "properties") {
           Properties.then(function(data){
-          $scope.slider = [ // TODO replace numbers with constants
-            {name: "uses in statements", from: 0,
-              to: 20000000,
-              startVal: status.propertiesFilter.statements[0],
-              endVal: status.propertiesFilter.statements[1]},
-            {name: "uses in qualifiers", from: 0,
-              to: 100000,
-              startVal: status.propertiesFilter.qualifiers[0],
-              endVal: status.propertiesFilter.qualifiers[1]},
-            {name: "uses in references", from: 0,
-              to: 100000,
-              startVal: status.propertiesFilter.references[0],
-              endVal: status.propertiesFilter.references[1]}];
+          initPropertiesSlider();
           var propertiesArray = initArray(data.getProperties(), applyFilter);
           refresh(args, data, propertiesArray, getPropertyFromId);
           $scope.content = tableContent;
@@ -237,7 +269,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           $scope.entityCount = propertiesArray.length;
           });
       }
-      
     }
     // $scope.slider = []; // TODO: init slider in refreshArgs()
     // execution part
@@ -247,6 +278,21 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     $scope.filterdata;
+
+    $scope.datatypeSelector = {
+      options: [{id: 1, name: "Any property type"},
+      {id: 2, name: "WikibaseItem"},
+      {id: 3, name: "WikibaseProperty"},
+      {id: 4, name: "String"},
+      {id: 5, name: "Url"},
+      {id: 6, name: "CommonsMedia"},
+      {id: 7, name: "ExternalId"},
+      {id: 8, name: "Time"},
+      {id: 9, name: "GlobeCoordinate"},
+      {id: 10, name: "Quantity"},
+      {id: 11, name: "Monolingualtext"}],
+      selected: status.propertiesFilter.datatypes
+    }
     if (!$scope.filterText) {$scope.filterText = ""};
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
@@ -259,6 +305,18 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
       updateTable();
     }
+
+    $scope.setDatatypeFilter = function(data){
+      status.propertiesFilter.datatypes = data;
+      updateTable();
+    }
+
+    $scope.resetFilters = function(){
+      status.classesFilter = Arguments.getStatusStartValues().classesFilter;
+      status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
+      updateTable();
+    }
+
     $scope.updateStatus = function(){
       if (status.entityType == "classes"){
         status.classesFilter.instances[0] = $scope.slider[0].startVal;

@@ -67,14 +67,34 @@ angular.module('utilities', [])
 		}
 	}
 
-	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; };
+	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId; }
+
+	var cloneObject = function(obj) {
+	    if (obj === null || typeof obj !== 'object') {
+	        return obj;
+	    }
+	 
+	    var temp = obj.constructor(); // give temp the original obj's constructor
+	    for (var key in obj) {
+	        temp[key] = cloneObject(obj[key]);
+	    }
+	 
+	    return temp;
+	};
+
+	var autoLinkText = function(text) {
+		return text.replace(/[QP][1-9][0-9]*/g, function(match) { return '<a href="' + getEntityUrl(match) +'">' + match + '</a>'; });
+	}
 
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
-		getIdFromUri: getIdFromUri
+		getIdFromUri: getIdFromUri,
+		cloneObject: cloneObject,
+		autoLinkText: autoLinkText
 	};
+
 })
 
 .factory('sparql', function(util) {
@@ -193,12 +213,38 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 .factory('wikidataapi', function(util, $q) {
 
+	var idTerms = {}; // cache for labels/descriptions of items
+	var idTermsSize = 0; // current size of cache
+
 	var language = "en";
+
+	// Clear term cache when it grows too big to prevent memory leak.
+	// This should only be called at the beginning of a new page display to ensure that
+	// we don't delete cache entries that some callers require.
+	var checkCacheSize = function() {
+		if (idTermsSize > 5000) {
+			// 5000 is a lot; only the hugest of items may reach that (which is no problem either)
+			idTerms = {};
+			idTermsSize = 0;
+		}
+	}
 
 	var fetchEntityData = function(id) {
 		// Special:EntityData does not always return current data, not even with "purge"
 // 		return util.httpRequest("https://www.wikidata.org/wiki/Special:EntityData/" + id + ".json?action=purge");
 		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
+	}
+	
+	var hasCachedEntityTerms =  function(entityId) {
+		return (entityId in idTerms);
+	}
+
+	var getCachedEntityTerms = function(entityId) {
+		if (entityId in idTerms) {
+			return idTerms[entityId];
+		} else {
+			return { label: entityId, description: ""};
+		}
 	}
 
 	var getStatementValue = function(statementJson, defaultValue) {
@@ -211,6 +257,83 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return defaultValue;
 	}
 
+	var addIdIfUncached = function(entityId, missingIds) {
+		if (!(entityId in idTerms) ) {
+			missingIds[entityId] = true;
+		}
+	}
+
+	var addIdsWithUncachedTermsFromSnak = function(snak, missingIds) {
+		if (snak.snaktype == 'value') {
+			switch (snak.datavalue.type) {
+				case 'wikibase-entityid':
+					if (snak.datavalue.value["entity-type"] == "item") {
+						addIdIfUncached("Q" + snak.datavalue.value["numeric-id"], missingIds);
+					}
+					break;
+				case 'quantity':
+					var unit = util.getIdFromUri(snak.datavalue.value.unit);
+					if (unit !== null) {
+						addIdIfUncached(unit, missingIds);
+					}
+					break;
+				case 'globecoordinate':
+					var globe = util.getIdFromUri(snak.datavalue.value.globe);
+					if (globe !== null) {
+						addIdIfUncached(globe, missingIds);
+					}
+					break;
+				case 'time':
+				case 'string':
+				case 'monolingualtext':
+				default:
+					break; // no ids
+			}
+		}
+	}
+
+	var getIdsWithUncachedTerms = function(statements) {
+		var result = {};
+		angular.forEach(statements, function(statementGroup) {
+			angular.forEach(statementGroup, function (statement) {
+				addIdsWithUncachedTermsFromSnak(statement.mainsnak, result);
+				if ('qualifiers' in statement) {
+					angular.forEach(statement.qualifiers, function (snakList) {
+						angular.forEach(snakList, function(snak) {
+							addIdsWithUncachedTermsFromSnak(snak, result);
+						});
+					});
+				}
+			});
+		});
+		return result;
+	}
+	
+	var getEntityTerms = function(entityIds) {
+		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&redirects=yes&props=descriptions%7Clabels&languages=' + language + '&callback=JSON_CALLBACK';
+		var requests = [];
+
+		for (var i = 0; i < entityIds.length; i += 50) {
+			requests.push(util.jsonpRequest(baseUrl + '&ids=' + entityIds.slice(i,i+50).join('|')));
+		}
+
+		return $q.all(requests).then( function(responses) {
+			angular.forEach(responses, function(response) {
+				if ("entities" in response) {
+					angular.forEach(response.entities, function(data,entityId) {
+						var label = entityId;
+						var desc = "";
+						if (language in data.labels) label = data.labels[language].value;
+						if (language in data.descriptions) desc = data.descriptions[language].value;
+						idTerms[entityId] = { label: label, description: desc };
+					});
+				}
+			});
+			idTermsSize = Object.keys(idTerms).length;
+			return true;
+		});
+	};
+	
 	var getEntityData = function(id) {
 		return fetchEntityData(id).then(function(response) {
 			var ret = {
@@ -223,8 +346,22 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				superclasses: [],
 				instanceClasses: [],
 				superProperties: [],
-				statements: {}
+				statements: {},
+				missing: false,
+				termsPromise: null,
+				waitForTerms: function() {
+					if (this.termsPromise == null) {
+						var missingTermIdList = Object.keys(getIdsWithUncachedTerms(this.statements));
+						this.termsPromise = getEntityTerms(missingTermIdList);
+					}
+					return this.termsPromise;
+				}
 			};
+
+			if ("error" in response || "missing" in response.entities[id]) {
+				ret.missing = true;
+				return ret;
+			}
 
 			var entityData = response.entities[id];
 
@@ -291,35 +428,13 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		});
 	};
 
-	var getEntityTerms = function(entityIds) {
-		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&redirects=yes&props=descriptions%7Clabels&languages=' + language + '&callback=JSON_CALLBACK';
-		var requests = [];
-
-		for (var i = 0; i < entityIds.length; i += 50) {
-			requests.push(util.jsonpRequest(baseUrl + '&ids=' + entityIds.slice(i,i+50).join('|')));
-		}
-
-		return $q.all(requests).then( function(responses) {
-			var ret = {};
-			angular.forEach(responses, function(response) {
-				if ("entities" in response) {
-					angular.forEach(response.entities, function(data,entityId) {
-						var label = entityId;
-						var desc = "";
-						if (language in data.labels) label = data.labels[language].value;
-						if (language in data.descriptions) desc = data.descriptions[language].value;
-						ret[entityId] = { label: label, description: desc };
-					});
-				}
-			});
-			return ret;
-		});
-	};
-
 	return {
 		getEntityData: getEntityData,
 		getEntityTerms: getEntityTerms,
-		getImageData: getImageData
+		getImageData: getImageData,
+		checkCacheSize: checkCacheSize,
+		getCachedEntityTerms: getCachedEntityTerms,
+		hasCachedEntityTerms: hasCachedEntityTerms
 	};
 })
 
@@ -342,22 +457,32 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
+.directive('wdcbFooter', function(statistics) {
+
+	var link = function (scope, element, attrs) {
+		statistics.then(function(stats) {
+			var innerHtml = '<div class="col-md-6">Statistics based on data dump ' + stats.getDumpDateString() + '</div>';
+			innerHtml += '<div class="col-md-6">Powered by \
+				<a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; \
+				<a href="https://query.wikidata.org/">Wikidata SPARQL Query</a></div>';
+			element.replaceWith('<hr/><div class="container-fluid"><div class="footer row">' + innerHtml + '</div></div>');
+		});
+	};
+	
+	return {
+		restrict: 'E',
+		link: link
+	};
+})
+
 .directive('wdcbStatementTable', function(Properties, Classes, wikidataapi, util) {
-	var idTerms = {};
-	var idTermsSize = 0;
 	var properties = null;
 
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
+		var title = attrs.title;
 
-		// clear term cache when it grows too big to prevent memory leak
-		if (idTermsSize > 5000) {
-			// 5000 is a lot; only the hugest of items may reach that (which is no problem either)
-			idTerms = {};
-			idTermsSize = 0;
-		}
-
-		var missingTermIds = {};
+		var hasMissingTerms = false;
 
 		var includeProperty = function(numId) {
 			if (!show || show == 'all') {
@@ -366,21 +491,52 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			if (numId == '31' || numId == '279') {
 				return false;
 			}
-			if (show == 'ids') {
-				return (properties.getDatatype(numId) == 'ExternalId');
-			}
 
-			// if (show == 'other')
-			return (properties.getDatatype(numId) != 'ExternalId');
+			var isId = (properties.getDatatype(numId) == 'ExternalId');
+			var isHumanRelation = false;
+			var isMedia = (properties.getDatatype(numId) == 'CommonsMedia');
+			var isAboutWikiPages = (numId == '1151') || // "topic's main Wikimedia portal"
+									(numId == '910'); // "topic's main category"
+			angular.forEach(properties.getClasses(numId), function(classId) {
+				if (classId == '19847637' || // "Wikidata property representing a unique identifier"
+					classId == '18614948' || // "Wikidata property for authority control"
+					classId == '19595382' || // "Wikidata property for authority control for people"
+					classId == '19829908' || // "Wikidata property for authority control for places"
+					classId == '19833377' || // "Wikidata property for authority control for works"
+					classId == '18618628' || // "Wikidata property for authority control for cultural heritage identification"
+					classId == '21745557' || // "Wikidata property for authority control for organisations"
+					classId == '19833835' || // "Wikidata property for authority control for substances"
+					classId == '22964274'  // "Wikidata property for identication in the film industry"
+				) {
+					isId = true;
+				} else if (classId == '22964231') { // "Wikidata property for human relationships"
+					isHumanRelation = true;
+				} else if (classId == '18610173') { // "Wikidata property for Commons"
+					isMedia = true;
+				} else if (classId == '18667213') { // "Wikidata property about Wikimedia categories"
+					isAboutWikiPages = true;
+				}
+			});
+
+			switch (show) {
+				case 'ids':
+					return isId;
+				case 'family':
+					return isHumanRelation;
+				case 'media':
+					return isMedia;
+				case 'wiki':
+					return isAboutWikiPages;
+				case 'other': default:
+					return !isId && !isHumanRelation && !isMedia && !isAboutWikiPages;
+			}
 		}
 
 		var getEntityTerms = function(entityId) {
-			if (entityId in idTerms) {
-				return idTerms[entityId];
-			} else {
-				missingTermIds[entityId] = true;
-				return { label: entityId, description: ""};
+			if (!wikidataapi.hasCachedEntityTerms(entityId)) {
+				hasMissingTerms = true;
 			}
+			return wikidataapi.getCachedEntityTerms(entityId);
 		}
 
 		var getPropertyLink = function(numId) {
@@ -394,7 +550,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 						var itemId = "Q" + datavalue.value["numeric-id"];
 						var terms = getEntityTerms(itemId);
 						return '<a href="' + util.getEntityUrl(itemId) + '">' + terms.label + '</a>' +
-							( terms.description != '' ? ' <span class="smallnote">(' + terms.description + ')</span>' : '' );
+							( terms.description != '' ? ' <span class="smallnote">(' + util.autoLinkText(terms.description) + ')</span>' : '' );
 					} else if (datavalue.value["entity-type"] == "property") {
 						return getPropertyLink(datavalue.value["numeric-id"]);
 					}
@@ -435,7 +591,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 							}
 					}
 				case 'monolingualtext':
-					return datavalue.value.text + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
+					return util.autoLinkText(datavalue.value.text) + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
 				case 'quantity':
 					var amount = datavalue.value.amount;
 					if (amount.substring(0,1) == '+') {
@@ -502,21 +658,33 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		};
 
 		var getHtml = function(statements, propertyList) {
-			var html = '<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
+			hasMissingTerms = false;
+			var panelId = 'statements_' + show;
+			var html = '<div class="panel panel-info">\n' +
+						'<div class="panel-heading"><h2 class="panel-title">\n' +
+						'<a data-toggle="collapse" data-target="#' + panelId + '"  style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
+						'<div id="' + panelId + '" class="panel-collapse collapse in">' +
+						'<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
+			var hasContent = false;
 			angular.forEach(propertyList, function (numPropId) {
 				var statementGroup = statements['P' + numPropId]
-				angular.forEach(statementGroup, function (statement, index) {
-					html += '<tr>';
-					if (index == 0) {
-						html += '<th valign="top" rowspan="' + statementGroup.length + '" style="min-width: 20%;">'
-							+ getPropertyLink(numPropId)
-							+ '</th>';
-					}
-					html += '<td>' + makeStatementValueHtml(statement) + '</td>'
-					html += '</tr>';
-				});
+				if (!hasMissingTerms) {
+					angular.forEach(statementGroup, function (statement, index) {
+						hasContent = true;
+						html += '<tr>';
+						if (index == 0) {
+							html += '<th valign="top" rowspan="' + statementGroup.length + '" style="min-width: 20%;">'
+								+ getPropertyLink(numPropId)
+								+ '</th>';
+						}
+						html += '<td>' + makeStatementValueHtml(statement) + '</td>'
+						html += '</tr>';
+					});
+				}
 			});
-			html += '</tbody></table></div>';
+			if (!hasContent) return '';
+
+			html += '</tbody></table></div></div></div>';
 			return html;
 		}
 
@@ -563,14 +731,10 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			Properties.then(function(propertyData){
 				properties = propertyData;
 				var propertyList = preparePropertyList(itemData);
-				
+
 				var html = getHtml(itemData.statements, propertyList);
-				var missingTermIdList = Object.keys(missingTermIds);
-				if (missingTermIdList.length > 0) {
-					wikidataapi.getEntityTerms(missingTermIdList).then(function(terms){
-						angular.extend(idTerms, terms);
-						idTermsSize = Object.keys(idTerms).length;
-						missingTermIds = {};
+				if (hasMissingTerms) {
+					itemData.waitForTerms().then( function() {
 						element.replaceWith(getHtml(itemData.statements, propertyList));
 					});
 				} else {

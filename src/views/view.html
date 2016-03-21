@@ -1,6 +1,10 @@
 <div ng-controller="ViewController">
 
 	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
+		<div ng-if="entityData != null && entityData.missing == true" class="well" >
+			<h2>Sorry, I could not find any entity with ID "{{id}}".</h2>
+			<p>Maybe it was deleted. Maybe it never existed. Maybe we'll never know.</p>
+		</div>
 		<div ng-if="entityData.banner" style="overflow: hidden;">
 			<wdcb-image file="entityData.banner" width="850"></wdcb-image>
 		</div>
@@ -12,7 +16,7 @@
 			</ul>
 		</div>
 		<div class="lead entity-description">
-			{{entityData.description}}
+			<div ng-bind-html="richDescription"></div>
 		</div>
 		<div style="margin-bottom: 15px;">
 			<div ng-if="propertyDatatype !== null">
@@ -247,17 +251,18 @@
 				</table>
 			</div>
 		</div>
+		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Human relationships" show="family"></wdcb-statement-table>
+
+		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Statements" show="other"></wdcb-statement-table>
 		
-		<div class="panel panel-info">
-			<div class="panel-heading"><h2 class="panel-title">
-			<a data-toggle="collapse" data-target="#statements_panel" style="cursor:pointer;cursor:hand">Statements</a>
-			</h2></div>
-			<div id='statements_panel' class='panel-collapse collapse in'>
-				<wdcb-statement-table ng-if="entityData !== null" data="entityData" show="other"></wdcb-statement-table>
-			</div>
-		</div>
+		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Media" show="media"></wdcb-statement-table>
+		
+		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Wikimedia Categories and Portals" show="wiki"></wdcb-statement-table>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
+		<div ng-if="entityData != null && entityData.missing == true" style="padding-bottom: 15px;">
+			<wdcb-image file="'Colossal octopus by Pierre Denys de Montfort.jpg'" width="260"></wdcb-image>
+		</div>
 		<div ng-if="entityData.images[0]" style="padding-bottom: 15px;">
 			<wdcb-image file="entityData.images[0]" width="260"></wdcb-image>
 		</div>
@@ -274,13 +279,6 @@
 				</table>
 			</div>
 		</div>
-		<div class="panel panel-info">
-			<div class="panel-heading"><h2 class="panel-title">
-			<a data-toggle="collapse" data-target="#ids_panel" style="cursor:pointer;cursor:hand">External Ids</a>
-			</h2></div>
-			<div id='ids_panel' class='panel-collapse collapse in'>
-				<wdcb-statement-table ng-if="entityData !== null" data="entityData" show="ids"></wdcb-statement-table>
-			</div>
-		</div>
+		<wdcb-statement-table ng-if="entityData !== null" data="entityData" show="ids" title="Identifiers"></wdcb-statement-table>
 	</div>
 </div>

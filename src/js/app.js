@@ -13,9 +13,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.otherwise({redirectTo: '/'});
 	})
 
-	.factory('Arguments', function($http, $route, jsonData){
+	.factory('Arguments', function($http, $route, jsonData, util){
 		var args = {}; 
-		var status ={
+		var statusStartValues = {
 			entityType: "classes",
 			from: 0,
 			to:jsonData.TABLE_SIZE,
@@ -28,9 +28,12 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				label: "",
 				statements: [0, 20000000],
 				qualifiers: [0, 100000],
-				references: [0, 100000]
+				references: [0, 100000],
+				datatypes: {id: 1, name: "Any property type"}
+
 			}
-		}
+		};
+		var status = util.cloneObject(statusStartValues);
 		return {
 			refreshArgs: function(){
 				args = {
@@ -47,6 +50,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			getStatus: function(){
 				return status;
+			},
+			getStatusStartValues:function(){
+				return util.cloneObject(statusStartValues);
 			}
 		}
 	})
@@ -62,8 +68,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					return result;
 				}
 			} catch(e){
-				return defaultValue;
+				// fall through
 			}
+			return defaultValue;
 		}
 
 		var getLabel = function(id) { return getData(id, 'l', null); }
@@ -114,7 +121,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				return {
-					propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
+					propertiesHeader: [["Label (ID)", "col-xs-5"], ["Datatype", "col-xs-1"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
@@ -176,7 +183,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
-					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-6"], ["Instances", "col-xs-2"], ["Subclasses", "col-xs-2"]],
+					classesHeader: [["Label (ID)", "col-xs-10"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,
@@ -195,6 +202,25 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		}
 		return promise;
 	})
+	
+	.factory('statistics', function($http, $route) {
+		var promise;
+		var statistics; 
+
+		if (!promise){
+			promise = $http.get("data/statistics.json").then(function(response){
+				statistics = response.data;
+				return {
+					getDumpDateStamp: function(){ return statistics['dumpDate']; },
+					getDumpDateString: function(){
+						var dateStamp = statistics['dumpDate'];
+						return dateStamp.substring(0,4) + '-' + dateStamp.substring(4,6) + '-' + dateStamp.substring(6,8);
+					}
+				}
+			});
+		}
+		return promise;
+	})
 
 	.filter('to_trusted', ['$sce', function($sce){
 		return function(text) {
@@ -206,7 +232,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    var SCALE_FACTOR = 1.005;
 	    var scale = function(val){
 	      if (val > 0) {
-	      return Math.round(Math.log(val) / Math.log(SCALE_FACTOR));
+	      	return Math.ceil(Math.log(val) / Math.log(SCALE_FACTOR));
 	      }
 	      else {
 	        return 0;
@@ -214,25 +240,29 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    }
 	    
 	    var antiScale = function(val){
-	       if (val > 0) {
-	      return Math.round(Math.pow(SCALE_FACTOR, val));
-	       }else{
+	      if (val > 0) {
+	       	if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
+	       		return 1;
+	       	}
+	        return Math.ceil(Math.pow(SCALE_FACTOR, val));
+	      }else{
 	        return 0;
-	       }
+	      }
 	    }
 	    function link(scope, element, attrs){
-	      element.slider({
-	        range: true,
-	        min: scale(parseInt(scope.begin)),
-	        max: scale(parseInt(scope.end)),
-	        values: [ scale(scope.$parent.slider[parseInt(scope.index)].startVal), scale(scope.$parent.slider[parseInt(scope.index)].endVal) ],
-	        slide: function( event, ui ) {
-	          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
-	          scope.$parent.slider[parseInt(scope.index)].endVal = antiScale(ui.values[1]);
-	          scope.$parent.updateStatus();
-	          scope.$apply();
-	          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-	        }
+	      scope.$watchGroup(['startval', 'endval'], function(){
+	        element.slider({
+	          range: true,
+	          min: scale(parseInt(scope.begin)),
+	          max: scale(parseInt(scope.end)),
+	          values: [ scale(scope.startval), scale(scope.endval) ],
+	          slide: function( event, ui ) {
+	            scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
+	            scope.$parent.slider[parseInt(scope.index)].endVal = Math.min(antiScale(ui.values[1]), scope.end);
+	            scope.$parent.updateStatus();
+	            scope.$apply();
+	          }
+	        });
 	      });
 	    }
 	    
@@ -240,7 +270,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	      scope:{
 	        begin: '=begin',
 	        end: '=end',
-	        index: '=index'
+	        index: '=index', // TODO and startVal and endVal
+	        startval: '=startval',
+	        endval: '=endval'
 	      },
 	      link: link
 	    };
