@@ -293,6 +293,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       {id: 11, name: "Monolingualtext"}],
       selected: status.propertiesFilter.datatypes
     }
+
+    $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};
     updateTable();
     //$scope.searchfilter = angular.copy(searchfilter);
@@ -308,6 +310,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     $scope.setDatatypeFilter = function(data){
       status.propertiesFilter.datatypes = data;
+      $scope.filterPermalink =Arguments.getUrl();
       updateTable();
     }
 
@@ -331,7 +334,22 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         status.propertiesFilter.references[0] = $scope.slider[2].startVal;
         status.propertiesFilter.references[1] = $scope.slider[2].endVal;
       }
+      $scope.filterPermalink =Arguments.getUrl();
       updateTable();
     }
     
+    $scope.copyToClipboard = function(){
+      var textField = document.getElementById("permalink");
+      var oSelectionStart = textField.SelectionStart;
+      var oSelectionEnd = textField.SelectionEnd;
+      var currentFocus = document.activeElement;
+      textField.focus();
+      textField.setSelectionRange(0, textField.value.length);
+      document.execCommand("copy");
+      if (currentFocus && typeof currentFocus.focus === "function") {
+        currentFocus.focus();
+      }
+      textField.setSelectionRange(oSelectionStart, oSelectionEnd);
+    }
+
   });
