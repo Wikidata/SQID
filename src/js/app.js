@@ -32,17 +32,45 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 			}
 		};
+
+		var serializeDatatype = function(type){
+			return type.id + ":" + type.name;
+		}
+
+		var deserializeDatatype = function(typeString){
+			if (!typeString){
+				return typeString;
+			}
+			var splits = typeString.split(":");
+			return {id: splits[0], name: splits[1]};
+		}
+
 		var status = util.cloneObject(statusStartValues);
 		return {
 			refreshArgs: function(){
 				args = {
+					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
 					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : status.from,
 					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : status.to,
-					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType
+					classesFilter: {
+						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
+						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
+						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
+					  },
+					propertiesFilter: {
+						label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
+						statements: [ ($route.current.params.statementsbegin) ? ($route.current.params.statementsbegin) : status.propertiesFilter.statements[0], ($route.current.params.statementsend) ? ($route.current.params.statementsend) : status.propertiesFilter.statements[1]],
+						qualifiers: [ ($route.current.params.qualifiersbegin) ? ($route.current.params.qualifiersbegin) : status.propertiesFilter.qualifiers[0], ($route.current.params.qualifiersend) ? ($route.current.params.qualifiersend) : status.propertiesFilter.qualifiers[1]],
+						references: [ ($route.current.params.referencesbegin) ? ($route.current.params.referencesbegin) : status.propertiesFilter.references[0], ($route.current.params.referencesend) ? ($route.current.params.referencesend) : status.propertiesFilter.references[1]],
+						datatypes: ($route.current.params.datatypes) ? deserializeDatatype($route.current.params.datatypes) : status.propertiesFilter.datatypes
+					  }
+
 				}
 				status.from = args.from;
 				status.to = args.to;
 				status.entityType = args.type;
+				status.classesFilter = args.classesFilter;
+				status.propertiesFilter = args.propertiesFilter;
 			},
 			getArgs: function(){
 				return args;
@@ -52,6 +80,25 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			getStatusStartValues:function(){
 				return util.cloneObject(statusStartValues);
+			},
+			getUrl: function(){
+				return location.origin + "/#/browse" 
+					+ "?from=" + status.from
+					+ "&to=" + status.to
+					+ "&type=" + status.entityType
+					+ "&classlabelfilter=" + status.classesFilter.label
+					+ "&propertylabelfilter=" + status.propertiesFilter.label 
+					+ "&instancesbegin=" + status.classesFilter.instances[0]
+					+ "&instancesend=" + status.classesFilter.instances[1]
+					+ "&subclassesbegin=" + status.classesFilter.subclasses[0]
+					+ "&subclassesend=" + status.classesFilter.subclasses[1]
+					+ "&statementsbegin=" + status.propertiesFilter.statements[0]
+					+ "&statementsend=" + status.propertiesFilter.statements[1]
+					+ "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0]
+					+ "&qualifiersend=" + status.propertiesFilter.qualifiers[1]
+					+ "&referencesbegin=" + status.propertiesFilter.references[0]
+					+ "&referencesend=" + status.propertiesFilter.references[1]
+					+ "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes);
 			}
 		}
 	})
