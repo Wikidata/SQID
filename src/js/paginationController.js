@@ -125,5 +125,8 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 
 		if(typeof callback === "function") { callback.call(pgnt, pgnt.activeIndex); }
 	};
+
+	// init on init
+	pgnt.setIndex(pgnt.index, pgnt.onPageChange);
 }]);
 
