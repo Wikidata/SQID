@@ -127,6 +127,7 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 	};
 
 	// init on init
-	pgnt.setIndex(pgnt.index, pgnt.onPageChange);
+	pgnt.setIndex(pgnt.index);
 }]);
+
 
