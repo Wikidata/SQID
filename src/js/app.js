@@ -16,8 +16,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var args = {}; 
 		var statusStartValues = {
 			entityType: "classes",
-			from: 0,
-			to:jsonData.TABLE_SIZE,
+			activePage: 1,
 			classesFilter: {
 				label: "",
 				instances: [0, 4000000],
@@ -50,8 +49,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			refreshArgs: function(){
 				args = {
 					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
-					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : status.from,
-					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : status.to,
+					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
 					classesFilter: {
 						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
@@ -66,8 +64,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					  }
 
 				}
-				status.from = args.from;
-				status.to = args.to;
+				status.activePage = args.activePage;
 				status.entityType = args.type;
 				status.classesFilter = args.classesFilter;
 				status.propertiesFilter = args.propertiesFilter;
@@ -82,9 +79,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return util.cloneObject(statusStartValues);
 			},
 			getUrl: function(){
-				return location.origin + "/#/browse" 
-					+ "?from=" + status.from
-					+ "&to=" + status.to
+				return location.origin + location.pathname + "#/browse" 
+					+ "?activepage=" + status.activePage
 					+ "&type=" + status.entityType
 					+ "&classlabelfilter=" + status.classesFilter.label
 					+ "&propertylabelfilter=" + status.propertiesFilter.label 
