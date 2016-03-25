@@ -114,7 +114,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       $scope.pagination = {
         index: $scope.content,
-        activePage: $scope.args.activePage || 1
+        activePage: $scope.args.activePage || 1,
+        onPageChange: function(){
+          status.activePage = $scope.pagination.activePage;
+          $scope.filterPermalink =Arguments.getUrl();
+        }
       }
     }
 
