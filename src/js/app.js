@@ -163,7 +163,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				return {
-					propertiesHeader: [["Label (ID)", "col-xs-5"], ["Datatype", "col-xs-1"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
+					propertiesHeader: [["Label (ID)", "col-xs-5", "fa fa-sort"], 
+						["Datatype", "col-xs-1", "fa fa-sort"], 
+						["Uses in statements", "col-xs-2", "fa fa-sort"], 
+						["Uses in qualifiers", "col-xs-2", "fa fa-sort"], 
+						["Uses in references", "col-xs-2", "fa fa-sort"]],
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
@@ -225,7 +229,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
-					classesHeader: [["Label (ID)", "col-xs-10"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
+					classesHeader: [["Label (ID)", "col-xs-9", "fa fa-sort"],
+						["Instances", "col-xs-1", "fa fa-sort"], 
+						["Subclasses", "col-xs-1", "fa fa-sort"]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,

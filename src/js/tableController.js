@@ -257,4 +257,26 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       textField.setSelectionRange(oSelectionStart, oSelectionEnd);
     }
 
+    $scope.sortElement = function(element, header){
+      switch(element[2]){
+        case "fa fa-sort":
+          element[2] = "fa fa-sort-desc";
+          break;
+        case "fa fa-sort-desc":
+          element[2] = "fa fa-sort-asc";
+          break;
+        case "fa fa-sort-asc":
+          element[2] = "fa fa-sort-desc";
+          break;
+        default:
+          console.log("Unknown sort style " + element[2]);
+      }
+      for (var i=0; i < header.length; i++){
+        if (header[i] != element){
+          header[i][2] = "fa fa-sort"; 
+        }
+      }
+      // TODO: actually sort elements
+    }
+
   });
