@@ -99,7 +99,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		}
 	})
 
-	.factory('Properties', function($http, $route){
+	.factory('Properties', function($http, $route, jsonData){
 		var promise;
 		var properties;
     
@@ -163,11 +163,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				return {
-					propertiesHeader: [["Label (ID)", "col-xs-5", "fa fa-sort"], 
-						["Datatype", "col-xs-1", "fa fa-sort"], 
-						["Uses in statements", "col-xs-2", "fa fa-sort"], 
-						["Uses in qualifiers", "col-xs-2", "fa fa-sort"], 
-						["Uses in references", "col-xs-2", "fa fa-sort"]],
+					propertiesHeader: [["Label (ID)", "col-xs-5", "fa fa-sort", jsonData.JSON_LABEL], 
+						["Datatype", "col-xs-1", "fa fa-sort", jsonData.JSON_DATATYPE], 
+						["Uses in statements", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_STATEMENTS], 
+						["Uses in qualifiers", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_QUALIFIERS], 
+						["Uses in references", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_REFERENCES]],
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
@@ -185,13 +185,14 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
 					getClasses: function(id){ return getData(id, 'pc', []); },
 					formatRelatedProperties: formatRelatedProperties,
+					sortProperties: function(comparator){properties.sort(comparator);}
 				}
 			});
 		}
 		return promise;
 	})
 
-	.factory('Classes', function($http, $route) {
+	.factory('Classes', function($http, $route, jsonData) {
 		var promise;
 		var classes; 
 
@@ -229,9 +230,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
-					classesHeader: [["Label (ID)", "col-xs-9", "fa fa-sort"],
-						["Instances", "col-xs-1", "fa fa-sort"], 
-						["Subclasses", "col-xs-1", "fa fa-sort"]],
+					classesHeader: [["Label (ID)", "col-xs-9", "fa fa-sort", jsonData.JSON_LABEL],
+						["Instances", "col-xs-1", "fa fa-sort", jsonData.JSON_INSTANCES], 
+						["Subclasses", "col-xs-1", "fa fa-sort", jsonData.JSON_SUBCLASSES]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,
@@ -244,7 +245,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
-					getNonemptySubclasses: getNonemptySubclasses
+					getNonemptySubclasses: getNonemptySubclasses,
+					sortClasses: function(comparator){classes.sort(comparator);}
 				}
 			});
 		}
