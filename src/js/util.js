@@ -85,6 +85,19 @@ angular.module('utilities', [])
 	var getEntityUrl = function(entityId) { return "#/view?id=" + entityId +
 		( i18n.getLanguage() != 'en' ? '&lang=' + i18n.getLanguage() : ''); }
 
+	var cloneObject = function(obj) {
+	    if (obj === null || typeof obj !== 'object') {
+	        return obj;
+	    }
+	 
+	    var temp = obj.constructor(); // give temp the original obj's constructor
+	    for (var key in obj) {
+	        temp[key] = cloneObject(obj[key]);
+	    }
+	 
+	    return temp;
+	};
+
 	var autoLinkText = function(text) {
 		return text.replace(/[QP][1-9][0-9]*/g, function(match) { return '<a href="' + getEntityUrl(match) +'">' + match + '</a>'; });
 	}
@@ -94,8 +107,10 @@ angular.module('utilities', [])
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
 		getIdFromUri: getIdFromUri,
+		cloneObject: cloneObject,
 		autoLinkText: autoLinkText
 	};
+
 })
 
 .factory('sparql', function(util, i18n) {

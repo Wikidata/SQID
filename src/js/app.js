@@ -12,12 +12,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.otherwise({redirectTo: '/'});
 	})
 
-	.factory('Arguments', function($http, $route, jsonData){
+	.factory('Arguments', function($http, $route, jsonData, util){
 		var args = {}; 
-		var status ={
+		var statusStartValues = {
 			entityType: "classes",
-			from: 0,
-			to:jsonData.TABLE_SIZE,
+			activePage: 1,
 			classesFilter: {
 				label: "",
 				instances: [0, 4000000],
@@ -27,25 +26,75 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				label: "",
 				statements: [0, 20000000],
 				qualifiers: [0, 100000],
-				references: [0, 100000]
+				references: [0, 100000],
+				datatypes: {id: 1, name: "Any property type"}
+
 			}
+		};
+
+		var serializeDatatype = function(type){
+			return type.id + ":" + type.name;
 		}
+
+		var deserializeDatatype = function(typeString){
+			if (!typeString){
+				return typeString;
+			}
+			var splits = typeString.split(":");
+			return {id: splits[0], name: splits[1]};
+		}
+
+		var status = util.cloneObject(statusStartValues);
 		return {
 			refreshArgs: function(){
 				args = {
-					from: ($route.current.params.from) ? parseInt(($route.current.params.from)) : status.from,
-					to: ($route.current.params.to) ? parseInt(($route.current.params.to)) : status.to,
-					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType
+					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
+					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
+					classesFilter: {
+						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
+						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
+						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
+					  },
+					propertiesFilter: {
+						label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
+						statements: [ ($route.current.params.statementsbegin) ? ($route.current.params.statementsbegin) : status.propertiesFilter.statements[0], ($route.current.params.statementsend) ? ($route.current.params.statementsend) : status.propertiesFilter.statements[1]],
+						qualifiers: [ ($route.current.params.qualifiersbegin) ? ($route.current.params.qualifiersbegin) : status.propertiesFilter.qualifiers[0], ($route.current.params.qualifiersend) ? ($route.current.params.qualifiersend) : status.propertiesFilter.qualifiers[1]],
+						references: [ ($route.current.params.referencesbegin) ? ($route.current.params.referencesbegin) : status.propertiesFilter.references[0], ($route.current.params.referencesend) ? ($route.current.params.referencesend) : status.propertiesFilter.references[1]],
+						datatypes: ($route.current.params.datatypes) ? deserializeDatatype($route.current.params.datatypes) : status.propertiesFilter.datatypes
+					  }
+
 				}
-				status.from = args.from;
-				status.to = args.to;
+				status.activePage = args.activePage;
 				status.entityType = args.type;
+				status.classesFilter = args.classesFilter;
+				status.propertiesFilter = args.propertiesFilter;
 			},
 			getArgs: function(){
 				return args;
 			},
 			getStatus: function(){
 				return status;
+			},
+			getStatusStartValues:function(){
+				return util.cloneObject(statusStartValues);
+			},
+			getUrl: function(){
+				return location.origin + location.pathname + "#/browse" 
+					+ "?activepage=" + status.activePage
+					+ "&type=" + status.entityType
+					+ "&classlabelfilter=" + status.classesFilter.label
+					+ "&propertylabelfilter=" + status.propertiesFilter.label 
+					+ "&instancesbegin=" + status.classesFilter.instances[0]
+					+ "&instancesend=" + status.classesFilter.instances[1]
+					+ "&subclassesbegin=" + status.classesFilter.subclasses[0]
+					+ "&subclassesend=" + status.classesFilter.subclasses[1]
+					+ "&statementsbegin=" + status.propertiesFilter.statements[0]
+					+ "&statementsend=" + status.propertiesFilter.statements[1]
+					+ "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0]
+					+ "&qualifiersend=" + status.propertiesFilter.qualifiers[1]
+					+ "&referencesbegin=" + status.propertiesFilter.references[0]
+					+ "&referencesend=" + status.propertiesFilter.references[1]
+					+ "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes);
 			}
 		}
 	})
@@ -114,7 +163,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				return {
-					propertiesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-4"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
+					propertiesHeader: [["Label (ID)", "col-xs-5"], ["Datatype", "col-xs-1"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
 					getProperties: function(){ return properties; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
@@ -176,7 +225,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				return {
-					classesHeader: [["ID", "col-xs-2"], ["Label", "col-xs-8"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
+					classesHeader: [["Label (ID)", "col-xs-10"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
 					getClasses: function(){ return classes; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,
@@ -225,7 +274,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    var SCALE_FACTOR = 1.005;
 	    var scale = function(val){
 	      if (val > 0) {
-	      return Math.round(Math.log(val) / Math.log(SCALE_FACTOR));
+	      	return Math.ceil(Math.log(val) / Math.log(SCALE_FACTOR));
 	      }
 	      else {
 	        return 0;
@@ -233,25 +282,29 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    }
 	    
 	    var antiScale = function(val){
-	       if (val > 0) {
-	      return Math.round(Math.pow(SCALE_FACTOR, val));
-	       }else{
+	      if (val > 0) {
+	       	if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
+	       		return 1;
+	       	}
+	        return Math.ceil(Math.pow(SCALE_FACTOR, val));
+	      }else{
 	        return 0;
-	       }
+	      }
 	    }
 	    function link(scope, element, attrs){
-	      element.slider({
-	        range: true,
-	        min: scale(parseInt(scope.begin)),
-	        max: scale(parseInt(scope.end)),
-	        values: [ scale(scope.$parent.slider[parseInt(scope.index)].startVal), scale(scope.$parent.slider[parseInt(scope.index)].endVal) ],
-	        slide: function( event, ui ) {
-	          scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
-	          scope.$parent.slider[parseInt(scope.index)].endVal = antiScale(ui.values[1]);
-	          scope.$parent.updateStatus();
-	          scope.$apply();
-	          //$( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-	        }
+	      scope.$watchGroup(['startval', 'endval'], function(){
+	        element.slider({
+	          range: true,
+	          min: scale(parseInt(scope.begin)),
+	          max: scale(parseInt(scope.end)),
+	          values: [ scale(scope.startval), scale(scope.endval) ],
+	          slide: function( event, ui ) {
+	            scope.$parent.slider[parseInt(scope.index)].startVal = antiScale(ui.values[0]);
+	            scope.$parent.slider[parseInt(scope.index)].endVal = Math.min(antiScale(ui.values[1]), scope.end);
+	            scope.$parent.updateStatus();
+	            scope.$apply();
+	          }
+	        });
 	      });
 	    }
 	    
@@ -259,7 +312,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	      scope:{
 	        begin: '=begin',
 	        end: '=end',
-	        index: '=index'
+	        index: '=index', // TODO and startVal and endVal
+	        startval: '=startval',
+	        endval: '=endval'
 	      },
 	      link: link
 	    };

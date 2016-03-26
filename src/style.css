@@ -36,8 +36,8 @@ body{
 }
 
 #pageSelector{
-    margin-top: 10px;
-    margin-bottom: 20px;
+/*    margin-top: 10px;
+    margin-bottom: 20px;*/
 }
 
 /*.nav-bar-sides{
@@ -75,6 +75,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 /*#navigation{
 	height: 100px;
 }*/
+
+.pagination-nav-caption {
+	margin: 20px 0 -10px 6px;
+}
 
 #custom-search-input{
     padding: 3px;
@@ -117,7 +121,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 }
 
 #filter-menue{
-    margin-top: 100px;
+    margin-top: 35px;
 }
 
 .wd-red{
@@ -284,3 +288,22 @@ span.smallnote {
 	left: 4px;
 }
 
+.input-monospace{
+    font-family: monospace;
+}
+
+.form-margin-buttom{
+    margin-bottom: 15px;
+}
+
+.browsing-table{
+    min-height: 530px;
+}
+
+#permalink{
+    /*float: left;*/
+    /*width: 100px;*/
+}
+#ctc-button{
+    /*float: left;*/
+}
