@@ -22,7 +22,7 @@ angular.module('utilities', [])
 		JSON_DATATYPE: "d",
 
 		TABLE_SIZE: 15,
-		PAGE_SELECTOR_SIZE: 2
+		PAGE_SELECTOR_SIZE: 4
 	};
 
 })

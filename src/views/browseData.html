@@ -15,7 +15,14 @@
 	        	<table class="table table-condensed">
 					<thead>
 						<tr id="head-browse">
-							<th ng-repeat="hitem in tableHeader" class="{{hitem[1]}}">{{hitem[0]}}</th>
+							<th ng-repeat="hitem in tableHeader" class="{{hitem[1]}}">
+								<div class="clickable" ng-click="sortElement(hitem, tableHeader)">
+									<div class="header-element">{{hitem[0]}}&nbsp;&nbsp;</div>
+									<div class="sort-element">
+										<i ng-class="hitem[2]"></i>
+									</div>
+								</div>
+							</th>
 						</tr>
 					</thead>
 					<tbody>

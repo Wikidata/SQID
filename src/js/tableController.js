@@ -4,13 +4,14 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     var tableContent = [];
 
-    var initArray = function(json, filterfunc){
+    var initArray = function(json, filterfunc, sortfunc){
       var ret = []
       for (var entry in json) {
           if (filterfunc(entry, json)) {
               ret.push(entry);
           }
       }
+      ret.sort(sortfunc(json));
       return ret;
     };
 
@@ -108,6 +109,20 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
+    var getSortComparator = function(criteria, direction){
+      return function(data){
+        return function(a, b){
+          if (data[a][criteria] > data[b][criteria]){
+            return 1 * direction;
+          }
+          if (data[a][criteria] < data[b][criteria]){
+            return (-1) * direction;
+          }
+          return 0;
+        };
+      }
+    }
+
     var initPaginations = function(){
       if (!$scope.content){
         $scope.content = [];
@@ -154,7 +169,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (args.type == "classes") {
         Classes.then(function(data){
           initClassesSlider();
-          var classesArray = initArray(data.getClasses(), applyFilter);
+          var classesArray = initArray(data.getClasses(), applyFilter, sortfunc);
           refreshTableContent(args, classesArray, data, getClassFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.classesHeader;
@@ -163,12 +178,12 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       if (args.type == "properties") {
           Properties.then(function(data){
-          initPropertiesSlider();
-          var propertiesArray = initArray(data.getProperties(), applyFilter);
-          refreshTableContent(args, propertiesArray, data, getPropertyFromId);
-          $scope.content = tableContent;
-          $scope.tableHeader = data.propertiesHeader;
-          $scope.pagination.setIndex($scope.content, null);
+            initPropertiesSlider();
+            var propertiesArray = initArray(data.getProperties(), applyFilter, sortfunc);
+            refreshTableContent(args, propertiesArray, data, getPropertyFromId);
+            $scope.content = tableContent;
+            $scope.tableHeader = data.propertiesHeader;
+            $scope.pagination.setIndex($scope.content, null);
           });
       }
     }
@@ -176,6 +191,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
     var status = Arguments.getStatus();
+    var sortfunc = function(x){return function(a, b){return 0;};};
+
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     if (args.entityType == "classes"){
@@ -255,6 +272,37 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         currentFocus.focus();
       }
       textField.setSelectionRange(oSelectionStart, oSelectionEnd);
+    }
+
+    $scope.sortElement = function(element, header){
+      var direction = 0;
+      switch(element[2]){
+        case "fa fa-sort":
+          element[2] = "fa fa-sort-desc";
+          direction = 1;
+          break;
+        case "fa fa-sort-desc":
+          element[2] = "fa fa-sort-asc";
+          direction = (-1);
+          break;
+        case "fa fa-sort-asc":
+          element[2] = "fa fa-sort-desc";
+          direction = 1;
+          break;
+        default:
+          console.log("Unknown sort style " + element[2]);
+      }
+      for (var i=0; i < header.length; i++){
+        if (header[i] != element){
+          header[i][2] = "fa fa-sort"; 
+        }
+      }
+      if (status.entityType == "classes"){
+        sortfunc = getSortComparator(element[3], direction);
+      }else{
+        sortfunc = getSortComparator(element[3], direction);
+      }
+      updateTable();
     }
 
   });
