@@ -86,13 +86,22 @@ angular.module('utilities', [])
 		return text.replace(/[QP][1-9][0-9]*/g, function(match) { return '<a href="' + getEntityUrl(match) +'">' + match + '</a>'; });
 	}
 
+	var createIdArray = function(json){
+    	var ret = []
+    	for (var entry in json) {
+            ret.push(entry);
+    	}
+    	return ret;	
+	}
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getEntityUrl: getEntityUrl,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
-		autoLinkText: autoLinkText
+		autoLinkText: autoLinkText,
+		createIdArray: createIdArray
 	};
 
 })
