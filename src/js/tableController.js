@@ -11,7 +11,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
               ret.push(idArray[i]);
           }
       }
-      // ret.sort(sortfunc(json)); // TODO replace
       return ret;
     };
 
@@ -201,7 +200,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       $scope.filterLabels = args.propertiesFilter.label;
     }
     initPaginations();
-    // $scope.pagination.setIndex($scope.content, null);
 
     $scope.datatypeSelector = {
       options: [{id: 1, name: "Any property type"},
