@@ -4,14 +4,13 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     var tableContent = [];
 
-    var initArray = function(json, filterfunc, sortfunc){
-      var ret = []
-      for (var entry in json) {
-          if (filterfunc(entry, json)) {
-              ret.push(entry);
+    var initArray = function(idArray, json, filterfunc, sortfunc){
+      var ret = [];
+      for (var i = 0; i < idArray.length; i++){
+          if (filterfunc(idArray[i], json)) {
+              ret.push(idArray[i]);
           }
       }
-      ret.sort(sortfunc(json));
       return ret;
     };
 
@@ -169,7 +168,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (args.type == "classes") {
         Classes.then(function(data){
           initClassesSlider();
-          var classesArray = initArray(data.getClasses(), applyFilter, sortfunc);
+          var classesArray = initArray(data.getIdArray(), data.getClasses(), applyFilter, sortfunc);
           refreshTableContent(args, classesArray, data, getClassFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.classesHeader;
@@ -179,7 +178,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (args.type == "properties") {
           Properties.then(function(data){
             initPropertiesSlider();
-            var propertiesArray = initArray(data.getProperties(), applyFilter, sortfunc);
+            var propertiesArray = initArray(data.getIdArray(), data.getProperties(), applyFilter, sortfunc);
             refreshTableContent(args, propertiesArray, data, getPropertyFromId);
             $scope.content = tableContent;
             $scope.tableHeader = data.propertiesHeader;
@@ -201,7 +200,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       $scope.filterLabels = args.propertiesFilter.label;
     }
     initPaginations();
-
 
     $scope.datatypeSelector = {
       options: [{id: 1, name: "Any property type"},
@@ -298,11 +296,16 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         }
       }
       if (status.entityType == "classes"){
-        sortfunc = getSortComparator(element[3], direction);
+        Classes.then(function(data){
+          data.sortClasses(getSortComparator(element[3], direction));
+          updateTable();
+        });
       }else{
-        sortfunc = getSortComparator(element[3], direction);
+        Properties.then(function(data){
+          data.sortProperties(getSortComparator(element[3], direction));
+          updateTable();
+        });
       }
-      updateTable();
     }
 
   });
