@@ -240,10 +240,10 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var sortfunc = function(x){return function(a, b){return 0;};};
 
     $scope.propertyIndex = initPropertyIndex();
+    $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+    
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
-    $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
-    $scope.relatep
     if (args.entityType == "classes"){
       $scope.filterLabels = args.classesFilter.label;
     }else{
