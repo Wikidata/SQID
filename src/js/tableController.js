@@ -232,11 +232,23 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           });
       }
     }
+
+    var updateTableLazy = function(){
+      if (!timeoutIsSet){
+        timeoutIsSet = true;
+        setTimeout(function(){
+          timeoutIsSet = false;
+          updateTable();
+          }, 300);
+      }
+    }
+
     // execution part
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
     var status = Arguments.getStatus();
     var relatedPropertyFilterInit = false;
+    var timeoutIsSet = false;
     var sortfunc = function(x){return function(a, b){return 0;};};
 
     $scope.propertyIndex = initPropertyIndex();
@@ -268,14 +280,16 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};
+    
     updateTable();
+    
     $scope.searchFilter = function(){
       if (status.entityType == "classes"){
         status.classesFilter.label = $scope.filterLabels;
       }else{
         status.propertiesFilter.label = $scope.filterLabels;
       }
-      updateTable();
+      updateTableLazy();
     }
 
     $scope.setDatatypeFilter = function(data){
@@ -305,7 +319,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         status.propertiesFilter.references[1] = $scope.slider[2].endVal;
       }
       $scope.filterPermalink =Arguments.getUrl();
-      updateTable();
+      updateTableLazy();
     }
     
     $scope.copyToClipboard = function(){
