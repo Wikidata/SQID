@@ -1,6 +1,6 @@
 'use strict'; // indicate that code is executed in strict mode
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities'])
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'angucomplete-alt'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -19,6 +19,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			activePage: 1,
 			classesFilter: {
 				label: "",
+				relatedProperty: "",
 				instances: [0, 4000000],
 				subclasses: [0, 200000]
 			},
@@ -52,6 +53,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
 					classesFilter: {
 						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
+						relatedProperty: ($route.current.params.relatedpropertyfilter) ? ($route.current.params.relatedpropertyfilter) : status.classesFilter.relatedProperty,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
 						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
 					  },
@@ -83,6 +85,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					+ "?activepage=" + status.activePage
 					+ "&type=" + status.entityType
 					+ "&classlabelfilter=" + status.classesFilter.label
+					+ "&relatedpropertyfilter=" + status.classesFilter.relatedProperty
 					+ "&propertylabelfilter=" + status.propertiesFilter.label 
 					+ "&instancesbegin=" + status.classesFilter.instances[0]
 					+ "&instancesend=" + status.classesFilter.instances[1]
