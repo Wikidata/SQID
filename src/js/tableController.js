@@ -74,36 +74,60 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
+    var relatedPropertyFilter = function(entry){
+      var filter = status.classesFilter.relatedProperty;
+      if (status.entityType == "properties"){
+        return true;
+      }
+      if (!filter){
+        return true;
+      }
+      if (filter == ""){
+        return true;
+      }
+      if (!entry[jsonData.JSON_RELATED_PROPERTIES]){
+        return false;
+      }
+      if (entry[jsonData.JSON_RELATED_PROPERTIES][filter]){
+        return true;
+      }else{
+        return false;
+      }
+    }
+
     var applyFilter = function(entry, json){
       if (!datatypeFilter(json[entry])){
         return false;
       }else{
         if (!labelFilter(json[entry])){
           return false;
-        }else{
-          if (status.entityType == "classes"){
-            var filter = status.classesFilter;
-            if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
-              return false;
-            }
-            if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
-              return false;
-            }
-            return true;
+        }else{if(!relatedPropertyFilter(json[entry])){
+          return false;
           }else{
-            var filter = status.propertiesFilter;
-            if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
-              return false;
+            if (status.entityType == "classes"){
+              var filter = status.classesFilter;
+              if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
+                return false;
+              }
+              if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
+                return false;
+              }
+              return true;
+            }else{
+              var filter = status.propertiesFilter;
+              if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
+                return false;
+              }
+              if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
+                return false;
+              }
+              if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
+                return false;
+              }
+              return true;
             }
-            if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
-              return false;
-            }
-            if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
-              return false;
-            }
-            return true;
-          }
 
+          }
         }
       }
     }
@@ -134,6 +158,28 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           $scope.filterPermalink =Arguments.getUrl();
         }
       }
+    }
+
+    var initPropertyIndex = function(){
+      var result = [{name: "No Filter", idName: "", id:0}]; 
+      Properties.then(function(data){
+        $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+        var idArray = data.getIdArray();
+        for (var i = 0; i < idArray.length; i++){
+          var elem = {
+            name: data.getLabel(idArray[i]),
+            idName: "P" + idArray[i],
+            id: idArray[i].toString()
+          }
+          result.push(elem);
+          if (idArray[i].toString() == status.classesFilter.relatedProperty.toString()){
+            $scope.relatedProperty = elem;
+          }
+        }
+        relatedPropertyFilterInit = true;
+        $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.relatedProperty);
+      });
+      return result;
     }
 
     var initClassesSlider = function(){
@@ -190,8 +236,12 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
     var status = Arguments.getStatus();
+    var relatedPropertyFilterInit = false;
     var sortfunc = function(x){return function(a, b){return 0;};};
 
+    $scope.propertyIndex = initPropertyIndex();
+    $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+    
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     if (args.entityType == "classes"){
@@ -305,6 +355,24 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           data.sortProperties(getSortComparator(element[3], direction));
           updateTable();
         });
+      }
+    }
+
+    $scope.selectedRelatedProperty = function(selected){
+      var oldProperty = $scope.relatedProperty.id;
+      if (!selected){
+        $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+        if (relatedPropertyFilterInit){
+          status.classesFilter.relatedProperty = "";
+        }
+      }else{
+        $scope.relatedProperty = selected.originalObject;
+        if (relatedPropertyFilterInit){
+          status.classesFilter.relatedProperty = selected.originalObject.id;
+        }
+      }
+      if (oldProperty != $scope.relatedProperty.id){
+        updateTable();
       }
     }
 
