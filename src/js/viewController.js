@@ -1,5 +1,5 @@
 
-classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
+classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -28,25 +28,55 @@ classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
 
 		getEntityData: function() {
 			if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
-				entityDataPromise = wikidataapi.getEntityData(id).then(function(data) {
+				entityDataPromise = entitydata.getEntityData(id).then(function(data) {
 					return data;
 				});
 				fetchedEntityId = id;
 				fetchedEntityLanguage = i18n.getLanguage();
 			}
 			return entityDataPromise;
+		},
+
+		/**
+		 * Formats a map numericPropertyId => someNumericValue as a list of
+		 * objects with label, url, and "count" (value) keys, sorted by value,
+		 * and cut off at the threshold, if non-null.
+		 */
+		formatPropertyMap: function(propertyMap, threshold) {
+			var propertyIds = [];
+			angular.forEach(propertyMap, function(value, numPropId) {
+				propertyIds.push('P' + numPropId);
+			});
+			return i18n.waitForPropertyLabels(propertyIds).then( function() {
+				var ret = [];
+				var resultCount = 0;
+				angular.forEach(propertyMap, function(value, numPropId) {
+					var propId = 'P' + numPropId;
+					ret.push({ label: i18n.getPropertyLabel(propId), url: i18n.getEntityUrl(propId), count: value } );
+					if (threshold !== null && value > threshold) {
+						resultCount++;
+					}
+				});
+				util.sortByCount(ret);
+
+				if (threshold !== null) {
+					return ret.slice(0, resultCount);
+				} else {
+					return ret;
+				}
+			});
 		}
 	};
 })
 .controller('ViewController',
-	function($scope, $route, $sce, View, Classes, Properties, sparql, wikidataapi, util){
+	function($scope, $route, $sce, View, Classes, Properties, sparql, util, i18n){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
 		var MAX_PROP_SUBJECTS = 10;
 		var MAX_PROP_VALUES = 20;
 		var RELATED_PROPERTIES_THRESHOLD = 5;
 
-		wikidataapi.checkCacheSize();
+		i18n.checkCacheSize();
 
 		View.updateId();
 		View.updateLang();
@@ -80,7 +110,7 @@ classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
 
 		View.getEntityData().then(function(data) {
 			$scope.entityData = data;
-			$scope.richDescription = $sce.trustAsHtml(util.autoLinkText($scope.entityData.description));
+			$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
 		});
 
 		Properties.then(function(properties){
@@ -94,7 +124,9 @@ classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
 				
 				var numId = $scope.id.substring(1);
 
-				$scope.relatedProperties = properties.formatRelatedProperties(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD);
+				View.formatPropertyMap(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
+					$scope.relatedProperties = formattedProperties;
+				});
 
 				$scope.propertyItemCount = properties.getItemCount(numId);
 				$scope.propertyStatementCount = properties.getStatementCount(numId);
@@ -102,7 +134,10 @@ classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
 				$scope.propertyQualifierCount = properties.getQualifierCount(numId);
 				$scope.propertyReferenceCount = properties.getReferenceCount(numId);
 				$scope.propertyDatatype = properties.getDatatype(numId);
-				$scope.propertyQualifiers = properties.getFormattedQualifiers(numId);
+
+				View.formatPropertyMap(properties.getQualifiers(numId), null).then( function(formattedProperties) {
+					$scope.propertyQualifiers = formattedProperties;
+				});
 
 				if ($scope.propertyItemCount > 0) {
 					sparql.getPropertySubjects($scope.id, null, MAX_PROP_SUBJECTS + 1).then(function(result) {
@@ -130,8 +165,8 @@ classBrowser.factory('View', function($route, sparql, wikidataapi, i18n) {
 			if ($scope.isItem) {
 				var numId = $scope.id.substring(1);
 
-				Properties.then(function(properties){
-					$scope.relatedProperties = properties.formatRelatedProperties(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD);
+				View.formatPropertyMap(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
+					$scope.relatedProperties = formattedProperties;
 				});
 				$scope.directInstances = classes.getDirectInstanceCount(numId);
 				$scope.directSubclasses = classes.getDirectSubclassCount(numId);

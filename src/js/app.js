@@ -102,7 +102,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	.factory('Properties', function($http, $route){
 		var promise;
 		var properties;
-    
+
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = properties[id][key];
@@ -119,44 +119,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
 		var getUrl = function(id) { return "#/view?id=P" + id; }
 
-		var formatRelatedProperties = function(relatedProperties, threshold){
-			var ret = [];
-			try {
-				var relPropsList = [];
-				for (var relProp in relatedProperties) relPropsList.push([relProp, relatedProperties[relProp]]);
-
-				relPropsList.sort(function(a, b) {
-					var a = a[1];
-					var b = b[1];
-					return a < b ? 1 : (a > b ? -1 : 0);
-				});
-
-				for (var i = 0; i < relPropsList.length; i++) {
-					if (relPropsList[i][1] < threshold) break;
-					var propId = relPropsList[i][0];
-					var resultObj = {label : getLabelOrId(propId) , link: getUrl(propId)};
-					ret.push(resultObj);
-				}
-			} catch (e){}
-
-			return ret;
-		}
-		
 		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
-		
-		var getFormattedQualifiers = function(id) {
-			var ret = [];
-			angular.forEach(getQualifiers(id), function(usageCount, qualifierId) {
-				ret.push({label : getLabelOrId(qualifierId) , url: getUrl(qualifierId), count: usageCount});
-			});
-			ret.sort(function(a, b) {
-					var a = a.count;
-					var b = b.count;
-					return a < b ? 1 : (a > b ? -1 : 0);
-			});
-			return ret;
-		}
-		
+
 		var getStatementCount = function(id){ return getData(id, 's', 0); }
 
 		if (!promise) {
@@ -175,12 +139,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getReferenceCount: function(id){ return getData(id, 'e', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getQualifiers: getQualifiers,
-					getFormattedQualifiers: getFormattedQualifiers,
 					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
-					getClasses: function(id){ return getData(id, 'pc', []); },
-					formatRelatedProperties: formatRelatedProperties,
+					getClasses: function(id){ return getData(id, 'pc', []); }
 				}
 			});
 		}
