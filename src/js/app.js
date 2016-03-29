@@ -1,6 +1,8 @@
 'use strict'; // indicate that code is executed in strict mode
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities'])
+$("[data-toggle=popover]").popover({html:true});
+
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap'])
 
 	.config(function($routeProvider) {
 		$routeProvider

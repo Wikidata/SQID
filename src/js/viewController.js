@@ -1,9 +1,21 @@
 
-classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util) {
+classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
 	var entityDataPromise = null;
+
+	var getValueListData = function(statementGroup, properties, listener) {
+		var ret = [];
+		angular.forEach(statementGroup, function (statement) {
+			ret.push({ 
+				value : $sce.trustAsHtml(dataFormatter.getStatementMainValueHtml(statement, properties, listener, true)),
+				qualifiers : $sce.trustAsHtml(dataFormatter.getStatementQualifiersHtml(statement, properties, listener, true))
+			});
+		});
+		return ret;
+	}
+
 	return {
 		updateId: function() {
 			id = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
@@ -24,6 +36,21 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 				ret.push({label: data.getLabelOrId(numId), url: data.getUrl(numId), icount: data.getMainUsageCount(numId)});
 			});
 			return ret;
+		},
+
+		getValueList: function(data, propertyId, properties) {
+			var statementGroup = data.statements[propertyId];
+			var listener = { hasMissingTerms : false };
+			var ret = getValueListData(statementGroup, properties, listener);
+			if (listener.hasMissingTerms) {
+				return data.waitForTerms().then( function() {
+					return getValueListData(statementGroup, properties, listener);
+				});
+			} else {
+				var deferred = $q.defer();
+				deferred.resolve(ret);
+				return deferred.promise;
+			}
 		},
 
 		getEntityData: function() {
@@ -75,7 +102,9 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 					ret.push({ label: classes.getLabelOrId(classNumId), url: i18n.getEntityUrl('Q' + classNumId), icount: classes.getAllInstanceCount(classNumId) });
 				});
 				util.sortByField(ret, 'icount');
-				return $q.defer().resolve(ret);
+				var deferred = $q.defer();
+				deferred.resolve(ret);
+				return deferred.promise;
 			} else { // fetch labels using i18n
 				var classIds = [];
 				angular.forEach(classNumIds, function(classNumId) {
@@ -95,7 +124,7 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 	};
 })
 .controller('ViewController',
-	function($scope, $route, $sce, View, Classes, Properties, sparql, util, i18n){
+	function($scope, $route, $sce, $compile, View, Classes, Properties, sparql, util, i18n){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
 		var MAX_PROP_SUBJECTS = 10;
@@ -119,7 +148,7 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 		$scope.exampleSubclasses = null;
 		$scope.superClasses = null;
 		$scope.instanceClasses = null;
-		
+
 		$scope.examplePropertyItems = null;
 		$scope.examplePropertyValues = null;
 		$scope.superProperties = null;
@@ -138,6 +167,16 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 		View.getEntityData().then(function(data) {
 			$scope.entityData = data;
 			$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
+			Properties.then(function(properties){
+				View.getValueList(data, 'P31', properties).then( function(instanceClasses) {
+					$scope.instanceClasses = instanceClasses;
+				});
+				if ($scope.isItem) {
+					View.getValueList(data, 'P279', properties).then( function(superClasses) {
+						$scope.superClasses = superClasses;
+					});
+				}
+			});
 		});
 
 		Properties.then(function(properties){
@@ -180,13 +219,6 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 		$scope.url = "http://www.wikidata.org/entity/" + $scope.id;
 
 		Classes.then(function(classes){
-			View.getEntityData().then(function(data) {
-				if ($scope.isItem) {
-					$scope.superClasses = View.getSchemaEntityInfo(data.superclasses, classes);
-				}
-				$scope.instanceClasses = View.getSchemaEntityInfo(data.instanceClasses, classes);
-			});
-
 			if ($scope.isItem) {
 				View.formatPropertyMap(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
 					$scope.relatedProperties = formattedProperties;
@@ -195,7 +227,7 @@ classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util
 				$scope.directSubclasses = classes.getDirectSubclassCount(numId);
 				$scope.allInstances = classes.getAllInstanceCount(numId);
 				$scope.allSubclasses = classes.getAllSubclassCount(numId);
-				$scope.nonemptySubclasses = View.formatNonemptySubclasses(numId, classes); // classes.getNonemptySubclasses(numId);
+				$scope.nonemptySubclasses = View.formatNonemptySubclasses(numId, classes);
 
 				if ($scope.directInstances > 0) {
 					sparql.getPropertySubjects("P31", $scope.id, MAX_EXAMPLE_INSTANCES + 1).then(function(result) {

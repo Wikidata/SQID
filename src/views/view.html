@@ -1,5 +1,4 @@
 <div ng-controller="ViewController">
-
 	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" class="well" >
 			<h2>Sorry, I could not find any entity with ID "{{id}}".</h2>
@@ -43,7 +42,8 @@
 					every {{entityData.labelorid}} is also a<span ng-if="superClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
 					<ul class="list-inline comma-separated" style="display: inline;">
 						<li ng-repeat="superclass in superClasses">
-							<a href = {{superclass.url}}>{{superclass.label}}</a>
+							<span ng-bind-html="superclass.value"></span>
+							<span ng-if="superclass.qualifiers != ''" uib-popover-html="superclass.qualifiers"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
 						</li>
 					</ul>
 				</span>
@@ -54,10 +54,11 @@
 			<div ng-if="instanceClasses !== null">
 				<b><a href="{{instanceOfUrl}}">Instance of</a>:</b>
 				<span ng-if="instanceClasses.length > 0">
-					{{entityData.label}} is a<span ng-if="instanceClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
+					{{entityData.label}} is a
 					<ul class="list-inline comma-separated" style="display: inline;">
 						<li ng-repeat="instanceclass in instanceClasses">
-							<a href = {{instanceclass.url}}>{{instanceclass.label}}</a>
+							<span ng-bind-html="instanceclass.value"></span>
+							<span ng-if="instanceclass.qualifiers != ''" uib-popover-html="instanceclass.qualifiers"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
 						</li>
 					</ul>
 				</span>
@@ -211,7 +212,7 @@
 							<th>Direct superclasses</th>
 							<td><ul ng-if="superClasses.length > 0" class="list-inline comma-separated" style="display: inline;">
 									<li ng-repeat="superclass in superClasses">
-										<a href = {{superclass.url}}>{{superclass.label}}</a> <span class="info-badge">{{superclass.icount}}</span>
+										<span ng-bind-html="superclass.value"></span> <span class="info-badge">{{superclass.icount}}</span>
 									</li>
 								</ul><span ng-if="superClasses.length == 0"><i>none</i></span>
 							</td>
