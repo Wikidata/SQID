@@ -37,7 +37,7 @@
 					{{entityData.labelorid}} is not a subproperty of any other property
 				</span>
 			</div>
-			<div ng-if="superClasses !== null">
+			<div ng-if="directSubclasses > 0 || ( superClasses !== null && superClasses.length > 0)">
 				<b><a href="{{subclassOfUrl}}">{{subclassOfLabel}}</a>:</b>
 				<span ng-if="superClasses.length > 0">
 					every {{entityData.labelorid}} is also a
