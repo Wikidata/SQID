@@ -27,7 +27,7 @@ angular.module('utilities', [])
 
 })
 
-.factory('i18n', function(wikidataapi, Properties) {
+.factory('i18n', function(wikidataapi, Properties, $translate) {
 	var language = 'en';
 
 	var idTerms = {}; // cache for labels/descriptions of items
@@ -43,6 +43,7 @@ angular.module('utilities', [])
 
 	var setLanguage = function(newLang) {
 		if (language != newLang) {
+			$translate.use(newLang);
 			language = newLang;
 			clearCache(); // clear term cache that was based on old language
 			propertyLabels = {}; // clear property label cache for old language

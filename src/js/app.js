@@ -2,7 +2,7 @@
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap'])
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -13,6 +13,46 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/view', { templateUrl: 'views/view.html' })
 			.otherwise({redirectTo: '/'});
 	})
+
+	.config(['$translateProvider', function ($translateProvider) {
+		
+		var enMessages = {
+			PROPTYPE : 'Type',
+			TYPICAL_PROPS : 'Typical Properties',
+			TYPICAL_PROPS_HINT_PROP : 'Other properties typically used by entities using this property',
+			TYPICAL_PROPS_HINT_CLASS : 'Other properties typically used by direct and indirect instances of this class',
+			SEC_CLASSIFICATION : 'Classification',
+			SEC_INSTANCES : {
+				SEC_INSTANCES : 'Instances',
+				DIRECT_INSTANCES : 'Direct instances',
+				ALL_INSTANCES : 'All instances',
+				ALL_INSTANCES_HINT : 'Total number of unique instances of this class and its {{subclassCount}} direct and indirect subclasses'
+			},
+			SEC_PROP_USE : 'Property Usage',
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia Categories and Portals'
+		};
+		var deMessages = {
+			PROPTYPE : 'Typ',
+			TYPICAL_PROPS : 'Typische Eigenschaften',
+			TYPICAL_PROPS_HINT_PROP : 'Andere Eigenschaften, die oftmals von Entitäten verwendet werden, die diese Eigenschaft verwenden',
+			TYPICAL_PROPS_HINT_CLASS : 'Andere Eigenschaften, die oftmals von direkten oder indirekten Instanzen dieser Klasse verwendet werden',
+			SEC_CLASSIFICATION : 'Klassifikation',
+			SEC_INSTANCES : {
+				SEC_INSTANCES : 'Instanzen',
+				DIRECT_INSTANCES : 'Direkte Instanzen',
+				ALL_INSTANCES : 'Alle Instanzen'
+			},
+			SEC_PROP_USE : 'Verwendung der Eigenschaft',
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia-Kategorien und -Portale'
+		};
+		
+		$translateProvider
+			.translations('en', enMessages )
+			.translations('de', deMessages )
+			.fallbackLanguage('en')
+			.preferredLanguage('en')
+			.useSanitizeValueStrategy('escape');
+	}])
 
 	.factory('Arguments', function($http, $route, jsonData, util){
 		var args = {}; 
