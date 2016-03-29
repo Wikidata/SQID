@@ -1,5 +1,5 @@
 
-classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
+classBrowser.factory('View', function($route, $q, sparql, entitydata, i18n, util) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -57,7 +57,7 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 						resultCount++;
 					}
 				});
-				util.sortByCount(ret);
+				util.sortByField(ret, 'count');
 
 				if (threshold !== null) {
 					return ret.slice(0, resultCount);
@@ -65,7 +65,33 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 					return ret;
 				}
 			});
+		},
+
+		formatNonemptySubclasses: function(numId, classes) {
+			classNumIds = classes.getNonemptySubclasses(numId);
+			if (i18n.getLanguage() == 'en') { // get labels from classes data
+				var ret = [];
+				angular.forEach(classNumIds, function(classNumId) {
+					ret.push({ label: classes.getLabelOrId(classNumId), url: i18n.getEntityUrl('Q' + classNumId), icount: classes.getAllInstanceCount(classNumId) });
+				});
+				util.sortByField(ret, 'icount');
+				return $q.defer().resolve(ret);
+			} else { // fetch labels using i18n
+				var classIds = [];
+				angular.forEach(classNumIds, function(classNumId) {
+					classIds.push('Q' + classNumId);
+				});
+				return i18n.waitForTerms(classIds).then(function() {
+					var ret = [];
+					angular.forEach(classNumIds, function(classNumId) {
+						ret.push({ label: i18n.getEntityTerms('Q' + classNumId).label, url: i18n.getEntityUrl('Q' + classNumId), icount: classes.getAllInstanceCount(classNumId) });
+					});
+					util.sortByField(ret, 'icount');
+					return ret;
+				});
+			}
 		}
+
 	};
 })
 .controller('ViewController',
@@ -81,6 +107,7 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 		View.updateId();
 		View.updateLang();
 		$scope.id = View.getId();
+		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 
 		$scope.classes = null;
@@ -101,7 +128,7 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 		$scope.directSubclasses = 0;
 		$scope.allInstances = 0;
 		$scope.allSubclasses = 0;
-		$scope.nonemptySubclasses = 0;
+		$scope.nonemptySubclasses = null;
 		$scope.propertyStatementCount = 0;
 		$scope.propertyAverageStatements = 0;
 		$scope.propertyQualifierCount = 0;
@@ -121,8 +148,6 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 				View.getEntityData().then(function(data) {
 					$scope.superProperties = View.getSchemaEntityInfo(data.superProperties, properties);
 				});
-				
-				var numId = $scope.id.substring(1);
 
 				View.formatPropertyMap(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
 					$scope.relatedProperties = formattedProperties;
@@ -163,8 +188,6 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 			});
 
 			if ($scope.isItem) {
-				var numId = $scope.id.substring(1);
-
 				View.formatPropertyMap(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
 					$scope.relatedProperties = formattedProperties;
 				});
@@ -172,7 +195,7 @@ classBrowser.factory('View', function($route, sparql, entitydata, i18n, util) {
 				$scope.directSubclasses = classes.getDirectSubclassCount(numId);
 				$scope.allInstances = classes.getAllInstanceCount(numId);
 				$scope.allSubclasses = classes.getAllSubclassCount(numId);
-				$scope.nonemptySubclasses = classes.getNonemptySubclasses(numId);
+				$scope.nonemptySubclasses = View.formatNonemptySubclasses(numId, classes); // classes.getNonemptySubclasses(numId);
 
 				if ($scope.directInstances > 0) {
 					sparql.getPropertySubjects("P31", $scope.id, MAX_EXAMPLE_INSTANCES + 1).then(function(result) {

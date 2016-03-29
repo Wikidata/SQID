@@ -6,7 +6,7 @@
 			<p>Maybe it was deleted. Maybe it never existed. Maybe we'll never know.</p>
 		</div>
 		<div ng-if="entityData.banner" style="overflow: hidden;">
-			<wdcb-image file="entityData.banner" width="850"></wdcb-image>
+			<sqid-image file="entityData.banner" width="850"></sqid-image>
 		</div>
 		
 		<h1>{{entityData.label}} <small>(<a href="{{url}}" target="_blank">{{id}}</a>)</small></h1>
@@ -251,20 +251,20 @@
 				</table>
 			</div>
 		</div>
-		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Human relationships" show="family"></wdcb-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Human relationships" show="family"></sqid-statement-table>
 
-		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Statements" show="other"></wdcb-statement-table>
-		
-		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Media" show="media"></wdcb-statement-table>
-		
-		<wdcb-statement-table ng-if="entityData !== null" data="entityData" title="Wikimedia Categories and Portals" show="wiki"></wdcb-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Statements" show="other"></sqid-statement-table>
+
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Media" show="media"></sqid-statement-table>
+
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Wikimedia Categories and Portals" show="wiki"></sqid-statement-table>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" style="padding-bottom: 15px;">
-			<wdcb-image file="'Colossal octopus by Pierre Denys de Montfort.jpg'" width="260"></wdcb-image>
+			<sqid-image file="'Colossal octopus by Pierre Denys de Montfort.jpg'" width="260"></sqid-image>
 		</div>
 		<div ng-if="entityData.images[0]" style="padding-bottom: 15px;">
-			<wdcb-image file="entityData.images[0]" width="260"></wdcb-image>
+			<sqid-image file="entityData.images[0]" width="260"></sqid-image>
 		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
@@ -279,6 +279,6 @@
 				</table>
 			</div>
 		</div>
-		<wdcb-statement-table ng-if="entityData !== null" data="entityData" show="ids" title="Identifiers"></wdcb-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" show="ids" title="Identifiers"></sqid-statement-table>
 	</div>
 </div>

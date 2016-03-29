@@ -169,20 +169,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
-		var getNonemptySubclasses = function(id) {
-			var ret = [];
-			var subClasses = getData(id,'sb', []);
-			for ( var i in subClasses ) {
-				var label = getLabel(subClasses[i]);
-				if ( label === null ) label = "Q" + subClasses[i];
-				ret.push( {label: label, url: getUrl(subClasses[i]), icount: getAllInstanceCount(subClasses[i])} );
-			}
-			ret.sort(function(a, b) {
-				return a.icount < b.icount ? 1 : (a.icount > b.icount ? -1 : 0);
-			});
-			return ret;
-		};
-
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
@@ -200,7 +186,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
-					getNonemptySubclasses: getNonemptySubclasses
+					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); }
 				}
 			});
 		}

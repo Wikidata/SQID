@@ -58,12 +58,12 @@ angular.module('utilities', [])
 		}
 	}
 
-	var hasCachedEntityTerms =  function(entityId) {
+	var hasEntityTerms =  function(entityId) {
 		return (entityId in idTerms);
 	}
 
-	var getCachedEntityTerms = function(entityId) {
-		if (hasCachedEntityTerms(entityId)) {
+	var getEntityTerms = function(entityId) {
+		if (hasEntityTerms(entityId)) {
 			return idTerms[entityId];
 		} else {
 			return { label: entityId, description: ''};
@@ -79,7 +79,7 @@ angular.module('utilities', [])
 	}
 
 	var getPropertyLabel = function(propertyId) {
-		if (hasPropertyLabel(propertyId)) {
+		if (hasPropertyLabel(propertyId)) { // implies (properties !== null)
 			if (language == 'en') {
 				var numId = propertyId.substring(1);
 				return properties.getLabelOrId(numId);
@@ -91,10 +91,18 @@ angular.module('utilities', [])
 		}
 	}
 
+	var getEntityLabel = function(id) {
+		if (id.substring(0,1) == 'Q') {
+			return getEntityTerms(id).label;
+		} else {
+			return getPropertyLabel(id);
+		}
+	}
+
 	var waitForTerms = function(entities) {
 		var missingEntities = [];
 		for (var i=0; i < entities.length; i++) {
-			if (!hasCachedEntityTerms(entities[i])) {
+			if (!hasEntityTerms(entities[i])) {
 				missingEntities.push(entities[i]);
 			}
 		}
@@ -145,8 +153,9 @@ angular.module('utilities', [])
 		getPropertyLabel: getPropertyLabel,
 		getPropertyLink: getPropertyLink,
 		checkCacheSize: checkCacheSize,
-		getCachedEntityTerms: getCachedEntityTerms,
-		hasCachedEntityTerms: hasCachedEntityTerms,
+		getEntityTerms: getEntityTerms,
+		hasEntityTerms: hasEntityTerms,
+		getEntityLabel: getEntityLabel,
 		waitForTerms: waitForTerms,
 		waitForPropertyLabels: waitForPropertyLabels
 	};
@@ -205,9 +214,9 @@ angular.module('utilities', [])
 	    return temp;
 	};
 
-	var sortByCount = function(objectList) {
+	var sortByField = function(objectList, fieldName) {
 		objectList.sort(function(a, b) {
-			return a.count < b.count ? 1 : (a.count > b.count ? -1 : 0);
+			return a[fieldName] < b[fieldName] ? 1 : (a[fieldName] > b[fieldName] ? -1 : 0);
 		});
 	}
 
@@ -216,7 +225,7 @@ angular.module('utilities', [])
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
-		sortByCount: sortByCount
+		sortByField: sortByField
 	};
 
 })
@@ -585,7 +594,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
-.directive('wdcbImage', function(wikidataapi) {
+.directive('sqidImage', function(wikidataapi) {
 
 	var link = function (scope, element, attrs) {
 		scope.$watch(attrs.file, function(file){
@@ -604,7 +613,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
-.directive('wdcbFooter', function(statistics) {
+.directive('sqidFooter', function(statistics) {
 
 	var link = function (scope, element, attrs) {
 		statistics.then(function(stats) {
@@ -622,7 +631,11 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
-.directive('wdcbStatementTable', function(Properties, Classes, wikidataapi, util, i18n) {
+.directive('sqidValueList', function(Properties, util, i18n) {
+	
+})
+
+.directive('sqidStatementTable', function(Properties, util, i18n) {
 	var properties = null;
 
 	var link = function (scope, element, attrs) {
@@ -680,10 +693,10 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		}
 
 		var getEntityTerms = function(entityId) {
-			if (!i18n.hasCachedEntityTerms(entityId)) {
+			if (!i18n.hasEntityTerms(entityId)) {
 				hasMissingTerms = true;
 			}
-			return i18n.getCachedEntityTerms(entityId);
+			return i18n.getEntityTerms(entityId);
 		}
 
 		var getValueHtml = function(datavalue, numPropId) {
