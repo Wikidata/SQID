@@ -371,8 +371,8 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					angular.forEach(response.entities, function(data,entityId) {
 						var label = entityId;
 						var desc = "";
-						if (language in data.labels) label = data.labels[language].value;
-						if (language in data.descriptions) desc = data.descriptions[language].value;
+						if ('labels' in data && language in data.labels) label = data.labels[language].value;
+						if ('descriptions' in data && language in data.descriptions) desc = data.descriptions[language].value;
 						idTerms[entityId] = { label: label, description: desc };
 					});
 				}
