@@ -1,18 +1,27 @@
 
-classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter) {
+classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
 	var entityDataPromise = null;
 
-	var getValueListData = function(statementGroup, properties, listener) {
+	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
 		var ret = [];
-		angular.forEach(statementGroup, function (statement) {
+		angular.forEach(statementGroup, function(statement) {
+			var count = -1;
+			if (propertiesOrClasses !== null) {
+				var mainSnak = statement.mainsnak;
+				if (mainSnak.snaktype == 'value' && mainSnak.datavalue.type == 'wikibase-entityid') { 
+					count = propertiesOrClasses.getMainUsageCount(mainSnak.datavalue.value["numeric-id"]);
+				}
+			}
 			ret.push({ 
 				value : $sce.trustAsHtml(dataFormatter.getStatementMainValueHtml(statement, properties, listener, true)),
-				qualifiers : $sce.trustAsHtml(dataFormatter.getStatementQualifiersHtml(statement, properties, listener, true))
+				qualifiers : $sce.trustAsHtml(dataFormatter.getStatementQualifiersHtml(statement, properties, listener, true)),
+				count: count
 			});
 		});
+		util.sortByField(ret, 'count');
 		return ret;
 	}
 
@@ -38,19 +47,23 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			return ret;
 		},
 
-		getValueList: function(data, propertyId, properties) {
-			var statementGroup = data.statements[propertyId];
-			var listener = { hasMissingTerms : false };
-			var ret = getValueListData(statementGroup, properties, listener);
-			if (listener.hasMissingTerms) {
-				return data.waitForTerms().then( function() {
-					return getValueListData(statementGroup, properties, listener);
+		getValueList: function(data, propertyId, propertiesOrClasses) {
+			return Properties.then(function(properties){
+				return data.waitForPropertyLabels().then(function() {
+					var statementGroup = data.statements[propertyId];
+					var listener = { hasMissingTerms : false };
+					var ret = getValueListData(statementGroup, properties, listener, propertiesOrClasses);
+					if (listener.hasMissingTerms) {
+						return data.waitForTerms().then( function() {
+							return getValueListData(statementGroup, properties, listener, propertiesOrClasses);
+						});
+					} else {
+						var deferred = $q.defer();
+						deferred.resolve(ret);
+						return deferred.promise;
+					}
 				});
-			} else {
-				var deferred = $q.defer();
-				deferred.resolve(ret);
-				return deferred.promise;
-			}
+			});
 		},
 
 		getEntityData: function() {
@@ -167,12 +180,21 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		View.getEntityData().then(function(data) {
 			$scope.entityData = data;
 			$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
-			Properties.then(function(properties){
-				View.getValueList(data, 'P31', properties).then( function(instanceClasses) {
+			data.waitForPropertyLabels().then( function() {
+				$scope.instanceOfUrl = i18n.getEntityUrl("P31");
+				$scope.instanceOfLabel = i18n.getPropertyLabel("P31");
+				$scope.subclassOfUrl = i18n.getEntityUrl("P279");
+				$scope.subclassOfLabel = i18n.getPropertyLabel("P279");
+				$scope.subpropertyOfUrl = i18n.getEntityUrl("P1647");
+				$scope.subpropertyOfLabel = i18n.getPropertyLabel("P1647");
+			});
+
+			Classes.then(function(classes){
+				View.getValueList(data, 'P31', classes).then( function(instanceClasses) {
 					$scope.instanceClasses = instanceClasses;
 				});
 				if ($scope.isItem) {
-					View.getValueList(data, 'P279', properties).then( function(superClasses) {
+					View.getValueList(data, 'P279', classes).then( function(superClasses) {
 						$scope.superClasses = superClasses;
 					});
 				}
@@ -180,12 +202,11 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		});
 
 		Properties.then(function(properties){
-			$scope.instanceOfUrl = properties.getUrl("31");
-			$scope.subclassOfUrl = properties.getUrl("279");
-			$scope.subpropertyOfUrl = properties.getUrl("1647");
 			if (!$scope.isItem) {
 				View.getEntityData().then(function(data) {
-					$scope.superProperties = View.getSchemaEntityInfo(data.superProperties, properties);
+					View.getValueList(data, 'P1647', properties).then( function(superProperties) {
+						$scope.superProperties = superProperties;
+					});
 				});
 
 				View.formatPropertyMap(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {

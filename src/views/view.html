@@ -23,12 +23,13 @@
 				{{propertyDatatype}}
 			</div>
 			<div ng-if="superProperties !== null">
-				<b><a href="{{subpropertyOfUrl}}">Subproperty of</a>:</b>
+				<b><a href="{{subpropertyOfUrl}}">{{subpropertyOfLabel}}</a>:</b>
 				<span ng-if="superProperties.length > 0">
 					every {{entityData.labelorid}} is also a
 					<ul class="list-inline comma-separated" style="display: inline;">
 						<li ng-repeat="superprop in superProperties">
-							<a href = {{superprop.url}}>{{superprop.label}}</a>
+							<span ng-bind-html="superprop.value"></span>
+							<span ng-if="superprop.qualifiers != ''" uib-popover-html="superprop.qualifiers"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
 						</li>
 					</ul>
 				</span>
@@ -37,9 +38,9 @@
 				</span>
 			</div>
 			<div ng-if="superClasses !== null">
-				<b><a href="{{subclassOfUrl}}">Subclass of</a>:</b>
+				<b><a href="{{subclassOfUrl}}">{{subclassOfLabel}}</a>:</b>
 				<span ng-if="superClasses.length > 0">
-					every {{entityData.labelorid}} is also a<span ng-if="superClasses[0].label.toLowerCase().charAt(0) == 'a'">n</span>
+					every {{entityData.labelorid}} is also a
 					<ul class="list-inline comma-separated" style="display: inline;">
 						<li ng-repeat="superclass in superClasses">
 							<span ng-bind-html="superclass.value"></span>
@@ -52,7 +53,7 @@
 				</span>
 			</div>
 			<div ng-if="instanceClasses !== null">
-				<b><a href="{{instanceOfUrl}}">Instance of</a>:</b>
+				<b><a href="{{instanceOfUrl}}">{{instanceOfLabel}}</a>:</b>
 				<span ng-if="instanceClasses.length > 0">
 					{{entityData.label}} is a
 					<ul class="list-inline comma-separated" style="display: inline;">
@@ -212,7 +213,7 @@
 							<th>Direct superclasses</th>
 							<td><ul ng-if="superClasses.length > 0" class="list-inline comma-separated" style="display: inline;">
 									<li ng-repeat="superclass in superClasses">
-										<span ng-bind-html="superclass.value"></span> <span class="info-badge">{{superclass.icount}}</span>
+										<span ng-bind-html="superclass.value"></span> <span class="info-badge">{{superclass.count}}</span>
 									</li>
 								</ul><span ng-if="superClasses.length == 0"><i>none</i></span>
 							</td>

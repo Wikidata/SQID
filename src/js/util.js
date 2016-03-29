@@ -45,6 +45,7 @@ angular.module('utilities', [])
 		if (language != newLang) {
 			language = newLang;
 			clearCache(); // clear term cache that was based on old language
+			propertyLabels = {}; // clear property label cache for old language
 		}
 	}
 
@@ -126,6 +127,17 @@ angular.module('utilities', [])
 					missingPropertyIds.push(propertyIds[i]);
 				}
 			}
+			// Make sure we always have the main properties we use in labels:
+			if (!('P31' in propertyLabels)) {
+				missingPropertyIds.push('P31');
+			}
+			if (!('P279' in propertyLabels)) {
+				missingPropertyIds.push('P279');
+			}
+			if (!('P1647' in propertyLabels)) {
+				missingPropertyIds.push('P1647');
+			}
+
 			return wikidataapi.getEntityLabels(missingPropertyIds, language).then(function(entityLabels) {
 				angular.extend(propertyLabels, entityLabels);
 				return true;
@@ -500,15 +512,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return wikidataapi.getEntityData(id, language).then(function(response) {
 			var ret = {
 				language: language, // this is fixed for this result!
-				label: "",
+				label: '',
 				labelorid: id,
-				description: "",
+				description: '',
 				images: [],
 				aliases: [],
 				banner: null,
-				superclasses: [],
-				instanceClasses: [],
-				superProperties: [],
 				statements: {},
 				missing: false,
 				termsPromise: null,
@@ -549,7 +558,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					ret.aliases.push(aliasesData[i].value);
 				}
 			}
-			
+
 			if ("claims" in entityData) {
 				// image
 				if ("P18" in entityData.claims) {
@@ -558,30 +567,12 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 						ret.images.push(imageFileName.replace(" ","_"));
 					}
 				}
-				// instance of
-				if ("P31" in entityData.claims) {
-					for (var i in entityData.claims.P31) {
-						ret.instanceClasses.push(getStatementValue(entityData.claims.P31[i],{"numeric-id": 0})["numeric-id"].toString());
-					}
-				}
-				// subclass of
-				if ("P279" in entityData.claims) {
-					for (var i in entityData.claims.P279) {
-						ret.superclasses.push(getStatementValue(entityData.claims.P279[i],{"numeric-id": 0})["numeric-id"].toString());
-					}
-				}
-				// subproperty of
-				if ("P1647" in entityData.claims) {
-					for (var i in entityData.claims.P1647) {
-						ret.superProperties.push(getStatementValue(entityData.claims.P1647[i],{"numeric-id": 0})["numeric-id"].toString());
-					}
-				}
 				// Wikivoyage banner; only pick the first banner if multiple
 				if ("P948" in entityData.claims) {
 					var imageFileName = getStatementValue(entityData.claims.P948[0],"");
 					ret.banner = imageFileName.replace(" ","_");
 				}
-				
+
 				ret.statements = entityData.claims;
 			}
 
