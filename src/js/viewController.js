@@ -248,7 +248,9 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 				$scope.directSubclasses = classes.getDirectSubclassCount(numId);
 				$scope.allInstances = classes.getAllInstanceCount(numId);
 				$scope.allSubclasses = classes.getAllSubclassCount(numId);
-				$scope.nonemptySubclasses = View.formatNonemptySubclasses(numId, classes);
+				View.formatNonemptySubclasses(numId, classes).then( function(nonemptySubclasses) {
+					$scope.nonemptySubclasses = nonemptySubclasses;
+				});
 
 				if ($scope.directInstances > 0) {
 					sparql.getPropertySubjects("P31", $scope.id, MAX_EXAMPLE_INSTANCES + 1).then(function(result) {
