@@ -301,6 +301,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.resetFilters = function(){
       status.classesFilter = Arguments.getStatusStartValues().classesFilter;
       status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
+      $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+      $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.relatedProperty);
       updateTable();
     }
 
