@@ -28,7 +28,12 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				ALL_INSTANCES : 'All instances',
 				ALL_INSTANCES_HINT : 'Total number of unique instances of this class and its {{subclassCount}} direct and indirect subclasses'
 			},
+			SEC_HUMAN_RELATIONS: 'Human relationships',
+			SEC_IDENTIFIERS: 'Identifiers',
+			SEC_LINKS : 'Links',
 			SEC_PROP_USE : 'Property Usage',
+			SEC_STATEMENTS : 'Statements',
+			SEC_MEDIA : 'Media',
 			SEC_WIKIMEDIA_PAGES : 'Wikimedia Categories and Portals'
 		};
 		var deMessages = {
@@ -42,7 +47,12 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				DIRECT_INSTANCES : 'Direkte Instanzen',
 				ALL_INSTANCES : 'Alle Instanzen'
 			},
+			SEC_HUMAN_RELATIONS: 'Beziehungen',
+			SEC_IDENTIFIERS: 'Bezeichner',
+			SEC_LINKS : 'Links',
 			SEC_PROP_USE : 'Verwendung der Eigenschaft',
+			SEC_STATEMENTS : 'Aussagen',
+			SEC_MEDIA : 'Medien',
 			SEC_WIKIMEDIA_PAGES : 'Wikimedia-Kategorien und -Portale'
 		};
 		

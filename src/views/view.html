@@ -253,13 +253,13 @@
 				</table>
 			</div>
 		</div>
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Human relationships" show="family"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_HUMAN_RELATIONS'|translate}}" show="family"></sqid-statement-table>
 
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Statements" show="other"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_STATEMENTS'|translate}}" show="other"></sqid-statement-table>
 
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Media" show="media"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_MEDIA'|translate}}" show="media"></sqid-statement-table>
 
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="Wikimedia Categories and Portals" show="wiki"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_WIKIMEDIA_PAGES'|translate}}" show="wiki"></sqid-statement-table>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" style="padding-bottom: 15px;">
@@ -270,7 +270,7 @@
 		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
-				Links
+				<span translate="SEC_LINKS"></span>
 			</h2></div>
 			<div>
 				<table class="table table-striped table-condensed">
@@ -281,6 +281,6 @@
 				</table>
 			</div>
 		</div>
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" show="ids" title="Identifiers"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" show="ids" title="{{'SEC_IDENTIFIERS'|translate}}"></sqid-statement-table>
 	</div>
 </div>
