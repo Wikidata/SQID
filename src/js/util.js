@@ -332,7 +332,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					};
 				} else {
 					element = {
-						label: "... further results",
+						label: '... further results', // TODO I18N
 						uri: getQueryUiUrl(continueUrl)
 					};
 				}

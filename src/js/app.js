@@ -15,7 +15,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	})
 
 	.config(['$translateProvider', function ($translateProvider) {
-		
+
 		var enMessages = {
 			NAV: {
 				PROPERTIES: 'Properties',
@@ -28,6 +28,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
 			PROPTYPE : 'Type',
+			FURTHER_RESULTS: '&hellip; further results',
 			STATEMENTS: {
 				PREFERRED_HINT: 'This is a preferred statement',
 				DEPRECATED_HINT: 'This is a deprecated statement',
