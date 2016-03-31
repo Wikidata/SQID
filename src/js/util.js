@@ -823,15 +823,14 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
-.directive('sqidFooter', function(statistics) {
+.directive('sqidFooter', function($compile, statistics) {
 
 	var link = function (scope, element, attrs) {
 		statistics.then(function(stats) {
-			var innerHtml = '<div class="col-md-6">Statistics based on data dump ' + stats.getDumpDateString() + '</div>';
-			innerHtml += '<div class="col-md-6">Powered by \
-				<a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; \
-				<a href="https://query.wikidata.org/">Wikidata SPARQL Query</a></div>';
-			element.replaceWith('<hr/><div class="container-fluid"><div class="footer row">' + innerHtml + '</div></div>');
+			var innerHtml = '<div class="col-md-6"><span translate="FOOTER.STAT_DATE" translate-value-date="' + stats.getDumpDateString() + '"></span></div>';
+			innerHtml += '<div class="col-md-6"><span translate="FOOTER.POWERED_BY"></span></div>';
+			element.html('<hr/><div class="container-fluid"><div class="footer row">' + innerHtml + '</div></div>');
+			$compile(element.contents())(scope);
 		});
 	};
 	

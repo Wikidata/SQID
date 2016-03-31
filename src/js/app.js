@@ -17,6 +17,16 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	.config(['$translateProvider', function ($translateProvider) {
 		
 		var enMessages = {
+			NAV: {
+				PROPERTIES: 'Properties',
+				CLASSES: 'Classes',
+				START: 'Start',
+				ABOUT: 'About',
+			},
+			FOOTER: {
+				STAT_DATE: 'Statistics based on data dump {{date}}',
+				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
+			},
 			PROPTYPE : 'Type',
 			STATEMENTS: {
 				PREFERRED_HINT: 'This is a preferred statement',
@@ -85,6 +95,16 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			NOSUCHENTITY_BODY: 'Maybe it was deleted. Maybe it never existed. Maybe we\'ll never know.',
 		};
 		var deMessages = {
+			NAV: {
+				PROPERTIES: 'Eigenschaften',
+				CLASSES: 'Klassen',
+				START: 'Start',
+				ABOUT: 'Über SQID',
+			},
+			FOOTER: {
+				STAT_DATE: 'Statistiken Stand {{date}}',
+				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
+			},
 			PROPTYPE : 'Typ',
 		 	STATEMENTS: {
 				PREFERRED_HINT: 'Dies ist eine bevorzugte Aussage',
