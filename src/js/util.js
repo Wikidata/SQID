@@ -174,6 +174,25 @@ angular.module('utilities', [])
 	};
 })
 
+.factory('htmlCache', function($sce) {
+	var trustedHtmlSnippets = [];
+
+	return {
+		reset : function() { trustedHtmlSnippets = []; },
+		getKey : function(html) {
+			trustedHtmlSnippets.push($sce.trustAsHtml(html));
+			return trustedHtmlSnippets.length-1;
+		},
+		getValue : function(key) {
+			if (key < trustedHtmlSnippets.length) {
+				return trustedHtmlSnippets[key];
+			} else {
+				return $sce.trustAsHtml('<span style="color: red;">HTML key ' + index + ' not found!</span>');
+			}
+		}
+	};
+})
+
 .factory('util', function($http, $q) {
 
 	var httpRequest = function(url) {
@@ -759,15 +778,15 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	 * cache. This usually means that rendering will have to wait until labels have
 	 * been fetched.
 	 * 
-	 * TODO should use boostrap-ui popover; possibly not needed at all
+	 * FIXME This fails since html needs to be an angular expression that evaluates to an $sce escaped html string, which is something we cannot insert on this level.
 	 */
 	var getStatementValueInlineHtml = function(statement, properties, missingTermsListener) {
 		var ret = getStatementMainValueHtml(statement, properties, missingTermsListener, true);
 
 		if ('qualifiers' in statement) {
-			ret += '<span role="button" class="btn popovers" data-toggle="popover" title="" data-content="'
-				+  getStatementQualifiersHtml(statement, properties, missingTermsListener, true).replace(/"/g,"'")
-				+ '">qualifiers</span>';
+			ret += ' <span uib-popover-html="\''
+				+  getStatementQualifiersHtml(statement, properties, missingTermsListener, true)//.replace(/"/g,"'")
+				+ '\'"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>';
 		}
 
 		return ret;
@@ -844,7 +863,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 // 	};
 // }])
 
-.directive('sqidStatementTable', function(Properties, dataFormatter, util, i18n) {
+.directive('sqidStatementTable', function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;
 	var missingTermsListener = { hasMissingTerms : false};
 // 	var hasMissingTerms = false;
@@ -972,6 +991,11 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			});
 			return ret;
 		}
+		
+		var insertAndCompile = function(html, element, scope) {
+			element.html(html);
+			$compile(element.contents())(scope);
+		}
 
 		scope.$watch(attrs.data, function(itemData){
 			itemData.waitForPropertyLabels().then(function() {
@@ -982,10 +1006,10 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					var html = getHtml(itemData.statements, propertyList);
 					if (missingTermsListener.hasMissingTerms) {
 						itemData.waitForTerms().then( function() {
-							element.replaceWith(getHtml(itemData.statements, propertyList));
+							insertAndCompile(getHtml(itemData.statements, propertyList), element, scope);
 						});
 					} else {
-						element.replaceWith(html);
+						insertAndCompile(html, element, scope);
 					}
 				})
 			});

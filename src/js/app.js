@@ -18,42 +18,97 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		
 		var enMessages = {
 			PROPTYPE : 'Type',
-			TYPICAL_PROPS : 'Typical Properties',
-			TYPICAL_PROPS_HINT_PROP : 'Other properties typically used by entities using this property',
-			TYPICAL_PROPS_HINT_CLASS : 'Other properties typically used by direct and indirect instances of this class',
-			SEC_CLASSIFICATION : 'Classification',
+			TYPICAL_PROPS : {
+				TYPICAL_PROPS : 'Typical Properties',
+				HINT_PROP : 'Other properties typically used by entities using this property',
+				HINT_CLASS : 'Other properties typically used by direct and indirect instances of this class',
+				NONE : 'none',
+			},
+			INSTANCE_OF_PHRASE: '{{entity}} is a(n) {{classes}}',
+			NO_INSTANCE_OF_PHRASE: '{{entity}} is not an instance of any other class',
+			SUBCLASS_OF_PHRASE: 'every {{entity}} is also a(n) {{classes}}',
+			NO_SUBCLASS_OF_PHRASE: '{{entity}} is not a subclass of any other class',
+			SUBPROPERTY_OF_PHRASE: 'every {{entity}} is also a(n) {{properties}}',
+			NO_SUBPROPERTY_OF_PHRASE: '{{entity}} is not a subproperty of any other property',
+		 	SEC_CLASSIFICATION : {
+				SEC_CLASSIFICATION : 'Classification',
+				DIRECT_SUBCLASSES: 'Direct subclasses',
+				LOADING_DIRECT_SUBCLASSES: 'Loading direct subclasses &hellip;',
+				DIRECT_SUPERCLASSES: 'Direct superclasses',
+				NO_DIRECT_SUPERCLASSES: 'none',
+				ALL_SUBCLASSES: 'All subclasses',
+				ALL_SUBCLASSES_HINT: 'Number of unique direct and indirect subclasses',
+				MAIN_SUBCLASSES: 'Main subclasses',
+				MAIN_SUBCLASSES_HINT: 'Direct subclasses that have at least one instance or subclass',
+			},
 			SEC_INSTANCES : {
 				SEC_INSTANCES : 'Instances',
 				DIRECT_INSTANCES : 'Direct instances',
 				ALL_INSTANCES : 'All instances',
-				ALL_INSTANCES_HINT : 'Total number of unique instances of this class and its {{subclassCount}} direct and indirect subclasses'
+				ALL_INSTANCES_HINT : 'Total number of unique instances of this class and its {{subclassCount}} direct and indirect subclasses',
+				NO_DIRECT_INSTANCES: 'No direct instances found. Maybe the data changed recently. Our records will be updated soon.',
+				LOADING_DIRECT_INSTANCES: 'Loading direct instances &hellip;',
 			},
 			SEC_HUMAN_RELATIONS: 'Human relationships',
 			SEC_IDENTIFIERS: 'Identifiers',
-			SEC_LINKS : 'Links',
+			SEC_LINKS : {
+				SEC_LINKS : 'Links',
+				WIKIDATA : 'Wikidata page',
+				REASONATOR : 'Reasonator',
+			},
 			SEC_PROP_USE : 'Property Usage',
 			SEC_STATEMENTS : 'Statements',
 			SEC_MEDIA : 'Media',
-			SEC_WIKIMEDIA_PAGES : 'Wikimedia Categories and Portals'
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia Categories and Portals',
+			NOSUCHENTITY_HEADLINE: 'Sorry, I could not find any entity with ID "{{id}}".',
+			NOSUCHENTITY_BODY: 'Maybe it was deleted. Maybe it never existed. Maybe we\'ll never know.',
 		};
 		var deMessages = {
 			PROPTYPE : 'Typ',
-			TYPICAL_PROPS : 'Typische Eigenschaften',
-			TYPICAL_PROPS_HINT_PROP : 'Andere Eigenschaften, die oftmals von Entitäten verwendet werden, die diese Eigenschaft verwenden',
-			TYPICAL_PROPS_HINT_CLASS : 'Andere Eigenschaften, die oftmals von direkten oder indirekten Instanzen dieser Klasse verwendet werden',
-			SEC_CLASSIFICATION : 'Klassifikation',
+			TYPICAL_PROPS : {
+				TYPICAL_PROPS : 'Typische Eigenschaften',
+				HINT_PROP : 'Andere Eigenschaften, die oftmals von Entitäten verwendet werden, die diese Eigenschaft verwenden',
+				HINT_CLASS : 'Andere Eigenschaften, die oftmals von direkten oder indirekten Instanzen dieser Klasse verwendet werden',
+				NONE: 'keine'
+			},
+			INSTANCE_OF_PHRASE: '{{entity}} ist ein(e) {{classes}}',
+			NO_INSTANCE_OF_PHRASE: '{{entity}} ist keine Instanz einer Klasse',
+			SUBCLASS_OF_PHRASE: 'jede Instanz von {{entity}} ist auch {{classes}}',
+			NO_SUBCLASS_OF_PHRASE: '{{entity}} hat keinerlei Oberklassen',
+			SUBPROPERTY_OF_PHRASE: 'Werte für {{entity}} gelten auch für {{properties}}',
+			NO_SUBPROPERTY_OF_PHRASE: '{{entity}} ist keine Untereigenschaft einer anderen Eigenschaft',
+			SEC_CLASSIFICATION : {
+				SEC_CLASSIFICATION : 'Klassifikation',
+				DIRECT_SUBCLASSES: 'Direkte Unterklassen',
+				LOADING_DIRECT_SUBCLASSES: 'Direkte Unterklassen werden geladen &hellip;',
+				DIRECT_SUPERCLASSES: 'Direkte Oberklassen',
+				NO_DIRECT_SUPERCLASSES: 'keine',
+				ALL_SUBCLASSES: 'Alle Unterklassen',
+				ALL_SUBCLASSES_HINT: 'Gesamtzahl der direkten und indirekten Unterklassen',
+				MAIN_SUBCLASSES: 'Wichtigste Unterklassen',
+				MAIN_SUBCLASSES_HINT: 'Direkte Unterklassen mit mindestens einer Instanz oder Unterklasse',
+			},
 			SEC_INSTANCES : {
 				SEC_INSTANCES : 'Instanzen',
 				DIRECT_INSTANCES : 'Direkte Instanzen',
-				ALL_INSTANCES : 'Alle Instanzen'
+				ALL_INSTANCES : 'Alle Instanzen',
+				ALL_INSTANCES_HINT : 'Gesamtzahl der Instanzen dieser Klasse und ihrer {{subclassCount}} direkten und indirekten Unterklassen',
+				NO_DIRECT_INSTANCES: 'No direct instances found. Maybe the data changed recently. Our records will be updated soon.',
+				LOADING_DIRECT_INSTANCES: 'Direkte Instanzen werden geladen &hellip;',
 			},
 			SEC_HUMAN_RELATIONS: 'Beziehungen',
 			SEC_IDENTIFIERS: 'Bezeichner',
-			SEC_LINKS : 'Links',
+			SEC_LINKS : {
+				SEC_LINKS : 'Links',
+				WIKIDATA : 'Wikidata',
+				REASONATOR : 'Reasonator',
+			},
 			SEC_PROP_USE : 'Verwendung der Eigenschaft',
 			SEC_STATEMENTS : 'Aussagen',
 			SEC_MEDIA : 'Medien',
-			SEC_WIKIMEDIA_PAGES : 'Wikimedia-Kategorien und -Portale'
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia-Kategorien und -Portale',
+			NOSUCHENTITY_HEADLINE: 'Leider konnte ich kein Objekt mit ID "{{id}}" finden.',
+			NOSUCHENTITY_BODY: 'Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden.',
 		};
 		
 		$translateProvider
@@ -61,7 +116,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.translations('de', deMessages )
 			.fallbackLanguage('en')
 			.preferredLanguage('en')
-			.useSanitizeValueStrategy('escape');
+// 			.useSanitizeValueStrategy('escape') // using this makes it impossible to use HTML (links, tooltips, etc.) in variable replacements
+			;
 	}])
 
 	.factory('Arguments', function($http, $route, jsonData, util){

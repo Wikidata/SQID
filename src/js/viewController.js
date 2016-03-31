@@ -1,5 +1,5 @@
 
-classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties) {
+classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -16,8 +16,8 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 				}
 			}
 			ret.push({ 
-				value : $sce.trustAsHtml(dataFormatter.getStatementMainValueHtml(statement, properties, listener, true)),
-				qualifiers : $sce.trustAsHtml(dataFormatter.getStatementQualifiersHtml(statement, properties, listener, true)),
+				value : dataFormatter.getStatementMainValueHtml(statement, properties, listener, true),
+				qualifiers : dataFormatter.getStatementQualifiersHtml(statement, properties, listener, true),
 				count: count
 			});
 		});
@@ -64,6 +64,23 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 					}
 				});
 			});
+		},
+
+		getValueListTrustedHtml: function(valueList, showCounts) {
+			var result = '';
+			angular.forEach(valueList, function(item, index) {
+				if (index>0) {
+					result += ', ';
+				}
+				result += item.value;
+				if (item.qualifiers != '') {
+					result += ' <span uib-popover-html="getCachedHtml(' + htmlCache.getKey(item.qualifiers) + ')"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>';
+				}
+				if (showCounts) {
+					result += ' <span class="info-badge">' + item.count + '</span>';
+				}
+			});
+			return $sce.trustAsHtml(result);
 		},
 
 		getEntityData: function() {
@@ -137,7 +154,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 	};
 })
 .controller('ViewController',
-	function($scope, $route, $sce, $compile, View, Classes, Properties, sparql, util, i18n){
+	function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
 		var MAX_PROP_SUBJECTS = 10;
@@ -146,11 +163,23 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 
 		i18n.checkCacheSize();
 
+		htmlCache.reset();
+		$scope.getCachedHtml = htmlCache.getValue;
+
 		View.updateId();
 		View.updateLang();
 		$scope.id = View.getId();
 		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
+		
+		$scope.translations = {};
+
+		$translate(['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP']).then( function(translations) {
+			$scope.translations['MAIN_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT'];
+			$scope.translations['ALL_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT'];
+			$scope.translations['TYPICAL_PROPS_HINT_CLASS'] = translations['TYPICAL_PROPS.HINT_CLASS'];
+			$scope.translations['TYPICAL_PROPS_HINT_PROP'] = translations['TYPICAL_PROPS.HINT_PROP'];
+		});
 
 		$scope.classes = null;
 		$scope.properties = null;
@@ -159,12 +188,12 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 
 		$scope.exampleInstances = null;
 		$scope.exampleSubclasses = null;
-		$scope.superClasses = null;
-		$scope.instanceClasses = null;
+		$scope.superClassCount = -1;
+		$scope.instanceClassCount = -1;
 
 		$scope.examplePropertyItems = null;
 		$scope.examplePropertyValues = null;
-		$scope.superProperties = null;
+		$scope.superPropertyCount = -1;
 
 		$scope.directInstances = 0;
 		$scope.directSubclasses = 0;
@@ -191,11 +220,14 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 
 			Classes.then(function(classes){
 				View.getValueList(data, 'P31', classes).then( function(instanceClasses) {
-					$scope.instanceClasses = instanceClasses;
+					$scope.instanceClassCount = instanceClasses.length;
+					$scope.instanceClassesHtml = View.getValueListTrustedHtml(instanceClasses, false);
 				});
 				if ($scope.isItem) {
 					View.getValueList(data, 'P279', classes).then( function(superClasses) {
-						$scope.superClasses = superClasses;
+						$scope.superClassCount = superClasses.length;
+						$scope.superClassesHtml = View.getValueListTrustedHtml(superClasses, false);
+						$scope.superClassesHtmlWithCounts = View.getValueListTrustedHtml(superClasses, true);
 					});
 				}
 			});
@@ -205,7 +237,8 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			if (!$scope.isItem) {
 				View.getEntityData().then(function(data) {
 					View.getValueList(data, 'P1647', properties).then( function(superProperties) {
-						$scope.superProperties = superProperties;
+						$scope.superPropertyCount = superProperties.length;
+						$scope.superPropertiesHtml = View.getValueListTrustedHtml(superProperties, false);
 					});
 				});
 
@@ -237,7 +270,8 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			}
 		});
 
-		$scope.url = "http://www.wikidata.org/entity/" + $scope.id;
+		$scope.url = 'https://www.wikidata.org/wiki/' + $scope.id + '?uselang=' + i18n.getLanguage();
+		$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id + '&lang=' + i18n.getLanguage();
 
 		Classes.then(function(classes){
 			if ($scope.isItem) {
@@ -248,6 +282,10 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 				$scope.directSubclasses = classes.getDirectSubclassCount(numId);
 				$scope.allInstances = classes.getAllInstanceCount(numId);
 				$scope.allSubclasses = classes.getAllSubclassCount(numId);
+				$translate('SEC_INSTANCES.ALL_INSTANCES_HINT', { subclassCount : $scope.allSubclasses } ).then( function(result) {
+					$scope.translations['ALL_INSTANCES_HINT'] = result;
+				});
+
 				View.formatNonemptySubclasses(numId, classes).then( function(nonemptySubclasses) {
 					$scope.nonemptySubclasses = nonemptySubclasses;
 				});

@@ -1,8 +1,8 @@
 <div ng-controller="ViewController">
 	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" class="well" >
-			<h2>Sorry, I could not find any entity with ID "{{id}}".</h2>
-			<p>Maybe it was deleted. Maybe it never existed. Maybe we'll never know.</p>
+			<h2><span translate="NOSUCHENTITY_HEADLINE" translate-value-id="{{id}}"></span></h2>
+			<p><span translate="NOSUCHENTITY_BODY"></span></p>
 		</div>
 		<div ng-if="entityData.banner" style="overflow: hidden;">
 			<sqid-image file="entityData.banner" width="850"></sqid-image>
@@ -22,50 +22,20 @@
 				<b><span translate="PROPTYPE"></span>:</b>
 				{{propertyDatatype}}
 			</div>
-			<div ng-if="superProperties !== null">
+			<div ng-if="superPropertyCount > -1">
 				<b><a href="{{subpropertyOfUrl}}">{{subpropertyOfLabel}}</a>:</b>
-				<span ng-if="superProperties.length > 0">
-					every {{entityData.labelorid}} is also a
-					<ul class="list-inline comma-separated" style="display: inline;">
-						<li ng-repeat="superprop in superProperties">
-							<span ng-bind-html="superprop.value"></span>
-							<span ng-if="superprop.qualifiers != ''" uib-popover-html="superprop.qualifiers"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
-						</li>
-					</ul>
-				</span>
-				<span ng-if="superProperties.length == 0">
-					{{entityData.labelorid}} is not a subproperty of any other property
-				</span>
+				<span ng-if="superPropertyCount > 0" translate="SUBPROPERTY_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}" translate-value-properties="{{superPropertiesHtml}}" translate-compile></span>
+				<span ng-if="superPropertyCount == 0" translate="NO_SUBPROPERTY_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}"></span>
 			</div>
-			<div ng-if="directSubclasses > 0 || ( superClasses !== null && superClasses.length > 0)">
+			<div ng-if="directSubclasses > 0 || superClassCount > 0">
 				<b><a href="{{subclassOfUrl}}">{{subclassOfLabel}}</a>:</b>
-				<span ng-if="superClasses.length > 0">
-					every {{entityData.labelorid}} is also a
-					<ul class="list-inline comma-separated" style="display: inline;">
-						<li ng-repeat="superclass in superClasses">
-							<span ng-bind-html="superclass.value"></span>
-							<span ng-if="superclass.qualifiers != ''" uib-popover-html="superclass.qualifiers"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
-						</li>
-					</ul>
-				</span>
-				<span ng-if="superClasses.length == 0">
-					{{entityData.labelorid}} is not a subclass of any other class
-				</span>
+				<span ng-if="superClassCount >= 0" translate="SUBCLASS_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}" translate-value-classes="{{superClassesHtml}}" translate-compile></span>
+				<span ng-if="superClassCount == 0" translate="NO_SUBCLASS_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}"></span>
 			</div>
-			<div ng-if="instanceClasses !== null">
+			<div ng-if="instanceClassCount >= 0">
 				<b><a href="{{instanceOfUrl}}">{{instanceOfLabel}}</a>:</b>
-				<span ng-if="instanceClasses.length > 0">
-					{{entityData.label}} is a
-					<ul class="list-inline comma-separated" style="display: inline;">
-						<li ng-repeat="instanceclass in instanceClasses">
-							<span ng-bind-html="instanceclass.value"></span>
-							<span ng-if="instanceclass.qualifiers != ''" uib-popover-html="instanceclass.qualifiers"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>
-						</li>
-					</ul>
-				</span>
-				<span ng-if="instanceClasses.length == 0">
-					{{entityData.label}} is not an instance of any other class
-				</span>
+				<span ng-if="instanceClassCount > 0" translate="INSTANCE_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}" translate-value-classes="{{instanceClassesHtml}}" translate-compile></span>
+				<span ng-if="instanceClassCount == 0" translate="NO_INSTANCE_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}"></span>
 			</div>
 		</div>
 
@@ -109,7 +79,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th><span translate="TYPICAL_PROPS"></span> <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="{{'TYPICAL_PROPS_HINT_PROP'|translate}}"></span></th>
+							<th><span translate="TYPICAL_PROPS"></span> <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="{{'TYPICAL_PROPS.HINT_PROP'|translate}}"></span></th>
 							<td>
 								<div ng-if="relatedProperties.length > 0" class="four-lines">
 									<ul class="list-inline comma-separated">
@@ -118,7 +88,7 @@
 										</li>
 									</ul>
 								</div>
-								<span ng-if="relatedProperties.length == 0"><i>none</i></span>
+								<span ng-if="relatedProperties.length == 0"><i><span translate="TYPICAL_PROPS.NONE"></span></i></span>
 							</td>
 						</tr>
 						<tr>
@@ -163,10 +133,10 @@
 							<td>{{directInstances}}
 								<div ng-if="directInstances>0">
 									<div ng-if="exampleInstances===null" style="padding: 20px;">
-										<i>Loading direct instances &hellip;</i>
+										<i><span translate="SEC_INSTANCES.LOADING_DIRECT_INSTANCES"></span></i>
 									</div>
 									<div ng-if="exampleInstances.length === 0" style="padding: 20px;">
-										<i>No direct instances found. Maybe the data changed recently. Our records will be updated soon.</i>
+										<i><span translate="SEC_INSTANCES.NO_DIRECT_INSTANCES"></span></i>
 									</div>
 									<div ng-if="exampleInstances.length > 0">
 										<div class="four-lines">
@@ -181,11 +151,11 @@
 							</td>
 						</tr>
 						<tr>
-							<th><span translate="SEC_INSTANCES.ALL_INSTANCES"></span> <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Total number of unique instances of this class and its {{allSubclasses}} direct and indirect subclasses"></span></th>
+							<th><span uib-tooltip="{{translations.ALL_INSTANCES_HINT}}"><span translate="SEC_INSTANCES.ALL_INSTANCES"></span></span></th>
 							<td>{{allInstances}}</td>
 						</tr>
 						<tr>
-							<th><span translate="TYPICAL_PROPS"></span> <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="{{'TYPICAL_PROPS_HINT_CLASS'|translate}}"></span></th>
+							<th><span uib-tooltip="{{translations.TYPICAL_PROPS_HINT_CLASS}}"><span translate="TYPICAL_PROPS"></span></span></th>
 							<td>
 								<div ng-if="relatedProperties.length > 0" class="four-lines">
 									<ul class="list-inline comma-separated">
@@ -194,14 +164,14 @@
 										</li>
 									</ul>
 								</div>
-								<span ng-if="relatedProperties.length == 0"><i>none</i></span>
+								<span ng-if="relatedProperties.length == 0"><i><span translate="TYPICAL_PROPS.NONE"></span></i></span>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
-		<div ng-if="directSubclasses > 0 || ( superClasses !== null && superClasses.length > 0)" class="panel panel-info">
+		<div ng-if="directSubclasses > 0 || superClassCount > 0" class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
 			<a data-toggle="collapse" data-target="#classes_panel" style="cursor:pointer;cursor:hand"><span translate="SEC_CLASSIFICATION"></span></a>
 			</h2></div>
@@ -210,16 +180,13 @@
 				<table class="table table-striped table-condensed property-table">
 					<tbody>
 						<tr>
-							<th>Direct superclasses</th>
-							<td><ul ng-if="superClasses.length > 0" class="list-inline comma-separated" style="display: inline;">
-									<li ng-repeat="superclass in superClasses">
-										<span ng-bind-html="superclass.value"></span> <span class="info-badge">{{superclass.count}}</span>
-									</li>
-								</ul><span ng-if="superClasses.length == 0"><i>none</i></span>
+							<th><span translate="SEC_CLASSIFICATION.DIRECT_SUPERCLASSES"></span></th>
+							<td><span ng-if="superClassCount > 0" ng-bind-html="superClassesHtmlWithCounts"></span>
+								<span ng-if="superClassCount == 0"><i><span translate="SEC_CLASSIFICATION.NO_DIRECT_SUPERCLASSES"></span></i></span>
 							</td>
 						</tr>
 						<tr>
-							<th>Main subclasses <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Direct subclasses that have at least one instance or subclass"></span></th>
+							<th><span uib-tooltip="{{translations.MAIN_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.MAIN_SUBCLASSES"></span></span></th>
 							<td>{{nonemptySubclasses.length}}
 								<ul ng-if="nonemptySubclasses.length > 0" class="list-inline comma-separated" style="">
 									<li ng-repeat="subclass in nonemptySubclasses">
@@ -229,11 +196,11 @@
 							</td>
 						</tr>
 						<tr>
-							<th>Direct subclasses</th>
+							<th><span translate="SEC_CLASSIFICATION.DIRECT_SUBCLASSES"></span></th>
 							<td>{{directSubclasses}}
 								<div ng-if="directSubclasses > 0">
 									<div ng-if="exampleSubclasses===null" style="padding: 20px;">
-										<i>Loading direct subclasses &hellip;</i>
+										<i><span translate="SEC_CLASSIFICATION.LOADING_DIRECT_SUBCLASSES"></span></i>
 									</div>
 									<div ng-if="exampleSubclasses.length > 0">
 										<ul class="list-inline comma-separated">
@@ -246,7 +213,7 @@
 							</td>
 						</tr>
 						<tr>
-							<th>All subclasses <span class="glyphicon glyphicon-info-sign" aria-hidden="true" title="Number of unique direct and indirect subclasses"></span></th>
+							<th><span uib-tooltip="{{translations.ALL_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.ALL_SUBCLASSES"></span></span></th>
 							<td>{{allSubclasses}}</td>
 						</tr>
 					</tbody>
@@ -275,8 +242,8 @@
 			<div>
 				<table class="table table-striped table-condensed">
 					<tbody>
-						<tr><th><a href="{{url}}" target="_blank">Wikidata page</a></th></tr>
-						<tr><th><a href="https://tools.wmflabs.org/reasonator/?q={{id}}" target="_blank">Reasonator</a></th></tr>
+						<tr><th><a href="{{url}}" target="_blank"><span translate="SEC_LINKS.WIKIDATA"></span></a></th></tr>
+						<tr><th><a href="{{urlReasonator}}" target="_blank"><span translate="SEC_LINKS.REASONATOR"></span></a></th></tr>
 					</tbody>
 				</table>
 			</div>
