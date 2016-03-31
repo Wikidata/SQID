@@ -1,6 +1,8 @@
 'use strict'; // indicate that code is executed in strict mode
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'angucomplete-alt'])
+$("[data-toggle=popover]").popover({html:true});
+
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -11,6 +13,175 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/view', { templateUrl: 'views/view.html' })
 			.otherwise({redirectTo: '/'});
 	})
+
+	.config(['$translateProvider', function ($translateProvider) {
+
+		var enMessages = {
+			NAV: {
+				PROPERTIES: 'Properties',
+				CLASSES: 'Classes',
+				START: 'Start',
+				ABOUT: 'About',
+			},
+			FOOTER: {
+				STAT_DATE: 'Statistics based on data dump {{date}}',
+				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
+			},
+			PROPTYPE : 'Type',
+			FURTHER_RESULTS: '&hellip; further results',
+			STATEMENTS: {
+				PREFERRED_HINT: 'This is a preferred statement',
+				DEPRECATED_HINT: 'This is a deprecated statement',
+				NO_VALUE: 'no value',
+				SOME_VALUE: 'unspecified value',
+			},
+			TYPICAL_PROPS : {
+				TYPICAL_PROPS : 'Typical Properties',
+				HINT_PROP : 'Other properties typically used by entities using this property',
+				HINT_CLASS : 'Other properties typically used by direct and indirect instances of this class',
+				NONE : 'none',
+			},
+			INSTANCE_OF_PHRASE: '{{entity}} is a(n) {{classes}}',
+			NO_INSTANCE_OF_PHRASE: '{{entity}} is not an instance of any other class',
+			SUBCLASS_OF_PHRASE: 'every {{entity}} is also a(n) {{classes}}',
+			NO_SUBCLASS_OF_PHRASE: '{{entity}} is not a subclass of any other class',
+			SUBPROPERTY_OF_PHRASE: 'every {{entity}} is also a(n) {{properties}}',
+			NO_SUBPROPERTY_OF_PHRASE: '{{entity}} is not a subproperty of any other property',
+		 	SEC_CLASSIFICATION : {
+				SEC_CLASSIFICATION : 'Classification',
+				DIRECT_SUBCLASSES: 'Direct subclasses',
+				LOADING_DIRECT_SUBCLASSES: 'Loading direct subclasses &hellip;',
+				DIRECT_SUPERCLASSES: 'Direct superclasses',
+				NO_DIRECT_SUPERCLASSES: 'none',
+				ALL_SUBCLASSES: 'All subclasses',
+				ALL_SUBCLASSES_HINT: 'Number of unique direct and indirect subclasses',
+				MAIN_SUBCLASSES: 'Main subclasses',
+				MAIN_SUBCLASSES_HINT: 'Direct subclasses that have at least one instance or subclass',
+			},
+			SEC_INSTANCES : {
+				SEC_INSTANCES : 'Instances',
+				DIRECT_INSTANCES : 'Direct instances',
+				ALL_INSTANCES : 'All instances',
+				ALL_INSTANCES_HINT : 'Total number of unique instances of this class and its {{subclassCount}} direct and indirect subclasses',
+				NO_DIRECT_INSTANCES: 'No direct instances found. Maybe the data changed recently. Our records will be updated soon.',
+				LOADING_DIRECT_INSTANCES: 'Loading direct instances &hellip;',
+			},
+			SEC_HUMAN_RELATIONS: 'Human relationships',
+			SEC_IDENTIFIERS: 'Identifiers',
+			SEC_LINKS : {
+				SEC_LINKS : 'Links',
+				WIKIDATA : 'Wikidata page',
+				REASONATOR : 'Reasonator',
+			},
+			SEC_PROP_USE : {
+				SEC_PROP_USE : 'Property Usage',
+				ENTITIES: 'Entities',
+				ENTITIES_HINT: 'Entities with some statement for this property',
+				NO_ENTITIES: 'No entities found. Maybe the data changed recently. Our records will be updated soon.',
+				LOADING_ENTITIES: 'Loading entities &hellip;',
+				VALUES: 'Values',
+				VALUES_HINT: 'Values used in some statement with this property',
+				STATEMENTS: 'Statements',
+				STATEMENTS_PER_ENTITY: '({{number}} per entity)',
+				STATEMENTS_HINT: 'Number of statements for this property',
+				QUALIFIERS: 'Qualifiers',
+				QUALIFIERS_HINT: 'Other properties that are used as qualifiers for this property, together with the number of uses',
+				QUALIFIER_USES: 'Uses as qualifier',
+				REFERENCE_USES: 'Uses in references',
+			},
+			SEC_STATEMENTS : 'Statements',
+			SEC_MEDIA : 'Media',
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia Categories and Portals',
+			NOSUCHENTITY_HEADLINE: 'Sorry, I could not find any entity with ID "{{id}}".',
+			NOSUCHENTITY_BODY: 'Maybe it was deleted. Maybe it never existed. Maybe we\'ll never know.',
+		};
+		var deMessages = {
+			NAV: {
+				PROPERTIES: 'Eigenschaften',
+				CLASSES: 'Klassen',
+				START: 'Start',
+				ABOUT: 'Über SQID',
+			},
+			FOOTER: {
+				STAT_DATE: 'Statistiken Stand {{date}}',
+				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
+			},
+			PROPTYPE : 'Typ',
+		 	STATEMENTS: {
+				PREFERRED_HINT: 'Dies ist eine bevorzugte Aussage',
+				DEPRECATED_HINT: 'Dies ist eine überholte Aussage',
+				NO_VALUE: 'kein Wert',
+				SOME_VALUE: 'unspezifizierter Wert',
+			},
+			TYPICAL_PROPS : {
+				TYPICAL_PROPS : 'Typische Eigenschaften',
+				HINT_PROP : 'Andere Eigenschaften, die oftmals von Entitäten verwendet werden, die diese Eigenschaft verwenden',
+				HINT_CLASS : 'Andere Eigenschaften, die oftmals von direkten oder indirekten Instanzen dieser Klasse verwendet werden',
+				NONE: 'keine'
+			},
+			INSTANCE_OF_PHRASE: '{{entity}} ist ein(e) {{classes}}',
+			NO_INSTANCE_OF_PHRASE: '{{entity}} ist keine Instanz einer Klasse',
+			SUBCLASS_OF_PHRASE: 'jede Instanz von {{entity}} ist auch {{classes}}',
+			NO_SUBCLASS_OF_PHRASE: '{{entity}} hat keinerlei Oberklassen',
+			SUBPROPERTY_OF_PHRASE: 'Werte für {{entity}} gelten auch für {{properties}}',
+			NO_SUBPROPERTY_OF_PHRASE: '{{entity}} ist keine Untereigenschaft einer anderen Eigenschaft',
+			SEC_CLASSIFICATION : {
+				SEC_CLASSIFICATION : 'Klassifikation',
+				DIRECT_SUBCLASSES: 'Direkte Unterklassen',
+				LOADING_DIRECT_SUBCLASSES: 'Direkte Unterklassen werden geladen &hellip;',
+				DIRECT_SUPERCLASSES: 'Direkte Oberklassen',
+				NO_DIRECT_SUPERCLASSES: 'keine',
+				ALL_SUBCLASSES: 'Alle Unterklassen',
+				ALL_SUBCLASSES_HINT: 'Gesamtzahl der direkten und indirekten Unterklassen',
+				MAIN_SUBCLASSES: 'Wichtigste Unterklassen',
+				MAIN_SUBCLASSES_HINT: 'Direkte Unterklassen mit mindestens einer Instanz oder Unterklasse',
+			},
+			SEC_INSTANCES : {
+				SEC_INSTANCES : 'Instanzen',
+				DIRECT_INSTANCES : 'Direkte Instanzen',
+				ALL_INSTANCES : 'Alle Instanzen',
+				ALL_INSTANCES_HINT : 'Gesamtzahl der Instanzen dieser Klasse und ihrer {{subclassCount}} direkten und indirekten Unterklassen',
+				NO_DIRECT_INSTANCES: 'Keine direkten Instanzen gefunden. Eventuell haben sich die Daten vor kurzem geändert. Unsere Statistiken sollten in Kürze aktualisiert werden.',
+				LOADING_DIRECT_INSTANCES: 'Direkte Instanzen werden geladen &hellip;',
+			},
+			SEC_HUMAN_RELATIONS: 'Beziehungen',
+			SEC_IDENTIFIERS: 'Bezeichner',
+			SEC_LINKS : {
+				SEC_LINKS : 'Links',
+				WIKIDATA : 'Wikidata',
+				REASONATOR : 'Reasonator',
+			},
+			SEC_PROP_USE : {
+				SEC_PROP_USE : 'Verwendung der Eigenschaft',
+				ENTITIES: 'Entitäten',
+				ENTITIES_HINT: 'Entitäten mit mindestens einer Aussage für diese Eigenschaft',
+				NO_ENTITIES: 'Keine Entitäten mit dieser Eigentschaft gefunden. Eventuell haben sich die Daten vor kurzem geändert. Unsere Statistiken sollten in Kürze aktualisiert werden.',
+				LOADING_ENTITIES: 'Entitäten werden geladen &hellip;',
+				VALUES: 'Werte',
+				VALUES_HINT: 'Werte, die in einer Aussage dieser Eigenschaft verwendet werden',
+				STATEMENTS: 'Aussagen',
+				STATEMENTS_PER_ENTITY: '({{number}} pro Entität)',
+				STATEMENTS_HINT: 'Gesamtzahl der Aussagen mit dieser Eigenschaft',
+				QUALIFIERS: 'Qualifikatoren',
+				QUALIFIERS_HINT: 'Andere Eigenschaften, die als Qualifikator für Aussagen mit dieser Eigenschaft verwendet werden und die Zahl ihrer Verwendungen',
+				QUALIFIER_USES: 'Verwendung als Qualifikator',
+				REFERENCE_USES: 'Verwendung in Referenzen',
+			},
+			SEC_STATEMENTS : 'Aussagen',
+			SEC_MEDIA : 'Medien',
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia-Kategorien und -Portale',
+			NOSUCHENTITY_HEADLINE: 'Leider konnte ich kein Objekt mit ID "{{id}}" finden.',
+			NOSUCHENTITY_BODY: 'Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden.',
+		};
+		
+		$translateProvider
+			.translations('en', enMessages )
+			.translations('de', deMessages )
+			.fallbackLanguage('en')
+			.preferredLanguage('en')
+// 			.useSanitizeValueStrategy('escape') // using this makes it impossible to use HTML (links, tooltips, etc.) in variable replacements
+			;
+	}])
 
 	.factory('Arguments', function($http, $route, jsonData, util){
 		var args = {}; 
@@ -106,7 +277,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var promise;
 		var properties;
 		var idArray;
-    
+
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = properties[id][key];
@@ -123,44 +294,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
 		var getUrl = function(id) { return "#/view?id=P" + id; }
 
-		var formatRelatedProperties = function(relatedProperties, threshold){
-			var ret = [];
-			try {
-				var relPropsList = [];
-				for (var relProp in relatedProperties) relPropsList.push([relProp, relatedProperties[relProp]]);
-
-				relPropsList.sort(function(a, b) {
-					var a = a[1];
-					var b = b[1];
-					return a < b ? 1 : (a > b ? -1 : 0);
-				});
-
-				for (var i = 0; i < relPropsList.length; i++) {
-					if (relPropsList[i][1] < threshold) break;
-					var propId = relPropsList[i][0];
-					var resultObj = {label : getLabelOrId(propId) , link: getUrl(propId)};
-					ret.push(resultObj);
-				}
-			} catch (e){}
-
-			return ret;
-		}
-		
 		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
-		
-		var getFormattedQualifiers = function(id) {
-			var ret = [];
-			angular.forEach(getQualifiers(id), function(usageCount, qualifierId) {
-				ret.push({label : getLabelOrId(qualifierId) , url: getUrl(qualifierId), count: usageCount});
-			});
-			ret.sort(function(a, b) {
-					var a = a.count;
-					var b = b.count;
-					return a < b ? 1 : (a > b ? -1 : 0);
-			});
-			return ret;
-		}
-		
+
 		var getStatementCount = function(id){ return getData(id, 's', 0); }
 
 		if (!promise) {
@@ -185,12 +320,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getReferenceCount: function(id){ return getData(id, 'e', 0); },
 					getRelatedProperties: function(id){ return getData(id, 'r', {}); },
 					getQualifiers: getQualifiers,
-					getFormattedQualifiers: getFormattedQualifiers,
 					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
 					getClasses: function(id){ return getData(id, 'pc', []); },
-					formatRelatedProperties: formatRelatedProperties,
 					sortProperties: function(comparator){idArray.sort(comparator(properties));}
 				}
 			});
@@ -219,20 +352,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
-		var getNonemptySubclasses = function(id) {
-			var ret = [];
-			var subClasses = getData(id,'sb', []);
-			for ( var i in subClasses ) {
-				var label = getLabel(subClasses[i]);
-				if ( label === null ) label = "Q" + subClasses[i];
-				ret.push( {label: label, url: getUrl(subClasses[i]), icount: getAllInstanceCount(subClasses[i])} );
-			}
-			ret.sort(function(a, b) {
-				return a.icount < b.icount ? 1 : (a.icount > b.icount ? -1 : 0);
-			});
-			return ret;
-		};
-
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
@@ -254,8 +373,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
-					getNonemptySubclasses: getNonemptySubclasses,
-					sortClasses: function(comparator){idArray.sort(comparator(classes));}
+					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); },
+					sortClasses: function(comparator){ idArray.sort(comparator(classes)); }
 				}
 			});
 		}
