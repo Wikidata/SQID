@@ -18,6 +18,12 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		
 		var enMessages = {
 			PROPTYPE : 'Type',
+			STATEMENTS: {
+				PREFERRED_HINT: 'This is a preferred statement',
+				DEPRECATED_HINT: 'This is a deprecated statement',
+				NO_VALUE: 'no value',
+				SOME_VALUE: 'unspecified value',
+			},
 			TYPICAL_PROPS : {
 				TYPICAL_PROPS : 'Typical Properties',
 				HINT_PROP : 'Other properties typically used by entities using this property',
@@ -80,6 +86,12 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 		var deMessages = {
 			PROPTYPE : 'Typ',
+		 	STATEMENTS: {
+				PREFERRED_HINT: 'Dies ist eine bevorzugte Aussage',
+				DEPRECATED_HINT: 'Dies ist eine überholte Aussage',
+				NO_VALUE: 'kein Wert',
+				SOME_VALUE: 'unspezifizierter Wert',
+			},
 			TYPICAL_PROPS : {
 				TYPICAL_PROPS : 'Typische Eigenschaften',
 				HINT_PROP : 'Andere Eigenschaften, die oftmals von Entitäten verwendet werden, die diese Eigenschaft verwenden',

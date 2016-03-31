@@ -614,8 +614,8 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		return i18n.getEntityTerms(entityId);
 	}
 
-	var getSomeValueHtml = function() { return '<i>unspecified value</i>'; }
-	var getNoValueHtml = function() { return '<i>no value</i>'; }
+	var getSomeValueHtml = function() { return '<i><span translate="STATEMENTS.SOME_VALUE"></span></i>'; }
+	var getNoValueHtml = function() { return '<i><span translate="STATEMENTS.NO_VALUE"></span></i>'; }
 
 	/**
 	 * Returns HTML to present the given value for the given property.
@@ -734,9 +734,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	var getStatementMainValueHtml = function(statement, properties, missingTermsListener, inline) {
 		var ret = getSnakHtml(statement.mainsnak, false, properties, missingTermsListener, inline);
 		if (statement.rank == 'preferred') {
-			ret += ' <span class="glyphicon glyphicon-star" aria-hidden="true" title="This is a preferred statement"></span>';
+			ret += ' <span class="glyphicon glyphicon-star" aria-hidden="true" title="{{\'STATEMENTS.PREFERRED_HINT\'|translate}}"></span>';
 		} else if (statement.rank == 'deprecated') {
-			ret = '<span style="text-decoration: line-through;">' + ret + '</span> <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" title="This is a deprecated statement"></span>';
+			ret = '<span style="text-decoration: line-through;">' + ret + '</span> <span class="glyphicon glyphicon-ban-circle" aria-hidden="true" title="{{\'STATEMENTS.DEPRECATED_HINT\'|translate}}"></span>';
 		}
 		return ret;
 	}
