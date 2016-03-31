@@ -174,12 +174,18 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		
 		$scope.translations = {};
 
-		$translate(['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP']).then( function(translations) {
+		$translate(['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
 			$scope.translations['MAIN_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT'];
 			$scope.translations['ALL_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT'];
 			$scope.translations['TYPICAL_PROPS_HINT_CLASS'] = translations['TYPICAL_PROPS.HINT_CLASS'];
 			$scope.translations['TYPICAL_PROPS_HINT_PROP'] = translations['TYPICAL_PROPS.HINT_PROP'];
+			$scope.translations['PROP_ENTITIES_HINT'] = translations['SEC_PROP_USE.ENTITIES_HINT'];
+			$scope.translations['PROP_VALUES_HINT'] = translations['SEC_PROP_USE.VALUES_HINT'];
+			$scope.translations['PROP_STATEMENTS_HINT'] = translations['SEC_PROP_USE.STATEMENTS_HINT'];
+			$scope.translations['PROP_QUALIFIERS_HINT'] = translations['SEC_PROP_USE.QUALIFIERS_HINT'];
 		});
+		
+		
 
 		$scope.classes = null;
 		$scope.properties = null;
