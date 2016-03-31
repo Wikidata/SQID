@@ -22,7 +22,7 @@ angular.module('utilities', [])
 		JSON_DATATYPE: "d",
 
 		TABLE_SIZE: 15,
-		PAGE_SELECTOR_SIZE: 2
+		PAGE_SELECTOR_SIZE: 4
 	};
 
 })
@@ -252,12 +252,21 @@ angular.module('utilities', [])
 		});
 	}
 
+	var createIdArray = function(json){
+		var ret = []
+		for (var entry in json) {
+			ret.push(entry);
+		}
+		return ret;
+	}
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
-		sortByField: sortByField
+		sortByField: sortByField,
+		createIdArray: createIdArray
 	};
 
 })

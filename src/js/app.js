@@ -2,7 +2,7 @@
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate'])
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt'])
 
 	.config(function($routeProvider) {
 		$routeProvider
@@ -190,6 +190,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			activePage: 1,
 			classesFilter: {
 				label: "",
+				relatedProperty: "",
 				instances: [0, 4000000],
 				subclasses: [0, 200000]
 			},
@@ -223,6 +224,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
 					classesFilter: {
 						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
+						relatedProperty: ($route.current.params.relatedpropertyfilter) ? ($route.current.params.relatedpropertyfilter) : status.classesFilter.relatedProperty,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
 						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
 					  },
@@ -254,6 +256,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					+ "?activepage=" + status.activePage
 					+ "&type=" + status.entityType
 					+ "&classlabelfilter=" + status.classesFilter.label
+					+ "&relatedpropertyfilter=" + status.classesFilter.relatedProperty
 					+ "&propertylabelfilter=" + status.propertiesFilter.label 
 					+ "&instancesbegin=" + status.classesFilter.instances[0]
 					+ "&instancesend=" + status.classesFilter.instances[1]
@@ -270,9 +273,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		}
 	})
 
-	.factory('Properties', function($http, $route){
+	.factory('Properties', function($http, $route, jsonData, util){
 		var promise;
 		var properties;
+		var idArray;
 
 		var getData = function(id, key, defaultValue) {
 			try {
@@ -297,9 +301,15 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
+				idArray = util.createIdArray(properties);
 				return {
-					propertiesHeader: [["Label (ID)", "col-xs-5"], ["Datatype", "col-xs-1"], ["Uses in statements", "col-xs-2"], ["Uses in qualifiers", "col-xs-2"], ["Uses in references", "col-xs-2"]],
+					propertiesHeader: [["Label (ID)", "col-xs-5", "fa fa-sort", jsonData.JSON_LABEL], 
+						["Datatype", "col-xs-1", "fa fa-sort", jsonData.JSON_DATATYPE], 
+						["Uses in statements", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_STATEMENTS], 
+						["Uses in qualifiers", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_QUALIFIERS], 
+						["Uses in references", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_REFERENCES]],
 					getProperties: function(){ return properties; },
+					getIdArray: function() {return idArray; },
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
 					getLabelOrId: getLabelOrId,
@@ -313,16 +323,18 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getMainUsageCount: getStatementCount,
 					getUrl: getUrl,
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
-					getClasses: function(id){ return getData(id, 'pc', []); }
+					getClasses: function(id){ return getData(id, 'pc', []); },
+					sortProperties: function(comparator){idArray.sort(comparator(properties));}
 				}
 			});
 		}
 		return promise;
 	})
 
-	.factory('Classes', function($http, $route) {
+	.factory('Classes', function($http, $route, jsonData, util) {
 		var promise;
-		var classes; 
+		var classes;
+		var idArray; 
 
 		var getData = function(id, key, defaultValue) {
 			try {
@@ -343,9 +355,13 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
+				idArray = util.createIdArray(classes);
 				return {
-					classesHeader: [["Label (ID)", "col-xs-10"], ["Instances", "col-xs-1"], ["Subclasses", "col-xs-1"]],
+					classesHeader: [["Label (ID)", "col-xs-9", "fa fa-sort", jsonData.JSON_LABEL],
+						["Instances", "col-xs-1", "fa fa-sort", jsonData.JSON_INSTANCES], 
+						["Subclasses", "col-xs-1", "fa fa-sort", jsonData.JSON_SUBCLASSES]],
 					getClasses: function(){ return classes; },
+					getIdArray: function(){ return idArray; },
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,
 					getLabelOrId: function(id){ return getData(id, 'l', 'Q' + id); },
@@ -357,7 +373,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getSuperClasses: function(id){ return getData(id, 'sc', []); },
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
-					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); }
+					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); },
+					sortClasses: function(comparator){ idArray.sort(comparator(classes)); }
 				}
 			});
 		}

@@ -4,11 +4,11 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     var tableContent = [];
 
-    var initArray = function(json, filterfunc){
-      var ret = []
-      for (var entry in json) {
-          if (filterfunc(entry, json)) {
-              ret.push(entry);
+    var initArray = function(idArray, json, filterfunc, sortfunc){
+      var ret = [];
+      for (var i = 0; i < idArray.length; i++){
+          if (filterfunc(idArray[i], json)) {
+              ret.push(idArray[i]);
           }
       }
       return ret;
@@ -74,37 +74,75 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
+    var relatedPropertyFilter = function(entry){
+      var filter = status.classesFilter.relatedProperty;
+      if (status.entityType == "properties"){
+        return true;
+      }
+      if (!filter){
+        return true;
+      }
+      if (filter == ""){
+        return true;
+      }
+      if (!entry[jsonData.JSON_RELATED_PROPERTIES]){
+        return false;
+      }
+      if (entry[jsonData.JSON_RELATED_PROPERTIES][filter]){
+        return true;
+      }else{
+        return false;
+      }
+    }
+
     var applyFilter = function(entry, json){
       if (!datatypeFilter(json[entry])){
         return false;
       }else{
         if (!labelFilter(json[entry])){
           return false;
-        }else{
-          if (status.entityType == "classes"){
-            var filter = status.classesFilter;
-            if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
-              return false;
-            }
-            if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
-              return false;
-            }
-            return true;
+        }else{if(!relatedPropertyFilter(json[entry])){
+          return false;
           }else{
-            var filter = status.propertiesFilter;
-            if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
-              return false;
+            if (status.entityType == "classes"){
+              var filter = status.classesFilter;
+              if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
+                return false;
+              }
+              if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
+                return false;
+              }
+              return true;
+            }else{
+              var filter = status.propertiesFilter;
+              if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
+                return false;
+              }
+              if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
+                return false;
+              }
+              if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
+                return false;
+              }
+              return true;
             }
-            if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
-              return false;
-            }
-            if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
-              return false;
-            }
-            return true;
-          }
 
+          }
         }
+      }
+    }
+
+    var getSortComparator = function(criteria, direction){
+      return function(data){
+        return function(a, b){
+          if (data[a][criteria] > data[b][criteria]){
+            return 1 * direction;
+          }
+          if (data[a][criteria] < data[b][criteria]){
+            return (-1) * direction;
+          }
+          return 0;
+        };
       }
     }
 
@@ -120,6 +158,28 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           $scope.filterPermalink =Arguments.getUrl();
         }
       }
+    }
+
+    var initPropertyIndex = function(){
+      var result = [{name: "No Filter", idName: "", id:0}]; 
+      Properties.then(function(data){
+        $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+        var idArray = data.getIdArray();
+        for (var i = 0; i < idArray.length; i++){
+          var elem = {
+            name: data.getLabel(idArray[i]),
+            idName: "P" + idArray[i],
+            id: idArray[i].toString()
+          }
+          result.push(elem);
+          if (idArray[i].toString() == status.classesFilter.relatedProperty.toString()){
+            $scope.relatedProperty = elem;
+          }
+        }
+        relatedPropertyFilterInit = true;
+        $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.relatedProperty);
+      });
+      return result;
     }
 
     var initClassesSlider = function(){
@@ -154,7 +214,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (args.type == "classes") {
         Classes.then(function(data){
           initClassesSlider();
-          var classesArray = initArray(data.getClasses(), applyFilter);
+          var classesArray = initArray(data.getIdArray(), data.getClasses(), applyFilter, sortfunc);
           refreshTableContent(args, classesArray, data, getClassFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.classesHeader;
@@ -163,19 +223,37 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       if (args.type == "properties") {
           Properties.then(function(data){
-          initPropertiesSlider();
-          var propertiesArray = initArray(data.getProperties(), applyFilter);
-          refreshTableContent(args, propertiesArray, data, getPropertyFromId);
-          $scope.content = tableContent;
-          $scope.tableHeader = data.propertiesHeader;
-          $scope.pagination.setIndex($scope.content, null);
+            initPropertiesSlider();
+            var propertiesArray = initArray(data.getIdArray(), data.getProperties(), applyFilter, sortfunc);
+            refreshTableContent(args, propertiesArray, data, getPropertyFromId);
+            $scope.content = tableContent;
+            $scope.tableHeader = data.propertiesHeader;
+            $scope.pagination.setIndex($scope.content, null);
           });
       }
     }
+
+    var updateTableLazy = function(){
+      if (!timeoutIsSet){
+        timeoutIsSet = true;
+        setTimeout(function(){
+          timeoutIsSet = false;
+          updateTable();
+          }, 300);
+      }
+    }
+
     // execution part
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
     var status = Arguments.getStatus();
+    var relatedPropertyFilterInit = false;
+    var timeoutIsSet = false;
+    var sortfunc = function(x){return function(a, b){return 0;};};
+
+    $scope.propertyIndex = initPropertyIndex();
+    $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+    
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     if (args.entityType == "classes"){
@@ -184,7 +262,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       $scope.filterLabels = args.propertiesFilter.label;
     }
     initPaginations();
-
 
     $scope.datatypeSelector = {
       options: [{id: 1, name: "Any property type"},
@@ -203,14 +280,16 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};
+    
     updateTable();
+    
     $scope.searchFilter = function(){
       if (status.entityType == "classes"){
         status.classesFilter.label = $scope.filterLabels;
       }else{
         status.propertiesFilter.label = $scope.filterLabels;
       }
-      updateTable();
+      updateTableLazy();
     }
 
     $scope.setDatatypeFilter = function(data){
@@ -222,6 +301,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.resetFilters = function(){
       status.classesFilter = Arguments.getStatusStartValues().classesFilter;
       status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
+      $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+      $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.relatedProperty);
       updateTable();
     }
 
@@ -240,7 +321,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         status.propertiesFilter.references[1] = $scope.slider[2].endVal;
       }
       $scope.filterPermalink =Arguments.getUrl();
-      updateTable();
+      updateTableLazy();
     }
     
     $scope.copyToClipboard = function(){
@@ -255,6 +336,60 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         currentFocus.focus();
       }
       textField.setSelectionRange(oSelectionStart, oSelectionEnd);
+    }
+
+    $scope.sortElement = function(element, header){
+      var direction = 0;
+      switch(element[2]){
+        case "fa fa-sort":
+          element[2] = "fa fa-sort-desc";
+          direction = 1;
+          break;
+        case "fa fa-sort-desc":
+          element[2] = "fa fa-sort-asc";
+          direction = (-1);
+          break;
+        case "fa fa-sort-asc":
+          element[2] = "fa fa-sort-desc";
+          direction = 1;
+          break;
+        default:
+          console.log("Unknown sort style " + element[2]);
+      }
+      for (var i=0; i < header.length; i++){
+        if (header[i] != element){
+          header[i][2] = "fa fa-sort"; 
+        }
+      }
+      if (status.entityType == "classes"){
+        Classes.then(function(data){
+          data.sortClasses(getSortComparator(element[3], direction));
+          updateTable();
+        });
+      }else{
+        Properties.then(function(data){
+          data.sortProperties(getSortComparator(element[3], direction));
+          updateTable();
+        });
+      }
+    }
+
+    $scope.selectedRelatedProperty = function(selected){
+      var oldProperty = $scope.relatedProperty.id;
+      if (!selected){
+        $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+        if (relatedPropertyFilterInit){
+          status.classesFilter.relatedProperty = "";
+        }
+      }else{
+        $scope.relatedProperty = selected.originalObject;
+        if (relatedPropertyFilterInit){
+          status.classesFilter.relatedProperty = selected.originalObject.id;
+        }
+      }
+      if (oldProperty != $scope.relatedProperty.id){
+        updateTable();
+      }
     }
 
   });

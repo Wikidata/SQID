@@ -118,6 +118,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 
 #head-browse{
     height: 60px;
+    font-size: 0.8em;
 }
 
 #filter-menue{
@@ -298,6 +299,18 @@ span.smallnote {
 
 .browsing-table{
     min-height: 530px;
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+.header-element{
+    float: left;
+}
+
+.sort-element{
+    float: left;
 }
 
 #permalink{
