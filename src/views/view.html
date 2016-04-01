@@ -186,11 +186,21 @@
 							</td>
 						</tr>
 						<tr>
-							<th><span uib-tooltip="{{translations.MAIN_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.MAIN_SUBCLASSES"></span></span></th>
-							<td>{{nonemptySubclasses.length}}
-								<ul ng-if="nonemptySubclasses.length > 0" class="list-inline comma-separated" style="">
-									<li ng-repeat="subclass in nonemptySubclasses">
-										<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.icount}}</span>
+							<th><span uib-tooltip="{{translations.INSTANCE_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.INSTANCE_SUBCLASSES"></span></span></th>
+							<td>{{instanceSubclasses.length}}
+								<ul ng-if="instanceSubclasses.length > 0" class="list-inline comma-separated" style="">
+									<li ng-repeat="subclass in instanceSubclasses">
+										<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.count}}</span>
+									</li>
+								</ul>
+							</td>
+						</tr>
+						<tr>
+							<th><span uib-tooltip="{{translations.SUBCLASS_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES"></span></span></th>
+							<td>{{subclassSubclasses.length}}
+								<ul ng-if="subclassSubclasses.length > 0" class="list-inline comma-separated" style="">
+									<li ng-repeat="subclass in subclassSubclasses">
+										<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.count}}</span>
 									</li>
 								</ul>
 							</td>

@@ -124,14 +124,17 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			});
 		},
 
-		formatNonemptySubclasses: function(numId, classes) {
+		formatNonemptySubclasses: function(numId, classes, countFunction) {
 			classNumIds = classes.getNonemptySubclasses(numId);
 			if (i18n.getLanguage() == 'en') { // get labels from classes data
 				var ret = [];
 				angular.forEach(classNumIds, function(classNumId) {
-					ret.push({ label: classes.getLabelOrId(classNumId), url: i18n.getEntityUrl('Q' + classNumId), icount: classes.getAllInstanceCount(classNumId) });
+					var count = countFunction(classNumId);
+					if (count > 0) {
+						ret.push({ label: classes.getLabelOrId(classNumId), url: i18n.getEntityUrl('Q' + classNumId), count: count });
+					}
 				});
-				util.sortByField(ret, 'icount');
+				util.sortByField(ret, 'count');
 				var deferred = $q.defer();
 				deferred.resolve(ret);
 				return deferred.promise;
@@ -143,9 +146,12 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 				return i18n.waitForTerms(classIds).then(function() {
 					var ret = [];
 					angular.forEach(classNumIds, function(classNumId) {
-						ret.push({ label: i18n.getEntityTerms('Q' + classNumId).label, url: i18n.getEntityUrl('Q' + classNumId), icount: classes.getAllInstanceCount(classNumId) });
+						var count = countFunction(classNumId);
+						if (count > 0) {
+							ret.push({ label: i18n.getEntityTerms('Q' + classNumId).label, url: i18n.getEntityUrl('Q' + classNumId), count: count });
+						}
 					});
-					util.sortByField(ret, 'icount');
+					util.sortByField(ret, 'count');
 					return ret;
 				});
 			}
@@ -174,8 +180,9 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		
 		$scope.translations = {};
 
-		$translate(['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
-			$scope.translations['MAIN_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.MAIN_SUBCLASSES_HINT'];
+		$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
+			$scope.translations['SUBCLASS_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT'];
+			$scope.translations['INSTANCE_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT'];
 			$scope.translations['ALL_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT'];
 			$scope.translations['TYPICAL_PROPS_HINT_CLASS'] = translations['TYPICAL_PROPS.HINT_CLASS'];
 			$scope.translations['TYPICAL_PROPS_HINT_PROP'] = translations['TYPICAL_PROPS.HINT_PROP'];
@@ -184,8 +191,6 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			$scope.translations['PROP_STATEMENTS_HINT'] = translations['SEC_PROP_USE.STATEMENTS_HINT'];
 			$scope.translations['PROP_QUALIFIERS_HINT'] = translations['SEC_PROP_USE.QUALIFIERS_HINT'];
 		});
-		
-		
 
 		$scope.classes = null;
 		$scope.properties = null;
@@ -292,8 +297,11 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 					$scope.translations['ALL_INSTANCES_HINT'] = result;
 				});
 
-				View.formatNonemptySubclasses(numId, classes).then( function(nonemptySubclasses) {
-					$scope.nonemptySubclasses = nonemptySubclasses;
+				View.formatNonemptySubclasses(numId, classes, classes.getAllInstanceCount).then( function(subclasses) {
+					$scope.instanceSubclasses = subclasses;
+				});
+				View.formatNonemptySubclasses(numId, classes, classes.getAllSubclassCount).then( function(subclasses) {
+					$scope.subclassSubclasses = subclasses;
 				});
 
 				if ($scope.directInstances > 0) {
