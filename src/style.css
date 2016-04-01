@@ -204,6 +204,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	padding-top: 10px;
 }
 
+.padded-tabcontent {
+	padding-top: 10px;
+}
+
 .entity-description {
 	font-size: 1.3em;
 }

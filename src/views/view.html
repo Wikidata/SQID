@@ -182,44 +182,50 @@
 						<tr>
 							<th><span translate="SEC_CLASSIFICATION.DIRECT_SUPERCLASSES"></span></th>
 							<td><span ng-if="superClassCount > 0" sqid-compile="superClassesHtmlWithCounts"></span>
-								<span ng-if="superClassCount == 0"><i><span translate="SEC_CLASSIFICATION.NO_DIRECT_SUPERCLASSES"></span></i></span>
-							</td>
-						</tr>
-						<tr>
-							<th><span uib-tooltip="{{translations.INSTANCE_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.INSTANCE_SUBCLASSES"></span></span></th>
-							<td>{{instanceSubclasses.length}}
-								<ul ng-if="instanceSubclasses.length > 0" class="list-inline comma-separated" style="">
-									<li ng-repeat="subclass in instanceSubclasses">
-										<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.count}}</span>
-									</li>
-								</ul>
-							</td>
-						</tr>
-						<tr>
-							<th><span uib-tooltip="{{translations.SUBCLASS_SUBCLASSES_HINT}}"><span translate="SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES"></span></span></th>
-							<td>{{subclassSubclasses.length}}
-								<ul ng-if="subclassSubclasses.length > 0" class="list-inline comma-separated" style="">
-									<li ng-repeat="subclass in subclassSubclasses">
-										<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.count}}</span>
-									</li>
-								</ul>
+								<i ng-if="superClassCount == 0"><span translate="SEC_CLASSIFICATION.NO_DIRECT_SUPERCLASSES"></span></i>
 							</td>
 						</tr>
 						<tr>
 							<th><span translate="SEC_CLASSIFICATION.DIRECT_SUBCLASSES"></span></th>
-							<td>{{directSubclasses}}
-								<div ng-if="directSubclasses > 0">
-									<div ng-if="exampleSubclasses===null" style="padding: 20px;">
-										<i><span translate="SEC_CLASSIFICATION.LOADING_DIRECT_SUBCLASSES"></span></i>
-									</div>
-									<div ng-if="exampleSubclasses.length > 0">
-										<ul class="list-inline comma-separated">
-											<li ng-repeat="subclass in exampleSubclasses">
-												<a href = {{subclass.uri}}>{{subclass.label}}</a>
+							<td>
+								<uib-tabset ng-if="directSubclasses > 0 && subclassActiveTab >= 0" active="subclassActiveTab">
+									<uib-tab index="0" title="{{translations.INSTANCE_SUBCLASSES_HINT}}" disable="instanceSubclasses.length == 0">
+										<uib-tab-heading>
+											<span translate="SEC_CLASSIFICATION.DIRECT_SUBCLASSES_INSTANCE"></span> <span class="info-badge">{{instanceSubclasses.length}}</span>
+										</uib-tab-heading>
+										<ul ng-if="instanceSubclasses.length > 0" class="list-inline comma-separated padded-tabcontent" style="">
+											<li ng-repeat="subclass in instanceSubclasses">
+												<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.count}}</span>
 											</li>
 										</ul>
-									</div>
-								</div>
+									</uib-tab>
+									<uib-tab index="1" title="{{translations.SUBCLASS_SUBCLASSES_HINT}}" disable="subclassSubclasses.length == 0">
+										<uib-tab-heading>
+											<span translate="SEC_CLASSIFICATION.DIRECT_SUBCLASSES_SUBCLASS"></span> <span class="info-badge">{{subclassSubclasses.length}}</span>
+										</uib-tab-heading>
+										<ul ng-if="subclassSubclasses.length > 0" class="list-inline comma-separated padded-tabcontent" style="">
+											<li ng-repeat="subclass in subclassSubclasses">
+												<a href = {{subclass.url}}>{{subclass.label}}</a> <span class="info-badge">{{subclass.count}}</span>
+											</li>
+										</ul>
+									</uib-tab>
+									<uib-tab index="2">
+										<uib-tab-heading >
+											<span translate="SEC_CLASSIFICATION.DIRECT_SUBCLASSES_ALL"></span> <span class="info-badge">{{directSubclasses}}</span>
+										</uib-tab-heading>
+										<div ng-if="exampleSubclasses===null" class="padded-tabcontent">
+											<i><span translate="SEC_CLASSIFICATION.LOADING_DIRECT_SUBCLASSES"></span></i>
+										</div>
+										<div ng-if="exampleSubclasses.length > 0">
+											<ul class="list-inline comma-separated padded-tabcontent">
+												<li ng-repeat="subclass in exampleSubclasses">
+													<a href = {{subclass.uri}}>{{subclass.label}}</a>
+												</li>
+											</ul>
+										</div>
+									</uib-tab>
+								</uib-tabset>
+								<i ng-if="directSubclasses == 0"><span translate="SEC_CLASSIFICATION.NO_DIRECT_SUBCLASSES"></span></i>
 							</td>
 						</tr>
 						<tr>

@@ -299,9 +299,16 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 
 				View.formatNonemptySubclasses(numId, classes, classes.getAllInstanceCount).then( function(subclasses) {
 					$scope.instanceSubclasses = subclasses;
-				});
-				View.formatNonemptySubclasses(numId, classes, classes.getAllSubclassCount).then( function(subclasses) {
-					$scope.subclassSubclasses = subclasses;
+					View.formatNonemptySubclasses(numId, classes, classes.getAllSubclassCount).then( function(subclasses) {
+						$scope.subclassSubclasses = subclasses;
+						if ($scope.instanceSubclasses.length > 0) {
+							$scope.subclassActiveTab = 0;
+						} else if ($scope.subclassSubclasses.length > 0) {
+							$scope.subclassActiveTab = 1;
+						} else {
+							$scope.subclassActiveTab = 2;
+						}
+					});
 				});
 
 				if ($scope.directInstances > 0) {
