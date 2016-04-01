@@ -849,27 +849,27 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 })
 
-// .directive('compile', ['$compile', function ($compile) {
-// 	return function(scope, element, attrs) {
-// 		scope.$watch(
-// 			function(scope) {
-// 				// watch the 'compile' expression for changes
-// 				return scope.$eval(attrs.compile);
-// 			},
-// 			function(value) {
-// 				// when the 'compile' expression changes
-// 				// assign it into the current DOM
-// 				element.html(value);
-// 
-// 				// compile the new DOM and link it to the current
-// 				// scope.
-// 				// NOTE: we only compile .childNodes so that
-// 				// we don't get into infinite loop compiling ourselves
-// 				$compile(element.contents())(scope);
-// 			}
-// 		);
-// 	};
-// }])
+/**
+ * Directive to include trusted or untrusted HTML snippets and compiling
+ * the result. This is necessary to expand directives within the snippets,
+ * which does not work when using ng-bind-html-trusted to incude HTML.
+ */
+.directive('sqidCompile', ['$compile', function ($compile) {
+	return function(scope, element, attrs) {
+		scope.$watch(
+			function(scope) {
+				return scope.$eval(attrs.sqidCompile);
+			},
+			function(value) {
+				// If value is a TrustedValueHolderType, it needs to be
+				// explicitly converted to a string in order to
+				// get the HTML string.
+				element.html(value && value.toString());
+				$compile(element.contents())(scope);
+			}
+		);
+	};
+}])
 
 .directive('sqidStatementTable', function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;

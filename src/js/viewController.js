@@ -8,7 +8,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
 		var ret = [];
 		angular.forEach(statementGroup, function(statement) {
-			var count = -1;
+			var count = null;
 			if (propertiesOrClasses !== null) {
 				var mainSnak = statement.mainsnak;
 				if (mainSnak.snaktype == 'value' && mainSnak.datavalue.type == 'wikibase-entityid') { 
@@ -76,7 +76,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 				if (item.qualifiers != '') {
 					result += ' <span uib-popover-html="getCachedHtml(' + htmlCache.getKey(item.qualifiers) + ')"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>';
 				}
-				if (showCounts) {
+				if (showCounts && item.count !== null) {
 					result += ' <span class="info-badge">' + item.count + '</span>';
 				}
 			});
