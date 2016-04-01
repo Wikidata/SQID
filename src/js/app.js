@@ -34,6 +34,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				DEPRECATED_HINT: 'This is a deprecated statement',
 				NO_VALUE: 'no value',
 				SOME_VALUE: 'unspecified value',
+				MORE_STATEMENTS: 'show {{number}} more statements',
+				LESS_STATEMENTS: 'hide {{number}} statements'
 			},
 			TYPICAL_PROPS : {
 				TYPICAL_PROPS : 'Typical Properties',
@@ -116,6 +118,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				DEPRECATED_HINT: 'Dies ist eine überholte Aussage',
 				NO_VALUE: 'kein Wert',
 				SOME_VALUE: 'unspezifizierter Wert',
+				MORE_STATEMENTS: 'weitere {{number}} Aussagen anzeigen',
+				LESS_STATEMENTS: '{{number}} Aussagen ausblenden'
 			},
 			TYPICAL_PROPS : {
 				TYPICAL_PROPS : 'Typische Eigenschaften',

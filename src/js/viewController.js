@@ -179,6 +179,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 		
 		$scope.translations = {};
+		$scope.test=true; // DEBUG
 
 		$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
 			$scope.translations['SUBCLASS_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT'];

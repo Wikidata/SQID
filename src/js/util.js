@@ -874,7 +874,8 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 .directive('sqidStatementTable', function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;
 	var missingTermsListener = { hasMissingTerms : false};
-// 	var hasMissingTerms = false;
+
+	var hideStatementsThreshold = 3; // how many statements are displayed when hiding some
 
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
@@ -942,12 +943,20 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			angular.forEach(propertyList, function (propId) {
 				var statementGroup = statements[propId]
 				if (!missingTermsListener.hasMissingTerms) {
+					var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
 					angular.forEach(statementGroup, function (statement, index) {
 						hasContent = true;
-						html += '<tr>';
+						if (hideSomeStatements && index >= hideStatementsThreshold) {
+							html += '<tr ng-if="showRows(\'' + propId + '\')">';
+						} else {
+							html += '<tr>';
+						}
 						if (index == 0) {
-							html += '<th valign="top" rowspan="' + statementGroup.length + '" style="min-width: 20%;">'
+							html += '<th valign="top" rowspan="'
+								+ (hideSomeStatements ? '{{getRowSpan(\'' + propId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
+								+ '" style="min-width: 20%;">'
 								+ i18n.getPropertyLink(propId)
+								+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><button type="button" class="btn btn-xs" ng-click="toggleRows(\'' + propId + '\')"><span translate="{{getShowRowsMessage(\'' + propId + '\')}}" translate-value-number="' + (statementGroup.length - hideStatementsThreshold) + '"></span></button></div>' : '')
 								+ '</th>';
 						}
 						html += '<td>' + dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) + '</td>'
@@ -956,7 +965,6 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				}
 			});
 			if (!hasContent) return '';
-
 			html += '</tbody></table></div></div></div>';
 			return html;
 		}
@@ -999,10 +1007,30 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			});
 			return ret;
 		}
-		
+
 		var insertAndCompile = function(html, element, scope) {
 			element.html(html);
 			$compile(element.contents())(scope);
+		}
+
+		// Register additional functions to toggle the display for longer lists of statements:
+		scope.showRows = function(id) {
+			var field = 'show' + id;
+			if (field in scope) {
+				return scope[field];
+			} else {
+				return false;
+			}
+		}
+		scope.toggleRows = function(id) {
+			var field = 'show' + id;
+			scope[field] = !scope.showRows(id);
+		}
+		scope.getRowSpan = function(id,length) {
+			return scope.showRows(id) ? length : hideStatementsThreshold;
+		}
+		scope.getShowRowsMessage = function(id) {
+			return scope.showRows(id) ? 'STATEMENTS.LESS_STATEMENTS' : 'STATEMENTS.MORE_STATEMENTS';
 		}
 
 		scope.$watch(attrs.data, function(itemData){
