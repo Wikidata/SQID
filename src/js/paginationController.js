@@ -21,6 +21,14 @@
 			first parameter (which is more for writing convenience since it's the same as this.activeIndex alias $pagination.activeIndex)
 		useful if you want to do something in your parent controller whenever the page changes (e.g. lazy loading of live data for just the visible items)
 	
+	example of init hook - persisting a pagination (in parent controller, before pagination controller load(!):)
+	>	$scope.pagination.init = function(pagination) {
+	>		if(firstRun) {
+	>			someService.persistentPagi = jQuery.extend({}, pagination);
+	>		}
+	>	return someService.persistentPagi; // (MUST return reference to a pagination object)
+	>}
+
 
 	Template Example
  		<div ng-controller="PaginationController">
@@ -64,6 +72,10 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
 		onPageChange: $scope.pagination.onPageChange || undefined // callback function that runs on every page change
 	};
+
+	// custom init hook
+	if(typeof $scope.pagination.init === "function") { pgnt = $scope.pagination.init(pgnt); }
+
 	$scope.pagination = pgnt; // expose to own and
 	$scope.$parent.pagination = pgnt; // parent scope
 
