@@ -2,7 +2,7 @@
 	//classBrowser.controller('QueryController', function($scope, Arguments, Classes, Properties, jsonData) {
 	qry = angular.module('queryInterface', ['angucomplete-alt']);
 
-	qry.controller('QueryController', ['$scope','Classes', 'util', 'sparql', 'wikidataapi', function($scope, Classes, util, sparql, wikidataapi) {
+	qry.controller('QueryController', ['$scope','Classes', 'i18n', 'sparql', 'wikidataapi',  function($scope, Classes, i18n, sparql, wikidataapi) {
 
 		sparqewl = sparql;
 
@@ -10,7 +10,7 @@
 		$scope.sparqlQuery = null;
 		$scope.classIndex = [];
 
-		var searchOrderBy = 'i';
+		var searchOrderBy = 'ai';
 		//$scope.results = null;
 
 		$scope.selectedClassHandler = function(selected) {
@@ -77,13 +77,13 @@
 						if(entities[i].qid === undefined) { // no need to process more than once
 							eid = entities[i].instance.value.split('/entity/')[1];
 							entities[i].qid = eid;
-							entities[i].url = util.getEntityUrl(eid);
+							entities[i].url = i18n.getEntityUrl(eid);
 							entityIds.push(eid);
 						}
 					}
 					// pull labels and descriptions
 					if(entityIds.length > 0) {
-						wikidataapi.getEntityTerms(entityIds).then(function(data) {
+						wikidataapi.getEntityTerms(entityIds, i18n.getLanguage()).then(function(data) {
 							//console.log(data);
 							var i = entities.length, entity;
 							while(i--) {
