@@ -54,7 +54,6 @@
 */
 
 angular.module('utilities').controller('PaginationController', ['$scope', 'jsonData', function($scope, jsonData) {
-	
 	//init pagination config from parent or default (specified in util.js/jsonData)
 	if($scope.pagination === undefined) { $scope.pagination = {}; }
 	var pgnt = {

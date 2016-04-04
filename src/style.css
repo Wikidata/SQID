@@ -36,8 +36,8 @@ body{
 }
 
 #pageSelector{
-    margin-top: 10px;
-    margin-bottom: 20px;
+/*    margin-top: 10px;
+    margin-bottom: 20px;*/
 }
 
 /*.nav-bar-sides{
@@ -122,10 +122,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 
 #head-browse{
     height: 60px;
+    font-size: 0.8em;
 }
 
 #filter-menue{
-    /*margin-top: 100px;*/
+    margin-top: 35px;
 }
 
 .wd-red{
@@ -204,6 +205,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 .padded {
 	padding-left: 15px;
 	padding-right: 15px;
+	padding-top: 10px;
+}
+
+.padded-tabcontent {
 	padding-top: 10px;
 }
 
@@ -294,4 +299,36 @@ span.smallnote {
 
 .alert-danger pre {
 	max-height: 12em;
+}
+
+.input-monospace{
+    font-family: monospace;
+}
+
+.form-margin-buttom{
+    margin-bottom: 15px;
+}
+
+.browsing-table{
+    min-height: 530px;
+}
+
+.clickable{
+    cursor: pointer;
+}
+
+.header-element{
+    float: left;
+}
+
+.sort-element{
+    float: left;
+}
+
+#permalink{
+    /*float: left;*/
+    /*width: 100px;*/
+}
+#ctc-button{
+    /*float: left;*/
 }
