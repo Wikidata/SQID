@@ -8,39 +8,39 @@
 					placeholder="Select a class"
 					pause="100"
 					selected-object="selectedClassHandler"
-					local-data="classIndex"
+					local-data="qui.classIndex"
 					local-search="classSearch"
 					title-field="title"
 					minlength="1"
 					input-class="form-control form-control-small"></angucomplete-alt>
 			</div>
-			<div data-ng-show="selectedClass" class="form-group">
-				<p><a href="#/classview?id={{selectedClass.originalObject.qid}}">{{selectedClass.originalObject.qid}}</a></p>
+			<div data-ng-show="qui.selectedClass" class="form-group">
+				<p><a href="#/classview?id={{qui.selectedClass.originalObject.qid}}">{{qui.selectedClass.originalObject.qid}}</a></p>
 				<p>
-					<strong>{{selectedClass.originalObject.i}}</strong> direct instances,
-					<strong>{{selectedClass.originalObject.s}}</strong> direct subclasses
+					<strong>{{qui.selectedClass.originalObject.i}}</strong> direct instances,
+					<strong>{{qui.selectedClass.originalObject.s}}</strong> direct subclasses
 				</p><p>
-					<strong>{{selectedClass.originalObject.ai}}</strong> total instances,
-					<strong>{{selectedClass.originalObject.as}}</strong> total subclasses
+					<strong>{{qui.selectedClass.originalObject.ai}}</strong> total instances,
+					<strong>{{qui.selectedClass.originalObject.as}}</strong> total subclasses
 				</p>
 			</div>
 
 			<hr>
 			<!-- generated sparql query -->
-			<div data-ng-show="sparqlQuery" class="form-group">
-				<textarea class="form-control" rows="10" data-ng-model="sparqlQuery">{{sparqlQuery}}</textarea>
+			<div data-ng-show="qui.sparqlQuery" class="form-group">
+				<textarea class="form-control" rows="10" data-ng-model="qui.sparqlQuery">{{qui.sparqlQuery}}</textarea>
 				<button type="submit" class="btn btn-default">Run query</button>
 			</div>
 
 		</form>
 
-		<div class="alert alert-danger alert-dismissible" role="alert" data-ng-show="queryError">
+		<div class="alert alert-danger alert-dismissible" role="alert" data-ng-show="qui.queryError">
 			<button type="button" class="close" ng-click="queryError = null" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			<span class="glyphicon glyphicon-alert" aria-hidden="true"></span> <strong>Query failed with the following response</strong>:
-  			<pre class="well-sm">{{queryError}}</pre>
+  			<pre class="well-sm">{{qui.queryError}}</pre>
 		</div>
 
-		<div data-ng-show="pagination.activeIndex.length" data-ng-controller="PaginationController">
+		<div data-ng-show="qui.pagination.activeIndex.length" data-ng-controller="PaginationController">
 			<table class="table table-condensed">
 				<thead>
 					<tr>
@@ -50,7 +50,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr ng-repeat="entity in pagination.activeIndex">
+					<tr ng-repeat="entity in qui.pagination.activeIndex">
 						<td><a href="{{entity.url}}">{{entity.qid}}</a></td>
 						<td>{{entity.label}}</td>
 						<td>{{entity.description}}</td>
@@ -63,16 +63,16 @@
 			<nav>
 
 				<ul class="pagination">
-					<li data-ng-class="{disabled: pagination.nav.prevLiDisabled()}">
-						<a href="" data-ng-click="pagination.nav.selectPrev()" aria-label="Previous">
+					<li data-ng-class="{disabled: qui.pagination.nav.prevLiDisabled()}">
+						<a href="" data-ng-click="qui.pagination.nav.selectPrev()" aria-label="Previous">
 							<span aria-hidden="true">&laquo;</span>
 						</a>
 					</li>
-					<li ng-repeat="page in pagination.nav.pages" data-ng-class="{active: pagination.nav.liActive(page)}">
+					<li ng-repeat="page in qui.pagination.nav.pages" data-ng-class="{active: qui.pagination.nav.liActive(page)}">
 						<a href="" data-ng-click="pagination.nav.selectPage(page)">{{page}}</a>
 					</li>
-					<li data-ng-class="{disabled: pagination.nav.nextLiDisabled()}">
-						<a href="" data-ng-click="pagination.nav.selectNext()" aria-label="Next">
+					<li data-ng-class="{disabled: qui.pagination.nav.nextLiDisabled()}">
+						<a href="" data-ng-click="qui.pagination.nav.selectNext()" aria-label="Next">
 							<span aria-hidden="true">&raquo;</span>
 						</a>
 					</li>

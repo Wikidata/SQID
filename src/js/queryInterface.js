@@ -1,43 +1,59 @@
 (function() {
-	//classBrowser.controller('QueryController', function($scope, Arguments, Classes, Properties, jsonData) {
-	qry = angular.module('queryInterface', ['angucomplete-alt']);
 
-	qry.controller('QueryController', ['$scope','Classes', 'i18n', 'sparql', 'wikidataapi',  function($scope, Classes, i18n, sparql, wikidataapi) {
+angular.module('queryInterface', ['angucomplete-alt'])
+	.factory('queryInterfaceState', function() { // persist state of page
 
-		sparqewl = sparql;
+		return {
+			classData: {}, // classData from Classes service
+			classIndex: [], // list of class indices for iteration
+			
+			selectedClass: false,
+			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
 
-		$scope.selectedClass = false;
-		$scope.sparqlQuery = null;
-		$scope.classIndex = [];
+			sparqlQuery: '', // sparql query as a string
+			queryError: '', // error message string returned from query.wikidata.org if something went wrong
 
-		var searchOrderBy = 'ai';
-		//$scope.results = null;
+			pagination: undefined // persist pagination (unnecessary statement for the sake of verbosity)
+		};
+	})
+
+	.controller('QueryController', ['$scope','Classes', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState',  function($scope, Classes, i18n, sparql, wikidataapi, qis) {
+
+		sparqewl = sparql; // expose as global in dev console TODO remove in production
+
+		$scope.qui = qis; // just point to the persisted state object
+		$scope.pagination = {
+			init: function(pgnt) {
+				if(qis.pagination === undefined) { qis.pagination = jQuery.extend({}, pgnt); }
+				return qis.pagination;
+		}	};
+
 
 		$scope.selectedClassHandler = function(selected) {
-			if(selected) { $scope.selectedClass = selected; }
-			else { $scope.selectedClass = false; }
+			if(selected) { qis.selectedClass = selected; }
+			else { qis.selectedClass = false; }
 			
 			$scope.buildSparql();
 		};
 
 		// searching classes in lokal data by id or labels (case insensitive) 
 		$scope.classSearch = function(str) {
-			var i = $scope.classIndex.length, matches = [], 
+			var i = qis.classIndex.length, matches = [], 
 				classId, classLabel, newMatch;
 			str = str.toString().toLowerCase();
 			while(i--) {
-				classId = $scope.classIndex[i];
-				classLabel = $scope.classData[classId].l;
+				classId = qis.classIndex[i];
+				classLabel = qis.classData[classId].l;
 				if( (classLabel !== undefined && classLabel !== null && classLabel.toLowerCase().indexOf(str) > -1) 
 				||( ('q'+classId).indexOf(str) > -1) ) {
-					newmatch = $scope.classData[$scope.classIndex[i]];
-					newmatch.qid = 'Q' + $scope.classIndex[i];
+					newmatch = qis.classData[qis.classIndex[i]];
+					newmatch.qid = 'Q' + qis.classIndex[i];
 					newmatch.title = newmatch.l + ' [' + newmatch.qid + ']';
 					matches.push(newmatch);
 				}
 			}
 			matches.sort(function(a,b) { // sort by number of all instances descending
-				return (a[searchOrderBy] > b[searchOrderBy]) ? -1 : ( (a[searchOrderBy] === b[searchOrderBy]) ? 0 : 1);
+				return (a[qis.searchOrderBy] > b[qis.searchOrderBy]) ? -1 : ( (a[qis.searchOrderBy] === b[qis.searchOrderBy]) ? 0 : 1);
 			});
 			return matches.slice(0,9);
 		};
@@ -45,10 +61,10 @@
 		// build classIndex array when we have the class data
 		Classes.then(function(data){
 			//console.log('classes loaded');
-			$scope.classData = data.getClasses();
-			for(var p in $scope.classData) {
-				if($scope.classData.hasOwnProperty(p)) {
-					$scope.classIndex.push(p);
+			qis.classData = data.getClasses();
+			for(var p in qis.classData) {
+				if(qis.classData.hasOwnProperty(p)) {
+					qis.classIndex.push(p);
 				}
 			}
 			 
@@ -56,17 +72,17 @@
 
 		// Translate form state into sparql
 		$scope.buildSparql = function() {
-			if(!$scope.selectedClass) { $scope.sparqlQuery = null; } else {
-				$scope.sparqlQuery = sparql.getStandardPrefixes() +
+			if(!qis.selectedClass) { qis.sparqlQuery = null; } else {
+				qis.sparqlQuery = sparql.getStandardPrefixes() +
 				"SELECT ?instance \n" +
 				"WHERE {\n" +
-				"	?instance wdt:P31 wd:" + $scope.selectedClass.originalObject.qid + " .\n" +
+				"	?instance wdt:P31 wd:" + qis.selectedClass.originalObject.qid + " .\n" +
 				"}";
 			}
 		};
 
 		$scope.runSparql = function() {
-			sparql.getQueryRequest($scope.sparqlQuery).then(function(data) {
+			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) {
 				//console.log(data);
 				var results = data.results.bindings;
 
@@ -96,13 +112,12 @@
 						});
 					}
 				};
-
-				$scope.pagination.onPageChange = processEntities;
-				$scope.pagination.setIndex(results);
+				qis.pagination.onPageChange = processEntities;
+				qis.pagination.setIndex(results);
 				
 			}, function(response) {
 				console.log(response);
-				$scope.queryError = response;
+				qis.queryError = response;
 			});
 			
 		};
