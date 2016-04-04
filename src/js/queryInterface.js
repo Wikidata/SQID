@@ -9,6 +9,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			
 			selectedClass: false,
 			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
+			offspring: 'i',
 
 			sparqlQuery: '', // sparql query as a string
 			queryError: '', // error message string returned from query.wikidata.org if something went wrong
@@ -75,11 +76,33 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		// Translate form state into sparql
 		$scope.buildSparql = function() {
 			if(!qis.selectedClass) { qis.sparqlQuery = null; } else {
-				qis.sparqlQuery = sparql.getStandardPrefixes() +
-				"SELECT ?instance \n" +
-				"WHERE {\n" +
-				"	?instance wdt:P31 wd:" + qis.selectedClass.originalObject.qid + " .\n" +
-				"}";
+				
+				var obj = "wd:" + qis.selectedClass.originalObject.qid,
+					ins = "?instance",
+					tab = "    ";
+
+				var header = sparql.getStandardPrefixes() +
+					"SELECT " + ins + " \n" +
+					"WHERE {\n" + tab;
+
+				var body;
+				switch(qis.offspring) {
+					case 'i': 	body = ins + " wdt:P31 " + obj + " ."; 
+								break;
+					case 'ai': 	body = "?class wdt:P279* " + obj + " .\n" +
+									tab + ins + " wdt:P31 ?class ."; 
+								break;
+					case 's': 	body = ins + " wdt:P279 " + obj + " .";
+								break;
+					case 'as': 	body = ins + " wdt:P279* " + obj + " ."; 
+								break;
+				}
+
+				var footer = "\n" +
+					"}";
+
+
+				qis.sparqlQuery = header + body + footer;
 			}
 		};
 

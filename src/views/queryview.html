@@ -15,14 +15,21 @@
 					input-class="form-control form-control-small"></angucomplete-alt>
 			</div>
 			<div data-ng-show="qui.selectedClass" class="form-group">
-				<p><a href="#/classview?id={{qui.selectedClass.originalObject.qid}}">{{qui.selectedClass.originalObject.qid}}</a></p>
-				<p>
-					<strong>{{qui.selectedClass.originalObject.i}}</strong> direct instances,
-					<strong>{{qui.selectedClass.originalObject.s}}</strong> direct subclasses
-				</p><p>
-					<strong>{{qui.selectedClass.originalObject.ai}}</strong> total instances,
-					<strong>{{qui.selectedClass.originalObject.as}}</strong> total subclasses
-				</p>
+				<!--<p><a href="#/classview?id={{qui.selectedClass.originalObject.qid}}">{{qui.selectedClass.originalObject.qid}}</a></p>-->
+				<div class="radio-inline"><label>
+   					<input type="radio" name="offspring" id="offspring-i" value="i" ng-model="qui.offspring" ng-change="buildSparql()"  checked>
+   					Direct instances <span class="info-badge">{{qui.selectedClass.originalObject.i}}</span>
+				</label></div>
+				<div class="radio-inline"><label>
+   					<input type="radio" name="offspring" id="offspring-ai" value="ai" ng-model="qui.offspring" ng-change="buildSparql()">
+   					Total instances <span class="info-badge">{{qui.selectedClass.originalObject.ai}}</span>
+				</label></div><div class="radio-inline"><label>
+   					<input type="radio" name="offspring" id="offspring-s" value="s" ng-model="qui.offspring" ng-change="buildSparql()">
+   					Direct subclasses <span class="info-badge">{{qui.selectedClass.originalObject.s}}</span>
+				</label></div><div class="radio-inline"><label>
+   					<input type="radio" name="offspring" id="offspring-as" value="as" ng-model="qui.offspring" ng-change="buildSparql()">
+   					Total subclasses <span class="info-badge">{{qui.selectedClass.originalObject.as}}</span>
+				</label></div>
 			</div>
 
 			<hr>
