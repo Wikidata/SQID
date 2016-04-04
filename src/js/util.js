@@ -260,13 +260,28 @@ angular.module('utilities', [])
 		return ret;
 	}
 
+	var getSortComparator = function(criteria, direction){
+      return function(data){
+        return function(a, b){
+          if (data[a][criteria] > data[b][criteria]){
+            return 1 * direction;
+          }
+          if (data[a][criteria] < data[b][criteria]){
+            return (-1) * direction;
+          }
+          return 0;
+        };
+      }
+    }
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
 		sortByField: sortByField,
-		createIdArray: createIdArray
+		createIdArray: createIdArray,
+		getSortComparator: getSortComparator
 	};
 
 })

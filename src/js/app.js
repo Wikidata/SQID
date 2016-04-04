@@ -302,22 +302,25 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			return defaultValue;
 		}
 
-		var getLabel = function(id) { return getData(id, 'l', null); }
-		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
-		var getUrl = function(id) { return "#/view?id=P" + id; }
+		var getLabel = function(id) { return getData(id, 'l', null); };
+		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); };
+		var getUrl = function(id) { return "#/view?id=P" + id; };
 
-		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
+		var getQualifiers = function(id){ return getData(id, 'qs', {}); };
 
-		var getStatementCount = function(id){ return getData(id, 's', 0); }
+		var getStatementCount = function(id){ return getData(id, 's', 0); };
+
+		var sortProperties = function(comparator){idArray.sort(comparator(properties));};
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				idArray = util.createIdArray(properties);
+				sortProperties(util.getSortComparator(jsonData.JSON_USES_IN_STATEMENTS, -1));
 				return {
 					propertiesHeader: [["Label (ID)", "col-xs-5", "fa fa-sort", jsonData.JSON_LABEL], 
 						["Datatype", "col-xs-1", "fa fa-sort", jsonData.JSON_DATATYPE], 
-						["Uses in statements", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_STATEMENTS], 
+						["Uses in statements", "col-xs-2", "fa fa-sort-desc", jsonData.JSON_USES_IN_STATEMENTS], 
 						["Uses in qualifiers", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_QUALIFIERS], 
 						["Uses in references", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_REFERENCES]],
 					getProperties: function(){ return properties; },
@@ -336,7 +339,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getUrl: getUrl,
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
 					getClasses: function(id){ return getData(id, 'pc', []); },
-					sortProperties: function(comparator){idArray.sort(comparator(properties));}
+					sortProperties: sortProperties
 				}
 			});
 		}
@@ -364,13 +367,16 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
+		var sortClasses = function(comparator){ idArray.sort(comparator(classes)); };
+
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				idArray = util.createIdArray(classes);
+				sortClasses(util.getSortComparator(jsonData.JSON_INSTANCES, -1));
 				return {
 					classesHeader: [["Label (ID)", "col-xs-9", "fa fa-sort", jsonData.JSON_LABEL],
-						["Instances", "col-xs-1", "fa fa-sort", jsonData.JSON_INSTANCES], 
+						["Instances", "col-xs-1", "fa fa-sort-desc", jsonData.JSON_INSTANCES], 
 						["Subclasses", "col-xs-1", "fa fa-sort", jsonData.JSON_SUBCLASSES]],
 					getClasses: function(){ return classes; },
 					getIdArray: function(){ return idArray; },
@@ -386,7 +392,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
 					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); },
-					sortClasses: function(comparator){ idArray.sort(comparator(classes)); }
+					sortClasses: sortClasses
 				}
 			});
 		}

@@ -1,4 +1,4 @@
-classBrowser.controller('TableController', function($scope, Arguments, Classes, Properties, jsonData){
+classBrowser.controller('TableController', function($scope, Arguments, Classes, Properties, jsonData, util){
 
 
 
@@ -129,20 +129,6 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
 
           }
         }
-      }
-    }
-
-    var getSortComparator = function(criteria, direction){
-      return function(data){
-        return function(a, b){
-          if (data[a][criteria] > data[b][criteria]){
-            return 1 * direction;
-          }
-          if (data[a][criteria] < data[b][criteria]){
-            return (-1) * direction;
-          }
-          return 0;
-        };
       }
     }
 
@@ -343,15 +329,15 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       switch(element[2]){
         case "fa fa-sort":
           element[2] = "fa fa-sort-desc";
-          direction = 1;
+          direction = (-1);
           break;
         case "fa fa-sort-desc":
           element[2] = "fa fa-sort-asc";
-          direction = (-1);
+          direction = 1;
           break;
         case "fa fa-sort-asc":
           element[2] = "fa fa-sort-desc";
-          direction = 1;
+          direction = (-1);
           break;
         default:
           console.log("Unknown sort style " + element[2]);
@@ -363,12 +349,12 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
       if (status.entityType == "classes"){
         Classes.then(function(data){
-          data.sortClasses(getSortComparator(element[3], direction));
+          data.sortClasses(util.getSortComparator(element[3], direction));
           updateTable();
         });
       }else{
         Properties.then(function(data){
-          data.sortProperties(getSortComparator(element[3], direction));
+          data.sortProperties(util.getSortComparator(element[3], direction));
           updateTable();
         });
       }
