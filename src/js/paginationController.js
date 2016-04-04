@@ -69,7 +69,8 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 		pageSelectorSize: $scope.pagination.pageSelectorSize || jsonData.PAGE_SELECTOR_SIZE, // number of explicit links left AND right from the active page
 		index: $scope.pagination.index || [], // an array of things to paginate
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
-		onPageChange: $scope.pagination.onPageChange || undefined // callback function that runs on every page change
+		onPageChange: $scope.pagination.onPageChange || undefined, // callback function that runs on every page change
+		autoBoot: false // automatically create the pagination model when the controller is loaded (start manually with setIndex(indexArray))
 	};
 
 	// custom init hook
@@ -138,7 +139,7 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 	};
 
 	// init on init
-	pgnt.setIndex(pgnt.index);
+	if(pgnt.autoBoot) { pgnt.setIndex(pgnt.index); }
 }]);
 
 
