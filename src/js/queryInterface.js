@@ -23,6 +23,8 @@ angular.module('queryInterface', ['angucomplete-alt'])
 
 		$scope.qui = qis; // just point to the persisted state object
 		$scope.pagination = {
+			autoBoot: true,
+			onPageChange: processEntities,
 			init: function(pgnt) {
 				if(qis.pagination === undefined) { qis.pagination = jQuery.extend({}, pgnt); }
 				return qis.pagination;
@@ -81,46 +83,43 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			}
 		};
 
-		$scope.runSparql = function() {
-			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) {
-				//console.log(data);
-				var results = data.results.bindings;
 
-				var processEntities = function(entities) {
-					// grab Q/P ids from the full entity uri
-					var entityIds = [], i = entities.length, eid;
-					while(i--) {
-						if(entities[i].qid === undefined) { // no need to process more than once
-							eid = entities[i].instance.value.split('/entity/')[1];
-							entities[i].qid = eid;
-							entities[i].url = i18n.getEntityUrl(eid);
-							entityIds.push(eid);
-						}
-					}
-					// pull labels and descriptions
-					if(entityIds.length > 0) {
-						wikidataapi.getEntityTerms(entityIds, i18n.getLanguage()).then(function(data) {
-							//console.log(data);
-							var i = entities.length, entity;
-							while(i--) {
-								entity = entities[i];
-								if(data[entity.qid] !== undefined) {
-									entity.label = data[entity.qid].label;
-									entity.description = data[entity.qid].description;
-								}
-							}
-						});
-					}
-				};
-				qis.pagination.onPageChange = processEntities;
-				qis.pagination.setIndex(results);
-				
-			}, function(response) {
+		$scope.runSparql = function() {
+			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) { // success
+				qis.pagination.setIndex(data.results.bindings);
+			}, function(response) { // error
 				console.log(response);
 				qis.queryError = response;
 			});
 			
 		};
 
-	}]);
-})();
+		// process entities on the current page
+		function processEntities (entities) {
+			// grab Q/P ids from the full entity uri
+			var entityIds = [], i = entities.length, eid;
+			while(i--) {
+				if(entities[i].qid === undefined) { // no need to process more than once
+					eid = entities[i].instance.value.split('/entity/')[1];
+					entities[i].qid = eid;
+					entities[i].url = i18n.getEntityUrl(eid);
+					entityIds.push(eid);
+				}
+			}
+			// pull labels and descriptions
+			if(entityIds.length > 0) {
+				wikidataapi.getEntityTerms(entityIds, i18n.getLanguage()).then(function(data) {
+					//console.log(data);
+					var i = entities.length, entity;
+					while(i--) {
+						entity = entities[i];
+						if(data[entity.qid] !== undefined) {
+							entity.label = data[entity.qid].label;
+							entity.description = data[entity.qid].description;
+						}
+					}
+				});
+			}
+		}
+	}]); // controller
+})(); // module
