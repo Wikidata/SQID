@@ -70,7 +70,7 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 		index: $scope.pagination.index || [], // an array of things to paginate
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
 		onPageChange: $scope.pagination.onPageChange || undefined, // callback function that runs on every page change
-		autoBoot: false // automatically create the pagination model when the controller is loaded (start manually with setIndex(indexArray))
+		autoBoot: $scope.pagination.autoBoot || false // automatically create the pagination model when the controller is loaded (start manually with setIndex(indexArray))
 	};
 
 	// custom init hook
