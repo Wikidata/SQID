@@ -18,7 +18,16 @@ SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
 
 def sparqlQuery(query):
 	r = requests.get(SPARQL_SERVICE_URL, params={'query': query, 'format': 'json'});
-	return json.loads(r.text)
+	try:
+		return json.loads(r.text)
+	except ValueError:
+		print "SPARQL query failed and returned:\n " + r.text + '\n retrying ...\n'
+		r = requests.get(SPARQL_SERVICE_URL, params={'query': query, 'format': 'json'});
+		try:
+			return json.loads(r.text)
+		except ValueError:
+			print "Failed to get SPARQL results. Giving up."
+			return json.loads('{}')
 
 def setPropertyStatistics(propertyStatistics, propertyId, statisticType, numberString):
 	try:
