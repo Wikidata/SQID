@@ -127,7 +127,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				HINT_CLASS : 'Andere Eigenschaften, die oftmals von direkten oder indirekten Instanzen dieser Klasse verwendet werden',
 				NONE: 'keine'
 			},
-			INSTANCE_OF_PHRASE: '{{entity}} ist ein(e) {{classes}}',
+			INSTANCE_OF_PHRASE: '{{entity}} ist eine Instanz von {{classes}}',
 			NO_INSTANCE_OF_PHRASE: '{{entity}} ist keine Instanz einer Klasse',
 			SUBCLASS_OF_PHRASE: 'jede Instanz von {{entity}} ist auch {{classes}}',
 			NO_SUBCLASS_OF_PHRASE: '{{entity}} hat keinerlei Oberklassen',
