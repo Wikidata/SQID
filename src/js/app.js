@@ -77,6 +77,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			SEC_LINKS : {
 				SEC_LINKS : 'Links',
 				WIKIDATA : 'Wikidata page',
+				WEBSITE: 'Official website',
 				REASONATOR : 'Reasonator',
 			},
 			SEC_PROP_USE : {
@@ -161,6 +162,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			SEC_LINKS : {
 				SEC_LINKS : 'Links',
 				WIKIDATA : 'Wikidata',
+				WEBSITE: 'Offizielle Website',
 				REASONATOR : 'Reasonator',
 			},
 			SEC_PROP_USE : {

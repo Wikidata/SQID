@@ -562,6 +562,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				images: [],
 				aliases: [],
 				banner: null,
+				homepage: null,
 				statements: {},
 				missing: false,
 				termsPromise: null,
@@ -613,8 +614,13 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				}
 				// Wikivoyage banner; only pick the first banner if multiple
 				if ("P948" in entityData.claims) {
-					var imageFileName = getStatementValue(entityData.claims.P948[0],"");
+					var imageFileName = getStatementValue(entityData.claims.P948[0],null);
 					ret.banner = imageFileName.replace(" ","_");
+				}
+				
+				// homepage URL; only pick the first URL if multiple
+				if ("P856" in entityData.claims) {
+					ret.homepage = getStatementValue(entityData.claims.P856[0],null);
 				}
 
 				ret.statements = entityData.claims;
