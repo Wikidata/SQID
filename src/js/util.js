@@ -988,7 +988,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			propertyScores = {};
 			// Note: class-based ranking rarely seems to help; hence using properties only
 			for (propertyId in itemData.statements) {
-				angular.forEach(properties.getRelatedProperties(propertyId), function(relPropScore, relPropId) {
+				angular.forEach(properties.getRelatedProperties(propertyId.substring(1)), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
 						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
 					} else {
