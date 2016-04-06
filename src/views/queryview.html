@@ -51,15 +51,13 @@
 			<table class="table table-condensed">
 				<thead>
 					<tr>
-						<th>Entity ID</th>
-						<th>Label</th>
+						<th>Entity</th>
 						<th>Description</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr ng-repeat="entity in qui.pagination.activeIndex">
-						<td><a href="{{entity.url}}">{{entity.qid}}</a></td>
-						<td>{{entity.label}}</td>
+						<td><a href="{{entity.url}}">{{entity.label}} ({{entity.qid}})</a></td>
 						<td>{{entity.description}}</td>
 					</tr>
 				</tbody>

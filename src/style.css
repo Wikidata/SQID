@@ -332,3 +332,19 @@ span.smallnote {
 #ctc-button{
     /*float: left;*/
 }
+
+
+#query-interface table {
+	table-layout: fixed;
+}
+#query-interface table th:first-child {
+	width: 35%;
+}
+#query-interface table th:last-child {
+	width: 65%;
+}
+#query-interface table td {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
