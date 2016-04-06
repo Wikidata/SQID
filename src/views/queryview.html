@@ -8,13 +8,14 @@
 					placeholder="Select a class"
 					pause="100"
 					selected-object="selectedClassHandler"
+					initial-value="qui.selectedClass.originalObject"
 					local-data="qui.classIndex"
 					local-search="classSearch"
 					title-field="title"
 					minlength="1"
 					input-class="form-control form-control-small"></angucomplete-alt>
 			</div>
-			<div data-ng-show="qui.selectedClass" class="form-group">
+			<div data-ng-show="qui.selectedClass.originalObject" class="form-group">
 				<!--<p><a href="#/classview?id={{qui.selectedClass.originalObject.qid}}">{{qui.selectedClass.originalObject.qid}}</a></p>-->
 				<div class="radio-inline"><label>
    					<input type="radio" name="offspring" id="offspring-i" value="i" ng-model="qui.offspring" ng-change="buildSparql()"  checked>

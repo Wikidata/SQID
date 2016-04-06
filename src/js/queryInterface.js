@@ -7,7 +7,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			classData: {}, // classData from Classes service
 			classIndex: [], // list of class indices for iteration
 			
-			selectedClass: false,
+			selectedClass: {},
 			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
 			offspring: 'i',
 
@@ -18,7 +18,8 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		};
 	})
 
-	.controller('QueryController', ['$scope','Classes', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState',  function($scope, Classes, i18n, sparql, wikidataapi, qis) {
+	.controller('QueryController', ['$scope','Classes', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
+	function($scope, Classes, i18n, sparql, wikidataapi, qis) {
 
 		sparqewl = sparql; // expose as global in dev console TODO remove in production
 
@@ -33,8 +34,10 @@ angular.module('queryInterface', ['angucomplete-alt'])
 
 
 		$scope.selectedClassHandler = function(selected) {
+			console.log('SELECTEDCLASSHANDLER!', selected);
 			if(selected) { qis.selectedClass = selected; }
-			else { qis.selectedClass = false; }
+			else { qis.selectedClass = undefined; }
+			console.log('selectedClass: ', qis.selectedClass);
 			
 			$scope.buildSparql();
 		};
