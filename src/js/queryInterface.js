@@ -65,6 +65,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		Classes.then(function(data){
 			//console.log('classes loaded');
 			qis.classData = data.getClasses();
+			qis.classIndex = [];
 			for(var p in qis.classData) {
 				if(qis.classData.hasOwnProperty(p)) {
 					qis.classIndex.push(p);
