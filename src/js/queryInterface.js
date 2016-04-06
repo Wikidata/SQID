@@ -111,6 +111,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		$scope.runSparql = function() {
 			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) { // success
 				qis.pagination.setIndex(data.results.bindings);
+				qis.pagination.setPage(1);
 			}, function(response) { // error
 				console.log(response);
 				qis.queryError = response;
