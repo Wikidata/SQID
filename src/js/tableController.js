@@ -132,6 +132,15 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
+    var refreshAngucompleteInputFields = function(){
+      $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-classes', $scope.suggestFilters.classes.relatedProperty); // evt. für properties kopieren
+      $scope.$broadcast('angucomplete-alt:changeInput', 'direct-superclass-of-class', $scope.suggestFilters.classes.directSuperclass);
+      $scope.$broadcast('angucomplete-alt:changeInput', 'direct-subclass-of-class', $scope.suggestFilters.classes.directSubclass);
+      $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-properties', $scope.suggestFilters.properties.relatedProperty);
+      $scope.$broadcast('angucomplete-alt:changeInput', 'related-qualifiers', $scope.suggestFilters.properties.relatedQualifier);
+      $scope.$broadcast('angucomplete-alt:changeInput', 'direct-instance-of-property', $scope.suggestFilters.properties.directInstanceOf);
+    }
+
     var initPaginations = function(){
       if (!$scope.content){
         $scope.content = [];
@@ -149,7 +158,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     var initPropertyIndex = function(){
       var result = [{name: "No Filter", idName: "", id:0}]; 
       Properties.then(function(data){
-        $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
+        $scope.suggestFilters.classes.relatedProperty = {name: "No Filter", idName: "", id:0};
         var idArray = data.getIdArray();
         for (var i = 0; i < idArray.length; i++){
           var elem = {
@@ -159,11 +168,34 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           }
           result.push(elem);
           if (idArray[i].toString() == status.classesFilter.relatedProperty.toString()){
-            $scope.relatedProperty = elem;
+            $scope.suggestFilters.classes.relatedProperty = elem;
+          }
+          if (idArray[i].toString() == status.propertiesFilter.relatedProperty.toString()){
+            $scope.suggestFilters.properties.relatedProperty = elem;
           }
         }
-        relatedPropertyFilterInit = true;
-        $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.relatedProperty);
+        propertyIndexInitialized = true;
+        refreshAngucompleteInputFields();
+      });
+      return result;
+    }
+
+    var initClassIndex = function(){
+      var result = [{name: "No Filter", idName: "", id:0}];
+      Classes.then(function(data){
+        var idArray = data.getIdArray();
+        for (var i = 1; i < idArray.length; i++){
+          var elem = {
+            name: data.getLabel(idArray[i]),
+            idName: "Q" + idArray[i],
+            id: idArray[i].toString()
+          }
+          result.push(elem);
+          if (idArray[i].toString() == status.propertiesFilter.relatedProperty.toString()){
+            $scope.suggestFilters.properties.re
+          }
+        }
+        var classIndexInitialized = true;
       });
       return result;
     }
@@ -229,17 +261,57 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
+    var selectElementForSuggestFilter = function(selected, statusElement, scopeElement){
+      // TODO more elements for oldProperty
+      var oldProperty = scopeElement.id;
+      if (!selected){
+        scopeElement = {name: "No Filter", idName: "", id:0};
+        if (propertyIndexInitialized){
+          statusElement = "";
+        }
+      }else{
+        scopeElement = selected.originalObject;
+        if (propertyIndexInitialized){
+          statusElement = selected.originalObject.id;
+        }
+      }
+      if (oldProperty != scopeElement.id){
+        updateTable();
+      }
+    }
+
     // execution part
     Arguments.refreshArgs();
     var args = Arguments.getArgs();
     var status = Arguments.getStatus();
-    var relatedPropertyFilterInit = false;
+    
+    var propertyIndexInitialized = false;
+    var classIndexInitialized = false;
+    
+
     var timeoutIsSet = false;
     var sortfunc = function(x){return function(a, b){return 0;};};
 
-    $scope.propertyIndex = initPropertyIndex();
-    $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
-    
+    $scope.suggestFilters = {
+      data: {
+        propertyIndex: initPropertyIndex(),
+        classIndex: initClassIndex()
+      },
+      classes: {
+        relatedProperty: {name: "No Filter", idName: "", id:0},
+        directSuperclass: {name: "No Filter", idName: "", id:0},
+        directSubclass: {name: "No Filter", idName: "", id:0}
+
+      },
+      properties: {
+        relatedProperty: {name: "No Filter", idName: "", id:0},
+        relatedQualifier: {name: "No Filter", idName: "", id:0},
+        directInstanceOf: {name: "No Filter", idName: "", id:0}
+      }
+    }
+    // $scope.suggestFilters.data.propertyIndex = initPropertyIndex();
+    // $scope.suggestFilters.data.classIndex = initClassIndex();
+
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
     if (args.entityType == "classes"){
@@ -268,7 +340,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     if (!$scope.filterText) {$scope.filterText = ""};
     
     updateTable();
-    
+
     $scope.searchFilter = function(){
       if (status.entityType == "classes"){
         status.classesFilter.label = $scope.filterLabels;
@@ -287,8 +359,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     $scope.resetFilters = function(){
       status.classesFilter = Arguments.getStatusStartValues().classesFilter;
       status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
-      $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
-      $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.relatedProperty);
+      $scope.suggestFilters.classes.relatedProperty = {name: "No Filter", idName: "", id:0};
+      $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.suggestFilters.classes.relatedProperty);
       updateTable();
     }
 
@@ -361,21 +433,23 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
     }
 
     $scope.selectedRelatedProperty = function(selected){
-      var oldProperty = $scope.relatedProperty.id;
+      // more functions, call selectElementForSuggestFilter
+      var oldProperty = $scope.suggestFilters.classes.relatedProperty.id;
       if (!selected){
-        $scope.relatedProperty = {name: "No Filter", idName: "", id:0};
-        if (relatedPropertyFilterInit){
+        $scope.suggestFilters.classes.relatedProperty = {name: "No Filter", idName: "", id:0};
+        if (propertyIndexInitialized){
           status.classesFilter.relatedProperty = "";
         }
       }else{
-        $scope.relatedProperty = selected.originalObject;
-        if (relatedPropertyFilterInit){
+        $scope.suggestFilters.classes.relatedProperty = selected.originalObject;
+        if (propertyIndexInitialized){
           status.classesFilter.relatedProperty = selected.originalObject.id;
         }
       }
-      if (oldProperty != $scope.relatedProperty.id){
+      if (oldProperty != $scope.suggestFilters.classes.relatedProperty.id){
         updateTable();
       }
+      console.log($scope.suggestFilters);
     }
 
   });

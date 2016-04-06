@@ -205,11 +205,16 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			classesFilter: {
 				label: "",
 				relatedProperty: "",
+				directSuperClass: "",
+				directSubClass: "",
 				instances: [0, 4000000],
 				subclasses: [0, 200000]
 			},
 			propertiesFilter: {
 				label: "",
+				relatedProperty: "",
+				relatedQualifier: "",
+				directInstanceOf: "",
 				statements: [0, 20000000],
 				qualifiers: [0, 100000],
 				references: [0, 100000],
@@ -238,12 +243,17 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
 					classesFilter: {
 						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
-						relatedProperty: ($route.current.params.relatedpropertyfilter) ? ($route.current.params.relatedpropertyfilter) : status.classesFilter.relatedProperty,
+						relatedProperty: ($route.current.params.rpcfilter) ? ($route.current.params.rpcfilter) : status.classesFilter.relatedProperty,
+						directSuperClass: ($route.current.params.dsupercfilter) ? ($route.current.params.dsupercfilter) : status.classesFilter.directSuperClass,
+						directSubClass: ($route.current.params.dsubcfilter) ? ($route.current.params.dsubcfilter) : status.classesFilter.directSubClass,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
 						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
 					  },
 					propertiesFilter: {
 						label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
+						relatedProperty: ($route.current.params.rppfilter) ? ($route.current.params.rppfilter) : status.propertiesFilter.relatedProperty,
+						relatedQualifier: ($route.current.params.rqualifierfilter) ? ($route.current.params.rqualifierfilter) : status.propertiesFilter.relatedQualifier,
+						directInstanceOf: ($route.current.params.dInstancefilter) ? ($route.current.params.dInstancefilter) : status.propertiesFilter.directInstanceOf,
 						statements: [ ($route.current.params.statementsbegin) ? ($route.current.params.statementsbegin) : status.propertiesFilter.statements[0], ($route.current.params.statementsend) ? ($route.current.params.statementsend) : status.propertiesFilter.statements[1]],
 						qualifiers: [ ($route.current.params.qualifiersbegin) ? ($route.current.params.qualifiersbegin) : status.propertiesFilter.qualifiers[0], ($route.current.params.qualifiersend) ? ($route.current.params.qualifiersend) : status.propertiesFilter.qualifiers[1]],
 						references: [ ($route.current.params.referencesbegin) ? ($route.current.params.referencesbegin) : status.propertiesFilter.references[0], ($route.current.params.referencesend) ? ($route.current.params.referencesend) : status.propertiesFilter.references[1]],
@@ -270,8 +280,13 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					+ "?activepage=" + status.activePage
 					+ "&type=" + status.entityType
 					+ "&classlabelfilter=" + status.classesFilter.label
-					+ "&relatedpropertyfilter=" + status.classesFilter.relatedProperty
 					+ "&propertylabelfilter=" + status.propertiesFilter.label 
+					+ "&rpcfilter=" + status.classesFilter.relatedProperty
+					+ "&dsupercfilter=" + status.classesFilter.directSuperClass
+					+ "&dsubcfilter=" + status.classesFilter.directSubClass
+					+ "&rppfilter=" + status.propertiesFilter.relatedProperty
+					+ "&rqualifierfilter=" + status.classesFilter.relatedQualifier
+					+ "&dInstancefilter=" + status.classesFilter.directInstanceOf
 					+ "&instancesbegin=" + status.classesFilter.instances[0]
 					+ "&instancesend=" + status.classesFilter.instances[1]
 					+ "&subclassesbegin=" + status.classesFilter.subclasses[0]

@@ -55,7 +55,6 @@
 	    </div>
 	    <div class="col-xs-3">
 			<div id="filter-menue">
-				<h3>Filter Controls</h3>
 				<div class="form-group">
 					<input type="text" class="form-control input-md" placeholder="Filter labels" ng-model="filterLabels" ng-change="searchFilter()" />
 				</div>
@@ -68,14 +67,89 @@
 				</div>
 				<div ng-if='args.type == "classes"'>
 					<p><strong>Has property:</strong></p>
-					<angucomplete-alt id="related-properties"
+					<angucomplete-alt id="related-properties-classes"
 		              placeholder="Select Property"
 		              pause="100"
 		              selected-object="selectedRelatedProperty"
-		              local-data="propertyIndex"
+		              local-data="suggestFilters.data.propertyIndex"
 		              search-fields="name,idName"
 		              title-field="name,idName"
-		              initial-value="relatedProperty"
+		              initial-value="suggestFilters.classes.relatedProperty"
+		              minlength="3"
+		              maxlength="100"
+		              input-class="form-control form-control-small"/>
+		              <br/>
+				</div>
+				<div ng-if='args.type == "classes"'>
+					<p><strong>Has direct superclass:</strong></p>
+					<angucomplete-alt id="direct-superclass-of-class"
+		              placeholder="Select Property"
+		              pause="100"
+		              selected-object="selectedRelatedProperty"
+		              local-data="suggestFilters.data.classIndex"
+		              search-fields="name,idName"
+		              title-field="name,idName"
+		              initial-value="suggestFilters.classes.directSuperclass"
+		              minlength="3"
+		              maxlength="100"
+		              input-class="form-control form-control-small"/>
+		              <br/>
+				</div>
+				<div ng-if='args.type == "classes"'>
+					<p><strong>Has direct subclass:</strong></p>
+					<angucomplete-alt id="direct-subclass-of-class"
+		              placeholder="Select Property"
+		              pause="100"
+		              selected-object="selectedRelatedProperty"
+		              local-data="suggestFilters.data.classIndex"
+		              search-fields="name,idName"
+		              title-field="name,idName"
+		              initial-value="suggestFilters.classes.directSubclass"
+		              minlength="3"
+		              maxlength="100"
+		              input-class="form-control form-control-small"/>
+		              <br/>
+				</div>
+				<div ng-if='args.type == "properties"'>
+					<p><strong>Has property:</strong></p>
+					<angucomplete-alt id="related-properties-properties"
+		              placeholder="Select Property"
+		              pause="100"
+		              selected-object="selectedRelatedProperty"
+		              local-data="suggestFilters.data.propertyIndex"
+		              search-fields="name,idName"
+		              title-field="name,idName"
+		              initial-value="suggestFilters.properties.relatedProperty"
+		              minlength="3"
+		              maxlength="100"
+		              input-class="form-control form-control-small"/>
+		              <br/>
+				</div>
+				<div ng-if='args.type == "properties"'>
+					<p><strong>Related qualifier properties:</strong></p>
+					<angucomplete-alt id="related-qualifiers"
+		              placeholder="Select Property"
+		              pause="100"
+		              selected-object="selectedRelatedProperty"
+		              local-data="suggestFilters.data.propertyIndex"
+		              search-fields="name,idName"
+		              title-field="name,idName"
+		              initial-value="suggestFilters.properties.relatedQualifier"
+		              minlength="3"
+		              maxlength="100"
+		              input-class="form-control form-control-small"/>
+		              <br/>
+				</div>
+				<div ng-if='args.type == "properties"'>
+					<p><strong>Class (only direct):</strong></p>
+					<angucomplete-alt id="direct-instance-of-property"
+		              placeholder="Select Property"
+		              pause="100"
+		              selected-object="selectedRelatedProperty"
+		              local-data="suggestFilters.data.classIndex"
+		              search-fields="name,idName"
+		              title-field="name,idName"
+		              initial-value="suggestFilters.properties.directInstanceOf"
 		              minlength="3"
 		              maxlength="100"
 		              input-class="form-control form-control-small"/>
