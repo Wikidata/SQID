@@ -1,6 +1,5 @@
-classBrowser.controller('TableController', function($scope, Arguments, Classes, Properties, jsonData, util){
-
-
+classBrowser.controller('TableController', 
+  function($scope, Arguments, Classes, Properties, jsonData, util){
 
     var tableContent = [];
 
@@ -51,7 +50,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }else{
         return false;
       }
-    }
+    };
 
     var datatypeFilter = function(entry){
       var filter;
@@ -72,36 +71,51 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }else{
         return false;
       }
-    }
+    };
 
-    var relatedPropertyFilter = function(entry){
-      var filter = status.classesFilter.relatedProperty;
-      if (status.entityType == "properties"){
+    var satisfySuggestFilter = function(entry, attr, value){
+      if (!value){
         return true;
       }
-      if (!filter){
+      if (value == ""){
         return true;
       }
-      if (filter == ""){
-        return true;
-      }
-      if (!entry[jsonData.JSON_RELATED_PROPERTIES]){
+      if (!entry[attr]){
         return false;
       }
-      if (entry[jsonData.JSON_RELATED_PROPERTIES][filter]){
-        return true;
+      if (entry[attr].constructor === Array){
+        if (entry[attr].indexOf(value) != -1){
+          return true;
+        }else{
+          return false;
+        }
       }else{
-        return false;
+        if (entry[attr][value]){
+          return true;
+        }else{
+          return false;
+        }
       }
-    }
+    };
 
+    var applySuggestFilters = function(entry){
+      if (status.entityType == "classes"){
+        return satisfySuggestFilter(entry, jsonData.JSON_RELATED_PROPERTIES, status.classesFilter.relatedProperty)
+          && satisfySuggestFilter(entry, jsonData.JSON_SUPERCLASSES, status.classesFilter.superclass)
+          && satisfySuggestFilter(entry, jsonData.JSON_DIRECT_SUBCLASSES, status.classesFilter.directSubclass)
+      }else{
+          return satisfySuggestFilter(entry, jsonData.JSON_RELATED_PROPERTIES, status.propertiesFilter.relatedProperty)
+            && satisfySuggestFilter(entry, jsonData.JSON_QUALIFIER_PROPERTIES, status.propertiesFilter.relatedQualifier)
+            && satisfySuggestFilter(entry, jsonData.JSON_PROPERTY_DIRECT_INSTANCE_OF, status.propertiesFilter.directInstanceOf)
+      }
+    };
     var applyFilter = function(entry, json){
       if (!datatypeFilter(json[entry])){
         return false;
       }else{
         if (!labelFilter(json[entry])){
           return false;
-        }else{if(!relatedPropertyFilter(json[entry])){
+        }else{if(!applySuggestFilters(json[entry])){
           return false;
           }else{
             if (status.entityType == "classes"){
@@ -130,16 +144,16 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           }
         }
       }
-    }
+    };
 
     var refreshAngucompleteInputFields = function(){
       $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-classes', $scope.suggestFilters.classes.relatedProperty); // evt. für properties kopieren
-      $scope.$broadcast('angucomplete-alt:changeInput', 'direct-superclass-of-class', $scope.suggestFilters.classes.directSuperclass);
+      $scope.$broadcast('angucomplete-alt:changeInput', 'direct-superclass-of-class', $scope.suggestFilters.classes.superclass);
       $scope.$broadcast('angucomplete-alt:changeInput', 'direct-subclass-of-class', $scope.suggestFilters.classes.directSubclass);
       $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-properties', $scope.suggestFilters.properties.relatedProperty);
       $scope.$broadcast('angucomplete-alt:changeInput', 'related-qualifiers', $scope.suggestFilters.properties.relatedQualifier);
       $scope.$broadcast('angucomplete-alt:changeInput', 'direct-instance-of-property', $scope.suggestFilters.properties.directInstanceOf);
-    }
+    };
 
     var initPaginations = function(){
       if (!$scope.content){
@@ -153,7 +167,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           $scope.filterPermalink =Arguments.getUrl();
         }
       }
-    }
+    };
 
     var initPropertyIndex = function(){
       var result = [{name: "No Filter", idName: "", id:0}]; 
@@ -166,19 +180,24 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
             idName: "P" + idArray[i],
             id: idArray[i].toString()
           }
-          result.push(elem);
+
           if (idArray[i].toString() == status.classesFilter.relatedProperty.toString()){
             $scope.suggestFilters.classes.relatedProperty = elem;
           }
           if (idArray[i].toString() == status.propertiesFilter.relatedProperty.toString()){
             $scope.suggestFilters.properties.relatedProperty = elem;
           }
+          if (idArray[i].toString() == status.propertiesFilter.relatedQualifier.toString()){
+            $scope.suggestFilters.properties.relatedQualifier = elem;
+          }
+          result.push(elem);
+
         }
         propertyIndexInitialized = true;
         refreshAngucompleteInputFields();
       });
       return result;
-    }
+    };
 
     var initClassIndex = function(){
       var result = [{name: "No Filter", idName: "", id:0}];
@@ -191,14 +210,22 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
             id: idArray[i].toString()
           }
           result.push(elem);
-          if (idArray[i].toString() == status.propertiesFilter.relatedProperty.toString()){
-            $scope.suggestFilters.properties.re
+          if (idArray[i].toString() == status.classesFilter.superclass.toString()){
+            $scope.suggestFilters.classes.superclass = elem;
           }
+          if (idArray[i].toString() == status.classesFilter.directSubClass.toString()){
+            $scope.suggestFilters.classes.directSubclass  = elem;
+          }
+          if (idArray[i].toString() == status.propertiesFilter.directInstanceOf.toString()){
+            $scope.suggestFilters.properties.directInstanceOf  = elem;
+          }
+
+
         }
         var classIndexInitialized = true;
       });
       return result;
-    }
+    };
 
     var initClassesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
@@ -210,7 +237,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           to: 200000,
           startVal: status.classesFilter.subclasses[0], 
           endVal: status.classesFilter.subclasses[1]}];
-    }
+    };
 
     var initPropertiesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
@@ -226,7 +253,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           to: 100000,
           startVal: status.propertiesFilter.references[0],
           endVal: status.propertiesFilter.references[1]}]; 
-    }
+    };
 
     var updateTable = function(){
       if (args.type == "classes") {
@@ -249,7 +276,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
             $scope.pagination.setIndex($scope.content, null);
           });
       }
-    }
+    };
 
     var updateTableLazy = function(){
       if (!timeoutIsSet){
@@ -259,7 +286,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
           updateTable();
           }, 300);
       }
-    }
+    };
 
     var selectElementForSuggestFilter = function(selected, statusElement, scopeElement){
       // TODO more elements for oldProperty
@@ -278,7 +305,8 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       if (oldProperty != scopeElement.id){
         updateTable();
       }
-    }
+      return [statusElement, scopeElement];
+    };
 
     // execution part
     Arguments.refreshArgs();
@@ -299,7 +327,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       },
       classes: {
         relatedProperty: {name: "No Filter", idName: "", id:0},
-        directSuperclass: {name: "No Filter", idName: "", id:0},
+        superclass: {name: "No Filter", idName: "", id:0},
         directSubclass: {name: "No Filter", idName: "", id:0}
 
       },
@@ -308,7 +336,7 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
         relatedQualifier: {name: "No Filter", idName: "", id:0},
         directInstanceOf: {name: "No Filter", idName: "", id:0}
       }
-    }
+    };
     // $scope.suggestFilters.data.propertyIndex = initPropertyIndex();
     // $scope.suggestFilters.data.classIndex = initClassIndex();
 
@@ -432,24 +460,49 @@ classBrowser.controller('TableController', function($scope, Arguments, Classes, 
       }
     }
 
-    $scope.selectedRelatedProperty = function(selected){
-      // more functions, call selectElementForSuggestFilter
-      var oldProperty = $scope.suggestFilters.classes.relatedProperty.id;
-      if (!selected){
-        $scope.suggestFilters.classes.relatedProperty = {name: "No Filter", idName: "", id:0};
-        if (propertyIndexInitialized){
-          status.classesFilter.relatedProperty = "";
+    $scope.suggestSelectFunctions = {
+      classes:{
+        relatedProperty : function(selected){
+          var result = selectElementForSuggestFilter(selected, 
+          status.classesFilter.relatedProperty, $scope.suggestFilters.classes.relatedProperty);
+          status.classesFilter.relatedProperty = result[0];
+          $scope.suggestFilters.classes.relatedProperty = result[1];
+        },
+        superclass : function(selected){
+          var result = selectElementForSuggestFilter(selected, 
+          status.classesFilter.superclass, $scope.suggestFilters.classes.superclass);
+          status.classesFilter.superclass = result[0];
+          $scope.suggestFilters.classes.superclass = result[1];
+        },
+        directSubclass : function(selected){
+          var result = selectElementForSuggestFilter(selected, 
+          status.classesFilter.directSubclass, $scope.suggestFilters.classes.directSubclass);
+          status.classesFilter.directSubclass = result[0];
+          $scope.suggestFilters.classes.directSubclass = result[1];
         }
-      }else{
-        $scope.suggestFilters.classes.relatedProperty = selected.originalObject;
-        if (propertyIndexInitialized){
-          status.classesFilter.relatedProperty = selected.originalObject.id;
-        }
+      },
+      properties: {
+        relatedProperty : function(selected){
+          var result = selectElementForSuggestFilter(selected, 
+          status.propertiesFilter.relatedProperty, $scope.suggestFilters.properties.relatedProperty);
+          status.propertiesFilter.relatedProperty = result[0];
+          $scope.suggestFilters.properties.relatedProperty = result[1];
+        },
+        relatedQualifier : function(selected){
+          var result = selectElementForSuggestFilter(selected, 
+          status.propertiesFilter.relatedQualifier, $scope.suggestFilters.properties.relatedQualifier);
+          status.propertiesFilter.relatedQualifier = result[0];
+          $scope.suggestFilters.properties.relatedQualifier = result[1];
+        },
+        directInstanceOf : function(selected){
+          var result = selectElementForSuggestFilter(selected, 
+          status.propertiesFilter.directInstanceOf, $scope.suggestFilters.properties.directInstanceOf);
+          status.propertiesFilter.directInstanceOf = result[0];
+          $scope.suggestFilters.properties.directInstanceOf = result[1];
+        },
+        
       }
-      if (oldProperty != $scope.suggestFilters.classes.relatedProperty.id){
-        updateTable();
-      }
-      console.log($scope.suggestFilters);
-    }
+    };
 
-  });
+  }
+  );
