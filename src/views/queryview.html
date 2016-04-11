@@ -39,9 +39,19 @@
 			<!-- generated sparql query -->
 			<div data-ng-show="qui.sparqlQuery" class="form-group">
 				<textarea class="form-control" rows="10" data-ng-model="qui.sparqlQuery">{{qui.sparqlQuery}}</textarea>
-				<button type="submit" class="btn btn-default">Run query</button>
 			</div>
-
+			<div data-ng-show="qui.sparqlQuery" class="form-group">
+				<button type="submit" class="btn" ng-class="{
+					'btn-primary': !qui.queryParms.heavy || qui.queryParms.limitResults, 
+					'btn-warning': qui.queryParms.heavy && !qui.queryParms.limitResults}">Run query</button>
+				<label ng-show="qui.queryParms.big" class="checkbox-inline">&nbsp;
+					<input type="checkbox" name="limitResults" ng-model="qui.queryParms.limitResults" ng-click="buildSparql()"> Fast query (only 10,000 results)
+				</label>
+			</div>
+			<div class="alert alert-warning" ng-show="qui.queryParms.heavy && !qui.queryParms.limitResults">
+				<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span> 
+				This is a pretty big query. It may work slowly or not at all. Be warned.
+			</div>
 		</form>
 
 		<div class="alert alert-danger alert-dismissible" role="alert" data-ng-show="qui.queryError">

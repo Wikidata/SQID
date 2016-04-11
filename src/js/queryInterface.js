@@ -11,6 +11,15 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
 			offspring: 'i',
 
+			queryParms: {
+				big: false,
+				heavy: false,
+				limitResults: true,
+				THRESHOLD_BIG: 10000,
+				THRESHOLD_HEAVY: 100000
+			},
+			// responseRange: {0: 10000, 1:100000, 2: Infinity},
+			// limitResults: false,
 			sparqlQuery: '', // sparql query as a string
 			queryError: '', // error message string returned from query.wikidata.org if something went wrong
 
@@ -22,6 +31,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 	function($scope, Classes, i18n, sparql, wikidataapi, qis) {
 
 		sparqewl = sparql; // expose as global in dev console TODO remove in production
+		globallz = qis;
 
 		$scope.qui = qis; // just point to the persisted state object
 		$scope.pagination = {
@@ -88,9 +98,17 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			}
 		});
 
+		$scope.estimateResponseSize = function() {
+			var size = qis.selectedClass[qis.offspring];
+			qis.queryParms.big = size > qis.queryParms.THRESHOLD_BIG;
+			qis.queryParms.heavy = size > qis.queryParms.THRESHOLD_HEAVY;
+		}
+
 		// Translate form state into sparql
 		$scope.buildSparql = function() {
 			if(!qis.selectedClass) { qis.sparqlQuery = null; } else {
+
+				$scope.estimateResponseSize();
 				
 				var obj = "wd:" + qis.selectedClass.qid,
 					ins = "?instance",
@@ -115,6 +133,9 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				var footer = "\n" +
 					"}";
 
+				if(qis.queryParms.big && qis.queryParms.limitResults) {
+					footer += "\n LIMIT " + qis.queryParms.THRESHOLD_BIG;
+				}
 
 				qis.sparqlQuery = header + body + footer;
 			}
@@ -122,7 +143,9 @@ angular.module('queryInterface', ['angucomplete-alt'])
 
 
 		$scope.runSparql = function() {
+			console.log('sending sparql request');
 			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) { // success
+				console.log('received response to sparql request');
 				qis.pagination.setIndex(data.results.bindings);
 				qis.pagination.setPage(1);
 			}, function(response) { // error
