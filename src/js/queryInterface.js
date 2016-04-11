@@ -7,7 +7,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			classData: {}, // classData from Classes service
 			classIndex: [], // list of class indices for iteration
 			
-			selectedClass: {},
+			selectedClass: undefined,
 			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
 			offspring: 'i',
 
@@ -33,13 +33,25 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		}	};
 
 
-		$scope.selectedClassHandler = function(selected) {
-			console.log('SELECTEDCLASSHANDLER!', selected);
-			if(selected) { qis.selectedClass = selected; }
-			else { qis.selectedClass = undefined; }
-			console.log('selectedClass: ', qis.selectedClass);
-			
-			$scope.buildSparql();
+		/////////////////////////////
+		/// class selection input //
+		///////////////////////////
+		$scope.classSelectModelOptions = {
+			debounce: { default: 500, blur: 250 },
+			getterSetter: true
+		};
+
+		// getter/setter handler for the input field
+		$scope.classSelectInputValue = qis.selectedClass;
+		$scope.classSelectHandler = function(selected) {
+			if(arguments.length) {
+				$scope.classSelectInputValue = selected;
+				if(selected !== null && typeof selected === 'object' && qis.classData[selected.qid.substr(1)] !== undefined ) { 
+					qis.selectedClass = selected;
+					$scope.buildSparql();
+				}
+			}
+			else { return $scope.classSelectInputValue; }
 		};
 
 		// searching classes in lokal data by id or labels (case insensitive) 
@@ -74,14 +86,13 @@ angular.module('queryInterface', ['angucomplete-alt'])
 					qis.classIndex.push(p);
 				}
 			}
-			 
 		});
 
 		// Translate form state into sparql
 		$scope.buildSparql = function() {
 			if(!qis.selectedClass) { qis.sparqlQuery = null; } else {
 				
-				var obj = "wd:" + qis.selectedClass.originalObject.qid,
+				var obj = "wd:" + qis.selectedClass.qid,
 					ins = "?instance",
 					tab = "    ";
 
