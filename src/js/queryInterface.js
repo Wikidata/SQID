@@ -104,8 +104,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				switch(qis.offspring) {
 					case 'i': 	body = ins + " wdt:P31 " + obj + " ."; 
 								break;
-					case 'ai': 	body = "?class wdt:P279* " + obj + " .\n" +
-									tab + ins + " wdt:P31 ?class ."; 
+					case 'ai': 	body = ins + " wdt:P31/wdt:P279* " + obj + " ."; 
 								break;
 					case 's': 	body = ins + " wdt:P279 " + obj + " .";
 								break;
