@@ -72,42 +72,27 @@
 		              pause="100"
 		              selected-object="suggestSelectFunctions.classes.relatedProperty"
 		              local-data="suggestFilters.data.propertyIndex"
-		              search-fields="name,idName"
 		              title-field="name,idName"
 		              initial-value="suggestFilters.classes.relatedProperty"
-		              minlength="3"
+		              minlength="1"
 		              maxlength="100"
-		              input-class="form-control form-control-small"/>
+		              input-class="form-control form-control-small"
+		              local-search="localSearchProperties"/>
 		              <br/>
 				</div>
 				<div ng-if='args.type == "classes"'>
 					<p><strong>Has superclass:</strong></p>
 					<angucomplete-alt id="superclass-of-class"
-		              placeholder="Select Property"
+		              placeholder="Select Class"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.classes.superclass"
 		              local-data="suggestFilters.data.classIndex"
-		              search-fields="name,idName"
 		              title-field="name,idName"
 		              initial-value="suggestFilters.classes.superclass"
-		              minlength="3"
+		              minlength="1"
 		              maxlength="100"
-		              input-class="form-control form-control-small"/>
-		              <br/>
-				</div>
-				<div ng-if='args.type == "classes"'>
-					<p><strong>Has direct subclass:</strong></p>
-					<angucomplete-alt id="direct-subclass-of-class"
-		              placeholder="Select Property"
-		              pause="100"
-		              selected-object="suggestSelectFunctions.classes.directSubclass"
-		              local-data="suggestFilters.data.classIndex"
-		              search-fields="name,idName"
-		              title-field="name,idName"
-		              initial-value="suggestFilters.classes.directSubclass"
-		              minlength="3"
-		              maxlength="100"
-		              input-class="form-control form-control-small"/>
+		              input-class="form-control form-control-small"
+		              local-search="localSearchClasses"/>
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
@@ -117,12 +102,12 @@
 		              pause="100"
 		              selected-object="suggestSelectFunctions.properties.relatedProperty"
 		              local-data="suggestFilters.data.propertyIndex"
-		              search-fields="name,idName"
 		              title-field="name,idName"
 		              initial-value="suggestFilters.properties.relatedProperty"
 		              minlength="3"
 		              maxlength="100"
-		              input-class="form-control form-control-small"/>
+		              input-class="form-control form-control-small"
+		              local-search="localSearchProperties"/>
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
@@ -132,27 +117,27 @@
 		              pause="100"
 		              selected-object="suggestSelectFunctions.properties.relatedQualifier"
 		              local-data="suggestFilters.data.propertyIndex"
-		              search-fields="name,idName"
 		              title-field="name,idName"
 		              initial-value="suggestFilters.properties.relatedQualifier"
 		              minlength="3"
 		              maxlength="100"
-		              input-class="form-control form-control-small"/>
+		              input-class="form-control form-control-small"
+		              local-search="localSearchProperties"/>
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
 					<p><strong>Class (only direct):</strong></p>
 					<angucomplete-alt id="direct-instance-of-property"
-		              placeholder="Select Property"
+		              placeholder="Select Class"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.properties.directInstanceOf"
 		              local-data="suggestFilters.data.classIndex"
-		              search-fields="name,idName"
 		              title-field="name,idName"
 		              initial-value="suggestFilters.properties.directInstanceOf"
 		              minlength="3"
 		              maxlength="100"
-		              input-class="form-control form-control-small"/>
+		              input-class="form-control form-control-small"
+		              local-search="localSearchClasses"/>
 		              <br/>
 				</div>
 				<div ng-repeat="elem in slider track by $index">

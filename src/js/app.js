@@ -206,7 +206,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				label: "",
 				relatedProperty: "",
 				superclass: "",
-				directSubClass: "",
 				instances: [0, 4000000],
 				subclasses: [0, 200000]
 			},
@@ -245,7 +244,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
 						relatedProperty: ($route.current.params.rpcfilter) ? ($route.current.params.rpcfilter) : status.classesFilter.relatedProperty,
 						superclass: ($route.current.params.supercfilter) ? ($route.current.params.supercfilter) : status.classesFilter.superclass,
-						directSubClass: ($route.current.params.dsubcfilter) ? ($route.current.params.dsubcfilter) : status.classesFilter.directSubClass,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
 						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
 					  },
@@ -283,7 +281,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					+ "&propertylabelfilter=" + status.propertiesFilter.label 
 					+ "&rpcfilter=" + status.classesFilter.relatedProperty
 					+ "&supercfilter=" + status.classesFilter.superclass
-					+ "&dsubcfilter=" + status.classesFilter.directSubClass
 					+ "&rppfilter=" + status.propertiesFilter.relatedProperty
 					+ "&rqualifierfilter=" + status.classesFilter.relatedQualifier
 					+ "&dInstancefilter=" + status.classesFilter.directInstanceOf
