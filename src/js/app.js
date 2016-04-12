@@ -245,7 +245,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 						relatedProperty: ($route.current.params.rpcfilter) ? ($route.current.params.rpcfilter) : status.classesFilter.relatedProperty,
 						superclass: ($route.current.params.supercfilter) ? ($route.current.params.supercfilter) : status.classesFilter.superclass,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
-						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
+						subclasses: [ ($route.current.params.subclassesbegin) ? ($route.current.params.subclassesbegin) : status.classesFilter.subclasses[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
 					  },
 					propertiesFilter: {
 						label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
@@ -440,9 +440,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 	.directive('ngSlider', function(){
 	    var SCALE_FACTOR = 1.005;
+	    var MULTIPLIER = 1000000;
 	    var scale = function(val){
 	      if (val > 0) {
-	      	return Math.ceil(Math.log(val) / Math.log(SCALE_FACTOR));
+	      	return Math.round((Math.log(val) / Math.log(SCALE_FACTOR))*MULTIPLIER);
 	      }
 	      else {
 	        return 0;
@@ -451,10 +452,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    
 	    var antiScale = function(val){
 	      if (val > 0) {
-	       	if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
-	       		return 1;
-	       	}
-	        return Math.ceil(Math.pow(SCALE_FACTOR, val));
+	        return Math.round(Math.pow(SCALE_FACTOR, (val / MULTIPLIER)));
 	      }else{
 	        return 0;
 	      }
@@ -480,7 +478,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	      scope:{
 	        begin: '=begin',
 	        end: '=end',
-	        index: '=index', // TODO and startVal and endVal
+	        index: '=index',
 	        startval: '=startval',
 	        endval: '=endval'
 	      },
