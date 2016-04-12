@@ -254,6 +254,16 @@ angular.module('utilities', [])
 	    return temp;
 	};
 
+	var unionArrays = function(a1, a2){
+		var unique = [];
+		$.each(a1.concat(a2), function(i, el){
+    		if($.inArray(el, unique) === -1){
+				unique.push(el);
+			}
+		});
+		return unique;
+	};
+
 	var sortByField = function(objectList, fieldName) {
 		objectList.sort(function(a, b) {
 			return a[fieldName] < b[fieldName] ? 1 : (a[fieldName] > b[fieldName] ? -1 : 0);
@@ -287,6 +297,7 @@ angular.module('utilities', [])
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
+		unionArrays: unionArrays,
 		sortByField: sortByField,
 		createIdArray: createIdArray,
 		getSortComparator: getSortComparator

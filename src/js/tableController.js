@@ -178,6 +178,7 @@ classBrowser.controller('TableController',
             idName: "P" + idArray[i],
             id: idArray[i].toString()
           }
+          result.push(elem);
 
           if (idArray[i].toString() == status.classesFilter.relatedProperty.toString()){
             $scope.suggestFilters.classes.relatedProperty = elem;
@@ -188,7 +189,6 @@ classBrowser.controller('TableController',
           if (idArray[i].toString() == status.propertiesFilter.relatedQualifier.toString()){
             $scope.suggestFilters.properties.relatedQualifier = elem;
           }
-          result.push(elem);
 
         }
         propertyIndexInitialized = true;
@@ -208,19 +208,47 @@ classBrowser.controller('TableController',
             id: idArray[i].toString()
           }
           result.push(elem);
-          if (idArray[i].toString() == status.classesFilter.superclass.toString()){
-            $scope.suggestFilters.classes.superclass = elem;
-          }
+          
           if (idArray[i].toString() == status.propertiesFilter.directInstanceOf.toString()){
             $scope.suggestFilters.properties.directInstanceOf  = elem;
           }
 
-
         }
-        var classIndexInitialized = true;
+
+        classIndexInitialized = true;
+        refreshAngucompleteInputFields();
       });
       return result;
     };
+
+    var initPropertyClassIndex = function(){
+      var result = [];
+      Properties.then(function(propertyData){
+        Classes.then(function(classData){
+          var propertyClassIds = [];
+          var idArray = propertyData.getIdArray();
+          for (var i = 0; i < idArray.length; i++){
+            propertyClassIds = util.unionArrays(propertyClassIds, propertyData.getClasses(i));
+          }
+          for (var i = 0; i < propertyClassIds.length; i++){
+            var elem = {
+              name: classData.getLabel(propertyClassIds[i]),
+              idName: "Q" + propertyClassIds[i],
+              id: propertyClassIds[i].toString()
+            }
+            result.push(elem);
+
+            if (propertyClassIds[i].toString() == status.propertiesFilter.directInstanceOf.toString()){
+              $scope.suggestFilters.properties.directInstanceOf  = elem;
+            }
+
+          }
+          propertyClassIndexInitialized = true;
+          refreshAngucompleteInputFields();
+        });
+      });
+      return result;
+    }
 
     var initClassesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
@@ -310,6 +338,7 @@ classBrowser.controller('TableController',
     
     var propertyIndexInitialized = false;
     var classIndexInitialized = false;
+    var propertyClassIndexInitialized = false;
     
 
     var timeoutIsSet = false;
@@ -318,7 +347,8 @@ classBrowser.controller('TableController',
     $scope.suggestFilters = {
       data: {
         propertyIndex: initPropertyIndex(),
-        classIndex: initClassIndex()
+        classIndex: initClassIndex(),
+        propertyClassIndex: initPropertyClassIndex()
       },
       classes: {
         relatedProperty: "",
@@ -541,7 +571,12 @@ classBrowser.controller('TableController',
 
     $scope.localSearchClasses = function(str){
       return localSearch(str, $scope.suggestFilters.data.classIndex);
-    }
+    };
+
+    $scope.localSearchPropertyClasses = function(str){
+      return localSearch(str, $scope.suggestFilters.data.propertyClassIndex);
+    };
+
 
   }
   );
