@@ -209,8 +209,8 @@ classBrowser.controller('TableController',
           }
           result.push(elem);
           
-          if (idArray[i].toString() == status.propertiesFilter.directInstanceOf.toString()){
-            $scope.suggestFilters.properties.directInstanceOf  = elem;
+          if (idArray[i].toString() == status.classesFilter.superclass.toString()){
+            $scope.suggestFilters.classes.superclass = elem;
           }
 
         }
