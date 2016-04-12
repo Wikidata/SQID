@@ -6,12 +6,20 @@ angular.module('utilities', [])
 	var JSON_INSTANCES = "i";
 	var JSON_SUBCLASSES = "s";
 	var JSON_RELATED_PROPERTIES = "r";
+	var JSON_SUPERCLASSES = "sc";
+	var JSON_DIRECT_SUBCLASSES = "sb";
+	var JSON_QUALIFIER_PROPERTIES = "qs";
+	var JSON_PROPERTY_DIRECT_INSTANCE_OF = "pc";
 
 	return {
 		JSON_LABEL: JSON_LABEL,
 		JSON_INSTANCES: JSON_INSTANCES,
 		JSON_SUBCLASSES: JSON_SUBCLASSES,
 		JSON_RELATED_PROPERTIES: JSON_RELATED_PROPERTIES,
+		JSON_SUPERCLASSES: JSON_SUPERCLASSES,
+		JSON_DIRECT_SUBCLASSES : JSON_DIRECT_SUBCLASSES,
+		JSON_QUALIFIER_PROPERTIES : JSON_QUALIFIER_PROPERTIES,
+		JSON_PROPERTY_DIRECT_INSTANCE_OF : JSON_PROPERTY_DIRECT_INSTANCE_OF,
 
 		JSON_ITEMS_WITH_SUCH_STATEMENTS: "i",
 		JSON_USES_IN_STATEMENTS: "s",
@@ -246,6 +254,16 @@ angular.module('utilities', [])
 	    return temp;
 	};
 
+	var unionArrays = function(a1, a2){
+		var unique = [];
+		$.each(a1.concat(a2), function(i, el){
+    		if($.inArray(el, unique) === -1){
+				unique.push(el);
+			}
+		});
+		return unique;
+	};
+
 	var sortByField = function(objectList, fieldName) {
 		objectList.sort(function(a, b) {
 			return a[fieldName] < b[fieldName] ? 1 : (a[fieldName] > b[fieldName] ? -1 : 0);
@@ -279,6 +297,7 @@ angular.module('utilities', [])
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
+		unionArrays: unionArrays,
 		sortByField: sortByField,
 		createIdArray: createIdArray,
 		getSortComparator: getSortComparator
