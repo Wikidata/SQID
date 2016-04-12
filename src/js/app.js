@@ -452,9 +452,6 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    
 	    var antiScale = function(val){
 	      if (val > 0) {
-	       	// if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
-	       	// 	return 1;
-	       	// }
 	        return Math.round(Math.pow(SCALE_FACTOR, (val / MULTIPLIER)));
 	      }else{
 	        return 0;
@@ -481,7 +478,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	      scope:{
 	        begin: '=begin',
 	        end: '=end',
-	        index: '=index', // TODO and startVal and endVal
+	        index: '=index',
 	        startval: '=startval',
 	        endval: '=endval'
 	      },
