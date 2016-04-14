@@ -11,11 +11,11 @@
 				<!-- /template -->
 
 				<label for="qry-form-class">Class</label>
-				<input type="text" id="qry-form-class" class="form-control" placeholder="Select a class"
+				<input type="text" id="qry-form-class" class="form-control" placeholder="Select a class" autocomplete="off"
 					ng-model="classSelectHandler"
 					ng-model-options="classSelectModelOptions"
 					typeahead-template-url="qry-form-class-typeahead.html"
-					uib-typeahead="entity as entity.title for entity in classSearch($viewValue) | filter:$viewValue">
+					uib-typeahead="entity as entity.title for entity in classSearch($viewValue)">
 			</div>
 			<div data-ng-show="qui.selectedClass" class="form-group">
 				<!--<p><a href="#/classview?id={{qui.selectedClass.originalObject.qid}}">{{qui.selectedClass.originalObject.qid}}</a></p>-->
@@ -33,6 +33,19 @@
    					<input type="radio" name="offspring" id="offspring-as" value="as" ng-model="qui.offspring" ng-change="buildSparql()">
    					Total subclasses <span class="info-badge">{{qui.selectedClass.as}}</span>
 				</label></div>
+			</div>
+
+			<div data-ng-show="qui.selectedClass" class="form-group">
+				<script type="text/ng-template" id="qry-form-property-typeahead.html">
+					<a><span ng-bind-html="match.model.title | uibTypeaheadHighlight:query"></span></a>
+				</script>
+				<label for="qry-form-property">Add Condition</label>
+				<input type="text" id="qry-form-property" class="form-control" placeholder="Select a property"
+					ng-model="propertyAddHandler"
+					ng-model-options="classSelectModelOptions"
+					typeahead-min-length="0"
+					typeahead-template-url="qry-form-property-typeahead.html"
+					uib-typeahead="property.title for property in propertySearch($viewValue)">
 			</div>
 
 			<hr>

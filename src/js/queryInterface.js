@@ -98,6 +98,33 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			}
 		});
 
+		$scope.propertySearch = function(str) {
+			var rProps = [],
+				keys = Object.keys(qis.selectedClass.r),
+				i = keys.length;
+			while(i--) {
+				rProps.push({id: keys[i], score: qis.selectedClass.r[keys[i]]});
+			}
+
+			rProps.sort(function(a,b) { // sort by relatedness score descending
+				return (a.score > b.score) ? -1 : ( (a.score === b.score) ? 0 : 1);
+			});
+
+			rProps = rProps.slice(0,9);
+			var fetchThose = []; i = rProps.length;
+			while(i--) { fetchThose.push('P' + rProps[i].id); } 
+			return i18n.waitForPropertyLabels(fetchThose).then(function() {
+				i = rProps.length;
+				while(i--) {
+					rProps[i].label = i18n.getPropertyLabel('P' + rProps[i].id);
+					rProps[i].title = rProps[i].label + ' (P' + rProps[i].id + ')';
+				}
+				return rProps;
+			});
+
+			
+		}
+
 		$scope.estimateResponseSize = function() {
 			var size = qis.selectedClass[qis.offspring];
 			qis.queryParms.big = size > qis.queryParms.THRESHOLD_BIG;
