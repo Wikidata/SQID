@@ -12,22 +12,28 @@
 import requests
 import json
 import os
+import time
 #import pprint
 
 SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
 
-def sparqlQuery(query):
+def doSparqlQuery(query):
 	r = requests.get(SPARQL_SERVICE_URL, params={'query': query, 'format': 'json'});
+	return json.loads(r.text)
+
+def sparqlQuery(query):
 	try:
-		return json.loads(r.text)
+		return doSparqlQuery(query)
 	except ValueError:
-		print "SPARQL query failed and returned:\n " + r.text + '\n retrying ...\n'
-		r = requests.get(SPARQL_SERVICE_URL, params={'query': query, 'format': 'json'});
+		print "SPARQL query failed, possibly because of a time out. Waiting for 60 sec ...\n"
+		time.sleep(60)
+		print "Retrying query ...\n"
 		try:
-			return json.loads(r.text)
+			return doSparqlQuery(query)
 		except ValueError:
 			print "Failed to get SPARQL results. Giving up."
-			return json.loads('{}')
+			return json.loads('{ results: { bindings: {} }')
+
 
 def setPropertyStatistics(propertyStatistics, propertyId, statisticType, numberString):
 	try:
@@ -36,13 +42,17 @@ def setPropertyStatistics(propertyStatistics, propertyId, statisticType, numberS
 	except ValueError:
 		print "Error reading count value " + numberString + ": not an integer number"
 
+
 def storeStatistics(key, value):
-	with open('statistics.json', 'w') as outfile:
+	with open('statistics.json', 'r') as outfile:
 		data = json.load(outfile)
 		data[key] = value
+		with open('statistics.json', 'w') as outfile:
+			json.dump(data, outfile)
 
 def updateClassRecords() :
 	print "Fetching class ids and labels for classes with direct instances ..."
+	startTime = time.strftime("%Y-%m-%dT%H:%M:%S")
 
 	resultsClasses = sparqlQuery("""SELECT ?cl ?clLabel ?c
 	WHERE {
@@ -80,8 +90,13 @@ def updateClassRecords() :
 		print "Replacing classes json file ..."
 		os.rename("classes-new.json","classes.json")
 
+	storeStatistics('classUpdate',startTime)
+	print "Class update complete."
+
+
 def updatePropertyRecords() :
 	print "Fetching property ids, labels, and types ..."
+	startTime = time.strftime("%Y-%m-%dT%H:%M:%S")
 
 	resultsProperties = sparqlQuery("""PREFIX wikibase: <http://wikiba.se/ontology#>
 	SELECT ?id ?idLabel ?type
@@ -159,5 +174,8 @@ def updatePropertyRecords() :
 
 		print "Replacing properties json file ..."
 		os.rename("properties-new.json","properties.json")
+
+	storeStatistics('propertyUpdate',startTime)
+	print "Property update complete."
 
 #pprint.pprint(propertyStatistics)
