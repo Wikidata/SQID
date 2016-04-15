@@ -12,7 +12,7 @@
 import requests
 import json
 import os
-import pprint
+#import pprint
 
 SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
 
@@ -35,6 +35,11 @@ def setPropertyStatistics(propertyStatistics, propertyId, statisticType, numberS
 			propertyStatistics[propertyId][statisticType] = int(numberString)
 	except ValueError:
 		print "Error reading count value " + numberString + ": not an integer number"
+
+def storeStatistics(key, value):
+	with open('statistics.json', 'w') as outfile:
+		data = json.load(outfile)
+		data[key] = value
 
 def updateClassRecords() :
 	print "Fetching class ids and labels for classes with direct instances ..."
@@ -154,9 +159,5 @@ def updatePropertyRecords() :
 
 		print "Replacing properties json file ..."
 		os.rename("properties-new.json","properties.json")
-
-updatePropertyRecords()
-updateClassRecords()
-print "Done."
 
 #pprint.pprint(propertyStatistics)
