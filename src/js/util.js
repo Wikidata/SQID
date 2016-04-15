@@ -876,7 +876,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 	var link = function (scope, element, attrs) {
 		statistics.then(function(stats) {
-			var innerHtml = '<div class="col-md-6"><span translate="FOOTER.STAT_DATE" translate-value-date="' + stats.getDumpDateString() + '"></span></div>';
+			var innerHtml = '<div class="col-md-6"><span translate="FOOTER.STAT_DATE" translate-value-date="' + stats.getDumpDateString() + '"></span> (<a href="#/status"><span translate="FOOTER.STAT_LINK"></span></a>)</div>';
 			innerHtml += '<div class="col-md-6"><span translate="FOOTER.POWERED_BY"></span></div>';
 			element.html('<hr/><div class="container-fluid"><div class="footer row">' + innerHtml + '</div></div>');
 			$compile(element.contents())(scope);

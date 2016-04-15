@@ -10,6 +10,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/browse', { templateUrl: 'views/browseData.html' })
 			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
+			.when('/status', { templateUrl: 'views/status.html' })
 			.when('/view', { templateUrl: 'views/view.html' })
 			.otherwise({redirectTo: '/'});
 	})
@@ -25,6 +26,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			FOOTER: {
 				STAT_DATE: 'Statistics based on data dump {{date}}',
+				STAT_LINK: 'details',
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
 			PROPTYPE : 'Type',
@@ -111,6 +113,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			FOOTER: {
 				STAT_DATE: 'Statistiken Stand {{date}}',
+				STAT_LINK: 'Details',
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
 			PROPTYPE : 'Typ',
@@ -425,7 +428,18 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getDumpDateString: function(){
 						var dateStamp = statistics['dumpDate'];
 						return dateStamp.substring(0,4) + '-' + dateStamp.substring(4,6) + '-' + dateStamp.substring(6,8);
-					}
+					},
+					getDumpDate:  function(){
+						var dateStamp = statistics['dumpDate'];
+						var month = parseInt(dateStamp.substring(4,6)) - 1;
+						return new Date(dateStamp.substring(0,4), month, dateStamp.substring(6,8));
+					},
+					getPropertyUpdateTime: function() {
+						return new Date(statistics['propertyUpdate']);
+					},
+					getClassUpdateTime: function() {
+						return new Date(statistics['classUpdate']);
+					},
 				}
 			});
 		}
