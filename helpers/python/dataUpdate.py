@@ -51,8 +51,8 @@ def storeStatistics(key, value):
 			json.dump(data, outfile)
 
 def updateClassRecords() :
-	print "Fetching class ids and labels for classes with direct instances ..."
 	startTime = time.strftime("%Y-%m-%dT%H:%M:%S")
+	print "[" + startTime + "] Fetching class ids and labels for classes with direct instances ..."
 
 	resultsClasses = sparqlQuery("""SELECT ?cl ?clLabel ?c
 	WHERE {
@@ -95,8 +95,8 @@ def updateClassRecords() :
 
 
 def updatePropertyRecords() :
-	print "Fetching property ids, labels, and types ..."
 	startTime = time.strftime("%Y-%m-%dT%H:%M:%S")
+	print "[" + startTime + "] Fetching property ids, labels, and types ..."
 
 	resultsProperties = sparqlQuery("""PREFIX wikibase: <http://wikiba.se/ontology#>
 	SELECT ?id ?idLabel ?type
