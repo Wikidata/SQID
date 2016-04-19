@@ -210,7 +210,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				relatedProperty: "",
 				superclass: "",
 				instances: [0, 4000000],
-				subclasses: [0, 200000]
+				subclasses: [0, 2000000]
 			},
 			propertiesFilter: {
 				label: "",
@@ -218,8 +218,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				relatedQualifier: "",
 				directInstanceOf: "",
 				statements: [0, 20000000],
-				qualifiers: [0, 100000],
-				references: [0, 100000],
+				qualifiers: [0, 10000000],
+				references: [0, 10000000],
 				datatypes: {id: 1, name: "Any property type"}
 
 			}

@@ -119,22 +119,22 @@ classBrowser.controller('TableController',
           }else{
             if (status.entityType == "classes"){
               var filter = status.classesFilter;
-              if (!((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))){
+              if (!(((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))||((!json[entry][jsonData.JSON_INSTANCES]) && (filter.instances[0] == 0)))){
                 return false;
               }
-              if (!((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))){
+              if (!(((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))||((!json[entry][jsonData.JSON_SUBCLASSES]) && (filter.subclasses[0] == 0)))){
                 return false;
               }
               return true;
             }else{
               var filter = status.propertiesFilter;
-              if (!((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))){
+              if (!(((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))||((!json[entry][jsonData.JSON_USES_IN_STATEMENTS]) && (filter.statements[0] == 0)))){
                 return false;
               }
-              if (!((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))){
+              if (!(((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))||((!json[entry][jsonData.JSON_USES_IN_QUALIFIERS]) && (filter.qualifiers[0] == 0)))){
                 return false;
               }
-              if (!((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))){
+              if (!(((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))||((!json[entry][jsonData.JSON_USES_IN_REFERENCES]) && (filter.references[0] == 0)))){
                 return false;
               }
               return true;
@@ -257,7 +257,7 @@ classBrowser.controller('TableController',
           startVal: status.classesFilter.instances[0], 
           endVal: status.classesFilter.instances[1]},
         {name: "number of direct subclasses", from: 0,
-          to: 200000,
+          to: 2000000,
           startVal: status.classesFilter.subclasses[0], 
           endVal: status.classesFilter.subclasses[1]}];
     };
@@ -269,11 +269,11 @@ classBrowser.controller('TableController',
           startVal: status.propertiesFilter.statements[0],
           endVal: status.propertiesFilter.statements[1]},
         {name: "Uses in qualifiers", from: 0,
-          to: 100000,
+          to: 10000000,
           startVal: status.propertiesFilter.qualifiers[0],
           endVal: status.propertiesFilter.qualifiers[1]},
         {name: "Uses in references", from: 0,
-          to: 100000,
+          to: 10000000,
           startVal: status.propertiesFilter.references[0],
           endVal: status.propertiesFilter.references[1]}]; 
     };
@@ -365,10 +365,10 @@ classBrowser.controller('TableController',
 
     $scope.tableSize = jsonData.TABLE_SIZE;
     $scope.args=args;
-    if (args.entityType == "classes"){
-      $scope.filterLabels = args.classesFilter.label;
+    if (status.entityType == "classes"){
+      $scope.filterLabels = status.classesFilter.label;
     }else{
-      $scope.filterLabels = args.propertiesFilter.label;
+      $scope.filterLabels = status.propertiesFilter.label;
     }
     initPaginations();
 
