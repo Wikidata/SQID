@@ -1,22 +1,47 @@
 <div ng-controller="StatController">
 	<div class="row">
 		<div class="mainbar col-lg-9 col-md-12 col-sm-12">
-		<h1>Status</h1>
-		<p>This page reports on the current status of the data shown in the system.
-		Data is cached in your browser. More recent data may be available on the server.
-		</p>
-		<p>
-			Statistical data is computed from the data dump about once per week.
-			Basic statisics (class and property names, usage counts for properties, direct instances of classes)
-			are refreshed more frequently, about once per hour. All other data is live.
-			<table class="table table-striped table-condensed">
-				<tbody>
-					<tr><th>Dump date</th><td>{{dumpDate}}</td></tr>
-					<tr><th>Property data refresh</th><td>{{propDate}}</td></tr>
-					<tr><th>Class data refresh</th><td>{{classDate}}</td></tr>
-				</tbody>
-			</table>
-		</p>
+			<h1>Status</h1>
+			<p>This page reports on the current status of the data shown in the system.
+			Data is cached in your browser. More recent data may be available on the server.
+			</p>
+			<div class="panel panel-info">
+				<div class="panel-heading"><h2 class="panel-title">
+				<a data-toggle="collapse" data-target="#stat_panel" style="cursor:pointer;cursor:hand">Statistics</a>
+				</h2></div>
+				<div id='stat_panel' class='panel-collapse collapse in'>
+					<table class="table table-striped table-condensed property-table number-table">
+						<tbody>
+							<tr><th></th><th style="text-align: right; ">Items</th><th style="text-align: right; ">Properties</th><th>Total</th></tr>
+							<tr><th>Number</th><td>{{itemStatistics.c}}</td><td>{{propertyStatistics.c}}</td><td>{{itemStatistics.c+propertyStatistics.c}}</td></tr>
+							<tr><th>Statements</th><td>{{itemStatistics.cStmts}}</td><td>{{propertyStatistics.cStmts}}</td><td>{{itemStatistics.cStmts+propertyStatistics.cStmts}}</td></tr>
+							<tr><th>Labels</th><td>{{itemStatistics.cLabels}}</td><td>{{propertyStatistics.cLabels}}</td><td>{{itemStatistics.cLabels+propertyStatistics.cLabels}}</td></tr>
+							<tr><th>Descriptions</th><td>{{itemStatistics.cDesc}}</td><td>{{propertyStatistics.cDesc}}</td><td>{{itemStatistics.cDesc+propertyStatistics.cDesc}}</td></tr>
+							<tr><th>Aliases</th><td>{{itemStatistics.cAliases}}</td><td>{{propertyStatistics.cAliases}}</td><td>{{itemStatistics.cAliases+propertyStatistics.cAliases}}</td></tr>
+							<tr><th>Site links</th><td>{{siteLinkCount}}</td><td>0</td><td>{{siteLinkCount}}</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div class="panel panel-info">
+				<div class="panel-heading"><h2 class="panel-title">
+				<a data-toggle="collapse" data-target="#update_panel" style="cursor:pointer;cursor:hand">Data Freshness</a>
+				</h2></div>
+				<div id='update_panel' class='panel-collapse collapse in'>
+					<p class="padded">
+					Statistical data is computed from the data dump about once per week.
+					Basic statisics (class and property names, usage counts for properties, direct instances of classes)
+					are refreshed more frequently, about once per hour. All other data is live.
+					</p>
+					<table class="table table-striped table-condensed">
+						<tbody>
+							<tr><th>Dump date</th><td>{{dumpDate}}</td></tr>
+							<tr><th>Property data refresh</th><td>{{propDate}}</td></tr>
+							<tr><th>Class data refresh</th><td>{{classDate}}</td></tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
 		</div>
 		<div class="sidebar col-md-3 col-md-12 col-sm-12">
 			<sqid-image file="'Sepia_officinalis_(aquarium).jpg'" width="260"></sqid-image>

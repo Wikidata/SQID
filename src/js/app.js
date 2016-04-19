@@ -440,6 +440,21 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getClassUpdateTime: function() {
 						return new Date(statistics['classUpdate']);
 					},
+					getEntityCount: function() {
+						return statistics['entityCount'];
+					},
+					getSiteLinkCount: function() {
+						return statistics['siteLinkCount'];
+					},
+					getItemStatistics: function() {
+						return statistics['itemStatistics'];
+					},
+					getPropertyStatistics: function() {
+						return statistics['propertyStatistics'];
+					},
+					getSites: function() {
+						return statistics['sites'];
+					},
 				}
 			});
 		}

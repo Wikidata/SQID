@@ -279,6 +279,10 @@ span.smallnote {
 .property-table th {
 	width: 20%;
 }
+.number-table td, .number-table th {
+	text-align: right;
+	width: 15%;
+}
 
 .ext-link {
 	color: #2A5C86;
