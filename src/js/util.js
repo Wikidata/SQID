@@ -963,7 +963,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					isHumanRelation = true;
 				} else if (classId == '18610173') { // "Wikidata property for Commons"
 					isMedia = true;
-				} else if (classId == '18667213') { // "Wikidata property about Wikimedia categories"
+				} else if (classId == '18667213' || // "Wikidata property about Wikimedia categories"
+					classId == '22969221' // "Wikidata property giving Wikimedia list"
+				) {
 					isAboutWikiPages = true;
 				}
 			});
