@@ -31,7 +31,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		},
 
 		updateLang: function() {
-			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : "en";
+			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : null;
 			i18n.setLanguage(lang);
 		},
 
@@ -282,8 +282,10 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			}
 		});
 
-		$scope.url = 'https://www.wikidata.org/wiki/' + $scope.id + '?uselang=' + i18n.getLanguage();
-		$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id + '&lang=' + i18n.getLanguage();
+		$scope.url = 'https://www.wikidata.org/wiki/' + $scope.id +
+			( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage()) : '' );
+		$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id +
+			( i18n.fixedLanguage() ? ('?lang=' + i18n.getLanguage()) : '' );
 
 		Classes.then(function(classes){
 			if ($scope.isItem) {

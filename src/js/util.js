@@ -36,7 +36,7 @@ angular.module('utilities', [])
 })
 
 .factory('i18n', function(wikidataapi, Properties, $translate) {
-	var language = 'en';
+	var language = null; // defaults to "en" in this case
 
 	var idTerms = {}; // cache for labels/descriptions of items
 	var idTermsSize = 0; // current size of cache
@@ -49,13 +49,23 @@ angular.module('utilities', [])
 		idTermsSize = 0;
 	}
 
+	var getLanguage = function() {
+		return language != null ? language : 'en';
+	}
+
+	// Check if an explicit lanuage was set.
+	// If not, rather omit the parameter entirely.
+	var fixedLanguage = function() {
+		return (language != null);
+	} 
+
 	var setLanguage = function(newLang) {
-		if (language != newLang) {
-			$translate.use(newLang);
-			language = newLang;
+		if (getLanguage() != newLang) {
 			clearCache(); // clear term cache that was based on old language
 			propertyLabels = {}; // clear property label cache for old language
 		}
+		language = newLang;
+		$translate.use(getLanguage());
 	}
 
 	// Clear term cache when it grows too big to prevent memory leak.
@@ -81,7 +91,7 @@ angular.module('utilities', [])
 	}
 
 	var hasPropertyLabel = function(propertyId) {
-		if (language == 'en') {
+		if (getLanguage() == 'en') {
 			return properties !== null;
 		} else {
 			return (propertyId in propertyLabels);
@@ -90,7 +100,7 @@ angular.module('utilities', [])
 
 	var getPropertyLabel = function(propertyId) {
 		if (hasPropertyLabel(propertyId)) { // implies (properties !== null)
-			if (language == 'en') {
+			if (getLanguage() == 'en') {
 				var numId = propertyId.substring(1);
 				return properties.getLabelOrId(numId);
 			} else {
@@ -116,7 +126,7 @@ angular.module('utilities', [])
 				missingEntities.push(entities[i]);
 			}
 		}
-		return wikidataapi.getEntityTerms(missingEntities, language).then(function(entityTerms) {
+		return wikidataapi.getEntityTerms(missingEntities, getLanguage()).then(function(entityTerms) {
 			angular.extend(idTerms, entityTerms);
 			idTermsSize = Object.keys(idTerms).length;
 			return true;
@@ -124,7 +134,7 @@ angular.module('utilities', [])
 	}
 
 	var waitForPropertyLabels = function(propertyIds) {
-		if (language == 'en') {
+		if (getLanguage() == 'en') {
 			return Properties.then(function(props) {
 				properties = props;
 				return true;
@@ -147,7 +157,7 @@ angular.module('utilities', [])
 				missingPropertyIds.push('P1647');
 			}
 
-			return wikidataapi.getEntityLabels(missingPropertyIds, language).then(function(entityLabels) {
+			return wikidataapi.getEntityLabels(missingPropertyIds, getLanguage()).then(function(entityLabels) {
 				angular.extend(propertyLabels, entityLabels);
 				return true;
 			});
@@ -155,7 +165,7 @@ angular.module('utilities', [])
 	}
 
 	var getEntityUrl = function(entityId) {
-		return "#/view?id=" + entityId + ( language != 'en' ? '&lang=' + language : '');
+		return "#/view?id=" + entityId + ( fixedLanguage() ? '&lang=' + getLanguage() : '');
 	}
 
 	var autoLinkText = function(text) {
@@ -167,7 +177,8 @@ angular.module('utilities', [])
 	}
 
 	return {
-		getLanguage: function() { return language; },
+		fixedLanguage: fixedLanguage,
+		getLanguage: getLanguage,
 		setLanguage: setLanguage,
 		getEntityUrl: getEntityUrl,
 		autoLinkText: autoLinkText,
