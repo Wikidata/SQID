@@ -130,7 +130,7 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 	// updates the model with the current state
 	pgnt.update = function(callback) {
 		this.fromItem = (pgnt.activePage-1) * pgnt.tableSize + 1;
-		this.toItem = this.activePage * this.tableSize;
+		this.toItem = Math.min(this.activePage * this.tableSize, this.numItems);
 		pgnt.activeIndex = pgnt.index.slice( this.fromItem - 1, this.toItem); // (slice is excluding the end of range index)
 
 		updatePageSelectionModel();
