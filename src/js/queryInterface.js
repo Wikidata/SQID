@@ -27,8 +27,8 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		};
 	})
 
-	.controller('QueryController', ['$scope','Classes', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
-	function($scope, Classes, i18n, sparql, wikidataapi, qis) {
+	.controller('QueryController', ['$scope','Classes', 'Properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
+	function($scope, Classes, Properties, i18n, sparql, wikidataapi, qis) {
 
 		sparqewl = sparql; // expose as global in dev console TODO remove in production
 		globallz = qis;
@@ -98,12 +98,23 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			}
 		});
 
+		Properties.then(function(data) {
+			qis.propertyData = data.getProperties();
+		});
+
 		$scope.propertySearch = function(str) {
+			if(str === undefined) { str = ''; }
 			var rProps = [],
 				keys = Object.keys(qis.selectedClass.r),
-				i = keys.length;
+				i = keys.length, p;
+			str = str.toString().toLowerCase();
 			while(i--) {
-				rProps.push({id: keys[i], score: qis.selectedClass.r[keys[i]]});
+				if( (p = qis.propertyData[keys[i]]) && ( 
+					(p.l !== undefined && p.l.toLowerCase().indexOf(str) > -1) ||
+					(("p" + keys[i]).indexOf(str) > -1)								
+			  	)){
+					rProps.push({id: keys[i], score: qis.selectedClass.r[keys[i]]});
+				}
 			}
 
 			rProps.sort(function(a,b) { // sort by relatedness score descending
@@ -111,6 +122,8 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			});
 
 			rProps = rProps.slice(0,9);
+
+			// ? localizing after searching in english labels? (related to issue #43)
 			var fetchThose = []; i = rProps.length;
 			while(i--) { fetchThose.push('P' + rProps[i].id); } 
 			return i18n.waitForPropertyLabels(fetchThose).then(function() {
