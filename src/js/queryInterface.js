@@ -155,7 +155,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 					tab = "    ";
 
 				var header = sparql.getStandardPrefixes() +
-					"SELECT " + ins + " \n" +
+					"SELECT " + (qis.offspring === 'ai' ? 'DISTINCT ' : '') + ins + " \n" +
 					"WHERE {\n" + tab;
 
 				var body;
