@@ -334,6 +334,10 @@ span.smallnote {
 }
 
 
+#qry-form-request .form-group {
+	position: relative; /* for spinner positioning */
+}
+
 #query-interface table {
 	table-layout: fixed;
 }

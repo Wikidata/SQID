@@ -27,8 +27,8 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		};
 	})
 
-	.controller('QueryController', ['$scope','Classes', 'Properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
-	function($scope, Classes, Properties, i18n, sparql, wikidataapi, qis) {
+	.controller('QueryController', ['$scope', 'spinner', 'Classes', 'Properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
+	function($scope, spinner, Classes, Properties, i18n, sparql, wikidataapi, qis) {
 
 		sparqewl = sparql; // expose as global in dev console TODO remove in production
 		globallz = qis;
@@ -183,14 +183,27 @@ angular.module('queryInterface', ['angucomplete-alt'])
 
 
 		$scope.runSparql = function() {
-			console.log('sending sparql request');
+			//console.log('sending sparql request');
+			var benchm = Date.now();
+
+			var submit = $('#qry-submit-sparql');
+			submit.prop('disabled', true);
+			var spin = spinner(submit.parent().get(0));
+			var resumeUI = function() {
+				console.log('SPARQL http request took ' + (Date.now() - benchm) + 'ms.');
+				submit.prop('disabled', false);
+				spin.stop();
+			};
 			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) { // success
-				console.log('received response to sparql request');
+				//console.log('received response to sparql request');
 				qis.pagination.setIndex(data.results.bindings);
 				qis.pagination.setPage(1);
+				resumeUI();
 			}, function(response) { // error
 				console.log(response);
+				if(response === '') { response = '(Empty response)'; }
 				qis.queryError = response;
+				resumeUI();
 			});
 			
 		};
