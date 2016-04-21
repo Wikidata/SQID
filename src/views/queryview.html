@@ -70,7 +70,7 @@
 		</form>
 
 		<div class="alert alert-danger alert-dismissible" role="alert" data-ng-show="qui.queryError">
-			<button type="button" class="close" ng-click="queryError = null" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<button type="button" class="close" ng-click="queryError = null" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			<span class="glyphicon glyphicon-alert" aria-hidden="true"></span> <strong>Query failed with the following response</strong>:
   			<pre class="well-sm">{{qui.queryError}}</pre>
 		</div>
