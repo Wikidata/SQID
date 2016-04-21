@@ -39,13 +39,22 @@
 				<script type="text/ng-template" id="qry-form-property-typeahead.html">
 					<a><span ng-bind-html="match.model.title | uibTypeaheadHighlight:query"></span></a>
 				</script>
-				<label for="qry-form-property">Add Condition</label>
+				<label for="qry-form-property">Add Property Filter</label>
 				<input type="text" id="qry-form-property" class="form-control" placeholder="Select a property"
 					ng-model="propertyAddHandler"
 					ng-model-options="classSelectModelOptions"
 					typeahead-min-length="0"
+					typeahead-focus-on-select="false"
 					typeahead-template-url="qry-form-property-typeahead.html"
-					uib-typeahead="property.title for property in propertySearch($viewValue)">
+					uib-typeahead="property as property.title for property in propertySearch($viewValue)">
+			</div>
+			<div data-ng-show="qui.selectedProperties.stack.length" class="qry-filter-list">
+				<div class="panel panel-default" ng-repeat="p in qui.selectedProperties.stack">
+					<header class="panel-heading">{{p.title}}</header>
+					<div class="panel-body">
+						(any value)
+					</div>
+				</div>
 			</div>
 
 			<hr>

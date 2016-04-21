@@ -11,6 +11,17 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
 			offspring: 'i',
 
+			selectedProperties: {
+				current: undefined,
+				stack: [],
+				add: function(p) {
+					
+					this.stack.push(p);
+					this.current = this.stack[this.stack.length - 1];
+					console.log(this);
+				}
+			},
+
 			queryParms: {
 				big: false,
 				heavy: false,
@@ -52,16 +63,37 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		};
 
 		// getter/setter handler for the input field
-		$scope.classSelectInputValue = qis.selectedClass;
+		var classSelectInputVal = qis.selectedClass;
 		$scope.classSelectHandler = function(selected) {
 			if(arguments.length) {
-				$scope.classSelectInputValue = selected;
+				classSelectInputVal = selected;
 				if(selected !== null && typeof selected === 'object' && qis.classData[selected.qid.substr(1)] !== undefined ) { 
 					qis.selectedClass = selected;
 					$scope.buildSparql();
 				}
 			}
-			else { return $scope.classSelectInputValue; }
+			else { return classSelectInputVal; }
+		};
+
+		var propAddInputVal = qis.selectedProperties.current;
+		$scope.propertyAddHandler = function(selected) {
+			//console.log(selected);
+			if(arguments.length) {
+				propAddInputVal = selected;
+				if(selected !== null && typeof selected === 'object' && qis.propertyData[selected.id] !== undefined ) { 
+					qis.selectedProperties.add(selected);
+					$scope.buildSparql();
+					//propAddInputVal = undefined;
+					// setTimeout(function() {
+					 	propAddInputVal = undefined;
+					// 	console.log('ey!');
+					// }, 1000);
+					// console.log(this);
+					// console.log($(this));
+					// return undefined;
+				}
+			}
+			else { return propAddInputVal; }
 		};
 
 		// searching classes in lokal data by id or labels (case insensitive) 
@@ -155,6 +187,9 @@ angular.module('queryInterface', ['angucomplete-alt'])
 					tab = "    ";
 
 				var header = sparql.getStandardPrefixes() +
+					"PREFIX ps: <http://www.wikidata.org/prop/statement/>\n" +
+					"PREFIX p: <http://www.wikidata.org/prop/>\n\n" +
+
 					"SELECT " + (qis.offspring === 'ai' ? 'DISTINCT ' : '') + ins + " \n" +
 					"WHERE {\n" + tab;
 
@@ -168,6 +203,11 @@ angular.module('queryInterface', ['angucomplete-alt'])
 								break;
 					case 'as': 	body = ins + " wdt:P279* " + obj + " ."; 
 								break;
+				}
+				var i = qis.selectedProperties.stack.length;
+				while(i--) {
+					body += "\n" +
+						tab + ins + " p:P" + qis.selectedProperties.stack[i].id + " ?any" + i + "thing .";
 				}
 
 				var footer = "\n" +
