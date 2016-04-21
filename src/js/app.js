@@ -277,27 +277,32 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return util.cloneObject(statusStartValues);
 			},
 			getUrl: function(){
-				return location.origin + location.pathname + "#/browse" 
+				var result =  location.origin + location.pathname + "#/browse" 
 					+ "?activepage=" + status.activePage
-					+ "&type=" + status.entityType
-					+ "&classlabelfilter=" + status.classesFilter.label
-					+ "&propertylabelfilter=" + status.propertiesFilter.label 
-					+ "&rpcfilter=" + status.classesFilter.relatedProperty
-					+ "&supercfilter=" + status.classesFilter.superclass
-					+ "&rppfilter=" + status.propertiesFilter.relatedProperty
-					+ "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier
-					+ "&dInstancefilter=" + status.propertiesFilter.directInstanceOf
-					+ "&instancesbegin=" + status.classesFilter.instances[0]
-					+ "&instancesend=" + status.classesFilter.instances[1]
-					+ "&subclassesbegin=" + status.classesFilter.subclasses[0]
-					+ "&subclassesend=" + status.classesFilter.subclasses[1]
-					+ "&statementsbegin=" + status.propertiesFilter.statements[0]
-					+ "&statementsend=" + status.propertiesFilter.statements[1]
-					+ "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0]
-					+ "&qualifiersend=" + status.propertiesFilter.qualifiers[1]
-					+ "&referencesbegin=" + status.propertiesFilter.references[0]
-					+ "&referencesend=" + status.propertiesFilter.references[1]
-					+ "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes);
+					+ "&type=" + status.entityType;
+				if (status.entityType == "classes"){
+					result += (status.classesFilter.label ? "&classlabelfilter=" + status.classesFilter.label : "")
+						+ (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")
+						+ (status.classesFilter.superclass ? "&supercfilter=" + status.classesFilter.superclass : "")
+						+ (status.classesFilter.instances[0] != 0 ? "&instancesbegin=" + status.classesFilter.instances[0] : "")
+						+ (status.classesFilter.instances[1] != 4000000 ? "&instancesend=" + status.classesFilter.instances[1] : "")
+						+ (status.classesFilter.subclasses[0] != 0 ? "&subclassesbegin=" + status.classesFilter.subclasses[0] : "")
+						+ (status.classesFilter.subclasses[1] != 2000000 ? "&subclassesend=" + status.classesFilter.subclasses[1] : "")
+					
+				}else{
+					result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "") 
+						+ (status.propertiesFilter.relatedProperty ? "&rppfilter=" + status.propertiesFilter.relatedProperty : "")
+						+ (status.propertiesFilter.relatedQualifier ? "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier : "")
+						+ (status.propertiesFilter.directInstanceOf ? "&dInstancefilter=" + status.propertiesFilter.directInstanceOf : "")
+						+ (status.propertiesFilter.statements[0] != 0 ? "&statementsbegin=" + status.propertiesFilter.statements[0] : "")
+						+ (status.propertiesFilter.statements[1] != 20000000 ? "&statementsend=" + status.propertiesFilter.statements[1] : "")
+						+ (status.propertiesFilter.qualifiers[0] != 0 ? "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0] : "")
+						+ (status.propertiesFilter.qualifiers[1] != 10000000 ? "&qualifiersend=" + status.propertiesFilter.qualifiers[1] : "")
+						+ (status.propertiesFilter.references[0] != 0 ? "&referencesbegin=" + status.propertiesFilter.references[0] : "")
+						+ (status.propertiesFilter.references[1] != 10000000	 ? "&referencesend=" + status.propertiesFilter.references[1] : "")
+						+ (status.propertiesFilter.datatypes.id != 1 ? "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes) : "");
+				}
+				return result;
 			}
 		}
 	})
