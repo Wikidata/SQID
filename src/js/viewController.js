@@ -282,7 +282,9 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 			}
 		});
 
-		$scope.url = 'https://www.wikidata.org/wiki/' + $scope.id +
+		$scope.url = 'https://www.wikidata.org/wiki/' + 
+			( $scope.isItem ? '' : 'Property:' ) +
+			$scope.id +
 			( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage()) : '' );
 		$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id +
 			( i18n.fixedLanguage() ? ('?lang=' + i18n.getLanguage()) : '' );
