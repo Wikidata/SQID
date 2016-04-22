@@ -29,10 +29,10 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				THRESHOLD_BIG: 10000,
 				THRESHOLD_HEAVY: 100000
 			},
-			// responseRange: {0: 10000, 1:100000, 2: Infinity},
-			// limitResults: false,
+
 			sparqlQuery: '', // sparql query as a string
 			queryError: '', // error message string returned from query.wikidata.org if something went wrong
+			//queryShowSuccess: false, // success message toggle for complete queries
 
 			pagination: undefined // persist pagination (unnecessary statement for the sake of verbosity)
 		};
@@ -226,6 +226,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			//console.log('sending sparql request');
 			var benchm = Date.now();
 
+			qis.queryError = null;
 			var submit = $('#qry-submit-sparql');
 			submit.prop('disabled', true);
 			var spin = spinner(submit.parent().get(0));
@@ -234,10 +235,16 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				submit.prop('disabled', false);
 				spin.stop();
 			};
+			var showSuccess = function() {
+				qis.showQuerySuccess = true;
+				setTimeout(function() { qis.showQuerySuccess = false; }, 2000); // show it for at least 2 seconds
+				// actually the observer only seems to react when some other action in the ui is taken
+			};
 			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) { // success
 				//console.log('received response to sparql request');
 				qis.pagination.setIndex(data.results.bindings);
 				qis.pagination.setPage(1);
+				showSuccess();
 				resumeUI();
 			}, function(response) { // error
 				console.log(response);

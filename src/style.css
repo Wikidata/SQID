@@ -2,6 +2,12 @@ body{
     font-family: 'Roboto', sans-serif;
 }
 
+
+.blending.ng-hide {
+	transition:0.4s linear all;
+	opacity:0;
+}
+
 .footer {
 	text-align: center;
 	color: #666;

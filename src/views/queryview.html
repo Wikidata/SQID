@@ -78,10 +78,15 @@
 			</div>
 		</form>
 
-		<div class="alert alert-danger alert-dismissible" role="alert" data-ng-show="qui.queryError">
+		<div class="alert alert-danger blending" role="alert" data-ng-show="qui.queryError">
 			<button type="button" class="close" ng-click="qui.queryError = null" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			<span class="glyphicon glyphicon-alert" aria-hidden="true"></span> <strong>Query failed with the following response</strong>:
   			<pre class="well-sm">{{qui.queryError}}</pre>
+		</div>
+
+		<div class="alert alert-success blending" role="alert" data-ng-show="qui.showQuerySuccess">
+			<button type="button" class="close" ng-click="qui.querySuccess = null" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span> Query returned <span class="info-badge">{{qui.pagination.index.length}}</span> results.
 		</div>
 
 		<div data-ng-show="qui.pagination.activeIndex.length" data-ng-controller="PaginationController">
