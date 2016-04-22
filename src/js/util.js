@@ -292,10 +292,17 @@ angular.module('utilities', [])
 	var getSortComparator = function(criteria, direction){
       return function(data){
         return function(a, b){
-          if (data[a][criteria] > data[b][criteria]){
+          var x = a;
+          var y = b;
+          var a = data[a][criteria];
+          var b = data[b][criteria];
+          if (a == b){          	
+          	return 0;
+          }
+          if ((b == undefined) || (a > b)){
             return 1 * direction;
           }
-          if (data[a][criteria] < data[b][criteria]){
+          if ((a == undefined) || (a < b)){
             return (-1) * direction;
           }
           return 0;
