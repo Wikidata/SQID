@@ -29,7 +29,7 @@
 			</div>
 			<div ng-if="directSubclasses > 0 || superClassCount > 0">
 				<b><a href="{{subclassOfUrl}}">{{subclassOfLabel}}</a>:</b>
-				<span ng-if="superClassCount >= 0" translate="SUBCLASS_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}" translate-value-classes="{{superClassesHtml}}" translate-compile></span>
+				<span ng-if="superClassCount > 0" translate="SUBCLASS_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}" translate-value-classes="{{superClassesHtml}}" translate-compile></span>
 				<span ng-if="superClassCount == 0" translate="NO_SUBCLASS_OF_PHRASE" translate-value-entity="{{entityData.labelorid}}"></span>
 			</div>
 			<div ng-if="instanceClassCount >= 0">
