@@ -14,11 +14,15 @@ classBrowser.controller('TableController',
     };
 
     var getClassFromId = function(id, data){
-      return ['<a href="' + data.getUrl(id) + '">' + data.getLabel(id) +  ' (Q' + id + ')</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
+      var label = data.getLabel(id);
+      label = label ? label + ' (Q' + id + ')': 'Q' + id;
+      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
-      return ['<a href="' + data.getUrl(id) + '">' + data.getLabel(id) + ' (P' + id + ')</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
+      var label = data.getLabel(id);
+      label = label ? label + ' (P' + id + ')': 'P' + id;
+      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
@@ -467,9 +471,11 @@ classBrowser.controller('TableController',
       }
       for (var i=0; i < header.length; i++){
         if (header[i] != element){
-          header[i][2] = "fa fa-sort"; 
+          header[i][2] = "fa fa-sort";
+          header[i][4](status, header[i][2]);
         }
       }
+      element[4](status, element[2]);
       if (status.entityType == "classes"){
         Classes.then(function(data){
           data.sortClasses(util.getSortComparator(element[3], direction));
