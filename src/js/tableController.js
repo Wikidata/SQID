@@ -1,12 +1,12 @@
 classBrowser.controller('TableController', 
-  function($scope, Arguments, Classes, Properties, jsonData, util){
+  function($scope, Arguments, Classes, Properties, util){
 
     var tableContent = [];
 
-    var initArray = function(idArray, json, filterfunc, sortfunc){
+    var initArray = function(idArray, data, filterfunc){
       var ret = [];
       for (var i = 0; i < idArray.length; i++){
-          if (filterfunc(idArray[i], json)) {
+          if (filterfunc(idArray[i], data)) {
               ret.push(idArray[i]);
           }
       }
@@ -32,122 +32,132 @@ classBrowser.controller('TableController',
       }
     };
     
-    var labelFilter = function(entry){
-      var filter;
-      if (status.entityType == "classes"){
-        filter = status.classesFilter.label.toLowerCase();
-      }else{
-        filter = status.propertiesFilter.label.toLowerCase();
-      }
-
-      if (!filter){
-        return true;
-      }
-      if ((filter == "") ) {
-        return true;
-      }
-      if (!entry[jsonData.JSON_LABEL]) {
-        return false;
-      }
-      if (entry[jsonData.JSON_LABEL].toLowerCase().indexOf(filter) > -1) {
-        return true;
-      }else{
-        return false;
-      }
-    };
-
-    var datatypeFilter = function(entry){
-      var filter;
-      if (status.entityType == "classes"){
-        return true;
-      }else{
-        filter = status.propertiesFilter.datatypes.name; 
-      }
-
-      if (!filter){
-        return true;
-      }
-      if (filter == "Any property type"){
-        return true;
-      }
-      if (filter == entry[jsonData.JSON_DATATYPE]){
-        return true;
-      }else{
-        return false;
-      }
-    };
-
-    var satisfySuggestFilter = function(entry, attr, value){
-      if (!value){
-        return true;
-      }
-      if (value == ""){
-        return true;
-      }
-      if (!entry[attr]){
-        return false;
-      }
-      if (entry[attr].constructor === Array){
-        if (entry[attr].indexOf(value) != -1){
+    var entityFilters = {
+      labelFilter: function(entry, data){
+        var filter;
+        var id;
+        if (status.entityType == "classes"){
+          filter = status.classesFilter.label.toLowerCase();
+          id = "q" + entry;
+        }else{
+          filter = status.propertiesFilter.label.toLowerCase();
+          id = 'p' + entry;
+        }
+        if (!filter){
+          return true;
+        }
+        if ((filter == "") ) {
+          return true;
+        }
+        if (id.indexOf(filter) > -1){
+          return true;
+        }
+        var label = data.getLabel(entry);
+        if (!label){
+          return false;
+        }
+        if (label.toLowerCase().indexOf(filter) > -1){
           return true;
         }else{
           return false;
         }
-      }else{
-        if (entry[attr][value]){
+      },
+      datatypeFilter: function(entry, data){
+        var filter;
+        if (status.entityType == "classes"){
+          return true;
+        }else{
+          filter = status.propertiesFilter.datatypes.name; 
+        }
+        if (!filter){
+          return true;
+        }
+        if (filter == "Any property type"){
+          return true;
+        }
+        if (filter == data.getDatatype(entry)){
           return true;
         }else{
           return false;
         }
-      }
-    };
-
-    var applySuggestFilters = function(entry){
-      if (status.entityType == "classes"){
-        return satisfySuggestFilter(entry, jsonData.JSON_RELATED_PROPERTIES, status.classesFilter.relatedProperty)
-          && satisfySuggestFilter(entry, jsonData.JSON_SUPERCLASSES, status.classesFilter.superclass)
-      }else{
-          return satisfySuggestFilter(entry, jsonData.JSON_RELATED_PROPERTIES, status.propertiesFilter.relatedProperty)
-            && satisfySuggestFilter(entry, jsonData.JSON_QUALIFIER_PROPERTIES, status.propertiesFilter.relatedQualifier)
-            && satisfySuggestFilter(entry, jsonData.JSON_PROPERTY_DIRECT_INSTANCE_OF, status.propertiesFilter.directInstanceOf)
-      }
-    };
-    var applyFilter = function(entry, json){
-      if (!datatypeFilter(json[entry])){
-        return false;
-      }else{
-        if (!labelFilter(json[entry])){
-          return false;
-        }else{if(!applySuggestFilters(json[entry])){
-          return false;
-          }else{
-            if (status.entityType == "classes"){
-              var filter = status.classesFilter;
-              if (!(((json[entry][jsonData.JSON_INSTANCES] >= filter.instances[0])&&(json[entry][jsonData.JSON_INSTANCES] <= filter.instances[1]))||((!json[entry][jsonData.JSON_INSTANCES]) && (filter.instances[0] == 0)))){
-                return false;
-              }
-              if (!(((json[entry][jsonData.JSON_SUBCLASSES] >= filter.subclasses[0])&&(json[entry][jsonData.JSON_SUBCLASSES] <= filter.subclasses[1]))||((!json[entry][jsonData.JSON_SUBCLASSES]) && (filter.subclasses[0] == 0)))){
-                return false;
-              }
+      },
+      suggestFilters: function(entry, data){
+        var suggestFiltersHelper = function(entry, getter, value){
+          if (!value){
+            return true;
+          }
+          if (value == ""){
+            return true;
+          }
+          var attr = getter(entry);
+          if (!attr){
+            return false;
+          }
+          if (attr.constructor === Array){
+            if (attr.indexOf(value) != -1){
               return true;
             }else{
-              var filter = status.propertiesFilter;
-              if (!(((json[entry][jsonData.JSON_USES_IN_STATEMENTS] >= filter.statements[0])&&(json[entry][jsonData.JSON_USES_IN_STATEMENTS] <= filter.statements[1]))||((!json[entry][jsonData.JSON_USES_IN_STATEMENTS]) && (filter.statements[0] == 0)))){
-                return false;
-              }
-              if (!(((json[entry][jsonData.JSON_USES_IN_QUALIFIERS] >= filter.qualifiers[0])&&(json[entry][jsonData.JSON_USES_IN_QUALIFIERS] <= filter.qualifiers[1]))||((!json[entry][jsonData.JSON_USES_IN_QUALIFIERS]) && (filter.qualifiers[0] == 0)))){
-                return false;
-              }
-              if (!(((json[entry][jsonData.JSON_USES_IN_REFERENCES] >= filter.references[0])&&(json[entry][jsonData.JSON_USES_IN_REFERENCES] <= filter.references[1]))||((!json[entry][jsonData.JSON_USES_IN_REFERENCES]) && (filter.references[0] == 0)))){
-                return false;
-              }
-              return true;
+              return false;
             }
+          }else{
+            if (attr[value]){
+              return true;
+            }else{
+              return false;
+            }
+          }
+        };
+        if (status.entityType == "classes"){
+          return suggestFiltersHelper(entry, data.getRelatedProperties, status.classesFilter.relatedProperty)
+            && suggestFiltersHelper(entry, data.getSuperClasses, status.classesFilter.superclass)
+        }else{
+            return suggestFiltersHelper(entry, data.getRelatedProperties, status.propertiesFilter.relatedProperty)
+              && suggestFiltersHelper(entry, data.getQualifiers, status.propertiesFilter.relatedQualifier)
+              && suggestFiltersHelper(entry, data.getClasses, status.propertiesFilter.directInstanceOf)
+        }
+      },
+      sliderFilter: function(entry, data){
+        if (status.entityType == "classes"){
+          var filter = status.classesFilter,
+            dic = data.getDirectInstanceCount(entry),
+            dsc = data.getDirectSubclassCount(entry);
+          if (!(((dic >= filter.instances[0])&&(dic <= filter.instances[1]))||((!dic) && (filter.instances[0] == 0)))){
+            return false;
+          }
+          
+          if (!(((dsc >= filter.subclasses[0])&&(dsc <= filter.subclasses[1]))||((!dsc) && (filter.subclasses[0] == 0)))){
+            return false;
+          }
+          return true;
+        }else{
+          var filter = status.propertiesFilter;
+            sc = data.getStatementCount(entry),
+            qc = data.getQualifierCount(entry),
+            rc = data.getReferenceCount(entry); 
+          if (!(((sc >= filter.statements[0])&&(sc <= filter.statements[1]))||((!sc) && (filter.statements[0] == 0)))){
+            return false;
+          }
+          if (!(((qc >= filter.qualifiers[0])&&(qc <= filter.qualifiers[1]))||((!qc) && (filter.qualifiers[0] == 0)))){
+            return false;
+          }
+          if (!(((rc >= filter.references[0])&&(rc <= filter.references[1]))||((!rc) && (filter.references[0] == 0)))){
+            return false;
+          }
+          return true;
+        }
+      }
+    }
 
+    var applyFilter = function(entry, data){
+      for (var key in entityFilters){
+        if (entityFilters.hasOwnProperty(key)) {
+          if (!entityFilters[key](entry, data)){
+            return false;
           }
         }
       }
-    };
+      return true;
+    }
 
     var refreshAngucompleteInputFields = function(){
       $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-classes', $scope.suggestFilters.classes.relatedProperty); // evt. für properties kopieren
@@ -286,7 +296,7 @@ classBrowser.controller('TableController',
       if (args.type == "classes") {
         Classes.then(function(data){
           initClassesSlider();
-          var classesArray = initArray(data.getIdArray(), data.getClasses(), applyFilter, sortfunc);
+          var classesArray = initArray(data.getIdArray(), data, applyFilter);
           refreshTableContent(args, classesArray, data, getClassFromId);
           $scope.content = tableContent;
           $scope.tableHeader = data.classesHeader;
@@ -296,7 +306,7 @@ classBrowser.controller('TableController',
       if (args.type == "properties") {
           Properties.then(function(data){
             initPropertiesSlider();
-            var propertiesArray = initArray(data.getIdArray(), data.getProperties(), applyFilter, sortfunc);
+            var propertiesArray = initArray(data.getIdArray(), data, applyFilter);
             refreshTableContent(args, propertiesArray, data, getPropertyFromId);
             $scope.content = tableContent;
             $scope.tableHeader = data.propertiesHeader;
@@ -344,9 +354,7 @@ classBrowser.controller('TableController',
     var classIndexInitialized = false;
     var propertyClassIndexInitialized = false;
     
-
     var timeoutIsSet = false;
-    var sortfunc = function(x){return function(a, b){return 0;};};
 
     $scope.suggestFilters = {
       data: {
@@ -364,10 +372,8 @@ classBrowser.controller('TableController',
         directInstanceOf: ""
       }
     };
-    // $scope.suggestFilters.data.propertyIndex = initPropertyIndex();
-    // $scope.suggestFilters.data.classIndex = initClassIndex();
 
-    $scope.tableSize = jsonData.TABLE_SIZE;
+    $scope.tableSize = 15;
     $scope.args=args;
     if (status.entityType == "classes"){
       $scope.filterLabels = status.classesFilter.label;
@@ -584,5 +590,4 @@ classBrowser.controller('TableController',
     };
 
 
-  }
-  );
+  });
