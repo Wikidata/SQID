@@ -7,3 +7,4 @@ The following dependencies should be downloaded to this directory (and possibly 
 * ui-bootstrap 1.2.5: https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-1.2.5.min.js
 * angucomplete-alt: https://raw.githubusercontent.com/ghiden/angucomplete-alt/master/dist/angucomplete-alt.min.js
 * angular-translate: https://github.com/angular-translate/bower-angular-translate/raw/master/angular-translate.min.js
+* spin.js: https://fgnass.github.io/spin.js/spin.min.js
