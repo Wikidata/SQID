@@ -3,51 +3,57 @@
 angular.module('queryInterface', ['angucomplete-alt'])
 	.factory('queryInterfaceState', function() { // persist state of page
 
-		return {
-			classData: {}, // classData from Classes service
-			classIndex: [], // list of class indices for iteration
-			
-			selectedClass: undefined,
-			searchOrderBy: 'ai', // (see /src/data/format.md for available options)
-			offspring: 'i',
+		return function getFreshStateInstance() {
+			return  {
+				getFreshStateInstance: getFreshStateInstance, 
 
-			selectedProperties: {
-				current: undefined,
-				stack: [],
-				add: function(p) {
+				classData: {}, // classData from Classes service
+				classIndex: [], // list of class indices for iteration
+				
+				selectedClass: undefined,
+				searchOrderBy: 'ai', // (see /src/data/format.md for available options)
+				offspring: 'i',
 
-					this.stack.push(p);
-					this.current = this.stack[this.stack.length - 1];
-					//console.log(this);
+				selectedProperties: {
+					current: undefined,
+					stack: [],
+					add: function(p) {
+						this.stack.push(p);
+						this.current = this.stack[this.stack.length - 1];
+					},
+					remove: function(i) {
+						this.stack.splice(i,1);
+					}
 				},
-				remove: function(i) {
-					this.stack.splice(i,1);
-				}
-			},
 
-			queryParms: {
-				big: false,
-				heavy: false,
-				limitResults: true,
-				THRESHOLD_BIG: 10000,
-				THRESHOLD_HEAVY: 100000
-			},
+				queryParms: {
+					big: false,
+					heavy: false,
+					limitResults: true,
+					THRESHOLD_BIG: 10000,
+					THRESHOLD_HEAVY: 100000,
+					RESULT_VAR: 'entity'
+				},
 
-			sparqlQuery: '', // sparql query as a string
-			queryError: '', // error message string returned from query.wikidata.org if something went wrong
-			//queryShowSuccess: false, // success message toggle for complete queries
+				sparqlQuery: '', // sparql query as a string
+				queryError: '', // error message string returned from query.wikidata.org if something went wrong
+				//queryShowSuccess: false, // success message toggle for complete queries
 
-			pagination: undefined // persist pagination (unnecessary statement for the sake of verbosity)
-		};
+				// pagination: undefined // persist pagination (unnecessary statement for the sake of verbosity)
+			};
+		}();
 	})
 
-	.controller('QueryController', ['$scope', 'spinner', 'Classes', 'Properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
-	function($scope, spinner, Classes, Properties, i18n, sparql, wikidataapi, qis) {
+	.controller('QueryController', ['$scope', '$routeParams', 'spinner', 'Classes', 'Properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
+	function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikidataapi, qisService) {
 
-		//sparqewl = sparql; // expose as global in dev console TODO remove in production
-		//globallz = qis;
+		var qis; // query interface state (usually points to qisService)
+		$scope.resultListMode = $routeParams.run !== undefined; // for instantly showing results of a predefined sparql query
 
-		$scope.qui = qis; // just point to the persisted state object
+		if(!$scope.resultListMode) { qis = qisService; } // just point to the persisted state object
+		else { qis = qisService.getFreshStateInstance(); } // minimalist interface, dont mess with persisted state
+		
+		$scope.qui = qis;
 		$scope.pagination = {
 			autoBoot: true,
 			onPageChange: processEntities,
@@ -55,6 +61,13 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				if(qis.pagination === undefined) { qis.pagination = jQuery.extend({}, pgnt); }
 				return qis.pagination;
 		}	};
+
+
+		//sparqewl = sparql; // expose as global in dev console TODO remove in production
+		//globallz = qis;
+		//rP = $routeParams;
+		//scoop = $scope;
+
 
 
 		/////////////////////////////
@@ -174,7 +187,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			
 		}
 
-		var estimateResponseSize = function() {
+		function estimateResponseSize() {
 			var size = qis.selectedClass[qis.offspring];
 			qis.queryParms.big = size > qis.queryParms.THRESHOLD_BIG;
 			qis.queryParms.heavy = size > qis.queryParms.THRESHOLD_HEAVY;
@@ -187,7 +200,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				estimateResponseSize();
 				
 				var obj = "wd:" + qis.selectedClass.qid,
-					ins = "?instance",
+					ins = "?" + qis.queryParms.RESULT_VAR,
 					tab = "    ";
 
 				var header = sparql.getStandardPrefixes() +
@@ -245,7 +258,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				// actually the observer only seems to react when some other action in the ui is taken
 			};
 			sparql.getQueryRequest(qis.sparqlQuery).then(function(data) { // success
-				//console.log('received response to sparql request');
+				//console.log(data);
 				qis.pagination.setIndex(data.results.bindings);
 				qis.pagination.setPage(1);
 				showSuccess();
@@ -265,7 +278,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			var entityIds = [], i = entities.length, eid;
 			while(i--) {
 				if(entities[i].qid === undefined) { // no need to process more than once
-					eid = entities[i].instance.value.split('/entity/')[1];
+					eid = entities[i][qis.queryParms.RESULT_VAR].value.split('/entity/')[1];
 					entities[i].qid = eid;
 					entities[i].url = i18n.getEntityUrl(eid);
 					entityIds.push(eid);
@@ -286,5 +299,12 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				});
 			}
 		}
+
+		// immediately fire the request when in resultListMode
+		if($scope.resultListMode) { 
+			qis.sparqlQuery = $routeParams.run;
+			setTimeout(function() {	$scope.runSparql(); }, 0); // timeout of 0 prevents some weird bug to happen
+		}
+
 	}]); // controller
 })(); // module
