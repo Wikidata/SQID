@@ -15,10 +15,13 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				current: undefined,
 				stack: [],
 				add: function(p) {
-					
+
 					this.stack.push(p);
 					this.current = this.stack[this.stack.length - 1];
-					console.log(this);
+					//console.log(this);
+				},
+				remove: function(i) {
+					this.stack.splice(i,1);
 				}
 			},
 
@@ -41,8 +44,8 @@ angular.module('queryInterface', ['angucomplete-alt'])
 	.controller('QueryController', ['$scope', 'spinner', 'Classes', 'Properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
 	function($scope, spinner, Classes, Properties, i18n, sparql, wikidataapi, qis) {
 
-		sparqewl = sparql; // expose as global in dev console TODO remove in production
-		globallz = qis;
+		//sparqewl = sparql; // expose as global in dev console TODO remove in production
+		//globallz = qis;
 
 		$scope.qui = qis; // just point to the persisted state object
 		$scope.pagination = {
@@ -163,6 +166,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				while(i--) {
 					rProps[i].label = i18n.getPropertyLabel('P' + rProps[i].id);
 					rProps[i].title = rProps[i].label + ' (P' + rProps[i].id + ')';
+					rProps[i].url = i18n.getEntityUrl('P' + rProps[i].id);
 				}
 				return rProps;
 			});
@@ -170,7 +174,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 			
 		}
 
-		$scope.estimateResponseSize = function() {
+		var estimateResponseSize = function() {
 			var size = qis.selectedClass[qis.offspring];
 			qis.queryParms.big = size > qis.queryParms.THRESHOLD_BIG;
 			qis.queryParms.heavy = size > qis.queryParms.THRESHOLD_HEAVY;
@@ -180,7 +184,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 		$scope.buildSparql = function() {
 			if(!qis.selectedClass) { qis.sparqlQuery = null; } else {
 
-				$scope.estimateResponseSize();
+				estimateResponseSize();
 				
 				var obj = "wd:" + qis.selectedClass.qid,
 					ins = "?instance",
