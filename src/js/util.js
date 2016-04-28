@@ -6,12 +6,20 @@ angular.module('utilities', [])
 	var JSON_INSTANCES = "i";
 	var JSON_SUBCLASSES = "s";
 	var JSON_RELATED_PROPERTIES = "r";
+	var JSON_SUPERCLASSES = "sc";
+	var JSON_DIRECT_SUBCLASSES = "sb";
+	var JSON_QUALIFIER_PROPERTIES = "qs";
+	var JSON_PROPERTY_DIRECT_INSTANCE_OF = "pc";
 
 	return {
 		JSON_LABEL: JSON_LABEL,
 		JSON_INSTANCES: JSON_INSTANCES,
 		JSON_SUBCLASSES: JSON_SUBCLASSES,
 		JSON_RELATED_PROPERTIES: JSON_RELATED_PROPERTIES,
+		JSON_SUPERCLASSES: JSON_SUPERCLASSES,
+		JSON_DIRECT_SUBCLASSES : JSON_DIRECT_SUBCLASSES,
+		JSON_QUALIFIER_PROPERTIES : JSON_QUALIFIER_PROPERTIES,
+		JSON_PROPERTY_DIRECT_INSTANCE_OF : JSON_PROPERTY_DIRECT_INSTANCE_OF,
 
 		JSON_ITEMS_WITH_SUCH_STATEMENTS: "i",
 		JSON_USES_IN_STATEMENTS: "s",
@@ -56,7 +64,7 @@ angular.module('utilities', [])
 })
 
 .factory('i18n', function(wikidataapi, Properties, $translate) {
-	var language = 'en';
+	var language = null; // defaults to "en" in this case
 
 	var idTerms = {}; // cache for labels/descriptions of items
 	var idTermsSize = 0; // current size of cache
@@ -69,13 +77,23 @@ angular.module('utilities', [])
 		idTermsSize = 0;
 	}
 
+	var getLanguage = function() {
+		return language != null ? language : 'en';
+	}
+
+	// Check if an explicit lanuage was set.
+	// If not, rather omit the parameter entirely.
+	var fixedLanguage = function() {
+		return (language != null);
+	} 
+
 	var setLanguage = function(newLang) {
-		if (language != newLang) {
-			$translate.use(newLang);
-			language = newLang;
+		if (getLanguage() != newLang) {
 			clearCache(); // clear term cache that was based on old language
 			propertyLabels = {}; // clear property label cache for old language
 		}
+		language = newLang;
+		$translate.use(getLanguage());
 	}
 
 	// Clear term cache when it grows too big to prevent memory leak.
@@ -101,7 +119,7 @@ angular.module('utilities', [])
 	}
 
 	var hasPropertyLabel = function(propertyId) {
-		if (language == 'en') {
+		if (getLanguage() == 'en') {
 			return properties !== null;
 		} else {
 			return (propertyId in propertyLabels);
@@ -110,7 +128,7 @@ angular.module('utilities', [])
 
 	var getPropertyLabel = function(propertyId) {
 		if (hasPropertyLabel(propertyId)) { // implies (properties !== null)
-			if (language == 'en') {
+			if (getLanguage() == 'en') {
 				var numId = propertyId.substring(1);
 				return properties.getLabelOrId(numId);
 			} else {
@@ -136,7 +154,7 @@ angular.module('utilities', [])
 				missingEntities.push(entities[i]);
 			}
 		}
-		return wikidataapi.getEntityTerms(missingEntities, language).then(function(entityTerms) {
+		return wikidataapi.getEntityTerms(missingEntities, getLanguage()).then(function(entityTerms) {
 			angular.extend(idTerms, entityTerms);
 			idTermsSize = Object.keys(idTerms).length;
 			return true;
@@ -144,7 +162,7 @@ angular.module('utilities', [])
 	}
 
 	var waitForPropertyLabels = function(propertyIds) {
-		if (language == 'en') {
+		if (getLanguage() == 'en') {
 			return Properties.then(function(props) {
 				properties = props;
 				return true;
@@ -167,7 +185,7 @@ angular.module('utilities', [])
 				missingPropertyIds.push('P1647');
 			}
 
-			return wikidataapi.getEntityLabels(missingPropertyIds, language).then(function(entityLabels) {
+			return wikidataapi.getEntityLabels(missingPropertyIds, getLanguage()).then(function(entityLabels) {
 				angular.extend(propertyLabels, entityLabels);
 				return true;
 			});
@@ -175,7 +193,7 @@ angular.module('utilities', [])
 	}
 
 	var getEntityUrl = function(entityId) {
-		return "#/view?id=" + entityId + ( language != 'en' ? '&lang=' + language : '');
+		return "#/view?id=" + entityId + ( fixedLanguage() ? '&lang=' + getLanguage() : '');
 	}
 
 	var autoLinkText = function(text) {
@@ -187,7 +205,8 @@ angular.module('utilities', [])
 	}
 
 	return {
-		getLanguage: function() { return language; },
+		fixedLanguage: fixedLanguage,
+		getLanguage: getLanguage,
 		setLanguage: setLanguage,
 		getEntityUrl: getEntityUrl,
 		autoLinkText: autoLinkText,
@@ -274,6 +293,16 @@ angular.module('utilities', [])
 	    return temp;
 	};
 
+	var unionArrays = function(a1, a2){
+		var unique = [];
+		$.each(a1.concat(a2), function(i, el){
+    		if($.inArray(el, unique) === -1){
+				unique.push(el);
+			}
+		});
+		return unique;
+	};
+
 	var sortByField = function(objectList, fieldName) {
 		objectList.sort(function(a, b) {
 			return a[fieldName] < b[fieldName] ? 1 : (a[fieldName] > b[fieldName] ? -1 : 0);
@@ -288,13 +317,36 @@ angular.module('utilities', [])
 		return ret;
 	}
 
+	var getSortComparator = function(criteria, direction){
+      return function(data){
+        return function(a, b){
+          var x = a;
+          var y = b;
+          var a = data[a][criteria];
+          var b = data[b][criteria];
+          if (a == b){          	
+          	return 0;
+          }
+          if ((b == undefined) || (a > b)){
+            return 1 * direction;
+          }
+          if ((a == undefined) || (a < b)){
+            return (-1) * direction;
+          }
+          return 0;
+        };
+      }
+    }
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
 		cloneObject: cloneObject,
+		unionArrays: unionArrays,
 		sortByField: sortByField,
-		createIdArray: createIdArray
+		createIdArray: createIdArray,
+		getSortComparator: getSortComparator
 	};
 
 })
@@ -583,6 +635,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				images: [],
 				aliases: [],
 				banner: null,
+				homepage: null,
 				statements: {},
 				missing: false,
 				termsPromise: null,
@@ -634,8 +687,13 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 				}
 				// Wikivoyage banner; only pick the first banner if multiple
 				if ("P948" in entityData.claims) {
-					var imageFileName = getStatementValue(entityData.claims.P948[0],"");
+					var imageFileName = getStatementValue(entityData.claims.P948[0],null);
 					ret.banner = imageFileName.replace(" ","_");
+				}
+				
+				// homepage URL; only pick the first URL if multiple
+				if ("P856" in entityData.claims) {
+					ret.homepage = getStatementValue(entityData.claims.P856[0],null);
 				}
 
 				ret.statements = entityData.claims;
@@ -872,7 +930,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 	var link = function (scope, element, attrs) {
 		statistics.then(function(stats) {
-			var innerHtml = '<div class="col-md-6"><span translate="FOOTER.STAT_DATE" translate-value-date="' + stats.getDumpDateString() + '"></span></div>';
+			var innerHtml = '<div class="col-md-6"><span translate="FOOTER.STAT_DATE" translate-value-date="' + stats.getDumpDate().toLocaleDateString() + '"></span> (<a href="#/status"><span translate="FOOTER.STAT_LINK"></span></a>)</div>';
 			innerHtml += '<div class="col-md-6"><span translate="FOOTER.POWERED_BY"></span></div>';
 			element.html('<hr/><div class="container-fluid"><div class="footer row">' + innerHtml + '</div></div>');
 			$compile(element.contents())(scope);
@@ -948,7 +1006,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 					isHumanRelation = true;
 				} else if (classId == '18610173') { // "Wikidata property for Commons"
 					isMedia = true;
-				} else if (classId == '18667213') { // "Wikidata property about Wikimedia categories"
+				} else if (classId == '18667213' || // "Wikidata property about Wikimedia categories"
+					classId == '22969221' // "Wikidata property giving Wikimedia list"
+				) {
 					isAboutWikiPages = true;
 				}
 			});
@@ -1009,7 +1069,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			propertyScores = {};
 			// Note: class-based ranking rarely seems to help; hence using properties only
 			for (propertyId in itemData.statements) {
-				angular.forEach(properties.getRelatedProperties(propertyId), function(relPropScore, relPropId) {
+				angular.forEach(properties.getRelatedProperties(propertyId.substring(1)), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
 						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
 					} else {

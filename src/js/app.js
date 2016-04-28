@@ -10,6 +10,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/browse', { templateUrl: 'views/browseData.html' })
 			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
+			.when('/status', { templateUrl: 'views/status.html' })
 			.when('/view', { templateUrl: 'views/view.html' })
 			.when('/query', { templateUrl: 'views/queryview.html'})
 			.otherwise({redirectTo: '/'});
@@ -26,6 +27,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			FOOTER: {
 				STAT_DATE: 'Statistics based on data dump {{date}}',
+				STAT_LINK: 'details',
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
 			PROPTYPE : 'Type',
@@ -78,6 +80,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			SEC_LINKS : {
 				SEC_LINKS : 'Links',
 				WIKIDATA : 'Wikidata page',
+				WEBSITE: 'Official website',
 				REASONATOR : 'Reasonator',
 			},
 			SEC_PROP_USE : {
@@ -111,6 +114,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			},
 			FOOTER: {
 				STAT_DATE: 'Statistiken Stand {{date}}',
+				STAT_LINK: 'Details',
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
 			PROPTYPE : 'Typ',
@@ -128,7 +132,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				HINT_CLASS : 'Andere Eigenschaften, die oftmals von direkten oder indirekten Instanzen dieser Klasse verwendet werden',
 				NONE: 'keine'
 			},
-			INSTANCE_OF_PHRASE: '{{entity}} ist ein(e) {{classes}}',
+			INSTANCE_OF_PHRASE: '{{entity}} ist eine Instanz von {{classes}}',
 			NO_INSTANCE_OF_PHRASE: '{{entity}} ist keine Instanz einer Klasse',
 			SUBCLASS_OF_PHRASE: 'jede Instanz von {{entity}} ist auch {{classes}}',
 			NO_SUBCLASS_OF_PHRASE: '{{entity}} hat keinerlei Oberklassen',
@@ -162,6 +166,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			SEC_LINKS : {
 				SEC_LINKS : 'Links',
 				WIKIDATA : 'Wikidata',
+				WEBSITE: 'Offizielle Website',
 				REASONATOR : 'Reasonator',
 			},
 			SEC_PROP_USE : {
@@ -201,17 +206,35 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var statusStartValues = {
 			entityType: "classes",
 			activePage: 1,
+			sortCriteria: {
+				classes: {
+					label: "fa fa-sort",
+					instances: "fa fa-sort-desc",
+					subclasses: "fa fa-sort"
+				},
+				properties: {
+					label: "fa fa-sort",
+					datatype: "fa fa-sort",
+					statements: "fa fa-sort-desc",
+					qualifiers: "fa fa-sort",
+					references: "fa fa-sort"
+				}
+			},
 			classesFilter: {
 				label: "",
 				relatedProperty: "",
+				superclass: "",
 				instances: [0, 4000000],
-				subclasses: [0, 200000]
+				subclasses: [0, 2000000]
 			},
 			propertiesFilter: {
 				label: "",
+				relatedProperty: "",
+				relatedQualifier: "",
+				directInstanceOf: "",
 				statements: [0, 20000000],
-				qualifiers: [0, 100000],
-				references: [0, 100000],
+				qualifiers: [0, 10000000],
+				references: [0, 10000000],
 				datatypes: {id: 1, name: "Any property type"}
 
 			}
@@ -235,23 +258,41 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				args = {
 					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
 					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
+					sortCriteria: {
+						classes: {
+							label: ($route.current.params.sortclasslabel) ? ($route.current.params.sortclasslabel) : status.sortCriteria.classes.label,
+							instances: ($route.current.params.sortclassinstances) ? ($route.current.params.sortclassinstances) : status.sortCriteria.classes.instances,
+							subclasses: ($route.current.params.sortclasssubclasses) ? ($route.current.params.sortclasssubclasses) : status.sortCriteria.classes.subclasses
+						},
+						properties: {
+							label: ($route.current.params.sortpropertylabel) ? ($route.current.params.sortpropertylabel) : status.sortCriteria.properties.label,
+							datatype: ($route.current.params.sortpropertydatatype) ? ($route.current.params.sortpropertydatatype) : status.sortCriteria.properties.datatype,
+							statements: ($route.current.params.sortpropertystatements) ? ($route.current.params.sortpropertystatements) : status.sortCriteria.properties.statements,
+							qualifiers: ($route.current.params.sortpropertyqualifiers) ? ($route.current.params.sortpropertyqualifiers) : status.sortCriteria.properties.qualifiers,
+							references: ($route.current.params.sortpropertyreferences) ? ($route.current.params.sortpropertyreferences) : status.sortCriteria.properties.references
+						}
+					},
 					classesFilter: {
 						label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
-						relatedProperty: ($route.current.params.relatedpropertyfilter) ? ($route.current.params.relatedpropertyfilter) : status.classesFilter.relatedProperty,
+						relatedProperty: ($route.current.params.rpcfilter) ? ($route.current.params.rpcfilter) : status.classesFilter.relatedProperty,
+						superclass: ($route.current.params.supercfilter) ? ($route.current.params.supercfilter) : status.classesFilter.superclass,
 						instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
-						subclasses: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
-					  },
+						subclasses: [ ($route.current.params.subclassesbegin) ? ($route.current.params.subclassesbegin) : status.classesFilter.subclasses[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
+					},
 					propertiesFilter: {
 						label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
+						relatedProperty: ($route.current.params.rppfilter) ? ($route.current.params.rppfilter) : status.propertiesFilter.relatedProperty,
+						relatedQualifier: ($route.current.params.rqualifierfilter) ? ($route.current.params.rqualifierfilter) : status.propertiesFilter.relatedQualifier,
+						directInstanceOf: ($route.current.params.dInstancefilter) ? ($route.current.params.dInstancefilter) : status.propertiesFilter.directInstanceOf,
 						statements: [ ($route.current.params.statementsbegin) ? ($route.current.params.statementsbegin) : status.propertiesFilter.statements[0], ($route.current.params.statementsend) ? ($route.current.params.statementsend) : status.propertiesFilter.statements[1]],
 						qualifiers: [ ($route.current.params.qualifiersbegin) ? ($route.current.params.qualifiersbegin) : status.propertiesFilter.qualifiers[0], ($route.current.params.qualifiersend) ? ($route.current.params.qualifiersend) : status.propertiesFilter.qualifiers[1]],
 						references: [ ($route.current.params.referencesbegin) ? ($route.current.params.referencesbegin) : status.propertiesFilter.references[0], ($route.current.params.referencesend) ? ($route.current.params.referencesend) : status.propertiesFilter.references[1]],
 						datatypes: ($route.current.params.datatypes) ? deserializeDatatype($route.current.params.datatypes) : status.propertiesFilter.datatypes
-					  }
-
+					}
 				}
-				status.activePage = args.activePage;
 				status.entityType = args.type;
+				status.activePage = args.activePage;
+				status.sortCriteria = args.sortCriteria;
 				status.classesFilter = args.classesFilter;
 				status.propertiesFilter = args.propertiesFilter;
 			},
@@ -265,32 +306,50 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return util.cloneObject(statusStartValues);
 			},
 			getUrl: function(){
-				return location.origin + location.pathname + "#/browse" 
+				var result =  location.origin + location.pathname + "#/browse" 
 					+ "?activepage=" + status.activePage
-					+ "&type=" + status.entityType
-					+ "&classlabelfilter=" + status.classesFilter.label
-					+ "&relatedpropertyfilter=" + status.classesFilter.relatedProperty
-					+ "&propertylabelfilter=" + status.propertiesFilter.label 
-					+ "&instancesbegin=" + status.classesFilter.instances[0]
-					+ "&instancesend=" + status.classesFilter.instances[1]
-					+ "&subclassesbegin=" + status.classesFilter.subclasses[0]
-					+ "&subclassesend=" + status.classesFilter.subclasses[1]
-					+ "&statementsbegin=" + status.propertiesFilter.statements[0]
-					+ "&statementsend=" + status.propertiesFilter.statements[1]
-					+ "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0]
-					+ "&qualifiersend=" + status.propertiesFilter.qualifiers[1]
-					+ "&referencesbegin=" + status.propertiesFilter.references[0]
-					+ "&referencesend=" + status.propertiesFilter.references[1]
-					+ "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes);
+					+ "&type=" + status.entityType;
+				if (status.entityType == "classes"){
+					result += (status.classesFilter.label ? "&classlabelfilter=" + status.classesFilter.label : "")
+						+ (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")
+						+ (status.classesFilter.superclass ? "&supercfilter=" + status.classesFilter.superclass : "")
+						+ (status.classesFilter.instances[0] != 0 ? "&instancesbegin=" + status.classesFilter.instances[0] : "")
+						+ (status.classesFilter.instances[1] != 4000000 ? "&instancesend=" + status.classesFilter.instances[1] : "")
+						+ (status.classesFilter.subclasses[0] != 0 ? "&subclassesbegin=" + status.classesFilter.subclasses[0] : "")
+						+ (status.classesFilter.subclasses[1] != 2000000 ? "&subclassesend=" + status.classesFilter.subclasses[1] : "")
+						+ (status.sortCriteria.classes.label != "fa fa-sort" ? "&sortclasslabel=" + status.sortCriteria.classes.label : "")
+						+ (status.sortCriteria.classes.instances != "fa fa-sort-desc" ? "&sortclassinstances=" + status.sortCriteria.classes.instances : "")
+						+ (status.sortCriteria.classes.subclasses != "fa fa-sort" ? "&sortclasssubclasses=" + status.sortCriteria.classes.subclasses : "")
+					
+				}else{
+					result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "") 
+						+ (status.propertiesFilter.relatedProperty ? "&rppfilter=" + status.propertiesFilter.relatedProperty : "")
+						+ (status.propertiesFilter.relatedQualifier ? "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier : "")
+						+ (status.propertiesFilter.directInstanceOf ? "&dInstancefilter=" + status.propertiesFilter.directInstanceOf : "")
+						+ (status.propertiesFilter.statements[0] != 0 ? "&statementsbegin=" + status.propertiesFilter.statements[0] : "")
+						+ (status.propertiesFilter.statements[1] != 20000000 ? "&statementsend=" + status.propertiesFilter.statements[1] : "")
+						+ (status.propertiesFilter.qualifiers[0] != 0 ? "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0] : "")
+						+ (status.propertiesFilter.qualifiers[1] != 10000000 ? "&qualifiersend=" + status.propertiesFilter.qualifiers[1] : "")
+						+ (status.propertiesFilter.references[0] != 0 ? "&referencesbegin=" + status.propertiesFilter.references[0] : "")
+						+ (status.propertiesFilter.references[1] != 10000000	 ? "&referencesend=" + status.propertiesFilter.references[1] : "")
+						+ (status.propertiesFilter.datatypes.id != 1 ? "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes) : "")
+						+ (status.sortCriteria.properties.label != "fa fa-sort" ? "&sortpropertylabel=" + status.sortCriteria.properties.label : "")
+						+ (status.sortCriteria.properties.datatype != "fa fa-sort" ? "&sortpropertydatatype=" + status.sortCriteria.properties.datatype : "")
+						+ (status.sortCriteria.properties.statements != "fa fa-sort-desc" ? "&sortpropertystatements=" + status.sortCriteria.properties.statements : "")
+						+ (status.sortCriteria.properties.qualifiers != "fa fa-sort" ? "&sortpropertyqualifiers=" + status.sortCriteria.properties.qualifiers : "")
+						+ (status.sortCriteria.properties.references != "fa fa-sort" ? "&sortpropertyreferences=" + status.sortCriteria.properties.references : "");
+				}
+				return result;
 			}
 		}
 	})
 
-	.factory('Properties', function($http, $route, jsonData, util){
+	.factory('Properties', function($http, $route, jsonData, util, Arguments){
 		var promise;
 		var properties;
 		var idArray;
-
+		Arguments.refreshArgs();
+		var status = Arguments.getStatus();
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = properties[id][key];
@@ -303,24 +362,35 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			return defaultValue;
 		}
 
-		var getLabel = function(id) { return getData(id, 'l', null); }
-		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); }
-		var getUrl = function(id) { return "#/view?id=P" + id; }
+		var getLabel = function(id) { return getData(id, 'l', null); };
+		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); };
+		var getUrl = function(id) { return "#/view?id=P" + id; };
 
-		var getQualifiers = function(id){ return getData(id, 'qs', {}); }
+		var getQualifiers = function(id){ return getData(id, 'qs', {}); };
 
-		var getStatementCount = function(id){ return getData(id, 's', 0); }
+		var getStatementCount = function(id){ return getData(id, 's', 0); };
+
+		var sortProperties = function(comparator){idArray.sort(comparator(properties));};
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				idArray = util.createIdArray(properties);
+				var sortCriteria = [[status.sortCriteria.properties.label, jsonData.JSON_LABEL], [status.sortCriteria.properties.datatype, jsonData.JSON_DATATYPE], 
+					[status.sortCriteria.properties.statements, jsonData.JSON_USES_IN_STATEMENTS], [status.sortCriteria.properties.qualifiers, jsonData.JSON_USES_IN_QUALIFIERS],
+					[status.sortCriteria.properties.references, jsonData.JSON_USES_IN_REFERENCES]];
+				for (var i=0; i < sortCriteria.length; i++){
+					if (sortCriteria[i][0] != "fa fa-sort"){
+						sortProperties(util.getSortComparator(sortCriteria[i][1], 
+							sortCriteria[i][0] == "fa fa-sort-asc" ? 1 : -1));
+					}
+				}
 				return {
-					propertiesHeader: [["Label (ID)", "col-xs-5", "fa fa-sort", jsonData.JSON_LABEL], 
-						["Datatype", "col-xs-1", "fa fa-sort", jsonData.JSON_DATATYPE], 
-						["Uses in statements", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_STATEMENTS], 
-						["Uses in qualifiers", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_QUALIFIERS], 
-						["Uses in references", "col-xs-2", "fa fa-sort", jsonData.JSON_USES_IN_REFERENCES]],
+					propertiesHeader: [["Label (ID)", "col-xs-5", sortCriteria[0][0], jsonData.JSON_LABEL, function(status, value){status.sortCriteria.properties.label = value}], 
+						["Datatype", "col-xs-1", sortCriteria[1][0], jsonData.JSON_DATATYPE, function(status, value){status.sortCriteria.properties.datatype = value}], 
+						["Uses in statements", "col-xs-2", sortCriteria[2][0], jsonData.JSON_USES_IN_STATEMENTS, function(status, value){status.sortCriteria.properties.statements = value}], 
+						["Uses in qualifiers", "col-xs-2", sortCriteria[3][0], jsonData.JSON_USES_IN_QUALIFIERS, function(status, value){status.sortCriteria.properties.qualifiers = value}], 
+						["Uses in references", "col-xs-2", sortCriteria[4][0], jsonData.JSON_USES_IN_REFERENCES, function(status, value){status.sortCriteria.properties.references = value}]],
 					getProperties: function(){ return properties; },
 					getIdArray: function() {return idArray; },
 					hasEntity: function(id){ return (id in properties); },
@@ -337,18 +407,19 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getUrl: getUrl,
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
 					getClasses: function(id){ return getData(id, 'pc', []); },
-					sortProperties: function(comparator){idArray.sort(comparator(properties));}
+					sortProperties: sortProperties
 				}
 			});
 		}
 		return promise;
 	})
 
-	.factory('Classes', function($http, $route, jsonData, util) {
+	.factory('Classes', function($http, $route, jsonData, util, Arguments) {
 		var promise;
 		var classes;
 		var idArray; 
-
+		Arguments.refreshArgs();
+		var status = Arguments.getStatus();
 		var getData = function(id, key, defaultValue) {
 			try {
 				var result = classes[id][key];
@@ -365,14 +436,25 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
+		var sortClasses = function(comparator){idArray.sort(comparator(classes));};
+
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				idArray = util.createIdArray(classes);
+				var sortCriteria = [[status.sortCriteria.classes.label, jsonData.JSON_LABEL], [status.sortCriteria.classes.instances, jsonData.JSON_INSTANCES], 
+					[status.sortCriteria.classes.subclasses, jsonData.JSON_SUBCLASSES]];
+
+				for (var i=0; i < sortCriteria.length; i++){
+					if (sortCriteria[i][0] != "fa fa-sort"){
+						sortClasses(util.getSortComparator(sortCriteria[i][1], 
+							sortCriteria[i][0] == "fa fa-sort-asc" ? 1 : -1));
+					}
+				}
 				return {
-					classesHeader: [["Label (ID)", "col-xs-9", "fa fa-sort", jsonData.JSON_LABEL],
-						["Instances", "col-xs-1", "fa fa-sort", jsonData.JSON_INSTANCES], 
-						["Subclasses", "col-xs-1", "fa fa-sort", jsonData.JSON_SUBCLASSES]],
+					classesHeader: [["Label (ID)", "col-xs-9", sortCriteria[0][0], jsonData.JSON_LABEL, function(status, value){status.sortCriteria.classes.label = value}],
+						["Instances", "col-xs-1", sortCriteria[1][0], jsonData.JSON_INSTANCES, function(status, value){status.sortCriteria.classes.instances = value}], 
+						["Subclasses", "col-xs-1", sortCriteria[2][0], jsonData.JSON_SUBCLASSES, function(status, value){status.sortCriteria.classes.subclasses = value}]],
 					getClasses: function(){ return classes; },
 					getIdArray: function(){ return idArray; },
 					hasEntity: function(id){ return (id in classes); },
@@ -387,7 +469,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
 					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); },
-					sortClasses: function(comparator){ idArray.sort(comparator(classes)); }
+					sortClasses: sortClasses
 				}
 			});
 		}
@@ -406,7 +488,33 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getDumpDateString: function(){
 						var dateStamp = statistics['dumpDate'];
 						return dateStamp.substring(0,4) + '-' + dateStamp.substring(4,6) + '-' + dateStamp.substring(6,8);
-					}
+					},
+					getDumpDate:  function(){
+						var dateStamp = statistics['dumpDate'];
+						var month = parseInt(dateStamp.substring(4,6)) - 1;
+						return new Date(dateStamp.substring(0,4), month, dateStamp.substring(6,8));
+					},
+					getPropertyUpdateTime: function() {
+						return new Date(statistics['propertyUpdate']);
+					},
+					getClassUpdateTime: function() {
+						return new Date(statistics['classUpdate']);
+					},
+					getEntityCount: function() {
+						return statistics['entityCount'];
+					},
+					getSiteLinkCount: function() {
+						return statistics['siteLinkCount'];
+					},
+					getItemStatistics: function() {
+						return statistics['itemStatistics'];
+					},
+					getPropertyStatistics: function() {
+						return statistics['propertyStatistics'];
+					},
+					getSites: function() {
+						return statistics['sites'];
+					},
 				}
 			});
 		}
@@ -421,9 +529,10 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 	.directive('ngSlider', function(){
 	    var SCALE_FACTOR = 1.005;
+	    var MULTIPLIER = 1000000;
 	    var scale = function(val){
 	      if (val > 0) {
-	      	return Math.ceil(Math.log(val) / Math.log(SCALE_FACTOR));
+	      	return Math.round((Math.log(val) / Math.log(SCALE_FACTOR))*MULTIPLIER);
 	      }
 	      else {
 	        return 0;
@@ -432,10 +541,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	    
 	    var antiScale = function(val){
 	      if (val > 0) {
-	       	if ((Math.pow(SCALE_FACTOR, val) > 1) && (Math.pow(SCALE_FACTOR, val) < 1.5)){
-	       		return 1;
-	       	}
-	        return Math.ceil(Math.pow(SCALE_FACTOR, val));
+	        return Math.round(Math.pow(SCALE_FACTOR, (val / MULTIPLIER)));
 	      }else{
 	        return 0;
 	      }
@@ -461,7 +567,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 	      scope:{
 	        begin: '=begin',
 	        end: '=end',
-	        index: '=index', // TODO and startVal and endVal
+	        index: '=index',
 	        startval: '=startval',
 	        endval: '=endval'
 	      },
