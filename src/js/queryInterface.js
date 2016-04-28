@@ -196,11 +196,16 @@ angular.module('queryInterface', ['angucomplete-alt'])
 					ins = "?" + qis.queryParms.RESULT_VAR,
 					tab = "    ";
 
+				var DISTINCT = '';
+				switch(qis.offspring) {
+					case 'ai': case 'as': DISTINCT = 'DISTINCT ';
+				}
+
 				var header = sparql.getStandardPrefixes() +
 					"PREFIX ps: <http://www.wikidata.org/prop/statement/>\n" +
 					"PREFIX p: <http://www.wikidata.org/prop/>\n\n" +
 
-					"SELECT " + (qis.offspring === 'ai' ? 'DISTINCT ' : '') + ins + " \n" +
+					"SELECT " + DISTINCT + ins + " \n" +
 					"WHERE {\n" + tab;
 
 				var body;
