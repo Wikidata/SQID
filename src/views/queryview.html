@@ -51,7 +51,7 @@
 			<div data-ng-show="qui.selectedProperties.stack.length" class="qry-filter-list">
 				<div class="panel panel-default" ng-repeat="p in qui.selectedProperties.stack">
 					<header class="panel-heading">{{p.label}} (<a href="{{p.url}}">P{{p.id}}</a>)
-						<button type="button" class="close" ng-click="qui.selectedProperties.remove($index)" aria-label="Remove"><span aria-hidden="true">&times;</span></button>
+						<button type="button" class="close" ng-click="qui.selectedProperties.remove($index); buildSparql();" aria-label="Remove"><span aria-hidden="true">&times;</span></button>
 					</header>
 					<div class="panel-body">
 						(any value)

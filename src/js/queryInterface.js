@@ -99,14 +99,7 @@ angular.module('queryInterface', ['angucomplete-alt'])
 				if(selected !== null && typeof selected === 'object' && qis.propertyData[selected.id] !== undefined ) { 
 					qis.selectedProperties.add(selected);
 					$scope.buildSparql();
-					//propAddInputVal = undefined;
-					// setTimeout(function() {
-					 	propAddInputVal = undefined;
-					// 	console.log('ey!');
-					// }, 1000);
-					// console.log(this);
-					// console.log($(this));
-					// return undefined;
+					propAddInputVal = undefined;
 				}
 			}
 			else { return propAddInputVal; }
