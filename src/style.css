@@ -188,13 +188,16 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 }
 
 /* Collapsible panels */
-.panel-heading a:after {
+.panel-heading[data-toggle='collapse'] {
+	cursor: pointer;
+}
+.panel-heading[data-toggle='collapse']:before {
     font-family: 'Glyphicons Halflings';
     content: "\e114";    
     float: right; 
     color: grey; 
 }
-.panel-heading a.collapsed:after {
+.panel-heading.collapsed:before {
     content: "\e080";
 }
 

@@ -995,8 +995,8 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			missingTermsListener.hasMissingTerms = false;
 			var panelId = 'statements_' + show;
 			var html = '<div class="panel panel-info">\n' +
-						'<div class="panel-heading"><h2 class="panel-title">\n' +
-						'<a data-toggle="collapse" data-target="#' + panelId + '"  style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
+						'<div class="panel-heading" data-toggle="collapse" data-target="#' + panelId + '"><h2 class="panel-title">\n' +
+						'<a style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
 						'<div id="' + panelId + '" class="panel-collapse collapse in">' +
 						'<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
 			var hasContent = false;
