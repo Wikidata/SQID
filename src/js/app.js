@@ -200,7 +200,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			;
 	}])
 
-	.factory('Arguments', function($http, $route, jsonData, util){
+	.factory('Arguments', function($http, $route, util){
 		var args = {}; 
 		var statusStartValues = {
 			entityType: "classes",
@@ -343,10 +343,22 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		}
 	})
 
-	.factory('Properties', function($http, $route, jsonData, util, Arguments){
+	.factory('Properties', function($http, $route, util, Arguments){
 		var promise;
 		var properties;
 		var idArray;
+
+		var sortedIdArrays = {
+			label: [],
+			datatype: [],
+			statements: [],
+			references: []
+		};
+		var sorting = {
+			category: "statements",
+			direction: -1
+		};
+
 		Arguments.refreshArgs();
 		var status = Arguments.getStatus();
 		var getData = function(id, key, defaultValue) {
@@ -369,29 +381,56 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 		var getStatementCount = function(id){ return getData(id, 's', 0); };
 
-		var sortProperties = function(comparator){idArray.sort(comparator(properties));};
+		var getSortedIdArray = function(){
+			var array = sortedIdArrays[sorting.category];
+			if (sorting.direction == 1){
+				return array;
+			}else{
+				return util.reverseDeepCopy(array);
+			}
+		}
+
+		var getSortCriteria = function(){
+			return [[status.sortCriteria.properties.label, "l", "label"], 
+				[status.sortCriteria.properties.datatype, "d", "datatype"], 
+				[status.sortCriteria.properties.statements, "s", "statements"], 
+				[status.sortCriteria.properties.qualifiers, "q", "qualifiers"],
+				[status.sortCriteria.properties.references, "e", "references"]];
+		}
+
+		var updateSorting = function(sortCriteria){
+			for (var i=0; i < sortCriteria.length; i++){
+				if (sortCriteria[i][0] != "fa fa-sort"){
+					sorting.category = sortCriteria[i][2];
+					sorting.direction = sortCriteria[i][0] == "fa fa-sort-asc" ? 1 : -1;
+				}
+			}
+		}
 
 		if (!promise) {
 			promise = $http.get("data/properties.json").then(function(response){
 				properties = response.data;
 				idArray = util.createIdArray(properties);
-				var sortCriteria = [[status.sortCriteria.properties.label, jsonData.JSON_LABEL], [status.sortCriteria.properties.datatype, jsonData.JSON_DATATYPE], 
-					[status.sortCriteria.properties.statements, jsonData.JSON_USES_IN_STATEMENTS], [status.sortCriteria.properties.qualifiers, jsonData.JSON_USES_IN_QUALIFIERS],
-					[status.sortCriteria.properties.references, jsonData.JSON_USES_IN_REFERENCES]];
+				var sortCriteria = getSortCriteria();
+
+				var sortIdArray = function(comparator, category){
+					sortedIdArrays[category] = util.cloneObject(idArray);
+					sortedIdArrays[category].sort(comparator(properties));
+				};
+
 				for (var i=0; i < sortCriteria.length; i++){
-					if (sortCriteria[i][0] != "fa fa-sort"){
-						sortProperties(util.getSortComparator(sortCriteria[i][1], 
-							sortCriteria[i][0] == "fa fa-sort-asc" ? 1 : -1));
-					}
+					sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
 				}
+				updateSorting(sortCriteria);
+
 				return {
-					propertiesHeader: [["Label (ID)", "col-xs-5", sortCriteria[0][0], jsonData.JSON_LABEL, function(status, value){status.sortCriteria.properties.label = value}], 
-						["Datatype", "col-xs-1", sortCriteria[1][0], jsonData.JSON_DATATYPE, function(status, value){status.sortCriteria.properties.datatype = value}], 
-						["Uses in statements", "col-xs-2", sortCriteria[2][0], jsonData.JSON_USES_IN_STATEMENTS, function(status, value){status.sortCriteria.properties.statements = value}], 
-						["Uses in qualifiers", "col-xs-2", sortCriteria[3][0], jsonData.JSON_USES_IN_QUALIFIERS, function(status, value){status.sortCriteria.properties.qualifiers = value}], 
-						["Uses in references", "col-xs-2", sortCriteria[4][0], jsonData.JSON_USES_IN_REFERENCES, function(status, value){status.sortCriteria.properties.references = value}]],
+					propertiesHeader: [["Label (ID)", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
+						["Datatype", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}], 
+						["Uses in statements", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
+						["Uses in qualifiers", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
+						["Uses in references", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]],
 					getProperties: function(){ return properties; },
-					getIdArray: function() {return idArray; },
+					getIdArray: getSortedIdArray,
 					hasEntity: function(id){ return (id in properties); },
 					getLabel: getLabel,
 					getLabelOrId: getLabelOrId,
@@ -406,17 +445,28 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getUrl: getUrl,
 					getUrlPattern: function(id){ return getData(id, 'u', null); },
 					getClasses: function(id){ return getData(id, 'pc', []); },
-					sortProperties: sortProperties
+					sortProperties: function() { updateSorting(getSortCriteria()); }
 				}
 			});
 		}
 		return promise;
 	})
 
-	.factory('Classes', function($http, $route, jsonData, util, Arguments) {
+	.factory('Classes', function($http, $route, util, Arguments) {
 		var promise;
 		var classes;
-		var idArray; 
+		var idArray;
+
+		var sortedIdArrays = {
+			label: [],
+			instances: [],
+			subclasses: []
+		};
+		var sorting = {
+			category: "instances",
+			direction: -1
+		};
+
 		Arguments.refreshArgs();
 		var status = Arguments.getStatus();
 		var getData = function(id, key, defaultValue) {
@@ -435,27 +485,52 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var getUrl = function(id) { return "#/view?id=Q" + id; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
-		var sortClasses = function(comparator){idArray.sort(comparator(classes));};
+		var getSortedIdArray = function(){
+			var array = sortedIdArrays[sorting.category];
+			if (sorting.direction == 1){
+				return array;
+			}else{
+				return util.reverseDeepCopy(array);
+			}
+		}
+
+		var getSortCriteria = function(){
+			return [[status.sortCriteria.classes.label, "l", "label"], 
+				[status.sortCriteria.classes.instances, "i", "instances"], 
+				[status.sortCriteria.classes.subclasses, "s", "subclasses"]];
+		}
+
+		var updateSorting = function(sortCriteria){
+			for (var i=0; i < sortCriteria.length; i++){
+				if (sortCriteria[i][0] != "fa fa-sort"){
+					sorting.category = sortCriteria[i][2];
+					sorting.direction = sortCriteria[i][0] == "fa fa-sort-asc" ? 1 : -1;
+				}
+			}
+		}
 
 		if (!promise){
 			promise = $http.get("data/classes.json").then(function(response){
 				classes = response.data;
 				idArray = util.createIdArray(classes);
-				var sortCriteria = [[status.sortCriteria.classes.label, jsonData.JSON_LABEL], [status.sortCriteria.classes.instances, jsonData.JSON_INSTANCES], 
-					[status.sortCriteria.classes.subclasses, jsonData.JSON_SUBCLASSES]];
+				var sortCriteria = getSortCriteria();
+
+				var sortIdArray = function(comparator, category){
+					sortedIdArrays[category] = util.cloneObject(idArray);
+					sortedIdArrays[category].sort(comparator(classes));
+				};
 
 				for (var i=0; i < sortCriteria.length; i++){
-					if (sortCriteria[i][0] != "fa fa-sort"){
-						sortClasses(util.getSortComparator(sortCriteria[i][1], 
-							sortCriteria[i][0] == "fa fa-sort-asc" ? 1 : -1));
-					}
+					sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
 				}
+				updateSorting(sortCriteria);
+
 				return {
-					classesHeader: [["Label (ID)", "col-xs-9", sortCriteria[0][0], jsonData.JSON_LABEL, function(status, value){status.sortCriteria.classes.label = value}],
-						["Instances", "col-xs-1", sortCriteria[1][0], jsonData.JSON_INSTANCES, function(status, value){status.sortCriteria.classes.instances = value}], 
-						["Subclasses", "col-xs-1", sortCriteria[2][0], jsonData.JSON_SUBCLASSES, function(status, value){status.sortCriteria.classes.subclasses = value}]],
+					classesHeader: [["Label (ID)", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
+						["Instances", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
+						["Subclasses", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]],
 					getClasses: function(){ return classes; },
-					getIdArray: function(){ return idArray; },
+					getIdArray: getSortedIdArray,
 					hasEntity: function(id){ return (id in classes); },
 					getLabel: getLabel,
 					getLabelOrId: function(id){ return getData(id, 'l', 'Q' + id); },
@@ -468,7 +543,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 					getMainUsageCount: getAllInstanceCount,
 					getUrl: getUrl,
 					getNonemptySubclasses: function(id){ return getData(id, 'sb', []); },
-					sortClasses: sortClasses
+					sortClasses: function(){ updateSorting(getSortCriteria()); }
 				}
 			});
 		}

@@ -478,18 +478,18 @@ classBrowser.controller('TableController',
       for (var i=0; i < header.length; i++){
         if (header[i] != element){
           header[i][2] = "fa fa-sort";
-          header[i][4](status, header[i][2]);
+          header[i][3](status, header[i][2]);
         }
       }
-      element[4](status, element[2]);
+      element[3](status, element[2]);
       if (status.entityType == "classes"){
         Classes.then(function(data){
-          data.sortClasses(util.getSortComparator(element[3], direction));
+          data.sortClasses();
           updateTable();
         });
       }else{
         Properties.then(function(data){
-          data.sortProperties(util.getSortComparator(element[3], direction));
+          data.sortProperties();
           updateTable();
         });
       }
