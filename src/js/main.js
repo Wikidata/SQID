@@ -15,7 +15,8 @@ requirejs.config({
 		'jquery-ui': ['jquery'],
 		'bootstrap': ['jquery'],
 		'angular': {
-			exports: 'angular'
+			exports: 'angular',
+			deps: ['jquery']
 		},
 		'ngAnimate': ['angular'],
 		'ngRoute': ['angular'],
