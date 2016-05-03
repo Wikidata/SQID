@@ -21,6 +21,14 @@
 			first parameter (which is more for writing convenience since it's the same as this.activeIndex alias $pagination.activeIndex)
 		useful if you want to do something in your parent controller whenever the page changes (e.g. lazy loading of live data for just the visible items)
 	
+	example of init hook - persisting a pagination (in parent controller, before pagination controller load(!):)
+	>	$scope.pagination.init = function(pagination) {
+	>		if(firstRun) {
+	>			someService.persistentPagi = jQuery.extend({}, pagination);
+	>		}
+	>	return someService.persistentPagi; // (MUST return reference to a pagination object)
+	>}
+
 
 	Template Example
  		<div ng-controller="PaginationController">
@@ -53,17 +61,21 @@
 		</div>
 */
 
-angular.module('utilities').controller('PaginationController', ['$scope', 'jsonData', function($scope, jsonData) {
-	
-	//init pagination config from parent or default (specified in util.js/jsonData)
+angular.module('utilities').controller('PaginationController', ['$scope', function($scope) {
+	//init pagination config from parent or default
 	if($scope.pagination === undefined) { $scope.pagination = {}; }
 	var pgnt = {
-		tableSize: $scope.pagination.tableSize || jsonData.TABLE_SIZE, // number of rows per page
-		pageSelectorSize: $scope.pagination.pageSelectorSize || jsonData.PAGE_SELECTOR_SIZE, // number of explicit links left AND right from the active page
+		tableSize: $scope.pagination.tableSize || 15, // number of rows per page
+		pageSelectorSize: $scope.pagination.pageSelectorSize || 4, // number of explicit links left AND right from the active page
 		index: $scope.pagination.index || [], // an array of things to paginate
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
-		onPageChange: $scope.pagination.onPageChange || undefined // callback function that runs on every page change
+		onPageChange: $scope.pagination.onPageChange || undefined, // callback function that runs on every page change
+		autoBoot: $scope.pagination.autoBoot || false // automatically create the pagination model when the controller is loaded (start manually with setIndex(indexArray))
 	};
+
+	// custom init hook
+	if(typeof $scope.pagination.init === "function") { pgnt = $scope.pagination.init(pgnt); }
+
 	$scope.pagination = pgnt; // expose to own and
 	$scope.$parent.pagination = pgnt; // parent scope
 
@@ -118,12 +130,16 @@ angular.module('utilities').controller('PaginationController', ['$scope', 'jsonD
 	// updates the model with the current state
 	pgnt.update = function(callback) {
 		this.fromItem = (pgnt.activePage-1) * pgnt.tableSize + 1;
-		this.toItem = this.activePage * this.tableSize;
+		this.toItem = Math.min(this.activePage * this.tableSize, this.numItems);
 		pgnt.activeIndex = pgnt.index.slice( this.fromItem - 1, this.toItem); // (slice is excluding the end of range index)
 
 		updatePageSelectionModel();
 
 		if(typeof callback === "function") { callback.call(pgnt, pgnt.activeIndex); }
 	};
+
+	// init on init
+	if(pgnt.autoBoot) { pgnt.setIndex(pgnt.index); }
 }]);
+
 

@@ -4,15 +4,12 @@
   <meta charset="utf8" />
   <title>Wikidata Class Browser</title>
   <link rel="stylesheet" href="lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="style.css">
   <link href='https://fonts.googleapis.com/css?family=Roboto:400,900' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+  <link rel="stylesheet" href="angucomplete-alt.css">
   <script data-main="js/main" src="lib/require.js"></script>
-  <!--
-  <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-  <script type="text/javascript" src="lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-  -->
 </head>
 <body>
 	<nav class="navbar navbar-default">
@@ -31,10 +28,10 @@
 			</div>
 			<div class="collapse navbar-collapse" id="main-navbar">
 				<ul class="nav navbar-nav navbar-right"> 
-					<li class="nav-link"><a href="#/">Start</a></li>
-					<li class="nav-link"><a href="#/browse?type=properties">Properties</a></li>
-					<li class="nav-link"><a href="#/browse?type=classes">Classes</a></li>
-					<li class="nav-link"><a href="#/about">About</a></li>
+					<li class="nav-link"><a href="#/"><span translate="NAV.START"></span></a></li>
+					<li class="nav-link"><a href="#/browse?type=properties"><span translate="NAV.PROPERTIES"></span></a></li>
+					<li class="nav-link"><a href="#/browse?type=classes"><span translate="NAV.CLASSES"></span></a></li>
+					<li class="nav-link"><a href="#/about"><span translate="NAV.ABOUT"></span></a></li>
 					<!-- Dropdown example: -->
 					<!--<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">About ICCL <b class="caret"></b></a>
@@ -98,16 +95,6 @@
     <div ng-view id="wrapper" autoscroll="">
     </div>
   </div>
-  <wdcb-footer />
-  <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-animate.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular-route.js"></script>
-  <!-- Latest compiled and minified JavaScript -->
-  <!--<script src="lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-  <script src="js/util.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/viewController.js"></script>
-  <script src="js/tableController.js"></script>
-  <script src="js/paginationController.js"></script>-->
+  <sqid-footer />
 </body>
 </html>
