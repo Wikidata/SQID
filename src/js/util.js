@@ -1,40 +1,5 @@
 
 angular.module('utilities', [])
-.factory('jsonData', function() {
-
-	var JSON_LABEL = "l";
-	var JSON_INSTANCES = "i";
-	var JSON_SUBCLASSES = "s";
-	var JSON_RELATED_PROPERTIES = "r";
-	var JSON_SUPERCLASSES = "sc";
-	var JSON_DIRECT_SUBCLASSES = "sb";
-	var JSON_QUALIFIER_PROPERTIES = "qs";
-	var JSON_PROPERTY_DIRECT_INSTANCE_OF = "pc";
-
-	return {
-		JSON_LABEL: JSON_LABEL,
-		JSON_INSTANCES: JSON_INSTANCES,
-		JSON_SUBCLASSES: JSON_SUBCLASSES,
-		JSON_RELATED_PROPERTIES: JSON_RELATED_PROPERTIES,
-		JSON_SUPERCLASSES: JSON_SUPERCLASSES,
-		JSON_DIRECT_SUBCLASSES : JSON_DIRECT_SUBCLASSES,
-		JSON_QUALIFIER_PROPERTIES : JSON_QUALIFIER_PROPERTIES,
-		JSON_PROPERTY_DIRECT_INSTANCE_OF : JSON_PROPERTY_DIRECT_INSTANCE_OF,
-
-		JSON_ITEMS_WITH_SUCH_STATEMENTS: "i",
-		JSON_USES_IN_STATEMENTS: "s",
-		JSON_USES_IN_STATEMENTS_WITH_QUALIFIERS: "w",
-		JSON_USES_IN_QUALIFIERS: "q",
-		JSON_USES_IN_PROPERTIES: "p",
-		JSON_USES_IN_REFERENCES: "e",
-		JSON_DATATYPE: "d",
-
-		TABLE_SIZE: 15,
-		PAGE_SELECTOR_SIZE: 4
-	};
-
-})
-
 .factory('spinner', function() {
 	var opts = {
 		lines: 15, // The number of lines to draw
@@ -338,6 +303,16 @@ angular.module('utilities', [])
       }
     }
 
+    var reverseDeepCopy = function(array){
+    	var newarray = [];
+		var j=0;
+		for (var i=array.length-1; i >= 0; i--){
+			newarray[j] = array[i];
+			j++;
+		}
+		return newarray;
+    }
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
@@ -346,7 +321,8 @@ angular.module('utilities', [])
 		unionArrays: unionArrays,
 		sortByField: sortByField,
 		createIdArray: createIdArray,
-		getSortComparator: getSortComparator
+		getSortComparator: getSortComparator,
+		reverseDeepCopy: reverseDeepCopy
 	};
 
 })
@@ -1031,8 +1007,8 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 			missingTermsListener.hasMissingTerms = false;
 			var panelId = 'statements_' + show;
 			var html = '<div class="panel panel-info">\n' +
-						'<div class="panel-heading"><h2 class="panel-title">\n' +
-						'<a data-toggle="collapse" data-target="#' + panelId + '"  style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
+						'<div class="panel-heading" data-toggle="collapse" data-target="#' + panelId + '"><h2 class="panel-title">\n' +
+						'<a style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
 						'<div id="' + panelId + '" class="panel-collapse collapse in">' +
 						'<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
 			var hasContent = false;
