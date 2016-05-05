@@ -66,3 +66,10 @@
     height: 34px;
     width: 34px;
 }
+
+/* adaptions for query view */
+#query-interface .angucomplete-dropdown {
+    width: 45em;
+    max-width: 100%;
+    max-height: 400px;
+}
