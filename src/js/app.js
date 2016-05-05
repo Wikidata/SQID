@@ -4,7 +4,7 @@ $("[data-toggle=popover]").popover({html:true});
 
 var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt'])
 
-	.config(function($routeProvider) {
+	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
 			.when('/', {templateUrl: 'views/start.html'})
 			.when('/browse', { templateUrl: 'views/browseData.html' })
@@ -13,7 +13,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/status', { templateUrl: 'views/status.html' })
 			.when('/view', { templateUrl: 'views/view.html' })
 			.otherwise({redirectTo: '/'});
-	})
+	}])
 
 	.config(['$translateProvider', function ($translateProvider) {
 
@@ -200,7 +200,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			;
 	}])
 
-	.factory('Arguments', function($http, $route, util){
+	.factory('Arguments', ['$http', '$route', 'util', function($http, $route, util){
 		var args = {}; 
 		var statusStartValues = {
 			entityType: "classes",
@@ -341,9 +341,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				return result;
 			}
 		}
-	})
+	}])
 
-	.factory('Properties', function($http, $route, util, Arguments){
+	.factory('Properties', ['$http', '$route', 'util', 'Arguments', function($http, $route, util, Arguments){
 		var promise;
 		var properties;
 		var idArray;
@@ -450,9 +450,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			});
 		}
 		return promise;
-	})
+	}])
 
-	.factory('Classes', function($http, $route, util, Arguments) {
+	.factory('Classes', ['$http', '$route', 'util', 'Arguments', function($http, $route, util, Arguments) {
 		var promise;
 		var classes;
 		var idArray;
@@ -548,9 +548,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			});
 		}
 		return promise;
-	})
+	}])
 	
-	.factory('statistics', function($http, $route) {
+	.factory('statistics', ['$http', '$route', function($http, $route){
 		var promise;
 		var statistics; 
 
@@ -593,7 +593,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			});
 		}
 		return promise;
-	})
+	}])
 
 	.filter('to_trusted', ['$sce', function($sce){
 		return function(text) {

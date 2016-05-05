@@ -1,8 +1,9 @@
 requirejs.config({
 	"paths": {
-		"lib": "../lib",
+		//"lib": "../lib",
 
-		"bootstrap": '../lib/bootstrap-3.3.6-dist/js/bootstrap',
+		//"bootstrap": '../lib/bootstrap-3.3.6-dist/js/bootstrap',
+		"bootstrap": '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min',
 		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.2.5.min",
 
 		"jquery": "//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min",
@@ -11,8 +12,13 @@ requirejs.config({
 		"angular": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular",
 		"ngAnimate": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate",
 		"ngRoute": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route",
-		"ngTranslate": "../lib/angular-translate.min",
-		"ngComplete": "../lib/angucomplete-alt.min"
+		//"ngTranslate": "../lib/angular-translate.min",
+		"ngTranslate": "//cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate.min",
+
+		// https://cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js
+		
+		//"ngComplete": "../lib/angucomplete-alt.min",
+		"ngComplete": "//cdn.jsdelivr.net/angucomplete-alt/2.4.1/angucomplete-alt.min"
 	},
 	shim: {
 		'jquery-ui': ['jquery'],
@@ -32,7 +38,7 @@ requirejs.config({
 		'paginationController': ['util'],
 
 		'app': {
-			deps: ['jquery-ui', 'ui-boostrap-tpls', 'bootstrap', 'ngAnimate', 'ngRoute', 'util', 'ngTranslate', 'ngComplete']
+			deps: ['jquery-ui', 'ui-boostrap-tpls', 'bootstrap', 'ngAnimate', 'ngRoute', 'util', 'paginationController', 'ngTranslate', 'ngComplete']
 		},
 
 		'tableController': ['app'],
@@ -43,9 +49,9 @@ requirejs.config({
 
 
 // Load the main app module to start the app
-requirejs(['app', 'tableController', 'viewController', 'statController', 'paginationController'], function() {
+requirejs(['app', 'tableController', 'viewController', 'statController'], function() {
 	jQuery(function() {
 		console.log('haz all filez, ready, actionz!');
-		angular.bootstrap( document, ['classBrowserApp'] );
+		angular.bootstrap( document, ['classBrowserApp'], { strictDi: true } );
 	});
 });
