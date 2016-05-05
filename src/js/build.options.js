@@ -6,6 +6,7 @@
         'jquery': "empty:",
         "jquery-ui": "empty:",
         "bootstrap": "empty:",
+        "spin": "empty:",
 
 		"angular": "empty:",
 		"ngAnimate": "empty:",

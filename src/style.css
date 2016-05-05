@@ -2,6 +2,12 @@ body{
     font-family: 'Roboto', sans-serif;
 }
 
+
+.blending.ng-hide {
+	transition:0.4s linear all;
+	opacity:0;
+}
+
 .footer {
 	text-align: center;
 	color: #666;
@@ -75,6 +81,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 /*#navigation{
 	height: 100px;
 }*/
+
+.pagination-nav-caption {
+	margin: 20px 0 -10px 6px;
+}
 
 .pagination-nav-caption {
 	margin: 20px 0 -10px 6px;
@@ -188,13 +198,16 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 }
 
 /* Collapsible panels */
-.panel-heading a:after {
+.panel-heading[data-toggle='collapse'] {
+	cursor: pointer;
+}
+.panel-heading[data-toggle='collapse']:before {
     font-family: 'Glyphicons Halflings';
     content: "\e114";    
     float: right; 
     color: grey; 
 }
-.panel-heading a.collapsed:after {
+.panel-heading.collapsed:before {
     content: "\e080";
 }
 
@@ -297,6 +310,10 @@ span.smallnote {
 	left: 4px;
 }
 
+.alert-danger pre {
+	max-height: 12em;
+}
+
 .input-monospace{
     font-family: monospace;
 }
@@ -327,4 +344,24 @@ span.smallnote {
 }
 #ctc-button{
     /*float: left;*/
+}
+
+
+#qry-form-request .form-group {
+	position: relative; /* for spinner positioning */
+}
+
+#query-interface table {
+	table-layout: fixed;
+}
+#query-interface table th:first-child {
+	width: 35%;
+}
+#query-interface table th:last-child {
+	width: 65%;
+}
+#query-interface table td {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }

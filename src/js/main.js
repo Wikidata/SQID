@@ -9,6 +9,8 @@ requirejs.config({
 		"jquery": "//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min",
 		"jquery-ui": "//code.jquery.com/ui/1.11.4/jquery-ui",
 
+		"spin": "//fgnass.github.io/spin.js/spin.min",
+
 		"angular": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular",
 		"ngAnimate": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate",
 		"ngRoute": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route",
@@ -34,11 +36,13 @@ requirejs.config({
 		'ngTranslate': ['angular'],
 		'ngComplete': ['angular'],
 
-		'util': ['angular'],
+		'util': ['angular', 'spin'],
 		'paginationController': ['util'],
+		'queryInterface': ['angular'],
 
 		'app': {
-			deps: ['jquery-ui', 'ui-boostrap-tpls', 'bootstrap', 'ngAnimate', 'ngRoute', 'util', 'paginationController', 'ngTranslate', 'ngComplete']
+			deps: ['jquery-ui', 'ui-boostrap-tpls', 'bootstrap', 'spin', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
+					'util', 'paginationController', 'queryInterface']
 		},
 
 		'tableController': ['app'],

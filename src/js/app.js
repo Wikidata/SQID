@@ -2,7 +2,7 @@
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt'])
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 'queryInterface'])
 
 	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
@@ -12,6 +12,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			.when('/about', { templateUrl: 'views/about.html' })
 			.when('/status', { templateUrl: 'views/status.html' })
 			.when('/view', { templateUrl: 'views/view.html' })
+			.when('/query', { templateUrl: 'views/queryview.html'})
 			.otherwise({redirectTo: '/'});
 	}])
 
