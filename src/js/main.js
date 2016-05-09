@@ -1,26 +1,21 @@
 requirejs.config({
+	baseUrl: './js',
 	"paths": {
-		//"lib": "../lib",
 
-		//"bootstrap": '../lib/bootstrap-3.3.6-dist/js/bootstrap',
-		"bootstrap": '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min',
-		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.2.5.min",
-
-		"jquery": "//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min",
-		"jquery-ui": "//code.jquery.com/ui/1.11.4/jquery-ui",
-
-		"spin": "//fgnass.github.io/spin.js/spin.min",
-
-		"angular": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular",
-		"ngAnimate": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate",
-		"ngRoute": "//ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route",
-		//"ngTranslate": "../lib/angular-translate.min",
-		"ngTranslate": "//cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate.min",
-
-		// https://cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js
+		"jquery": "../lib/jquery",
+		"jquery-ui": "../lib/jquery-ui",
+		"bootstrap": '../lib/bootstrap-3.3.6-dist/js/bootstrap',
 		
-		//"ngComplete": "../lib/angucomplete-alt.min",
-		"ngComplete": "//cdn.jsdelivr.net/angucomplete-alt/2.4.1/angucomplete-alt.min"
+		"spin": "../lib/spin",
+
+		"angular": "../lib/angular",
+		"ngAnimate": "../lib/angular-animate",
+		"ngRoute": "../lib/angular-route",
+		"ngTranslate": "../lib/angular-translate",
+		// TODO - lazy loader for language definition files:
+		// https://cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js
+		"ngComplete": "../lib/angucomplete-alt",
+		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2"
 	},
 	shim: {
 		'jquery-ui': ['jquery'],
@@ -41,8 +36,11 @@ requirejs.config({
 		'queryInterface': ['angular'],
 
 		'app': {
-			deps: ['jquery-ui', 'ui-boostrap-tpls', 'bootstrap', 'spin', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
-					'util', 'paginationController', 'queryInterface']
+			deps: ['jquery-ui', 'ui-boostrap-tpls', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
+					'paginationController', 'queryInterface']
+
+			// full deps including nested (best practice?)
+			// ['jquery', 'jquery-ui','bootstrap', 'spin', 'angular', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete', 'ui-boostrap-tpls', 'util', 'paginationController', 'queryInterface']
 		},
 
 		'tableController': ['app'],
