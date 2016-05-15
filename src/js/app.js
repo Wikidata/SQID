@@ -191,10 +191,98 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			NOSUCHENTITY_HEADLINE: 'Leider konnte ich kein Objekt mit ID "{{id}}" finden.',
 			NOSUCHENTITY_BODY: 'Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden.',
 		};
-		
+		var nbMessages = {
+			NAV: {
+				PROPERTIES: 'Egenskaper',
+				CLASSES: 'Klasser',
+				START: 'Start',
+				ABOUT: 'Om',
+			},
+			FOOTER: {
+				STAT_DATE: 'Statistikk basert på datadump fra {{date}}',
+				STAT_LINK: 'detaljer',
+				POWERED_BY: 'Drevet av <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
+			},
+			PROPTYPE : 'Type',
+			FURTHER_RESULTS: '&hellip; flere resultater',
+			STATEMENTS: {
+				PREFERRED_HINT: 'Dette er et foretrukket utsagn',
+				DEPRECATED_HINT: 'Dette er et utdatert utsagn',
+				NO_VALUE: 'ingen verdi',
+				SOME_VALUE: 'uspesifisert verdi',
+				MORE_STATEMENTS: 'vis {{number}} flere utsagn',
+				LESS_STATEMENTS: 'skjul {{number}} utsagn'
+			},
+			TYPICAL_PROPS : {
+				TYPICAL_PROPS : 'Typiske egenskaper',
+				HINT_PROP : 'Andre egenskaper som ofte er brukt av elementer med denne egenskapen',
+				HINT_CLASS : 'Andre egenskaper som ofte er brukt av direkte og indirekte forekomster av denne klassen',
+				NONE : 'ingen',
+			},
+			INSTANCE_OF_PHRASE: '{{entity}} er en/et {{classes}}',
+			NO_INSTANCE_OF_PHRASE: '{{entity}} er ikke en forekomst av noen annen klasse',
+			SUBCLASS_OF_PHRASE: 'enhver(t) {{entity}} er også en/et {{classes}}',
+			NO_SUBCLASS_OF_PHRASE: '{{entity}} er ikke en underklasse av noen annen klasse',
+			SUBPROPERTY_OF_PHRASE: 'enhver {{entity}} er også en/et {{properties}}',
+			NO_SUBPROPERTY_OF_PHRASE: '{{entity}} er ikke en underegenskap av noen annen egenskap',
+			SEC_CLASSIFICATION : {
+				SEC_CLASSIFICATION : 'Klassifikasjon',
+				DIRECT_SUBCLASSES: 'Direkte underklasser',
+				NO_DIRECT_SUBCLASSES: 'ingen',
+				LOADING_DIRECT_SUBCLASSES: 'Henter direkte underklasser &hellip;',
+				DIRECT_SUBCLASSES_INSTANCE: 'Med forekomster',
+				INSTANCE_SUBCLASSES_HINT: 'Direkte underklasser som har forekomster, sammen med antallet direkte og indirekte forekomster',
+				DIRECT_SUBCLASSES_SUBCLASS: 'Med underklasser',
+				SUBCLASS_SUBCLASSES_HINT: 'Direkte underklasser som har underklasser, sammen med antallet direkte og indirekte underklasser',
+				DIRECT_SUBCLASSES_ALL: 'Alle',
+				DIRECT_SUPERCLASSES: 'Direkte overklasser',
+				NO_DIRECT_SUPERCLASSES: 'ingen',
+				ALL_SUBCLASSES: 'Alle underklasser',
+				ALL_SUBCLASSES_HINT: 'Antall unike direkte og indirekte underklasser',
+			},
+			SEC_INSTANCES : {
+				SEC_INSTANCES : 'Forekomster',
+				DIRECT_INSTANCES : 'Direkte forekomster',
+				ALL_INSTANCES : 'Alle forekomster',
+				ALL_INSTANCES_HINT : 'Totalt antall unike forekomster av denne klassen og dens {{subclassCount}} direkte og indirekte underklasser',
+				NO_DIRECT_INSTANCES: 'Ingen direkte forekomster ble funnet. Kanskje dataene nylig har blitt endret. Vi henter snart oppdaterte data.',
+				LOADING_DIRECT_INSTANCES: 'Henter direkte forekomster &hellip;',
+			},
+			SEC_HUMAN_RELATIONS: 'Menneskelige relasjoner',
+			SEC_IDENTIFIERS: 'Identifikatorer',
+			SEC_LINKS : {
+				SEC_LINKS : 'Lenker',
+				WIKIDATA : 'Wikidata-side',
+				WEBSITE: 'Offisielt nettsted',
+				REASONATOR : 'Reasonator',
+			},
+			SEC_PROP_USE : {
+				SEC_PROP_USE : 'Egenskapsbruk',
+				ENTITIES: 'Entiteter',
+				ENTITIES_HINT: 'Entiteter med utsagn for denne egenskapen',
+				NO_ENTITIES: 'Ingen entiteter ble funnet. Kanskje dataene nylig har blitt endret. Vi henter snart oppdaterte data.',
+				LOADING_ENTITIES: 'Henter entiteter &hellip;',
+				VALUES: 'Verdier',
+				VALUES_HINT: 'Verdier brukt i utsagn med denne egenskapen',
+				STATEMENTS: 'Utsagn',
+				STATEMENTS_PER_ENTITY: '({{number}} per entitet)',
+				STATEMENTS_HINT: 'Antall utsagn for denne egenskapen',
+				QUALIFIERS: 'Kvalifikatorer',
+				QUALIFIERS_HINT: 'Andre egenskaper som er brukt som kvalifikatorer for denne egenskapen, sammen med antall brukstilfeller',
+				QUALIFIER_USES: 'Brukt som kvalifikator',
+				REFERENCE_USES: 'Brukt i referanser',
+			},
+			SEC_STATEMENTS : 'Utsagn',
+			SEC_MEDIA : 'Media',
+			SEC_WIKIMEDIA_PAGES : 'Wikimedia-kategorier og -portaler',
+			NOSUCHENTITY_HEADLINE: 'Beklager, fant ikke noen entitet med ID "{{id}}".',
+			NOSUCHENTITY_BODY: 'Kanskje den har blitt slettet. Kanskje den aldri eksisterte. Kanskje vi aldri får vite hvorfor.',
+		};
+
 		$translateProvider
 			.translations('en', enMessages )
 			.translations('de', deMessages )
+			.translations('nb', nbMessages )
 			.fallbackLanguage('en')
 			.preferredLanguage('en')
 // 			.useSanitizeValueStrategy('escape') // using this makes it impossible to use HTML (links, tooltips, etc.) in variable replacements
