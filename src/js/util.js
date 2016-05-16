@@ -337,7 +337,8 @@ angular.module('utilities', [])
 	}
 
 	var getQueryUiUrl = function(sparqlQuery) {
-		return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
+		return '#/query?run=' + encodeURIComponent(sparqlQuery);
+		//return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
 	}
 
 	var getStandardPrefixes = function() {
@@ -349,24 +350,32 @@ angular.module('utilities', [])
 	var getQueryRequest = function(sparqlQuery) {
 		return util.httpRequest(getQueryUrl(sparqlQuery));
 	};
+	
+	var getInnerQueryForPropertySubjects = function(resultVarName, propertyId, objectId, limit) {
+		return "SELECT DISTINCT ?" + resultVarName + " WHERE { ?" + resultVarName + " wdt:" + propertyId +  (objectId != null ? " wd:" + objectId : " _:bnode") + " . }"
+			+ (limit > 0 ? " LIMIT " + limit : "");
+	}
 
 	var getQueryForPropertySubjects = function(propertyId, objectId, limit) {
 		return getStandardPrefixes() + "\
 SELECT $p $pLabel \n\
 WHERE { \n\
-   { SELECT DISTINCT $p WHERE { $p wdt:" + propertyId +  (objectId != null ? " wd:" + objectId : " _:bnode")  +
-   " . } LIMIT " + limit + " } \n\
+   { " + getInnerQueryForPropertySubjects("p", propertyId, objectId, limit) + " } \n\
    SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage() + "\" . } \n\
 }";
+	}
+
+	var getInnerQueryForPropertyObjects = function(resultVarName, subjectId, propertyId, limit) {
+		return "SELECT DISTINCT ?" + resultVarName + " WHERE { " + (subjectId != null ? "wd:" + subjectId : "_:bnode")
+			+ " wdt:" + propertyId + " ?" + resultVarName + " . FILTER(isIRI(?" + resultVarName + ")) }"
+			+ (limit > 0 ? " LIMIT " + limit : "");
 	}
 
 	var getQueryForPropertyObjects = function(subjectId, propertyId, limit) {
 		return getStandardPrefixes() + "\
 SELECT $p $pLabel \n\
 WHERE { \n\
-   { SELECT DISTINCT $p WHERE { " + (subjectId != null ? "wd:" + subjectId : "_:bnode") +
-   " wdt:" + propertyId + " ?p . \n\
-     FILTER(isIRI(?p)) } LIMIT " + limit + " } \n\
+   { " + getInnerQueryForPropertyObjects("p", subjectId, propertyId, limit) + " } \n\
    SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage() + "\" . } \n\
 }";
 	}
@@ -418,13 +427,13 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 	var getPropertySubjects = function(propertyId, objectId, limit) {
 		return fetchPropertySubjects(propertyId, objectId, limit).then(function(data){
-			return parseUnarySparqlQueryResult(data, limit, getQueryForPropertySubjects(propertyId, objectId, 1000));
+			return parseUnarySparqlQueryResult(data, limit, getInnerQueryForPropertySubjects("entity", propertyId, objectId, 10000));
 		});
 	}
 
 	var getPropertyObjects = function(subjectId, propertyId, limit) {
 		return fetchPropertyObjects(subjectId, propertyId, limit).then(function(data){
-			return parseUnarySparqlQueryResult(data, limit, getQueryForPropertyObjects(subjectId, propertyId, 1000));
+			return parseUnarySparqlQueryResult(data, limit, getInnerQueryForPropertyObjects("entity", subjectId, propertyId, 10000));
 		});
 	}
 
