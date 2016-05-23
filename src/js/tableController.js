@@ -1,5 +1,5 @@
 classBrowser.controller('TableController', 
-  function($scope, Arguments, Classes, Properties, util){
+  function($scope, $translate, Arguments, Classes, Properties, util){
 
     var tableContent = [];
 
@@ -396,6 +396,21 @@ classBrowser.controller('TableController',
       {id: 11, name: "Monolingualtext"}],
       selected: status.propertiesFilter.datatypes
     }
+
+    $scope.translations = {};
+
+    $translate(['TABLE_HEADER.LABEL', 'TABLE_HEADER.DATATYPE', 'TABLE_HEADER.USES_IN_STMTS', 
+        'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES', 
+        'TABLE_HEADER.SUBCLASSES']).then(function(translations){
+      translations.LABEL = translations['TABLE_HEADER.LABEL'];
+      translations.DATATYPE = translations['TABLE_HEADER.DATATYPE'];
+      translations.USES_IN_STMTS = translations['TABLE_HEADER.USES_IN_STMTS'];
+      translations.USES_IN_QUALS = translations['TABLE_HEADER.USES_IN_QUALS'];
+      translations.USES_IN_REFS = translations['TABLE_HEADER.USES_IN_REFS'];
+      translations.INSTATNCES = translations['TABLE_HEADER.INSTATNCES'];
+      translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
+
+    });
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};

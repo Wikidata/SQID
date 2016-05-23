@@ -30,6 +30,32 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				STAT_LINK: 'details',
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
+			TABLE_HEADER: {
+				LABEL: 'Label (ID)',
+				DATATYPE: 'Datatype',
+				USES_IN_STMTS: 'Uses in statements',
+				USES_IN_QUALS: 'Uses in qualifiers',
+				USES_IN_REFS: 'Uses in references',
+				INSTATNCES: 'Instances',
+				SUBCLASSES: 'Subclasses'
+			},
+			FILTER_MENUE: {
+				LABEL_PLACEHOLDER: 'Filter labels',
+				PROPERTY_PLACEHOLDER: 'Select property',
+				CLASS_PLACEHOLDER: 'Select Class',
+				FILTER_PROPERTY: 'Has Property',
+				FILTER_DATATYPE: 'Select Datatype',
+				FILTER_REL_QUAL: 'Related qualifier properties',
+				FILTER_USE_STMTS: 'Uses in statements',
+				FILTER_USE_QUALS: 'Uses in qualifiers',
+				FILTER_USE_REFS: 'Uses in references',
+				FILTER_DIRECT_INSZ: 'Number of direct instances',
+				FILTER_DIRECT_SUBCL: 'Number of direct subclasses',
+				RESET_FILTERS: 'Reset FILTERS',
+				PERMALINK: 'Link with filter states:'	
+			},
+			ENTITIES: 'Entities',
+			ENTITIES_COUNT: 'Total number of entities',
 			PROPTYPE : 'Type',
 			FURTHER_RESULTS: '&hellip; further results',
 			STATEMENTS: {
@@ -117,6 +143,27 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				STAT_LINK: 'Details',
 				POWERED_BY: 'Powered by <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a> &amp; <a href="https://query.wikidata.org/">Wikidata SPARQL Query</a>',
 			},
+			TABLE_HEADER: {
+				LABEL: 'Bezeichner (ID)',
+				DATATYPE: 'Datentyp',
+				USES_IN_STMTS: 'Verwendung für Aussagen',
+				USES_IN_QUALS: 'Verwendung für Qualifikatoren',
+				USES_IN_REFS: 'Verwendung in Referenzen',
+				INSTATNCES: 'Instanzen',
+				SUBCLASSES: 'Unterklassen'
+			},
+			FILTER_MENUE: {
+				LABEL_PLACEHOLDER: 'Filter labels',
+				PROPERTY_PLACEHOLDER: 'Select property',
+				CLASS_PLACEHOLDER: 'Select Class',
+				FILTER_PROPERTY: 'Has Property',
+				FILTER_DIRECT_INSZ: 'Number of direct instances',
+				FILTER_DIRECT_SUBCL: 'Number of direct subclasses',
+				RESET_FILTERS: 'Reset FILTERS',
+				PERMALINK: 'Link with filter states:'	
+			},
+			ENTITIES: 'Entities',
+			ENTITIES_COUNT: 'Total number of entities',
 			PROPTYPE : 'Typ',
 		 	STATEMENTS: {
 				PREFERRED_HINT: 'Dies ist eine bevorzugte Aussage',
@@ -513,11 +560,11 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				updateSorting(sortCriteria);
 
 				return {
-					propertiesHeader: [["Label (ID)", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
-						["Datatype", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}], 
-						["Uses in statements", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
-						["Uses in qualifiers", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
-						["Uses in references", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]],
+					propertiesHeader: [["TABLE_HEADER.LABEL", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
+						["TABLE_HEADER.DATATYPE", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}], 
+						["TABLE_HEADER.USES_IN_STMTS", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
+						["TABLE_HEADER.USES_IN_QUALS", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
+						["TABLE_HEADER.USES_IN_REFS", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]],
 					getProperties: function(){ return properties; },
 					getIdArray: getSortedIdArray,
 					hasEntity: function(id){ return (id in properties); },
@@ -615,9 +662,9 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				updateSorting(sortCriteria);
 
 				return {
-					classesHeader: [["Label (ID)", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
-						["Instances", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
-						["Subclasses", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]],
+					classesHeader: [["TABLE_HEADER.LABEL", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
+						["TABLE_HEADER.INSTATNCES", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
+						["TABLE_HEADER.SUBCLASSES", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]],
 					getClasses: function(){ return classes; },
 					getIdArray: getSortedIdArray,
 					hasEntity: function(id){ return (id in classes); },
