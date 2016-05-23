@@ -350,6 +350,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var statusStartValues = {
 			entityType: "classes",
 			activePage: 1,
+			lang: 'en',
 			sortCriteria: {
 				classes: {
 					label: "fa fa-sort",
@@ -402,6 +403,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				args = {
 					type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
 					activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
+					lang : ($route.current.params.lang) ? ($route.current.params.lang) : status.lang,
 					sortCriteria: {
 						classes: {
 							label: ($route.current.params.sortclasslabel) ? ($route.current.params.sortclasslabel) : status.sortCriteria.classes.label,
@@ -436,6 +438,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				}
 				status.entityType = args.type;
 				status.activePage = args.activePage;
+				status.lang = args.lang;
 				status.sortCriteria = args.sortCriteria;
 				status.classesFilter = args.classesFilter;
 				status.propertiesFilter = args.propertiesFilter;

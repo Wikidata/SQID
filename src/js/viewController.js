@@ -1,5 +1,5 @@
 
-classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
+classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, Arguments, htmlCache) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -31,7 +31,8 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		},
 
 		updateLang: function() {
-			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : null;
+			Arguments.refreshArgs();
+			var lang = Arguments.getStatus().lang;
 			i18n.setLanguage(lang);
 		},
 
@@ -160,7 +161,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 	};
 })
 .controller('ViewController',
-	function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
+	function($scope, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
 		var MAX_PROP_SUBJECTS = 10;

@@ -1,5 +1,5 @@
 classBrowser.controller('TableController', 
-  function($scope, $translate, Arguments, Classes, Properties, util){
+  function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
     var tableContent = [];
 
@@ -411,6 +411,8 @@ classBrowser.controller('TableController',
       translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
 
     });
+
+    i18n.setLanguage(status.lang);
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};
