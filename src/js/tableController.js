@@ -266,11 +266,11 @@ classBrowser.controller('TableController',
 
     var initClassesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
-        {name: "Number of direct instances", from: 0, 
+        {name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0, 
           to: 4000000,
           startVal: status.classesFilter.instances[0], 
           endVal: status.classesFilter.instances[1]},
-        {name: "number of direct subclasses", from: 0,
+        {name: "FILTER_MENUE.FILTER_DIRECT_SUBCL", from: 0,
           to: 2000000,
           startVal: status.classesFilter.subclasses[0], 
           endVal: status.classesFilter.subclasses[1]}];
@@ -278,15 +278,15 @@ classBrowser.controller('TableController',
 
     var initPropertiesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
-        {name: "Uses in statements", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_STMTS", from: 0,
           to: 20000000,
           startVal: status.propertiesFilter.statements[0],
           endVal: status.propertiesFilter.statements[1]},
-        {name: "Uses in qualifiers", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_QUALS", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.qualifiers[0],
           endVal: status.propertiesFilter.qualifiers[1]},
-        {name: "Uses in references", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_REFS", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.references[0],
           endVal: status.propertiesFilter.references[1]}]; 

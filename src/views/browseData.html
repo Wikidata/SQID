@@ -49,26 +49,26 @@
 	            </li>
 	          </ul>
 			</nav>
-			<div>Entities {{pagination.fromItem}} - {{pagination.toItem}}</div>
-			<div><strong>Total number of entities: </strong>{{pagination.numItems}}</div>
+			<div>{{ 'ENTITIES' | translate }} {{pagination.fromItem}} - {{pagination.toItem}}</div>
+			<div><strong>{{ 'ENTITIES_COUNT' | translate }}: </strong>{{pagination.numItems}}</div>
 	      </div>
 	    </div>
 	    <div class="col-xs-3">
 			<div id="filter-menue">
 				<div class="form-group">
-					<input type="text" class="form-control input-md" placeholder="Filter labels" ng-model="filterLabels" ng-change="searchFilter()" />
+					<input type="text" class="form-control input-md" placeholder="{{ 'FILTER_MENUE.LABEL_PLACEHOLDER' | translate }}" ng-model="filterLabels" ng-change="searchFilter()" />
 				</div>
 				<!--<div ng-slider id="slider-range" someattr="{{slider[0].from}}" index="slider[0].from" begin="0" end="1000">-->
 				<div ng-if='args.type == "properties"' class="ng-scope">
-					<p><strong>Select datatype:</strong></p>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_DATATYPE' | translate }}:</strong></p>
 					<select class="form-control" data-ng-options="datatypeOption.name for datatypeOption in datatypeSelector.options track by datatypeOption.id" ng-model="datatypeSelector.selected" ng-change="setDatatypeFilter(datatypeSelector.selected)">
 					</select>
 			      	<br/>
 				</div>
 				<div ng-if='args.type == "classes"'>
-					<p><strong>Has property:</strong></p>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_PROPERTY' | translate }}:</strong></p>
 					<angucomplete-alt id="related-properties-classes"
-		              placeholder="Select Property"
+		              placeholder="{{ 'FILTER_MENUE.PROPERTY_PLACEHOLDER' | translate }}"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.classes.relatedProperty"
 		              local-data="suggestFilters.data.propertyIndex"
@@ -81,9 +81,9 @@
 		              <br/>
 				</div>
 				<div ng-if='args.type == "classes"'>
-					<p><strong>Has superclass:</strong></p>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_SUPERCLASS' | translate }}:</strong></p>
 					<angucomplete-alt id="superclass-of-class"
-		              placeholder="Select Class"
+		              placeholder="{{ 'FILTER_MENUE.CLASS_PLACEHOLDER' | translate }}"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.classes.superclass"
 		              local-data="suggestFilters.data.classIndex"
@@ -96,9 +96,9 @@
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
-					<p><strong>Has property:</strong></p>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_PROPERTY' | translate }}:</strong></p>
 					<angucomplete-alt id="related-properties-properties"
-		              placeholder="Select Property"
+		              placeholder="{{ 'FILTER_MENUE.PROPERTY_PLACEHOLDER' | translate }}"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.properties.relatedProperty"
 		              local-data="suggestFilters.data.propertyIndex"
@@ -111,9 +111,9 @@
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
-					<p><strong>Related qualifier properties:</strong></p>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_REL_QUAL' | translate }}:</strong></p>
 					<angucomplete-alt id="related-qualifiers"
-		              placeholder="Select Property"
+		              placeholder="{{ 'FILTER_MENUE.PROPERTY_PLACEHOLDER' | translate }}"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.properties.relatedQualifier"
 		              local-data="suggestFilters.data.propertyIndex"
@@ -126,9 +126,9 @@
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
-					<p><strong>Class (only direct):</strong></p>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_DIRECT_CLASS' | translate }}:</strong></p>
 					<angucomplete-alt id="direct-instance-of-property"
-		              placeholder="Select Class"
+		              placeholder="{{ 'FILTER_MENUE.CLASS_PLACEHOLDER' | translate }}"
 		              pause="100"
 		              selected-object="suggestSelectFunctions.properties.directInstanceOf"
 		              local-data="suggestFilters.data.propertyClassIndex"
@@ -141,16 +141,16 @@
 		              <br/>
 				</div>
 				<div ng-repeat="elem in slider track by $index">
-					<p><strong>{{elem.name}}:</strong></p>
+					<p><strong>{{ elem.name | translate }}:</strong></p>
 					<div ng-slider id="slider-range" someattr="elem.from" index="$index" begin="elem.from" end="elem.to" startval="elem.startVal" endval="elem.endVal"></div>
 					<br/>
 					<div class="pull-left">{{ slider[$index].startVal }}</div>
 					<div class="pull-right">{{ slider[$index].endVal }}</div>
 					<br/><br/>
 				</div>
-				<button type="button" class="btn btn-default form-margin-buttom" ng-click="resetFilters()">Reset Filters</button>
+				<button type="button" class="btn btn-default form-margin-buttom" ng-click="resetFilters()">{{ 'FILTER_MENUE.RESET_FILTERS' | translate }}</button>
 				<br/>
-				<p class="pull-left"><strong>Link with filter states:</strong></p>
+				<p class="pull-left"><strong>{{ 'FILTER_MENUE.PERMALINK' | translate }}:</strong></p>
 				<form class="form-horizontal" role="form">
 					<div class="form-group">
 						<div class="col-xs-10">
