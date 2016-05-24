@@ -350,7 +350,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var statusStartValues = {
 			entityType: "classes",
 			activePage: 1,
-			lang: 'en',
+			lang: null,
 			sortCriteria: {
 				classes: {
 					label: "fa fa-sort",
@@ -455,7 +455,8 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 			getUrl: function(){
 				var result =  location.origin + location.pathname + "#/browse" 
 					+ "?activepage=" + status.activePage
-					+ "&type=" + status.entityType;
+					+ "&type=" + status.entityType
+					+ (status.lang ? "&lang=" + status.lang : "");
 				if (status.entityType == "classes"){
 					result += (status.classesFilter.label ? "&classlabelfilter=" + status.classesFilter.label : "")
 						+ (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")
