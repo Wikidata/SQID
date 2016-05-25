@@ -350,7 +350,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		var statusStartValues = {
 			entityType: "classes",
 			activePage: 1,
-			lang: null,
+			lang: 'en',
 			sortCriteria: {
 				classes: {
 					label: "fa fa-sort",
@@ -456,7 +456,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 				var result =  location.origin + location.pathname + "#/browse" 
 					+ "?activepage=" + status.activePage
 					+ "&type=" + status.entityType
-					+ (status.lang ? "&lang=" + status.lang : "");
+					+ (status.lang != 'en' ? "&lang=" + status.lang : "");
 				if (status.entityType == "classes"){
 					result += (status.classesFilter.label ? "&classlabelfilter=" + status.classesFilter.label : "")
 						+ (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")
@@ -524,7 +524,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 
 		var getLabel = function(id) { return getData(id, 'l', null); };
 		var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); };
-		var getUrl = function(id) { return "#/view?id=P" + id; };
+		var getUrl = function(id, lang = 'en') { return "#/view?id=P" + id + '&lang=' + lang; };
 
 		var getQualifiers = function(id){ return getData(id, 'qs', {}); };
 
@@ -631,7 +631,7 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		};
 
 		var getLabel = function(id){ return getData(id, 'l', null); };
-		var getUrl = function(id) { return "#/view?id=Q" + id; };
+		var getUrl = function(id, lang = 'en') { return "#/view?id=Q" + id + '&lang=' + lang; };
 		var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
 		var getSortedIdArray = function(){

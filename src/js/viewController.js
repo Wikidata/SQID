@@ -1,5 +1,5 @@
 
-classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, Arguments, htmlCache) {
+classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -31,8 +31,7 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		},
 
 		updateLang: function() {
-			Arguments.refreshArgs();
-			var lang = Arguments.getStatus().lang;
+			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : null;
 			i18n.setLanguage(lang);
 		},
 

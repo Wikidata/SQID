@@ -16,13 +16,13 @@ classBrowser.controller('TableController',
     var getClassFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (Q' + id + ')': 'Q' + id;
-      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id, status.lang) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (P' + id + ')': 'P' + id;
-      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id, status.lang) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
