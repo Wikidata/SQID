@@ -29,39 +29,22 @@ requirejs.config({
 		'ngAnimate': ['angular'],
 		'ngRoute': ['angular'],
 		'ngTranslate': ['angular'],
-		'ngComplete': ['angular'],
-
-		// 'util/util': ['angular', 'spin'],
-		// 'util/paginationController': ['util/util'],
-		//'query/queryInterface': ['angular'],
-
-		// 'app/app': {
-		// 	deps: ['jquery-ui', 'ui-boostrap-tpls', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
-		// 			'util/paginationController', 'queryInterface']
-
-		// 	// full deps including nested (best practice?)
-		// 	// ['jquery', 'jquery-ui','bootstrap', 'spin', 'angular', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete', 'ui-boostrap-tpls', 'util', 'paginationController', 'queryInterface']
-		// },
-
-		// 'app/browse': ['app/app'],
-		// 'app/viewController': ['app/app'],
-		// 'app/statController': ['app/app'],
+		'ngComplete': ['angular']
 	}
 });
 
 
-// Load the main app module to start the app
-//requirejs(['app', 'tableController', 'viewController', 'statController'], function() {
+// Load everything, start the app 
 requirejs([
-	'app/app',
-	'app/browse',
-	'app/view', 
-	'app/statistics',
-	'app/translate',
-
+	'jquery-ui',
+	'app/browse',		// everything else
+	'app/view', 		// is implicitly
+	'app/translate',	// pulled via
+	'util/directives',	// dependencies
+	'query/query'
 ], function() {
 	jQuery(function() {
-		console.log('haz all filez, ready, actionz!');
+		//console.log('haz all filez, ready, acshionz!');
 		angular.bootstrap( document, ['classBrowserApp'], { strictDi: true } );
 	});
 });

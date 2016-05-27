@@ -1,12 +1,11 @@
 //////// Module Definition ////////////
 define([
-	// 'app/app', // pulls angular, ngroute and utilties
-	// 'app/classes',
-	// 'app/properties',
-	// 'angular',
-	// 'ngRoute',			TODO
-	// 'util/util'
-	// // ....
+	'util/util',
+	'app/classes', // implicit app/app
+	'app/properties',
+	'util/i18n',
+	'util/sparql',
+	'util/wikidataapi'
 ], function() {
 ///////////////////////////////////////
 
@@ -318,3 +317,6 @@ angular.module('queryInterface', [])
 
 	}]); // controller
 })(); // module
+
+return {}; // module
+}); 		  // definition end

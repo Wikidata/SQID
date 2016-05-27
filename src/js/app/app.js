@@ -5,19 +5,13 @@ define([ // module definition dependencies
 	'ngRoute',
 	'ngTranslate',
 	'ngComplete',
-	'util/util', 
-	
-	'jquery-ui', // implicit jquery
-	'ui-boostrap-tpls' // implicit bootstrap
-
-	//'query/queryInterface' 
-	//'pascalprecht.translate', 
-	//'angucomplete-alt', 
+	'util/util',
+	'ui-boostrap-tpls', // implicit bootstrap
 ], function() {
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt']) //, 'queryInterface'])
+var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 'queryInterface'])
 
 	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
