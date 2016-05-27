@@ -1,0 +1,36 @@
+documentation of refactoring
+============================
+
+
+branch refactor introduces following changes: (I try to make this list exhaustive but no gurantees)
+
+~~~~~~~~~~~~~~~~~~~~
+src/js/:
+
+	app.js moved to app/app.js
+
+
+	statController.js moved to app/statistics.js, now contains 'statistics' factory from former app.js
+	tableController.js moved to app/browse.js
+	viewController.js moved to app/view.js
+	app/
+		created file translate.js, contains $translateProvider from former app.js
+		created file properties.js, contains 'Properties' factory from fomer app.js 
+		created file classes.js, contains 'Classes' factory from former app.js
+
+	util.js moved to util/util.js
+	paginationController.js moved to util/paginationController.js
+	util/
+		created file i18n.js, contains 'i18n' factory from former util.js 
+		created file sparql.js, contains 'sparql' factory from former util.js
+		created file wikidataapi.js, contains 'wikidataapi' factory from former util.js 
+		created file entitydata.js, contains 'entitydata' factory from former util.js
+		created file dataFormatter.js, contains 'dataFormatter' factory from former util.js
+		created file directives.js, contains 'qidImage', 'squidFooter', 'sqidCompile' and 'sqidStatementTable' directives from former util.js 
+
+
+	queryInterface.js moved to query/queryInterface.js
+~~~~~~~~~~~~~~~
+
+
+wrapped all individual files in module definitions, so most of the requirejs shim config can be ditched

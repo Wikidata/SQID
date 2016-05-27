@@ -1,6 +1,18 @@
+//////// Module Definition ////////////
+define([
+	// 'app/app', // pulls angular, ngroute and utilties
+	// 'app/classes',
+	// 'app/properties',
+	// 'angular',
+	// 'ngRoute',			TODO
+	// 'util/util'
+	// // ....
+], function() {
+///////////////////////////////////////
+
 (function() {
 
-angular.module('queryInterface', ['angucomplete-alt'])
+angular.module('queryInterface', [])
 	.factory('queryInterfaceState', function() { // persist state of page
 
 		return function getFreshStateInstance() {

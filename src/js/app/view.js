@@ -1,3 +1,14 @@
+//////// Module Definition ////////////
+define([
+	'app/app', // pulls angular, ngroute and utilties
+	'util/sparql',
+	'util/entitydata',
+	'util/i18n',
+	// implicit 'util/util', // also contains htmlCache
+	'util/dataFormatter',
+	'app/properties'
+], function() {
+///////////////////////////////////////
 
 angular.module('classBrowserApp').factory('View', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'Properties', 'htmlCache',
 function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
@@ -331,3 +342,5 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		});
 }]);
 
+return {}; // module
+});		  // definition end

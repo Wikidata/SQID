@@ -31,27 +31,35 @@ requirejs.config({
 		'ngTranslate': ['angular'],
 		'ngComplete': ['angular'],
 
-		'util': ['angular', 'spin'],
-		'paginationController': ['util'],
-		'queryInterface': ['angular'],
+		// 'util/util': ['angular', 'spin'],
+		// 'util/paginationController': ['util/util'],
+		//'query/queryInterface': ['angular'],
 
-		'app': {
-			deps: ['jquery-ui', 'ui-boostrap-tpls', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
-					'paginationController', 'queryInterface']
+		// 'app/app': {
+		// 	deps: ['jquery-ui', 'ui-boostrap-tpls', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
+		// 			'util/paginationController', 'queryInterface']
 
-			// full deps including nested (best practice?)
-			// ['jquery', 'jquery-ui','bootstrap', 'spin', 'angular', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete', 'ui-boostrap-tpls', 'util', 'paginationController', 'queryInterface']
-		},
+		// 	// full deps including nested (best practice?)
+		// 	// ['jquery', 'jquery-ui','bootstrap', 'spin', 'angular', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete', 'ui-boostrap-tpls', 'util', 'paginationController', 'queryInterface']
+		// },
 
-		'tableController': ['app'],
-		'viewController': ['app'],
-		'statController': ['app']
+		// 'app/browse': ['app/app'],
+		// 'app/viewController': ['app/app'],
+		// 'app/statController': ['app/app'],
 	}
 });
 
 
 // Load the main app module to start the app
-requirejs(['app', 'tableController', 'viewController', 'statController'], function() {
+//requirejs(['app', 'tableController', 'viewController', 'statController'], function() {
+requirejs([
+	'app/app',
+	'app/browse',
+	'app/view', 
+	'app/statistics',
+	'app/translate',
+
+], function() {
 	jQuery(function() {
 		console.log('haz all filez, ready, actionz!');
 		angular.bootstrap( document, ['classBrowserApp'], { strictDi: true } );

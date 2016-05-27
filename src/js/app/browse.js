@@ -1,3 +1,13 @@
+//////// Module Definition ////////////
+define([
+  'app/app', // pulls angular, ngroute and utilties
+  'app/classes',
+  'app/properties',
+  'util/util',
+  'util/paginationController'
+], function() {
+///////////////////////////////////////
+
 angular.module('classBrowserApp').controller('TableController', ['$scope', 'Arguments', 'Classes', 'Properties', 'util',
   function($scope, Arguments, Classes, Properties, util){
 
@@ -591,3 +601,6 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
 
 
   }]);
+  
+  return {}; // module
+});         // definition end

@@ -61,6 +61,12 @@
 		</div>
 */
 
+//////// Module Definition ////////////
+define([
+	'util/util' // pulls in angular
+], function() {
+///////////////////////////////////////
+
 angular.module('utilities').controller('PaginationController', ['$scope', function($scope) {
 	//init pagination config from parent or default
 	if($scope.pagination === undefined) { $scope.pagination = {}; }
@@ -143,3 +149,5 @@ angular.module('utilities').controller('PaginationController', ['$scope', functi
 }]);
 
 
+return {}; // module
+});		  // definition end
