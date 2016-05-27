@@ -24,11 +24,12 @@ angular.module('utilities', [])
 		position: 'absolute' // Element positioning
 	}
 	return function(target) {
+		var Spinner = require('spin');
 		return new Spinner(opts).spin(target);
 	};
 })
 
-.factory('i18n', function(wikidataapi, Properties, $translate) {
+.factory('i18n', ['wikidataapi', 'Properties', '$translate', function(wikidataapi, Properties, $translate) {
 	var language = null; // defaults to "en" in this case
 
 	var idTerms = {}; // cache for labels/descriptions of items
@@ -184,9 +185,9 @@ angular.module('utilities', [])
 		waitForTerms: waitForTerms,
 		waitForPropertyLabels: waitForPropertyLabels
 	};
-})
+}])
 
-.factory('htmlCache', function($sce) {
+.factory('htmlCache', ['$sce', function($sce) {
 	var trustedHtmlSnippets = [];
 
 	return {
@@ -203,9 +204,9 @@ angular.module('utilities', [])
 			}
 		}
 	};
-})
+}])
 
-.factory('util', function($http, $q) {
+.factory('util', ['$http', '$q', function($http, $q) {
 
 	var httpRequest = function(url) {
 		return $http.get(url).then(function(response) {
@@ -325,9 +326,9 @@ angular.module('utilities', [])
 		reverseDeepCopy: reverseDeepCopy
 	};
 
-})
+}])
 
-.factory('sparql', function(util, i18n) {
+.factory('sparql', ['util', 'i18n', function(util, i18n) {
 
 	var SPARQL_SERVICE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql";
 	var SPARQL_UI_PREFIX = "https://query.wikidata.org/#";
@@ -448,9 +449,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		getIdFromUri: util.getIdFromUri // deprecated; only for b/c
 	};
 
-})
+}])
 
-.factory('wikidataapi', function(util, $q) {
+.factory('wikidataapi', ['util', '$q', function(util, $q) {
 
 	var getEntityData = function(id, language) {
 		// Special:EntityData does not always return current data, not even with "action=purge"
@@ -523,9 +524,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		getEntityLabels: getEntityLabels,
 		getImageData: getImageData
 	};
-})
+}])
 
-.factory('entitydata', function(wikidataapi, util, i18n) {
+.factory('entitydata', ['wikidataapi', 'util', 'i18n', function(wikidataapi, util, i18n) {
 
 	var getStatementValue = function(statementJson, defaultValue) {
 		try {
@@ -691,9 +692,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	return {
 		getEntityData: getEntityData
 	};
-})
+}])
 
-.factory('dataFormatter', function(util, i18n) {
+.factory('dataFormatter', ['util', 'i18n', function(util, i18n) {
 
 	var getEntityTerms = function(entityId, missingTermsListener) {
 		if (!i18n.hasEntityTerms(entityId)) {
@@ -890,9 +891,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		getStatementMainValueHtml: getStatementMainValueHtml,
 		getStatementQualifiersHtml: getStatementQualifiersHtml
 	};
-})
+}])
 
-.directive('sqidImage', function(wikidataapi) {
+.directive('sqidImage', ['wikidataapi', function(wikidataapi) {
 
 	var link = function (scope, element, attrs) {
 		scope.$watch(attrs.file, function(file){
@@ -909,9 +910,9 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		restrict: 'E',
 		link: link
 	};
-})
+}])
 
-.directive('sqidFooter', function($compile, statistics) {
+.directive('sqidFooter', ['$compile', 'statistics', function($compile, statistics) {
 
 	var link = function (scope, element, attrs) {
 		statistics.then(function(stats) {
@@ -926,7 +927,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		restrict: 'E',
 		link: link
 	};
-})
+}])
 
 /**
  * Directive to include trusted or untrusted HTML snippets and compiling
@@ -950,7 +951,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	};
 }])
 
-.directive('sqidStatementTable', function($compile, Properties, dataFormatter, util, i18n) {
+.directive('sqidStatementTable', ['$compile', 'Properties', 'dataFormatter', 'util', 'i18n', function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;
 	var missingTermsListener = { hasMissingTerms : false};
 
@@ -1137,5 +1138,5 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		restrict: 'E',
 		link: link
 	};
-});
+}]);
 

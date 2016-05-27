@@ -1,4 +1,4 @@
-classBrowser.controller('StatController',
+angular.module('classBrowserApp').controller('StatController',
 	 ['$scope', 'statistics', function($scope, statistics){
 		statistics.then(function(stats) {
 			$scope.dumpDate = stats.getDumpDate().toLocaleDateString();

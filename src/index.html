@@ -1,18 +1,18 @@
 <!DOCTYPE HTML>
-<html ng-app="classBrowserApp">
+<html>
 <head>
   <meta charset="utf8" />
-  <title>Wikidata Class Browser</title>
+  <title>SQID - Wikidata Explorer</title>
   <link rel="stylesheet" href="lib/bootstrap-3.3.6-dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="style.css">
   <link href='https://fonts.googleapis.com/css?family=Roboto:400,900' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   <link rel="stylesheet" href="angucomplete-alt.css">
-  <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-  <script type="text/javascript" src="lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-  <script src="lib/spin.min.js"></script>
+
+  <script data-main="js/main" src="lib/require.js"></script> <!-- development -->
+  <!-- <script data-main="js/dist.min" src="lib/require.js"></script> <!-- production -->
+
 </head>
 <body>
 	<nav class="navbar navbar-default">
@@ -99,20 +99,5 @@
     </div>
   </div>
   <sqid-footer />
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-animate.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.0/angular-route.js"></script>
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="lib/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-  <script src="lib/ui-bootstrap-tpls-1.2.5.min.js"></script>
-  <script src="lib/angular-translate.min.js"></script>
-  <script src="lib/angucomplete-alt.min.js"></script>
-  <script src="js/util.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/viewController.js"></script>
-  <script src="js/tableController.js"></script>
-  <script src="js/queryInterface.js"></script>
-  <script src="js/statController.js"></script>
-  <script src="js/paginationController.js"></script>
 </body>
 </html>

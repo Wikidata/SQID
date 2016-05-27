@@ -1,4 +1,4 @@
-classBrowser.controller('TableController', 
+angular.module('classBrowserApp').controller('TableController', ['$scope', 'Arguments', 'Classes', 'Properties', 'util',
   function($scope, Arguments, Classes, Properties, util){
 
     var tableContent = [];
@@ -590,4 +590,4 @@ classBrowser.controller('TableController',
     };
 
 
-  });
+  }]);
