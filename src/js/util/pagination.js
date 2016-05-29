@@ -5,7 +5,7 @@
 	the controller exposes the pagination object to its own and the parent $scope.
 
 	Setting (and updating) the data for pagination:
-	>	pagination.setIndex(hasToBeAnArray);
+	>	$scope.pagination.setIndex(hasToBeAnArray);
 
 	Customizing configuration:
 		in parent scope assign

@@ -312,6 +312,7 @@ span.smallnote {
 
 .alert-danger pre {
 	max-height: 12em;
+    white-space: pre-wrap;
 }
 
 .input-monospace{

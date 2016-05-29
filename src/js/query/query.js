@@ -5,7 +5,8 @@ define([
 	'app/properties',
 	'util/i18n',
 	'util/sparql',
-	'util/wikidataapi'
+	'util/wikidataapi',
+	'util/pagination'
 ], function() {
 ///////////////////////////////////////
 

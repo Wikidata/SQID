@@ -6,21 +6,20 @@ branch refactor introduces following changes: (I try to make this list exhaustiv
 
 ~~~~~~~~~~~~~~~~~~~~
 src/js/:
+	main.js adapted require loading, cleaned up shim config
 
-	app.js moved to app/app.js
-
-
-	statController.js moved to app/statistics.js, now contains 'statistics' factory from former app.js
-	tableController.js moved to app/browse.js
-	viewController.js moved to app/view.js
 	app/
+		../app.js moved to app.js
+		../statController.js moved to statistics.js, now contains 'statistics' factory from former app.js
+		../tableController.js moved to browse.js
+		../viewController.js moved to view.js
 		created file translate.js, contains $translateProvider from former app.js
 		created file properties.js, contains 'Properties' factory from fomer app.js 
 		created file classes.js, contains 'Classes' factory from former app.js
-
-	util.js moved to util/util.js
-	paginationController.js moved to util/paginationController.js
+	
 	util/
+		../util.js moved to util.js
+		../paginationController.js moved to pagination.js
 		created file i18n.js, contains 'i18n' factory from former util.js 
 		created file sparql.js, contains 'sparql' factory from former util.js
 		created file wikidataapi.js, contains 'wikidataapi' factory from former util.js 
@@ -28,8 +27,8 @@ src/js/:
 		created file dataFormatter.js, contains 'dataFormatter' factory from former util.js
 		created file directives.js, contains 'qidImage', 'squidFooter', 'sqidCompile' and 'sqidStatementTable' directives from former util.js 
 
-
-	queryInterface.js moved to query/queryInterface.js
+	query/
+		../queryInterface.js moved to query.js
 ~~~~~~~~~~~~~~~
 
 

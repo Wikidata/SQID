@@ -4,7 +4,7 @@ define([
   'app/classes',
   'app/properties',
   'util/util',
-  'util/paginationController'
+  'util/pagination'
 ], function() {
 ///////////////////////////////////////
 
