@@ -11,9 +11,11 @@ requirejs.config({
 		"angular": "../lib/angular",
 		"ngAnimate": "../lib/angular-animate",
 		"ngRoute": "../lib/angular-route",
-		"ngTranslate": "../lib/angular-translate",
-		// TODO - lazy loader for language definition files:
-		// https://cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js
+		"ngCookies": "../lib/angular-cookies",
+		"ngTranslate-core": "../lib/angular-translate",
+		"ngTranslate-loader": "../lib/angular-translate-loader-static-files",
+		"ngTranslate-storage": "../lib/angular-translate-storage-cookie",
+		"ngTranslate": "../lib/angular-translate-storage-local",
 		"ngComplete": "../lib/angucomplete-alt",
 		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2"
 	},
@@ -28,7 +30,11 @@ requirejs.config({
 		},
 		'ngAnimate': ['angular'],
 		'ngRoute': ['angular'],
-		'ngTranslate': ['angular'],
+		'ngCookies': ['angular'],
+		'ngTranslate-core': ['angular'],				// we trick a little here so
+		'ngTranslate-loader': ['ngTranslate-core'],		// module 'ngTranslate' actually includes 
+		'ngTranslate-storage': ['ngTranslate-core'],	// the async loader and storage extensions
+		'ngTranslate': ['ngTranslate-loader', 'ngTranslate-storage'],
 		'ngComplete': ['angular']
 	}
 });

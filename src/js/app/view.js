@@ -6,7 +6,8 @@ define([
 	'util/i18n',
 	// implicit 'util/util', // also contains htmlCache
 	'util/dataFormatter',
-	'app/properties'
+	'app/properties',
+	'util/directives'
 ], function() {
 ///////////////////////////////////////
 
@@ -342,5 +343,4 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		});
 }]);
 
-return {}; // module
-});		  // definition end
+return {};}); // module definition end

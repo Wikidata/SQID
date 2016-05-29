@@ -3,6 +3,7 @@
 define([ // module definition dependencies
 	'ngAnimate', 
 	'ngRoute',
+	'ngCookies',
 	'ngTranslate',
 	'ngComplete',
 	'util/util',
@@ -11,7 +12,10 @@ define([ // module definition dependencies
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'utilities', 'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 'queryInterface'])
+var classBrowser = angular.module('classBrowserApp',[
+	'ngAnimate', 'ngRoute', 'ngCookies',  'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 
+	'utilities', 'queryInterface'
+])
 
 	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
@@ -241,5 +245,4 @@ var classBrowser = angular.module('classBrowserApp', ['ngAnimate', 'ngRoute', 'u
 		}
 	});
 
-	return {}; // module
-}); 		  // definition end
+return {};}); // module definition end
