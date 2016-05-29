@@ -1,6 +1,7 @@
 //////// Module Definition ////////////
 define([
 	'app/app', // pulls angular, ngroute and utilties
+	//'ngTranslate' // is loaded explicitly in main.js
 ], function() {
 ///////////////////////////////////////
 

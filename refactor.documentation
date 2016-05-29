@@ -43,3 +43,7 @@ introduced new global dependencies:
 	translate-loader-static-files for async language file loading
 
 moved translation tables out of app/translate.js into lang/<key>.json (now need to be valid json syntax)
+
+!issue: 
+	I gave up on making dependency inference work with the angular-translate extensions. in the compiled bundle for some reason the extensions would always execute before the angular-translate, failing for the lack of an yet undefined module "pascalprecht.translate".
+	just explicitly listing them in the right order in the requirejs call of main.js solves this problem luckily 

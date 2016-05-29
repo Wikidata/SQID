@@ -3,7 +3,7 @@ define([
 	'util/util', // pulls in angular
 	'util/wikidataapi',
 	'app/properties',
-	'ngTranslate'
+	//'ngTranslate' // loaded explicitly in main.js
 ], function() {
 ///////////////////////////////////////
 

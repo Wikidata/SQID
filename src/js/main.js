@@ -14,8 +14,8 @@ requirejs.config({
 		"ngCookies": "../lib/angular-cookies",
 		"ngTranslate-core": "../lib/angular-translate",
 		"ngTranslate-loader": "../lib/angular-translate-loader-static-files",
-		"ngTranslate-storage": "../lib/angular-translate-storage-cookie",
-		"ngTranslate": "../lib/angular-translate-storage-local",
+		"ngTranslate-storage-cook": "../lib/angular-translate-storage-cookie",
+		"ngTranslate-storage-loc": "../lib/angular-translate-storage-local",
 		"ngComplete": "../lib/angucomplete-alt",
 		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2"
 	},
@@ -31,10 +31,10 @@ requirejs.config({
 		'ngAnimate': ['angular'],
 		'ngRoute': ['angular'],
 		'ngCookies': ['angular'],
-		'ngTranslate-core': ['angular'],				// we trick a little here so
-		'ngTranslate-loader': ['ngTranslate-core'],		// module 'ngTranslate' actually includes 
-		'ngTranslate-storage': ['ngTranslate-core'],	// the async loader and storage extensions
-		'ngTranslate': ['ngTranslate-loader', 'ngTranslate-storage'],
+		'ngTranslate-core': ['angular'],
+		'ngTranslate-loader': ['ngTranslate-core'],
+		'ngTranslate-storage-cook': ['ngTranslate-core', 'ngCookies'],
+		'ngTranslate-storage-loc': ['ngTranslate-storage-cook'],
 		'ngComplete': ['angular']
 	}
 });
@@ -42,12 +42,19 @@ requirejs.config({
 
 // Load everything, start the app 
 requirejs([
+	'ngCookies',				//
+	'ngTranslate-core',			// cannot for the life of me sort out the 
+	'ngTranslate-loader',		// dependency in a way that the bundle will
+	'ngTranslate-storage-cook',	// execute in the right order when optimized
+	'ngTranslate-storage-loc',	// unless loading in this order explicitly
+
 	'jquery-ui',
 	'app/browse',		// everything else
 	'app/view', 		// is implicitly
 	'app/translate',	// pulled via
 	'util/directives',	// dependencies
 	'query/query'
+	
 ], function() {
 	jQuery(function() {
 		//console.log('haz all filez, ready, acshionz!');
