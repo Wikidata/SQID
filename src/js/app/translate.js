@@ -10,7 +10,13 @@ angular.module('classBrowserApp').config(['$translateProvider', function ($trans
 		.useStaticFilesLoader({ prefix: 'lang/', suffix: '.json' })
 		.useLocalStorage()
 		.fallbackLanguage('en')
-		.preferredLanguage('en')
+		//.preferredLanguage('en')
+		.registerAvailableLanguageKeys(  // define existing
+			['en', 'de', 'nb'], {		// languages and aliases
+				'en_*': 'en', 'en-*': 'en',
+				'de_*': 'de', 'de-*': 'de',
+				'nb_*': 'nb', 'nb-*': 'nb'
+		}).determinePreferredLanguage()
 // 			.useSanitizeValueStrategy('escape') // using this makes it impossible to use HTML (links, tooltips, etc.) in variable replacements
 		;
 }]).factory();
