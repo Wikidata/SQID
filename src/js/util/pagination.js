@@ -5,7 +5,7 @@
 	the controller exposes the pagination object to its own and the parent $scope.
 
 	Setting (and updating) the data for pagination:
-	>	pagination.setIndex(hasToBeAnArray);
+	>	$scope.pagination.setIndex(hasToBeAnArray);
 
 	Customizing configuration:
 		in parent scope assign
@@ -60,6 +60,12 @@
 			</nav>
 		</div>
 */
+
+//////// Module Definition ////////////
+define([
+	'util/util' // pulls in angular
+], function() {
+///////////////////////////////////////
 
 angular.module('utilities').controller('PaginationController', ['$scope', function($scope) {
 	//init pagination config from parent or default
@@ -143,3 +149,5 @@ angular.module('utilities').controller('PaginationController', ['$scope', functi
 }]);
 
 
+return {}; // module
+});		  // definition end

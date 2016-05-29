@@ -11,9 +11,11 @@ requirejs.config({
 		"angular": "../lib/angular",
 		"ngAnimate": "../lib/angular-animate",
 		"ngRoute": "../lib/angular-route",
-		"ngTranslate": "../lib/angular-translate",
-		// TODO - lazy loader for language definition files:
-		// https://cdnjs.cloudflare.com/ajax/libs/angular-translate/2.10.0/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js
+		"ngCookies": "../lib/angular-cookies",
+		"ngTranslate-core": "../lib/angular-translate",
+		"ngTranslate-loader": "../lib/angular-translate-loader-static-files",
+		"ngTranslate-storage-cook": "../lib/angular-translate-storage-cookie",
+		"ngTranslate-storage-loc": "../lib/angular-translate-storage-local",
 		"ngComplete": "../lib/angucomplete-alt",
 		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2"
 	},
@@ -28,32 +30,34 @@ requirejs.config({
 		},
 		'ngAnimate': ['angular'],
 		'ngRoute': ['angular'],
-		'ngTranslate': ['angular'],
-		'ngComplete': ['angular'],
-
-		'util': ['angular', 'spin'],
-		'paginationController': ['util'],
-		'queryInterface': ['angular'],
-
-		'app': {
-			deps: ['jquery-ui', 'ui-boostrap-tpls', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete',
-					'paginationController', 'queryInterface']
-
-			// full deps including nested (best practice?)
-			// ['jquery', 'jquery-ui','bootstrap', 'spin', 'angular', 'ngAnimate', 'ngRoute', 'ngTranslate', 'ngComplete', 'ui-boostrap-tpls', 'util', 'paginationController', 'queryInterface']
-		},
-
-		'tableController': ['app'],
-		'viewController': ['app'],
-		'statController': ['app']
+		'ngCookies': ['angular'],
+		'ngTranslate-core': ['angular'],
+		'ngTranslate-loader': ['ngTranslate-core'],
+		'ngTranslate-storage-cook': ['ngTranslate-core', 'ngCookies'],
+		'ngTranslate-storage-loc': ['ngTranslate-storage-cook'],
+		'ngComplete': ['angular']
 	}
 });
 
 
-// Load the main app module to start the app
-requirejs(['app', 'tableController', 'viewController', 'statController'], function() {
+// Load everything, start the app 
+requirejs([
+	'ngCookies',				//
+	'ngTranslate-core',			// cannot for the life of me sort out the 
+	'ngTranslate-loader',		// dependency in a way that the bundle will
+	'ngTranslate-storage-cook',	// execute in the right order when optimized
+	'ngTranslate-storage-loc',	// unless loading in this order explicitly
+
+	'jquery-ui',
+	'app/browse',		// everything else
+	'app/view', 		// is implicitly
+	'app/translate',	// pulled via
+	'util/directives',	// dependencies
+	'query/query'
+	
+], function() {
 	jQuery(function() {
-		console.log('haz all filez, ready, actionz!');
+		//console.log('haz all filez, ready, acshionz!');
 		angular.bootstrap( document, ['classBrowserApp'], { strictDi: true } );
 	});
 });

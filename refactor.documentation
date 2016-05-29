@@ -1,0 +1,49 @@
+documentation of refactoring
+============================
+
+
+branch refactor introduces following changes: (I try to make this list exhaustive but no gurantees)
+
+~~~~~~~~~~~~~~~~~~~~
+src/js/:
+	main.js adapted require loading, cleaned up shim config
+
+	app/
+		../app.js moved to app.js
+		../statController.js moved to statistics.js, now contains 'statistics' factory from former app.js
+		../tableController.js moved to browse.js
+		../viewController.js moved to view.js
+		created file translate.js, contains $translateProvider from former app.js
+		created file properties.js, contains 'Properties' factory from fomer app.js 
+		created file classes.js, contains 'Classes' factory from former app.js
+	
+	util/
+		../util.js moved to util.js
+		../paginationController.js moved to pagination.js
+		created file i18n.js, contains 'i18n' factory from former util.js 
+		created file sparql.js, contains 'sparql' factory from former util.js
+		created file wikidataapi.js, contains 'wikidataapi' factory from former util.js 
+		created file entitydata.js, contains 'entitydata' factory from former util.js
+		created file dataFormatter.js, contains 'dataFormatter' factory from former util.js
+		created file directives.js, contains 'qidImage', 'squidFooter', 'sqidCompile' and 'sqidStatementTable' directives from former util.js 
+
+	query/
+		../queryInterface.js moved to query.js
+~~~~~~~~~~~~~~~
+
+
+wrapped all individual files in module definitions, so most of the requirejs shim config can be ditched
+
+
+i18n/translate
+--------------
+introduced new global dependencies: 
+	ngCookies,
+	translate-storage-cookie/local extensions (for remembering user lang choice)
+	translate-loader-static-files for async language file loading
+
+moved translation tables out of app/translate.js into lang/<key>.json (now need to be valid json syntax)
+
+!issue: 
+	I gave up on making dependency inference work with the angular-translate extensions. in the compiled bundle for some reason the extensions would always execute before the angular-translate, failing for the lack of an yet undefined module "pascalprecht.translate".
+	just explicitly listing them in the right order in the requirejs call of main.js solves this problem luckily 
