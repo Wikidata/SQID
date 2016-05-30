@@ -21,7 +21,7 @@
 		"SUBCLASSES": "Unterklassen"
 	},
 	"FILTER_MENUE": {
-		"LABEL_PLACEHOLDER": "Filter nach Bezeichnern",
+		"LABEL_PLACEHOLDER": "Filter anhand engl. Bezeichnern",
 		"PROPERTY_PLACEHOLDER": "Eigenschaft auswählen",
 		"CLASS_PLACEHOLDER": "Klasse auswählen",
 		"FILTER_PROPERTY": "Hat Eigenschaft",
