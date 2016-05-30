@@ -107,6 +107,11 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			return entityDataPromise;
 		},
 
+		getEntityInlinks: function() {
+// 																			console.log("Get data");
+			return entitydata.getInlinkData(id); //test
+		},
+
 		/**
 		 * Formats a map numericPropertyId => someNumericValue as a list of
 		 * objects with label, url, and "count" (value) keys, sorted by value,
@@ -192,7 +197,6 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 		
 		$scope.translations = {};
-		$scope.test=true; // DEBUG
 
 		$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
 			$scope.translations['SUBCLASS_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT'];
@@ -209,6 +213,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.classes = null;
 		$scope.properties = null;
 		$scope.entityData = null;
+		$scope.entityInData = null;
 		$scope.richDescription = null;
 
 		$scope.exampleInstances = null;
@@ -231,6 +236,10 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.propertyReferenceCount = 0;
 		$scope.propertyDatatype = null;
 
+		View.getEntityInlinks().then(function(data) {
+			$scope.entityInData = data;
+		});
+		
 		View.getEntityData().then(function(data) {
 			$scope.entityData = data;
 			$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));

@@ -243,6 +243,15 @@
 		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_MEDIA'|translate}}" show="media"></sqid-statement-table>
 
 		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_WIKIMEDIA_PAGES'|translate}}" show="wiki"></sqid-statement-table>
+
+		
+		<sqid-statement-table ng-if="entityInData !== null" data="entityInData" title="Family inlinks" show="family"></sqid-statement-table>
+		
+		<sqid-statement-table ng-if="entityInData !== null" data="entityInData" title="Other statements inlinks" show="other"></sqid-statement-table>
+		
+		<sqid-statement-table ng-if="entityInData !== null" data="entityInData" title="Media inlinks" show="media"></sqid-statement-table>
+		
+		<sqid-statement-table ng-if="entityInData !== null" data="entityInData" title="Wiki inlinks" show="wiki"></sqid-statement-table>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" style="padding-bottom: 15px;">

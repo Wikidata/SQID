@@ -167,10 +167,10 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 			return html;
 		}
 
-		var preparePropertyList = function(itemData) {
+		var preparePropertyList = function(statements) {
 			propertyScores = {};
 			// Note: class-based ranking rarely seems to help; hence using properties only
-			for (propertyId in itemData.statements) {
+			for (propertyId in statements) {
 				angular.forEach(properties.getRelatedProperties(propertyId.substring(1)), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
 						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
@@ -182,7 +182,7 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 
 			scoredProperties = [];
 
-			for (propertyId in itemData.statements) {
+			for (propertyId in statements) {
 				var numPropId = propertyId.substring(1);
 				if (includeProperty(numPropId)) {
 					if (numPropId in propertyScores) {
@@ -235,7 +235,7 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 			itemData.waitForPropertyLabels().then(function() {
 				Properties.then(function(propertyData){
 					properties = propertyData;
-					var propertyList = preparePropertyList(itemData);
+					var propertyList = preparePropertyList(itemData.statements);
 
 					var html = getHtml(itemData.statements, propertyList);
 					if (missingTermsListener.hasMissingTerms) {

@@ -6,7 +6,7 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n', function(wikidataapi, util, i18n) {
+angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n', 'sparql', function(wikidataapi, util, i18n, sparql) {
 
 	var getStatementValue = function(statementJson, defaultValue) {
 		try {
@@ -168,9 +168,97 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 			return ret;
 		});
 	};
-	
+
+	var getSparqlQueryForInlinks = function(objectId, limit) {
+		return sparql.getStandardPrefixes() + "\
+SELECT ?it ?s ?ps (SAMPLE(?pq) as ?pqs) \n\
+WHERE { \n\
+	{ SELECT DISTINCT ?it ?s ?ps { \n\
+		?s ?ps wd:" + objectId + " . ?it ?pc ?s . \n\
+		?p wikibase:statementProperty ?ps . ?p wikibase:claim ?pc . \n\
+    } LIMIT " + limit + " } \n\
+    OPTIONAL { ?s ?pq ?v . ?psub wikibase:qualifier ?pq } \n\
+} GROUP BY ?it ?s ?ps";
+	}
+
+	var getSparqlQueryForInProps = function(objectId) {
+		return sparql.getStandardPrefixes() + "\
+SELECT DISTINCT ?ps { \n\
+		?s ?ps wd:" + objectId + " . ?it ?pc ?s . \n\
+		?p wikibase:statementProperty ?ps . ?p wikibase:claim ?pc . \n\
+    }";
+	}
+
+	var getInlinkData = function(id) {
+		var language = i18n.getLanguage();
+		return sparql.getQueryRequest(getSparqlQueryForInlinks(id,101)).then(function(data){
+			var instanceJson = data.results.bindings;
+			var element;
+			var statements = {};
+			var propertyIds = {};
+			var itemIds = {};
+
+			if (instanceJson.length < 101) { // got all inlinks in one query
+				for (var i = 0; i < instanceJson.length; i++) {
+					var pid = instanceJson[i].ps.value.substring("http://www.wikidata.org/prop/statement/".length);
+					var eid = instanceJson[i].it.value.substring("http://www.wikidata.org/entity/".length);
+					var sid = instanceJson[i].s.value.substring("http://www.wikidata.org/entity/statement/".length);
+					var hasQualifiers = ("pqs" in instanceJson[i]); // TODO use this information
+
+					if (! (pid in statements) ) {
+						statements[pid] = [];
+						propertyIds[pid] = true;
+					}
+
+					var entityType;
+					if (eid.substring(0,1) == "P") {
+						entityType = "property";
+						propertyIds[eid] = true;
+					} else {
+						entityType = "item";
+						itemIds[eid] = true;
+					}
+
+					var value = { "entity-type": entityType, "numeric-id": parseInt(eid.substring(1)) };
+					var snak = {
+						snaktype: "value",
+						property: pid,
+						datatype: "wikibase-item",
+						datavalue: {value: value, type: "wikibase-entityid"}
+					}; 
+					var stmt = { mainsnak: snak, rank: "normal", type: "statement", id: sid }; 
+					statements[pid].push(stmt);
+				}
+			} else {
+				// TODO in this case we need to run more queries -- how to build promise?
+			}
+
+			ret = {
+				language: language, // this is fixed for this result!
+				statements: statements,
+				termsPromise: null,
+				propLabelPromise: null,
+				waitForPropertyLabels: function() {
+					if (this.propLabelPromise == null) {
+						this.propLabelPromise = i18n.waitForPropertyLabels(Object.keys(propertyIds), language);
+					}
+					return this.propLabelPromise;
+				},
+				waitForTerms: function() {
+					if (this.termsPromise == null) {
+						this.termsPromise = i18n.waitForTerms(Object.keys(itemIds), language);
+					}
+					return this.termsPromise;
+				}
+			}
+
+			return ret;
+		});
+	}
+
 	return {
-		getEntityData: getEntityData
+		getEntityData: getEntityData,
+		getInlinkData: getInlinkData
 	};
 }]);
 
