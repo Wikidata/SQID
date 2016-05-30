@@ -38,7 +38,7 @@ angular.module('classBrowserApp').factory('Properties', ['$http', '$route', 'uti
 
 	var getLabel = function(id) { return getData(id, 'l', null); };
 	var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); };
-	var getUrl = function(id) { return "#/view?id=P" + id; };
+	var getUrl = function(id, lang = 'en') { return "#/view?id=P" + id + '&lang=' + lang; };
 
 	var getQualifiers = function(id){ return getData(id, 'qs', {}); };
 
@@ -87,11 +87,11 @@ angular.module('classBrowserApp').factory('Properties', ['$http', '$route', 'uti
 			updateSorting(sortCriteria);
 
 			return {
-				propertiesHeader: [["Label (ID)", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
-					["Datatype", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}], 
-					["Uses in statements", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
-					["Uses in qualifiers", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
-					["Uses in references", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]],
+				propertiesHeader: [["TABLE_HEADER.LABEL", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
+					["TABLE_HEADER.DATATYPE", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}], 
+					["TABLE_HEADER.USES_IN_STMTS", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
+					["TABLE_HEADER.USES_IN_QUALS", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
+					["TABLE_HEADER.USES_IN_REFS", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]],
 				getProperties: function(){ return properties; },
 				getIdArray: getSortedIdArray,
 				hasEntity: function(id){ return (id in properties); },

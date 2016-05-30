@@ -8,8 +8,8 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('classBrowserApp').controller('TableController', ['$scope', 'Arguments', 'Classes', 'Properties', 'util',
-  function($scope, Arguments, Classes, Properties, util){
+angular.module('classBrowserApp').controller('TableController', ['$scope', '$translate', 'i18n', 'Arguments', 'Classes', 'Properties', 'util',
+  function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
     var tableContent = [];
 
@@ -26,13 +26,13 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
     var getClassFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (Q' + id + ')': 'Q' + id;
-      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id, status.lang) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (P' + id + ')': 'P' + id;
-      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id, status.lang) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
@@ -276,11 +276,11 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
 
     var initClassesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
-        {name: "Number of direct instances", from: 0, 
+        {name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0, 
           to: 4000000,
           startVal: status.classesFilter.instances[0], 
           endVal: status.classesFilter.instances[1]},
-        {name: "number of direct subclasses", from: 0,
+        {name: "FILTER_MENUE.FILTER_DIRECT_SUBCL", from: 0,
           to: 2000000,
           startVal: status.classesFilter.subclasses[0], 
           endVal: status.classesFilter.subclasses[1]}];
@@ -288,15 +288,15 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
 
     var initPropertiesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
-        {name: "Uses in statements", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_STMTS", from: 0,
           to: 20000000,
           startVal: status.propertiesFilter.statements[0],
           endVal: status.propertiesFilter.statements[1]},
-        {name: "Uses in qualifiers", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_QUAL", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.qualifiers[0],
           endVal: status.propertiesFilter.qualifiers[1]},
-        {name: "Uses in references", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_REFS", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.references[0],
           endVal: status.propertiesFilter.references[1]}]; 
@@ -406,6 +406,23 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
       {id: 11, name: "Monolingualtext"}],
       selected: status.propertiesFilter.datatypes
     }
+
+    $scope.translations = {};
+
+    $translate(['TABLE_HEADER.LABEL', 'TABLE_HEADER.DATATYPE', 'TABLE_HEADER.USES_IN_STMTS', 
+        'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES', 
+        'TABLE_HEADER.SUBCLASSES']).then(function(translations){
+      translations.LABEL = translations['TABLE_HEADER.LABEL'];
+      translations.DATATYPE = translations['TABLE_HEADER.DATATYPE'];
+      translations.USES_IN_STMTS = translations['TABLE_HEADER.USES_IN_STMTS'];
+      translations.USES_IN_QUALS = translations['TABLE_HEADER.USES_IN_QUALS'];
+      translations.USES_IN_REFS = translations['TABLE_HEADER.USES_IN_REFS'];
+      translations.INSTATNCES = translations['TABLE_HEADER.INSTATNCES'];
+      translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
+
+    });
+
+    i18n.setLanguage(status.lang);
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};

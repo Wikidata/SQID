@@ -34,6 +34,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	    var statusStartValues = {
 	      entityType: "classes",
 	      activePage: 1,
+	      lang: 'en',
 	      sortCriteria: {
 	        classes: {
 	          label: "fa fa-sort",
@@ -86,6 +87,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	        args = {
 	          type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
 	          activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
+	          lang : ($route.current.params.lang) ? ($route.current.params.lang) : status.lang,
 	          sortCriteria: {
 	            classes: {
 	              label: ($route.current.params.sortclasslabel) ? ($route.current.params.sortclasslabel) : status.sortCriteria.classes.label,
@@ -120,6 +122,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	        }
 	        status.entityType = args.type;
 	        status.activePage = args.activePage;
+	        status.lang = args.lang;
 	        status.sortCriteria = args.sortCriteria;
 	        status.classesFilter = args.classesFilter;
 	        status.propertiesFilter = args.propertiesFilter;
@@ -136,7 +139,8 @@ var classBrowser = angular.module('classBrowserApp',[
 	      getUrl: function(){
 	        var result =  location.origin + location.pathname + "#/browse" 
 	          + "?activepage=" + status.activePage
-	          + "&type=" + status.entityType;
+	          + "&type=" + status.entityType
+	          + (status.lang != 'en' ? "&lang=" + status.lang : "");
 	        if (status.entityType == "classes"){
 	          result += (status.classesFilter.label ? "&classlabelfilter=" + status.classesFilter.label : "")
 	            + (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")

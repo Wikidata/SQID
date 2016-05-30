@@ -36,7 +36,7 @@ angular.module('classBrowserApp').factory('Classes', ['$http', '$route', 'util',
 	};
 
 	var getLabel = function(id){ return getData(id, 'l', null); };
-	var getUrl = function(id) { return "#/view?id=Q" + id; };
+	var getUrl = function(id, lang = 'en') { return "#/view?id=Q" + id + '&lang=' + lang; };
 	var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
 	var getSortedIdArray = function(){
@@ -80,9 +80,9 @@ angular.module('classBrowserApp').factory('Classes', ['$http', '$route', 'util',
 			updateSorting(sortCriteria);
 
 			return {
-				classesHeader: [["Label (ID)", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
-					["Instances", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
-					["Subclasses", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]],
+				classesHeader: [["TABLE_HEADER.LABEL", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
+					["TABLE_HEADER.INSTATNCES", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
+					["TABLE_HEADER.SUBCLASSES", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]],
 				getClasses: function(){ return classes; },
 				getIdArray: getSortedIdArray,
 				hasEntity: function(id){ return (id in classes); },
