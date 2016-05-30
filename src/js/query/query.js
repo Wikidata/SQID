@@ -1,6 +1,18 @@
+//////// Module Definition ////////////
+define([
+	'util/util',
+	'app/classes', // implicit app/app
+	'app/properties',
+	'util/i18n',
+	'util/sparql',
+	'util/wikidataapi',
+	'util/pagination'
+], function() {
+///////////////////////////////////////
+
 (function() {
 
-angular.module('queryInterface', ['angucomplete-alt'])
+angular.module('queryInterface', [])
 	.factory('queryInterfaceState', function() { // persist state of page
 
 		return function getFreshStateInstance() {
@@ -306,3 +318,6 @@ angular.module('queryInterface', ['angucomplete-alt'])
 
 	}]); // controller
 })(); // module
+
+return {}; // module
+}); 		  // definition end

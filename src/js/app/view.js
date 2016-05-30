@@ -1,5 +1,18 @@
+//////// Module Definition ////////////
+define([
+	'app/app', // pulls angular, ngroute and utilties
+	'util/sparql',
+	'util/entitydata',
+	'util/i18n',
+	// implicit 'util/util', // also contains htmlCache
+	'util/dataFormatter',
+	'app/properties',
+	'util/directives'
+], function() {
+///////////////////////////////////////
 
-classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
+angular.module('classBrowserApp').factory('View', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'Properties', 'htmlCache',
+function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -158,9 +171,9 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 		}
 
 	};
-})
-.controller('ViewController',
-	function($scope, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
+}])
+.controller('ViewController', ['$scope', '$route', '$sce', '$translate', 'View', 'Classes', 'Properties', 'sparql', 'util', 'i18n', 'htmlCache',
+function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
 		var MAX_EXAMPLE_INSTANCES = 20;
 		var MAX_DIRECT_SUBCLASSES = 10;
 		var MAX_PROP_SUBJECTS = 10;
@@ -328,6 +341,6 @@ classBrowser.factory('View', function($route, $q, $sce, sparql, entitydata, i18n
 				}
 			}
 		});
-	}
-);
+}]);
 
+return {};}); // module definition end

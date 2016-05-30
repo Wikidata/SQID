@@ -14,7 +14,6 @@ github to report issues and to find out if your issue is already known or even b
 You do not normally need to install this yourself, since it is a Web application that you can use in your browser. Developers who want to change the code should have a local copy that runs though. This is farily easy:
 
 * Download the files. The Web application is in the src folder, which should be made accessible through your local web server.
-* Get the dependencies. The [src/lib](src/lib) directory contains a README that specifies some external files you need to download.
 * Get some data. You can copy the example json data files from [src/data/exampleData](src/data/exampleData) to [src/data/](src/data) to get started. You can update these files by running the Python scripts under [helpers/python](helpers/python) from this directory, but this will not recreate all statistics (this is done with a Java program not currently available here). You can also [download most recent updated json files](http://tools.wmflabs.org/sqid/data/.)
 
 ## License

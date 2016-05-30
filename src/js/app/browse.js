@@ -1,4 +1,15 @@
-classBrowser.controller('TableController', 
+//////// Module Definition ////////////
+define([
+  'app/app', // pulls angular, ngroute and utilties
+  'app/classes',
+  'app/properties',
+  'util/util',
+  'util/i18n',
+  'util/pagination'
+], function() {
+///////////////////////////////////////
+
+angular.module('classBrowserApp').controller('TableController', ['$scope','$translate', 'i18n', 'Arguments', 'Classes', 'Properties', 'util',
   function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
     var tableContent = [];
@@ -607,4 +618,7 @@ classBrowser.controller('TableController',
     };
 
 
-  });
+  }]);
+  
+  return {}; // module
+});         // definition end
