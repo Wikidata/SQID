@@ -4,6 +4,7 @@ define([
   'app/classes',
   'app/properties',
   'util/util',
+  'util/i18n',
   'util/pagination'
 ], function() {
 ///////////////////////////////////////
@@ -292,7 +293,7 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', '$tra
           to: 20000000,
           startVal: status.propertiesFilter.statements[0],
           endVal: status.propertiesFilter.statements[1]},
-        {name: "FILTER_MENUE.FILTER_USE_QUAL", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_QUALS", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.qualifiers[0],
           endVal: status.propertiesFilter.qualifiers[1]},
