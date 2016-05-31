@@ -98,10 +98,7 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 				label: '',
 				labelorid: id,
 				description: '',
-				images: [],
 				aliases: [],
-				banner: null,
-				homepage: null,
 				statements: {},
 				missing: false,
 				termsPromise: null,
@@ -142,26 +139,7 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 					ret.aliases.push(aliasesData[i].value);
 				}
 			}
-
 			if ("claims" in entityData) {
-				// image
-				if ("P18" in entityData.claims) {
-					for (var i in entityData.claims.P18) {
-						var imageFileName = getStatementValue(entityData.claims.P18[i],"");
-						ret.images.push(imageFileName.replace(" ","_"));
-					}
-				}
-				// Wikivoyage banner; only pick the first banner if multiple
-				if ("P948" in entityData.claims) {
-					var imageFileName = getStatementValue(entityData.claims.P948[0],null);
-					ret.banner = imageFileName.replace(" ","_");
-				}
-				
-				// homepage URL; only pick the first URL if multiple
-				if ("P856" in entityData.claims) {
-					ret.homepage = getStatementValue(entityData.claims.P856[0],null);
-				}
-
 				ret.statements = entityData.claims;
 			}
 
@@ -269,7 +247,6 @@ SELECT DISTINCT ?p { \n\
 				addInlinksFromQuery(instanceJson, statements, propertyIds, itemIds);
 				return getInlinkRecord(language, statements, propertyIds, itemIds);
 			} else {
-				// TODO in this case we need to run more queries -- how to build promise?
 				return  sparql.getQueryRequest(getSparqlQueryForInProps(id)).then(function(propData){
 					var requests = [];
 					var propIds = [];
@@ -290,6 +267,7 @@ SELECT DISTINCT ?p { \n\
 	}
 
 	return {
+		getStatementValue: getStatementValue,
 		getEntityData: getEntityData,
 		getInlinkData: getInlinkData
 	};
