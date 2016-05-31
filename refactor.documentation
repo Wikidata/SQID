@@ -80,7 +80,7 @@ src/
 
 
 ////////////////////////////////////////////////////////////////////////////
-// app.js basically bundles up the apps modules in a manifest like fashion:
+// app.module.js basically bundles up the apps modules in a manifest like fashion:
 angular.module('sqid', [
 
 	// core logic and APIs
