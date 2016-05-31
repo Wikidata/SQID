@@ -259,6 +259,22 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	border-radius: 10rem;
 }
 
+.nav > li.shy-pill > a {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.nav-pills>li.shy-pill>a {
+    border-radius: 0px;
+}
+
+/*.nav-pills>li.active.shy-pill>a,
+.nav-pills>li.active.shy-pill>a:focus,
+.nav-pills>li.active.shy-pill>a:hover {
+	color: #31708f;
+	background-color: #d9edf7;
+}*/
+
 .info-badge {
     display: inline-block;
     min-width: 10px;

@@ -97,6 +97,8 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 					globe = '';
 				}
 				return '(' + datavalue.value.latitude + ', ' + datavalue.value.longitude + ')' + globe;
+			case 'sqid-text':
+				return datavalue.value;
 			default:
 				return 'value type "' + datavalue.type + '" is not supported yet.';
 		}

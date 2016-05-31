@@ -18,7 +18,9 @@
 		"NO_VALUE": "no value",
 		"SOME_VALUE": "unspecified value",
 		"MORE_STATEMENTS": "show {{number}} more statements",
-		"LESS_STATEMENTS": "hide {{number}} statements"
+		"LESS_STATEMENTS": "hide {{number}} statements",
+		"OUTGOING": "Own statements",
+		"INCOMING": "From related entities"
 	},
 	"TYPICAL_PROPS": {
 		"TYPICAL_PROPS": "Typical Properties",

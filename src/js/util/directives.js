@@ -69,7 +69,10 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 
 .directive('sqidStatementTable', ['$compile', 'Properties', 'dataFormatter', 'util', 'i18n', function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;
-	var missingTermsListener = { hasMissingTerms : false};
+	var outMissingTermsListener = { hasMissingTerms : false};
+	var inMissingTermsListener = { hasMissingTerms : false};
+	var outHtml = '';
+	var inHtml = '';
 
 	var hideStatementsThreshold = 3; // how many statements are displayed when hiding some
 
@@ -77,7 +80,10 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 		var show = attrs.show;
 		var title = attrs.title;
 
-		missingTermsListener.hasMissingTerms = false;
+		outHtml = '';
+		inHtml = '';
+		outMissingTermsListener.hasMissingTerms = false;
+		inMissingTermsListener.hasMissingTerms = false;
 
 		var includeProperty = function(numId) {
 			if (!show || show == 'all') {
@@ -129,15 +135,11 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 			}
 		}
 
-		var getHtml = function(statements, propertyList) {
-			missingTermsListener.hasMissingTerms = false;
-			var panelId = 'statements_' + show;
-			var html = '<div class="panel panel-info">\n' +
-						'<div class="panel-heading" data-toggle="collapse" data-target="#' + panelId + '"><h2 class="panel-title">\n' +
-						'<a style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
-						'<div id="' + panelId + '" class="panel-collapse collapse in">' +
-						'<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
+		var getStatementHtmlTable = function(statements, propertyList, outlinks) {
+			var html = '<table class="table table-striped table-condensed"><tbody>';
 			var hasContent = false;
+			var missingTermsListener = outlinks ? outMissingTermsListener : inMissingTermsListener;
+
 			angular.forEach(propertyList, function (propId) {
 				var statementGroup = statements[propId]
 				if (!missingTermsListener.hasMissingTerms) {
@@ -157,20 +159,51 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 								+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><button type="button" class="btn btn-xs" ng-click="toggleRows(\'' + propId + '\')"><span translate="{{getShowRowsMessage(\'' + propId + '\')}}" translate-value-number="' + (statementGroup.length - hideStatementsThreshold) + '"></span></button></div>' : '')
 								+ '</th>';
 						}
-						html += '<td>' + dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) + '</td>'
-						html += '</tr>';
+						html += '<td style="min-width: 70%;">' +
+							( outlinks ? '' : '<span style="color: #999; margin-left: -2ex; margin-right: 1ex; font-size: 80%; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>') +
+							dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) +
+							'</td>' +
+							'</tr>';
 					});
 				}
 			});
 			if (!hasContent) return '';
-			html += '</tbody></table></div></div></div>';
+			html += '</tbody></table>';
 			return html;
 		}
+		
+		var updateHtml = function(element, scope) {
+			var html;
+			if ( scope.outHtml == '' && scope.inHtml == '' ) {
+				html = '';
+			} else {
+				var panelId = 'statements_' + show;
+				html = '<div class="panel panel-info">\n' +
+							'<div class="panel-heading" data-toggle="collapse" data-target="#' + panelId + '"><h2 class="panel-title">\n' +
+							'<a style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
+							'<div id="' + panelId + '" class="panel-collapse collapse in">' +
+							'<div style="overflow: auto;">';
+				if (scope.inHtml != '') {
+					html += '<uib-tabset type="pills" justified="true">' +
+						'<uib-tab classes="shy-pill"><uib-tab-heading><span translate="STATEMENTS.OUTGOING"></span></uib-tab-heading>' +
+						scope.outHtml +
+						'</uib-tab>' +
+						'<uib-tab classes="shy-pill"><uib-tab-heading><span translate="STATEMENTS.INCOMING"></span></uib-tab-heading>' +
+						scope.inHtml +
+						'</uib-tab>' +
+						'</uib-tabset>';
+				} else { // outHtml != '' in this case
+					html += scope.outHtml;
+				}
+				html += '</div></div></div>';
+			}
+			insertAndCompile(html, element, scope);
+		}
 
-		var preparePropertyList = function(itemData) {
+		var preparePropertyList = function(statements) {
 			propertyScores = {};
 			// Note: class-based ranking rarely seems to help; hence using properties only
-			for (propertyId in itemData.statements) {
+			for (propertyId in statements) {
 				angular.forEach(properties.getRelatedProperties(propertyId.substring(1)), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
 						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
@@ -182,7 +215,7 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 
 			scoredProperties = [];
 
-			for (propertyId in itemData.statements) {
+			for (propertyId in statements) {
 				var numPropId = propertyId.substring(1);
 				if (includeProperty(numPropId)) {
 					if (numPropId in propertyScores) {
@@ -230,20 +263,48 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 		scope.getShowRowsMessage = function(id) {
 			return scope.showRows(id) ? 'STATEMENTS.LESS_STATEMENTS' : 'STATEMENTS.MORE_STATEMENTS';
 		}
+		
+		scope.inHtml = '';
+		scope.outHtml = '';
 
 		scope.$watch(attrs.data, function(itemData){
 			itemData.waitForPropertyLabels().then(function() {
 				Properties.then(function(propertyData){
 					properties = propertyData;
-					var propertyList = preparePropertyList(itemData);
+					var propertyList = preparePropertyList(itemData.statements);
 
-					var html = getHtml(itemData.statements, propertyList);
-					if (missingTermsListener.hasMissingTerms) {
+					var outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+					if (outMissingTermsListener.hasMissingTerms) {
 						itemData.waitForTerms().then( function() {
-							insertAndCompile(getHtml(itemData.statements, propertyList), element, scope);
+							outMissingTermsListener.hasMissingTerms = false;
+							scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+							updateHtml(element, scope);
 						});
 					} else {
-						insertAndCompile(html, element, scope);
+						scope.outHtml = outHtml;
+						updateHtml(element, scope);
+					}
+				})
+			});
+		});
+
+		scope.$watch(attrs.indata, function(inData){
+			if (!inData) return;
+			inData.waitForPropertyLabels().then(function() {
+				Properties.then(function(propertyData){
+					properties = propertyData;
+					var propertyList = preparePropertyList(inData.statements);
+
+					var inHtml = getStatementHtmlTable(inData.statements, propertyList, false);
+					if (inMissingTermsListener.hasMissingTerms) {
+						inData.waitForTerms().then( function() {
+							inMissingTermsListener.hasMissingTerms = false;
+							scope.inHtml = getStatementHtmlTable(inData.statements, propertyList, false);
+							updateHtml(element, scope);
+						});
+					} else {
+						scope.inHtml = inHtml;
+						updateHtml(element, scope);
 					}
 				})
 			});
