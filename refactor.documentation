@@ -1,9 +1,17 @@
 next structure proposal
 =======================
 
-this outlines a possible setup with very strong module granularity. note that the js/ folder was renamed in app/ and the files from the view/ folder have moved to the subfolders of the modules they would belong to.
+this outlines a possible setup with very strong module granularity. 
+note that the js/ folder was renamed in app/ and the files from the 
+view/ folder have moved to the subfolders of the modules they would belong to.
 
-some parts are still unclear. like what purpose the core module actually has, if start and about views couldn't better fit into meta or even layout. shouldn't squidStatementTable rather be part of layout as well? or would data make more sense in core instead of an own module (or the other way round)? is bundling utils i18n with the angular-translate parts into their own module sensible? can util be broken down further?
+some parts are still unclear. like 
+what purpose the core module actually has, 
+if start and about views couldn't better fit into meta or even layout. 
+shouldn't squidStatementTable rather be part of layout as well? 
+or would data make more sense in core instead of an own module (or the other way round)? 
+is bundling utils i18n with the angular-translate parts into their own module sensible? 
+can util be broken down further?
 
 to me it seems like finer granularity also makes it less obvious for some components where they belong.
 
