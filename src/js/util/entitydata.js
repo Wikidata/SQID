@@ -6,7 +6,7 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n', 'sparql', function(wikidataapi, util, i18n, sparql) {
+angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n', 'sparql', '$q', function(wikidataapi, util, i18n, sparql, $q) {
 
 	var getStatementValue = function(statementJson, defaultValue) {
 		try {
@@ -171,69 +171,72 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 
 	var getSparqlQueryForInlinks = function(objectId, limit) {
 		return sparql.getStandardPrefixes() + "\
-SELECT ?it ?s ?ps (SAMPLE(?pq) as ?pqs) \n\
+SELECT ?it ?s ?p (SAMPLE(?pq) as ?pqs) \n\
 WHERE { \n\
-	{ SELECT DISTINCT ?it ?s ?ps { \n\
+	{ SELECT DISTINCT ?it ?s ?p { \n\
 		?s ?ps wd:" + objectId + " . ?it ?pc ?s . \n\
 		?p wikibase:statementProperty ?ps . ?p wikibase:claim ?pc . \n\
+		FILTER( ?p != <http://www.wikidata.org/entity/P31> ) \n\
+	} LIMIT " + limit + " } \n\
+	OPTIONAL { ?s ?pq ?v . ?psub wikibase:qualifier ?pq } \n\
+} GROUP BY ?it ?s ?p";
+	}
+
+	var getSparqlQueryForInlinksByProperty = function(propertyId, objectId, limit) {
+		return sparql.getStandardPrefixes() + "\
+SELECT ?it ?s (SAMPLE(?pq) as ?pqs) \n\
+WHERE { \n\
+	{ SELECT DISTINCT ?it ?s { \n\
+		?s ps:" + propertyId + " wd:" + objectId + " . ?it p:" + propertyId + " ?s . \n\
     } LIMIT " + limit + " } \n\
     OPTIONAL { ?s ?pq ?v . ?psub wikibase:qualifier ?pq } \n\
-} GROUP BY ?it ?s ?ps";
+} GROUP BY ?it ?s ";
 	}
 
 	var getSparqlQueryForInProps = function(objectId) {
 		return sparql.getStandardPrefixes() + "\
-SELECT DISTINCT ?ps { \n\
-		?s ?ps wd:" + objectId + " . ?it ?pc ?s . \n\
-		?p wikibase:statementProperty ?ps . ?p wikibase:claim ?pc . \n\
-    }";
+SELECT DISTINCT ?p { \n\
+		?s ?ps wd:" + objectId + " . \n\
+		?p wikibase:statementProperty ?ps . \n\
+		FILTER( ?p != <http://www.wikidata.org/entity/P31> ) \n\
+}";
 	}
+	
+	var addInlinksFromQuery = function(instanceJson, statements, propertyIds, itemIds, fixedPropId) {
+		for (var i = 0; i < instanceJson.length; i++) {
+			var pid = fixedPropId ? fixedPropId : instanceJson[i].p.value.substring("http://www.wikidata.org/entity/".length);
+			var eid = instanceJson[i].it.value.substring("http://www.wikidata.org/entity/".length);
+			var sid = instanceJson[i].s.value.substring("http://www.wikidata.org/entity/statement/".length);
+			var hasQualifiers = ("pqs" in instanceJson[i]); // TODO use this information
 
-	var getInlinkData = function(id) {
-		var language = i18n.getLanguage();
-		return sparql.getQueryRequest(getSparqlQueryForInlinks(id,101)).then(function(data){
-			var instanceJson = data.results.bindings;
-			var element;
-			var statements = {};
-			var propertyIds = {};
-			var itemIds = {};
-
-			if (instanceJson.length < 101) { // got all inlinks in one query
-				for (var i = 0; i < instanceJson.length; i++) {
-					var pid = instanceJson[i].ps.value.substring("http://www.wikidata.org/prop/statement/".length);
-					var eid = instanceJson[i].it.value.substring("http://www.wikidata.org/entity/".length);
-					var sid = instanceJson[i].s.value.substring("http://www.wikidata.org/entity/statement/".length);
-					var hasQualifiers = ("pqs" in instanceJson[i]); // TODO use this information
-
-					if (! (pid in statements) ) {
-						statements[pid] = [];
-						propertyIds[pid] = true;
-					}
-
-					var entityType;
-					if (eid.substring(0,1) == "P") {
-						entityType = "property";
-						propertyIds[eid] = true;
-					} else {
-						entityType = "item";
-						itemIds[eid] = true;
-					}
-
-					var value = { "entity-type": entityType, "numeric-id": parseInt(eid.substring(1)) };
-					var snak = {
-						snaktype: "value",
-						property: pid,
-						datatype: "wikibase-item",
-						datavalue: {value: value, type: "wikibase-entityid"}
-					}; 
-					var stmt = { mainsnak: snak, rank: "normal", type: "statement", id: sid }; 
-					statements[pid].push(stmt);
-				}
-			} else {
-				// TODO in this case we need to run more queries -- how to build promise?
+			if (! (pid in statements) ) {
+				statements[pid] = [];
+				propertyIds[pid] = true;
 			}
 
-			ret = {
+			var entityType;
+			if (eid.substring(0,1) == "P") {
+				entityType = "property";
+				propertyIds[eid] = true;
+			} else {
+				entityType = "item";
+				itemIds[eid] = true;
+			}
+
+			var value = { "entity-type": entityType, "numeric-id": parseInt(eid.substring(1)) };
+			var snak = {
+				snaktype: "value",
+				property: pid,
+				datatype: "wikibase-item",
+				datavalue: {value: value, type: "wikibase-entityid"}
+			}; 
+			var stmt = { mainsnak: snak, rank: "normal", type: "statement", id: sid }; 
+			statements[pid].push(stmt);
+		}
+	}
+	
+	var getInlinkRecord = function(language, statements, propertyIds, itemIds) {
+		return {
 				language: language, // this is fixed for this result!
 				statements: statements,
 				termsPromise: null,
@@ -250,9 +253,39 @@ SELECT DISTINCT ?ps { \n\
 					}
 					return this.termsPromise;
 				}
-			}
+			};
+	}
 
-			return ret;
+	var getInlinkData = function(id) {
+		var language = i18n.getLanguage();
+		return sparql.getQueryRequest(getSparqlQueryForInlinks(id,101)).then(function(data){
+			var instanceJson = data.results.bindings;
+			var element;
+			var statements = {};
+			var propertyIds = {};
+			var itemIds = {};
+
+			if (instanceJson.length < 101) { // got all inlinks in one query
+				addInlinksFromQuery(instanceJson, statements, propertyIds, itemIds);
+				return getInlinkRecord(language, statements, propertyIds, itemIds);
+			} else {
+				// TODO in this case we need to run more queries -- how to build promise?
+				return  sparql.getQueryRequest(getSparqlQueryForInProps(id)).then(function(propData){
+					var requests = [];
+					var propIds = [];
+					angular.forEach(propData.results.bindings, function (binding) {
+						var propId = util.getIdFromUri( binding.p.value );
+						propIds.push(propId);
+						requests.push( sparql.getQueryRequest(getSparqlQueryForInlinksByProperty(propId, id, 101)) );
+					});
+					return $q.all(requests).then( function(responses) {
+						for (var i = 0; i < responses.length; i++) {
+							addInlinksFromQuery(responses[i].results.bindings, statements, propertyIds, itemIds, propIds[i]);
+						}
+						return getInlinkRecord(language, statements, propertyIds, itemIds);
+					});
+				})
+			}
 		});
 	}
 
