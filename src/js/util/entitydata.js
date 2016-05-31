@@ -171,6 +171,17 @@ WHERE { \n\
 } GROUP BY ?it ?s ";
 	}
 
+	var getSparqlQueryForInlinksByPropertyContinuation = function(propertyId, objectId, limit) {
+		return sparql.getStandardPrefixes() + "\
+SELECT DISTINCT ?entity { \n\
+	?entity p:" + propertyId + "/ps:" + propertyId + " wd:" + objectId + "\n\
+} LIMIT " + limit;
+	}
+
+	var getContinuationLink = function(propertyId, objectId) {
+		return sparql.getQueryUiUrl(getSparqlQueryForInlinksByPropertyContinuation(propertyId, objectId, 10000));
+	}
+
 	var getSparqlQueryForInProps = function(objectId) {
 		return sparql.getStandardPrefixes() + "\
 SELECT DISTINCT ?p { \n\
@@ -180,7 +191,7 @@ SELECT DISTINCT ?p { \n\
 }";
 	}
 	
-	var addInlinksFromQuery = function(instanceJson, statements, propertyIds, itemIds, fixedPropId) {
+	var addInlinksFromQuery = function(instanceJson, statements, propertyIds, itemIds, objectId, fixedPropId) {
 		for (var i = 0; i < instanceJson.length; i++) {
 			var pid = fixedPropId ? fixedPropId : instanceJson[i].p.value.substring("http://www.wikidata.org/entity/".length);
 			var eid = instanceJson[i].it.value.substring("http://www.wikidata.org/entity/".length);
@@ -192,24 +203,35 @@ SELECT DISTINCT ?p { \n\
 				propertyIds[pid] = true;
 			}
 
-			var entityType;
-			if (eid.substring(0,1) == "P") {
-				entityType = "property";
-				propertyIds[eid] = true;
-			} else {
-				entityType = "item";
-				itemIds[eid] = true;
-			}
+			if (statements[pid].length < 100) {
+				var entityType;
+				if (eid.substring(0,1) == "P") {
+					entityType = "property";
+					propertyIds[eid] = true;
+				} else {
+					entityType = "item";
+					itemIds[eid] = true;
+				}
 
-			var value = { "entity-type": entityType, "numeric-id": parseInt(eid.substring(1)) };
-			var snak = {
-				snaktype: "value",
-				property: pid,
-				datatype: "wikibase-item",
-				datavalue: {value: value, type: "wikibase-entityid"}
-			}; 
-			var stmt = { mainsnak: snak, rank: "normal", type: "statement", id: sid }; 
-			statements[pid].push(stmt);
+				var value = { "entity-type": entityType, "numeric-id": parseInt(eid.substring(1)) };
+				var snak = {
+					snaktype: "value",
+					property: pid,
+					datatype: "wikibase-item",
+					datavalue: {value: value, type: "wikibase-entityid"}
+				}; 
+				var stmt = { mainsnak: snak, rank: "normal", type: "statement", id: sid }; 
+				statements[pid].push(stmt);
+			} else {
+				var snak = {
+					snaktype: "value",
+					property: pid,
+					datatype: "sqid-text",
+					datavalue: {value: '<a href="' + getContinuationLink(pid, objectId) + '"><span translate="FURTHER_RESULTS"></span></a>', type: "sqid-text"}
+				}; 
+				var stmt = { mainsnak: snak, rank: "normal", type: "statement", id: sid }; 
+				statements[pid].push(stmt);
+			}
 		}
 	}
 	
@@ -244,7 +266,7 @@ SELECT DISTINCT ?p { \n\
 			var itemIds = {};
 
 			if (instanceJson.length < 101) { // got all inlinks in one query
-				addInlinksFromQuery(instanceJson, statements, propertyIds, itemIds);
+				addInlinksFromQuery(instanceJson, statements, propertyIds, itemIds, id);
 				return getInlinkRecord(language, statements, propertyIds, itemIds);
 			} else {
 				return  sparql.getQueryRequest(getSparqlQueryForInProps(id)).then(function(propData){
@@ -257,7 +279,7 @@ SELECT DISTINCT ?p { \n\
 					});
 					return $q.all(requests).then( function(responses) {
 						for (var i = 0; i < responses.length; i++) {
-							addInlinksFromQuery(responses[i].results.bindings, statements, propertyIds, itemIds, propIds[i]);
+							addInlinksFromQuery(responses[i].results.bindings, statements, propertyIds, itemIds, id, propIds[i]);
 						}
 						return getInlinkRecord(language, statements, propertyIds, itemIds);
 					});

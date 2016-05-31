@@ -159,10 +159,11 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 								+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><button type="button" class="btn btn-xs" ng-click="toggleRows(\'' + propId + '\')"><span translate="{{getShowRowsMessage(\'' + propId + '\')}}" translate-value-number="' + (statementGroup.length - hideStatementsThreshold) + '"></span></button></div>' : '')
 								+ '</th>';
 						}
-						html += '<td style="min-width: 70%;">' + 
+						html += '<td style="min-width: 70%;">' +
 							( outlinks ? '' : '<span style="color: #999; margin-left: -2ex; margin-right: 1ex; font-size: 80%; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>') +
-							dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) + '</td>';
-						html += '</tr>';
+							dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) +
+							'</td>' +
+							'</tr>';
 					});
 				}
 			});

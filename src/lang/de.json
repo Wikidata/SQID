@@ -12,6 +12,7 @@
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
 	},
 	"PROPTYPE": "Typ",
+	"FURTHER_RESULTS": "&hellip; weitere Ergebnisse",
  	"STATEMENTS": {
 		"PREFERRED_HINT": "Dies ist eine bevorzugte Aussage",
 		"DEPRECATED_HINT": "Dies ist eine überholte Aussage",
