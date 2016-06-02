@@ -59,7 +59,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	        label: "",
 	        relatedProperty: "",
 	        relatedQualifier: "",
-	        directInstanceOf: "",
+	        directInstanceOf: {id: 1, name: "Any property class", qId: 0},
 	        statements: [0, 20000000],
 	        qualifiers: [0, 10000000],
 	        references: [0, 10000000],

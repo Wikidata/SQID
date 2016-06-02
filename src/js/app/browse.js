@@ -91,6 +91,23 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
           return false;
         }
       },
+      propertyClassFilter: function(entry, data){
+        var filter;
+        if (status.entityType == "classes"){
+          return true;
+        }else{
+          filter = status.propertiesFilter.directInstanceOf.qId;
+        }
+        if (filter == 0){
+          return true;
+        }else{
+          if (data.getClasses(entry).indexOf(filter) != -1){
+            return true;
+          }else{
+            return false;
+          }
+        }
+      },
       suggestFilters: function(entry, data){
         var suggestFiltersHelper = function(entry, getter, value){
           if (!value){
@@ -123,7 +140,6 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
         }else{
             return suggestFiltersHelper(entry, data.getRelatedProperties, status.propertiesFilter.relatedProperty)
               && suggestFiltersHelper(entry, data.getQualifiers, status.propertiesFilter.relatedQualifier)
-              && suggestFiltersHelper(entry, data.getClasses, status.propertiesFilter.directInstanceOf)
         }
       },
       sliderFilter: function(entry, data){
@@ -246,7 +262,7 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
     };
 
     var initPropertyClassIndex = function(){
-      var result = [];
+      var result = [{id: 1, name: "Any property class"}];
       Properties.then(function(propertyData){
         Classes.then(function(classData){
           var propertyClassIds = [];
@@ -256,9 +272,9 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
           }
           for (var i = 0; i < propertyClassIds.length; i++){
             var elem = {
-              name: classData.getLabel(propertyClassIds[i]),
-              idName: "Q" + propertyClassIds[i],
-              id: propertyClassIds[i].toString()
+              id: (i+2),
+              name: classData.getLabel(propertyClassIds[i]) + " (Q" + propertyClassIds[i].toString() + ")",
+              qId: propertyClassIds[i]
             }
             result.push(elem);
 
@@ -267,6 +283,19 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
             }
 
           }
+          result.sort(function(a, b){
+            if (a.id == 1){
+              return -1;
+            }
+            if (b.id == 1){
+              return 1;
+            }
+            if (a.name.toLowerCase() > b.name.toLowerCase()){
+              return 1;
+            }else{
+              return -1;  
+            }
+          });
           propertyClassIndexInitialized = true;
           refreshAngucompleteInputFields();
         });
@@ -369,8 +398,7 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
     $scope.suggestFilters = {
       data: {
         propertyIndex: initPropertyIndex(),
-        classIndex: initClassIndex(),
-        propertyClassIndex: initPropertyClassIndex()
+        classIndex: initClassIndex()
       },
       classes: {
         relatedProperty: "",
@@ -382,6 +410,12 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
         directInstanceOf: ""
       }
     };
+
+    $scope.propertyClassFilter = {
+      options: initPropertyClassIndex(),
+      selected: status.propertiesFilter.directInstanceOf
+    }
+
 
     $scope.tableSize = 15;
     $scope.args=args;
@@ -424,6 +458,12 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
     $scope.setDatatypeFilter = function(data){
       status.propertiesFilter.datatypes = data;
       $scope.filterPermalink =Arguments.getUrl();
+      updateTable();
+    }
+
+    $scope.setPropertyClassFilter = function(data){
+      status.propertiesFilter.directInstanceOf = data;
+      $scope.filterPermalink = Arguments.getUrl();
       updateTable();
     }
 
