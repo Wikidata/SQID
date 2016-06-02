@@ -18,8 +18,7 @@
 		"DEPRECATED_HINT": "Dies ist eine überholte Aussage",
 		"NO_VALUE": "kein Wert",
 		"SOME_VALUE": "unspezifizierter Wert",
-		"MORE_STATEMENTS": "weitere {{number}} Aussagen anzeigen",
-		"LESS_STATEMENTS": "{{number}} Aussagen ausblenden",
+		"NUMBER_STATEMENTS": "{{number}} Aussagen",
 		"OUTGOING": "Eigene Aussagen",
 		"INCOMING": "Von verwandten Einträgen"
 	},

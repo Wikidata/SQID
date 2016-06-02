@@ -79,6 +79,7 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
 		var title = attrs.title;
+		var narrowTable = ('narrow' in attrs);
 
 		outHtml = '';
 		inHtml = '';
@@ -136,36 +137,39 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 		}
 
 		var getStatementHtmlTable = function(statements, propertyList, outlinks) {
-			var html = '<table class="table table-striped table-condensed"><tbody>';
+			var html = '<table class="table table-striped table-condensed ' + 
+				(narrowTable ? 'narrow-statements-table' : 'statements-table' ) + '"><tbody>';
 			var hasContent = false;
 			var missingTermsListener = outlinks ? outMissingTermsListener : inMissingTermsListener;
 
 			angular.forEach(propertyList, function (propId) {
 				var statementGroup = statements[propId]
-				if (!missingTermsListener.hasMissingTerms) {
-					var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
-					angular.forEach(statementGroup, function (statement, index) {
-						hasContent = true;
-						if (hideSomeStatements && index >= hideStatementsThreshold) {
-							html += '<tr ng-if="showRows(\'' + propId + '\')">';
-						} else {
-							html += '<tr>';
-						}
-						if (index == 0) {
-							html += '<th valign="top" rowspan="'
-								+ (hideSomeStatements ? '{{getRowSpan(\'' + propId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
-								+ '" style="min-width: 20%;">'
-								+ i18n.getPropertyLink(propId)
-								+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><button type="button" class="btn btn-xs" ng-click="toggleRows(\'' + propId + '\')"><span translate="{{getShowRowsMessage(\'' + propId + '\')}}" translate-value-number="' + (statementGroup.length - hideStatementsThreshold) + '"></span></button></div>' : '')
-								+ '</th>';
-						}
-						html += '<td style="min-width: 70%;">' +
-							( outlinks ? '' : '<span style="color: #999; margin-left: -2ex; margin-right: 1ex; font-size: 80%; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>') +
-							dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) +
-							'</td>' +
-							'</tr>';
-					});
-				}
+				var propertyLabel = i18n.getPropertyLabel(propId);
+
+				var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
+				angular.forEach(statementGroup, function (statement, index) {
+					hasContent = true;
+					if (hideSomeStatements && index >= hideStatementsThreshold) {
+						html += '<tr ng-if="showRows(\'' + propId + '\')" title="' + propertyLabel + '">';
+					} else {
+						html += '<tr title="' + propertyLabel + '">';
+					}
+					if (index == 0) {
+						html += '<th valign="top" rowspan="'
+							+ (hideSomeStatements ? '{{getRowSpan(\'' + propId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
+							+ '">'
+							+ i18n.getPropertyLink(propId)
+							+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><div class="badge-'
+								+ (narrowTable ? 'small' : 'normal')  +
+							' clickable" ng-click="toggleRows(\'' + propId + '\')"><span class="{{getShowRowsClass(\'' + propId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementGroup.length) + '"></span></span></div></div>' : '')
+							+ '</th>';
+					}
+					html += '<td>' +
+						( outlinks ? '' : '<span style="color: #999; margin-left: -2ex; margin-right: 1ex; font-size: 80%; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>') +
+						dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) +
+						'</td>' +
+						'</tr>';
+				});
 			});
 			if (!hasContent) return '';
 			html += '</tbody></table>';
@@ -263,6 +267,9 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 		scope.getShowRowsMessage = function(id) {
 			return scope.showRows(id) ? 'STATEMENTS.LESS_STATEMENTS' : 'STATEMENTS.MORE_STATEMENTS';
 		}
+		scope.getShowRowsClass = function(id) {
+			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
+		}
 		
 		scope.inHtml = '';
 		scope.outHtml = '';
@@ -273,16 +280,14 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 					properties = propertyData;
 					var propertyList = preparePropertyList(itemData.statements);
 
-					var outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+					scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+					updateHtml(element, scope);
 					if (outMissingTermsListener.hasMissingTerms) {
 						itemData.waitForTerms().then( function() {
 							outMissingTermsListener.hasMissingTerms = false;
 							scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
 							updateHtml(element, scope);
 						});
-					} else {
-						scope.outHtml = outHtml;
-						updateHtml(element, scope);
 					}
 				})
 			});

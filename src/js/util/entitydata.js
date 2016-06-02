@@ -46,6 +46,14 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 			}
 		}
 	}
+	
+	var addEntityIdsFromSnaks = function(snaks, result) {
+		angular.forEach(snaks, function (snakList) {
+			angular.forEach(snakList, function(snak) {
+				addEntityIdsFromSnak(snak, result);
+			});
+		});
+	}
 
 	var getEntityIds = function(statements) {
 		var result = {};
@@ -53,10 +61,11 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 			angular.forEach(statementGroup, function (statement) {
 				addEntityIdsFromSnak(statement.mainsnak, result);
 				if ('qualifiers' in statement) {
-					angular.forEach(statement.qualifiers, function (snakList) {
-						angular.forEach(snakList, function(snak) {
-							addEntityIdsFromSnak(snak, result);
-						});
+					addEntityIdsFromSnaks(statement.qualifiers, result);
+				}
+				if ('references' in statement) {
+					angular.forEach(statement.references, function (reference) {
+						addEntityIdsFromSnaks(reference.snaks, result);
 					});
 				}
 			});
@@ -72,6 +81,14 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 		}
 		missingIds[snak.property] = true;
 	}
+	
+	var addPropertyIdsFromSnaks = function(snaks, result) {
+		angular.forEach(snaks, function (snakList) {
+			angular.forEach(snakList, function(snak) {
+				addPropertyIdsFromSnak(snak, result);
+			});
+		});
+	}
 
 	var getPropertyIds = function(statements) {
 		var result = {};
@@ -79,10 +96,11 @@ angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n'
 			angular.forEach(statementGroup, function (statement) {
 				addPropertyIdsFromSnak(statement.mainsnak, result);
 				if ('qualifiers' in statement) {
-					angular.forEach(statement.qualifiers, function (snakList) {
-						angular.forEach(snakList, function(snak) {
-							addPropertyIdsFromSnak(snak, result);
-						});
+					addPropertyIdsFromSnaks(statement.qualifiers, result);
+				}
+				if ('references' in statement) {
+					angular.forEach(statement.references, function (reference) {
+						addPropertyIdsFromSnaks(reference.snaks, result);
 					});
 				}
 			});
