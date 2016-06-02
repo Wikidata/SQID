@@ -275,6 +275,43 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	background-color: #d9edf7;
 }*/
 
+.badge-small {
+	display: inline-block;
+	min-width: 7px;
+	padding: 2px 6px;
+	font-size: 10px;
+	font-weight: 600;
+	line-height: 1;
+	color: #666;
+	background-color: #ccc;
+	text-align: center;
+	white-space: nowrap;
+	vertical-align: middle;
+	border-radius: 7px;
+}
+.badge-normal {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+	color: #666;
+	background-color: #ccc;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border-radius: 10px;
+}
+.info {
+	color: #31708f;
+	background-color: #d9edf7;
+}
+.warning {
+	color: #8a6d3b;
+	background-color: #fcf8e3;
+}
+
 .info-badge {
     display: inline-block;
     min-width: 10px;
@@ -286,6 +323,22 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	background-color: #777;*/
 	color: #31708f;
 	background-color: #d9edf7;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    border-radius: 10px;
+}
+.warning-badge {
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+/*    color: #000;
+	background-color: #777;*/
+	color: #8a6d3b;
+	background-color: #fcf8e3;
     text-align: center;
     white-space: nowrap;
     vertical-align: middle;
@@ -305,12 +358,69 @@ span.smallnote {
     color: #444;
 }
 
-.property-table th {
+.expand-closed,
+.expand-open {
+	padding-right: 0.5ex;
+}
+.expand-closed::after {
+    font-family: 'Glyphicons Halflings';
+	content: "\e080";
+    float: right;
+}
+.expand-open::after {
+	font-family: 'Glyphicons Halflings';
+	content: "\e114";
+    float: right; 
+}
+
+div.qualifiers {
+    font-size: 0.8em;
+	padding-left: 10px;
+}
+
+.property-table th { /* used for instance/class/property usage tables */
 	width: 20%;
 }
 .number-table td, .number-table th {
 	text-align: right;
 	width: 15%;
+}
+.statements-table {
+	table-layout: fixed;
+}
+.statements-table th {
+	width: 25%;
+}
+.narrow-statements-table {
+	font-size: 90%;
+	table-layout: fixed;
+}
+.narrow-statements-table th {
+	width: 40%; /* but layout not fixed here */
+}
+.reference-table {
+	font-size: 90%;
+	table-layout: fixed;
+}
+.reference-table td {
+	padding-left: 5px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	min-width: 25%;
+}
+.reference-table th {
+	padding-top: 7px;
+	padding-bottom: 3px;
+	width: 100%;
+	color: #555;
+/* 	font-weight: normal; */
+}
+
+.font-small {
+	font-size: 90%;
+}
+.font-tiny {
+	font-size: 80%;
 }
 
 .ext-link {

@@ -18,6 +18,7 @@
 		"NO_VALUE": "no value",
 		"SOME_VALUE": "unspecified value",
 		"MORE_STATEMENTS": "show {{number}} more statements",
+		"NUMBER_STATEMENTS": "{{number}} statements",
 		"LESS_STATEMENTS": "hide {{number}} statements",
 		"OUTGOING": "Own statements",
 		"INCOMING": "From related entities"
@@ -84,6 +85,8 @@
 	"SEC_STATEMENTS": "Statements",
 	"SEC_MEDIA": "Media",
 	"SEC_WIKIMEDIA_PAGES": "Wikimedia Categories and Portals",
+	"REFERENCES_HINT": "References",
+	"NO_REFERENCES_HINT": "No references given",
 	"NOSUCHENTITY_HEADLINE": "Sorry, I could not find any entity with ID '{{id}}'.",
 	"NOSUCHENTITY_BODY": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know."
 }
