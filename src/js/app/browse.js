@@ -190,7 +190,6 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
       $scope.$broadcast('angucomplete-alt:changeInput', 'direct-superclass-of-class', $scope.suggestFilters.classes.superclass);
       $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-properties', $scope.suggestFilters.properties.relatedProperty);
       $scope.$broadcast('angucomplete-alt:changeInput', 'related-qualifiers', $scope.suggestFilters.properties.relatedQualifier);
-      $scope.$broadcast('angucomplete-alt:changeInput', 'direct-instance-of-property', $scope.suggestFilters.properties.directInstanceOf);
     };
 
     var initPaginations = function(){
@@ -572,14 +571,7 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
           status.propertiesFilter.relatedQualifier, $scope.suggestFilters.properties.relatedQualifier);
           status.propertiesFilter.relatedQualifier = result[0];
           $scope.suggestFilters.properties.relatedQualifier = result[1];
-        },
-        directInstanceOf : function(selected){
-          var result = selectElementForSuggestFilter(selected, 
-          status.propertiesFilter.directInstanceOf, $scope.suggestFilters.properties.directInstanceOf);
-          status.propertiesFilter.directInstanceOf = result[0];
-          $scope.suggestFilters.properties.directInstanceOf = result[1];
-        },
-        
+        }
       }
     };
 
@@ -633,10 +625,6 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
 
     $scope.localSearchClasses = function(str){
       return localSearch(str, $scope.suggestFilters.data.classIndex);
-    };
-
-    $scope.localSearchPropertyClasses = function(str){
-      return localSearch(str, $scope.suggestFilters.data.propertyClassIndex);
     };
 
 
