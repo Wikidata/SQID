@@ -199,7 +199,7 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 				refCount = statement.references.length;
 				refTable += '<table class="reference-table">';
 				angular.forEach(statement.references, function(reference) {
-					refTable += '<tr><th colspan="2">Reference</th></tr>'
+					refTable += '<tr><th colspan="2">{{\'SEC_REFERENCE\'|translate}}</th></tr>'
 						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, false);
 				});
 				refTable += '</table>';

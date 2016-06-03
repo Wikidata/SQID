@@ -83,8 +83,8 @@
 	"SEC_STATEMENTS": "Statements",
 	"SEC_MEDIA": "Media",
 	"SEC_WIKIMEDIA_PAGES": "Wikimedia Categories and Portals",
-	"REFERENCES_HINT": "References",
-	"NO_REFERENCES_HINT": "No references given",
+	"SEC_REFERENCE": "Reference",
+	"NO_REFERENCES_HINT": "no references given",
 	"NOSUCHENTITY_HEADLINE": "Sorry, I could not find any entity with ID '{{id}}'.",
 	"NOSUCHENTITY_BODY": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know."
 }

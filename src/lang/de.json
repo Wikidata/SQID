@@ -84,6 +84,8 @@
 	"SEC_STATEMENTS": "Aussagen",
 	"SEC_MEDIA": "Medien",
 	"SEC_WIKIMEDIA_PAGES": "Wikimedia-Kategorien und -Portale",
+	"SEC_REFERENCE": "Fundstelle",
+	"NO_REFERENCES_HINT": "keine Fundstellen angegeben",
 	"NOSUCHENTITY_HEADLINE": "Leider konnte ich kein Objekt mit ID \"{{id}}\" finden.",
 	"NOSUCHENTITY_BODY": "Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden."
 }
