@@ -143,6 +143,7 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 			var missingTermsListener = outlinks ? outMissingTermsListener : inMissingTermsListener;
 
 			angular.forEach(propertyList, function (propId) {
+				var statementListId = propId + ( outlinks ? '-out' : '-in' );
 				var statementGroup = statements[propId]
 				var propertyLabel = i18n.getPropertyLabel(propId);
 
@@ -150,18 +151,18 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 				angular.forEach(statementGroup, function (statement, index) {
 					hasContent = true;
 					if (hideSomeStatements && index >= hideStatementsThreshold) {
-						html += '<tr ng-if="showRows(\'' + propId + '\')" title="' + propertyLabel + '">';
+						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '">';
 					} else {
 						html += '<tr title="' + propertyLabel + '">';
 					}
 					if (index == 0) {
 						html += '<th valign="top" rowspan="'
-							+ (hideSomeStatements ? '{{getRowSpan(\'' + propId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
+							+ (hideSomeStatements ? '{{getRowSpan(\'' + statementListId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
 							+ '">'
 							+ i18n.getPropertyLink(propId)
 							+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><div class="badge-'
 								+ (narrowTable ? 'small' : 'normal')  +
-							' clickable" ng-click="toggleRows(\'' + propId + '\')"><span class="{{getShowRowsClass(\'' + propId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementGroup.length) + '"></span></span></div></div>' : '')
+							' clickable" ng-click="toggleRows(\'' + statementListId + '\')"><span class="{{getShowRowsClass(\'' + statementListId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementGroup.length) + '"></span></span></div></div>' : '')
 							+ '</th>';
 					}
 
