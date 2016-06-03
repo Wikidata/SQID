@@ -164,11 +164,19 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 							' clickable" ng-click="toggleRows(\'' + propId + '\')"><span class="{{getShowRowsClass(\'' + propId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementGroup.length) + '"></span></span></div></div>' : '')
 							+ '</th>';
 					}
-					html += '<td>' +
-						( outlinks ? '' : '<span style="color: #999; margin-left: -2ex; margin-right: 1ex; font-size: 80%; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>') +
-						dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) +
-						'</td>' +
-						'</tr>';
+
+					if (outlinks) { // expand statement, only used for outlinks right now (may change in future)
+						html += '<td ng-click="toggleRows(\'' + statement.id + '\')" class="clickable">' +
+							'<div style="float: right; "><span class="{{getShowRowsClass(\'' + statement.id + '\')}} light-grey font-tiny clickable"></span></div>'
+					} else {
+						html += '<td>';
+					}
+
+					if (!outlinks) { // show left-arrow for inlinks
+						html += '<span class=" light-grey font-tiny" style="margin-left: -2ex; margin-right: 1ex; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>';
+					}
+					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) +
+						'</td></tr>';
 				});
 			});
 			if (!hasContent) return '';

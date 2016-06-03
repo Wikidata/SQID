@@ -193,26 +193,28 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 
 		var refTable = '';
 		var refCount = 0;
-		if (showReferences && ('references' in statement)) {
-			refCount = statement.references.length;
-			refTable += '<div style="overflow: auto; clear: both;" ng-if="showRows(\'' + statementId + '\')">'
-				+ '<table class="reference-table">';
-			angular.forEach(statement.references, function(reference) {
-				refTable += '<tr><th colspan="2">Reference</th></tr>'
-					+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, false);
-			});
-			refTable += '</table></div>';
+		if (showReferences) {
+			refTable += '<div style="overflow: auto; clear: both; padding-top: 4px;" ng-if="showRows(\'' + statementId + '\')">';
+			if ('references' in statement) {
+				refCount = statement.references.length;
+				refTable += '<table class="reference-table">';
+				angular.forEach(statement.references, function(reference) {
+					refTable += '<tr><th colspan="2">Reference</th></tr>'
+						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, false);
+				});
+				refTable += '</table>';
+			} else {
+				refTable += '<span class="font-small">{{\'NO_REFERENCES_HINT\'|translate}}</span>'
+			}
+			refTable += '</div>';
 		}
 
 		var ret = getStatementMainValueHtml(statement, properties, missingTermsListener, false, short);
 
-		if (showReferences) {
-			if (refCount > 0) {
-				ret += '<div style="float: right; "><span class="badge-small info clickable" ng-click="toggleRows(\'' + statementId + '\')" title="{{\'REFERENCES_HINT\'|translate}}">' + refCount+ ' <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span></span></div>';
-			} else {
-				ret += '<div style="float: right; "><span class="badge-small warning" title="{{\'NO_REFERENCES_HINT\'|translate}}">' + refCount+ ' <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span></span></div>';
-			}
-		}
+		// Showing this everywhere seems too obstrusive. We should have a way to toggle such information.
+// 		if (showReferences && refCount == 0) {
+// 			ret += '<span title="{{\'NO_REFERENCES_HINT\'|translate}}"  class="unsourced light-grey"></span>';
+// 		}
 
 		if ('qualifiers' in statement) {
 			ret += '<div class="qualifiers">'
