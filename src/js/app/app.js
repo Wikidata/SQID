@@ -59,7 +59,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	        label: "",
 	        relatedProperty: "",
 	        relatedQualifier: "",
-	        directInstanceOf: "",
+	        directInstanceOf: {id: 1, name: "Any property class", qId: 0},
 	        statements: [0, 20000000],
 	        qualifiers: [0, 10000000],
 	        references: [0, 10000000],
@@ -78,6 +78,18 @@ var classBrowser = angular.module('classBrowserApp',[
 	      }
 	      var splits = typeString.split(":");
 	      return {id: splits[0], name: splits[1]};
+	    }
+
+	    var serializePropertyClass = function(c){
+	    	return c.id + ":" + c.name + ":" + c.qId;
+	    }
+
+	    var deserializePropertyClass = function(classString){
+	    	if (!classString){
+	    		return classString;
+	    	}
+	    	var splits = classString.split(":");
+	    	return {id: splits[0], name: splits[1], qId: splits[2]};
 	    }
 
 	    var status = util.cloneObject(statusStartValues);
@@ -111,7 +123,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	            label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
 	            relatedProperty: ($route.current.params.rppfilter) ? ($route.current.params.rppfilter) : status.propertiesFilter.relatedProperty,
 	            relatedQualifier: ($route.current.params.rqualifierfilter) ? ($route.current.params.rqualifierfilter) : status.propertiesFilter.relatedQualifier,
-	            directInstanceOf: ($route.current.params.dInstancefilter) ? ($route.current.params.dInstancefilter) : status.propertiesFilter.directInstanceOf,
+	            directInstanceOf: ($route.current.params.dInstancefilter) ? deserializePropertyClass($route.current.params.dInstancefilter) : status.propertiesFilter.directInstanceOf,
 	            statements: [ ($route.current.params.statementsbegin) ? ($route.current.params.statementsbegin) : status.propertiesFilter.statements[0], ($route.current.params.statementsend) ? ($route.current.params.statementsend) : status.propertiesFilter.statements[1]],
 	            qualifiers: [ ($route.current.params.qualifiersbegin) ? ($route.current.params.qualifiersbegin) : status.propertiesFilter.qualifiers[0], ($route.current.params.qualifiersend) ? ($route.current.params.qualifiersend) : status.propertiesFilter.qualifiers[1]],
 	            references: [ ($route.current.params.referencesbegin) ? ($route.current.params.referencesbegin) : status.propertiesFilter.references[0], ($route.current.params.referencesend) ? ($route.current.params.referencesend) : status.propertiesFilter.references[1]],
@@ -153,7 +165,7 @@ var classBrowser = angular.module('classBrowserApp',[
 	          result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "") 
 	            + (status.propertiesFilter.relatedProperty ? "&rppfilter=" + status.propertiesFilter.relatedProperty : "")
 	            + (status.propertiesFilter.relatedQualifier ? "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier : "")
-	            + (status.propertiesFilter.directInstanceOf ? "&dInstancefilter=" + status.propertiesFilter.directInstanceOf : "")
+	            + (status.propertiesFilter.directInstanceOf ? "&dInstancefilter=" + serializePropertyClass(status.propertiesFilter.directInstanceOf) : "")
 	            + (status.propertiesFilter.statements[0] != 0 ? "&statementsbegin=" + status.propertiesFilter.statements[0] : "")
 	            + (status.propertiesFilter.statements[1] != 20000000 ? "&statementsend=" + status.propertiesFilter.statements[1] : "")
 	            + (status.propertiesFilter.qualifiers[0] != 0 ? "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0] : "")

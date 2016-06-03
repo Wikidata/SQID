@@ -127,18 +127,10 @@
 				</div>
 				<div ng-if='args.type == "properties"'>
 					<p><strong>Class (only direct):</strong></p>
-					<angucomplete-alt id="direct-instance-of-property"
-		              placeholder="Select Class"
-		              pause="100"
-		              selected-object="suggestSelectFunctions.properties.directInstanceOf"
-		              local-data="suggestFilters.data.propertyClassIndex"
-		              title-field="name,idName"
-		              initial-value="suggestFilters.properties.directInstanceOf"
-		              minlength="1"
-		              maxlength="100"
-		              input-class="form-control form-control-small"
-		              local-search="localSearchPropertyClasses"></angucomplete-alt>
-		              <br/>
+					<select class="form-control" data-ng-options="classOption.name for classOption in propertyClassFilter.options track by classOption.id" ng-model="propertyClassFilter.selected" ng-change="setPropertyClassFilter(propertyClassFilter.selected)">
+					</select>
+			      	<br/>
+				</div>
 				</div>
 				<div ng-repeat="elem in slider track by $index">
 					<p><strong>{{elem.name}}:</strong></p>
