@@ -11,6 +11,33 @@
 		"STAT_LINK": "Details",
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
 	},
+	"TABLE_HEADER": {
+		"LABEL": "Bezeichner (ID)",
+		"DATATYPE": "Datentyp",
+		"USES_IN_STMTS": "Verwendung für Aussagen",
+		"USES_IN_QUALS": "Verwendung für Qualifikatoren",
+		"USES_IN_REFS": "Verwendung in Referenzen",
+		"INSTATNCES": "Instanzen",
+		"SUBCLASSES": "Unterklassen"
+	},
+	"FILTER_MENUE": {
+		"LABEL_PLACEHOLDER": "Filter anhand engl. Bezeichnern",
+		"PROPERTY_PLACEHOLDER": "Eigenschaft auswählen",
+		"FILTER_PROPERTY": "Hat Eigenschaft",
+		"FILTER_SUPERCLASS": "Hat Oberklasse",
+		"FILTER_DATATYPE": "Datentyp auswählen",
+		"FILTER_REL_QUAL": "Verwandte Qualifikatoren",
+		"FILTER_USE_STMTS": "Verwendung für Aussagen",
+		"FILTER_USE_QUALS": "Verwendung für Qualifikatoren",
+		"FILTER_USE_REFS": "Verwendung in Referenzen",
+		"FILTER_DIRECT_CLASS": "Klasse (nur direkte Klassenbeziehung)",
+		"FILTER_DIRECT_INS": "Anzahl direkter Instanzen",
+		"FILTER_DIRECT_SUBCL": "Anzahl direkter Unterklassen",
+		"RESET_FILTERS": "Filter zurücksetzen",
+		"PERMALINK": "Permanentlink (inkl. Filter Positionen)"	
+	},
+	"ENTITIES": "Entitäten",
+	"ENTITIES_COUNT": "Gesamtzahl an Entitäten",
 	"PROPTYPE": "Typ",
 	"FURTHER_RESULTS": "&hellip; weitere Ergebnisse",
  	"STATEMENTS": {

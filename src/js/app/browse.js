@@ -4,12 +4,175 @@ define([
   'app/classes',
   'app/properties',
   'util/util',
+  'util/i18n',
   'util/pagination'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('classBrowserApp').controller('TableController', ['$scope', 'Arguments', 'Classes', 'Properties', 'util',
-  function($scope, Arguments, Classes, Properties, util){
+angular.module('classBrowserApp')
+
+
+  .factory('Arguments', ['$http', '$route', 'util', 'i18n', function($http, $route, util, i18n){
+      var args = {}; 
+      var statusStartValues = {
+        entityType: "classes",
+        activePage: 1,
+        lang: i18n.getLanguage(),
+        sortCriteria: {
+          classes: {
+            label: "fa fa-sort",
+            instances: "fa fa-sort-desc",
+            subclasses: "fa fa-sort"
+          },
+          properties: {
+            label: "fa fa-sort",
+            datatype: "fa fa-sort",
+            statements: "fa fa-sort-desc",
+            qualifiers: "fa fa-sort",
+            references: "fa fa-sort"
+          }
+        },
+        classesFilter: {
+          label: "",
+          relatedProperty: "",
+          superclass: "",
+          instances: [0, 4000000],
+          subclasses: [0, 2000000]
+        },
+        propertiesFilter: {
+          label: "",
+          relatedProperty: "",
+          relatedQualifier: "",
+          directInstanceOf: {id: 1, name: "Any property class", qId: 0},
+          statements: [0, 20000000],
+          qualifiers: [0, 10000000],
+          references: [0, 10000000],
+          datatypes: {id: 1, name: "Any property type"}
+
+        }
+      };
+
+      var serializeDatatype = function(type){
+        return type.id + ":" + type.name;
+      }
+
+      var deserializeDatatype = function(typeString){
+        if (!typeString){
+          return typeString;
+        }
+        var splits = typeString.split(":");
+        return {id: splits[0], name: splits[1]};
+      }
+
+      var serializePropertyClass = function(c){
+        return c.id + ":" + c.name + ":" + c.qId;
+      }
+
+      var deserializePropertyClass = function(classString){
+        if (!classString){
+          return classString;
+        }
+        var splits = classString.split(":");
+        return {id: splits[0], name: splits[1], qId: splits[2]};
+      }
+
+      var status = util.cloneObject(statusStartValues);
+      return {
+        refreshArgs: function(){
+          args = {
+            type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
+            activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
+            lang : ($route.current.params.lang) ? ($route.current.params.lang) : status.lang,
+            sortCriteria: {
+              classes: {
+                label: ($route.current.params.sortclasslabel) ? ($route.current.params.sortclasslabel) : status.sortCriteria.classes.label,
+                instances: ($route.current.params.sortclassinstances) ? ($route.current.params.sortclassinstances) : status.sortCriteria.classes.instances,
+                subclasses: ($route.current.params.sortclasssubclasses) ? ($route.current.params.sortclasssubclasses) : status.sortCriteria.classes.subclasses
+              },
+              properties: {
+                label: ($route.current.params.sortpropertylabel) ? ($route.current.params.sortpropertylabel) : status.sortCriteria.properties.label,
+                datatype: ($route.current.params.sortpropertydatatype) ? ($route.current.params.sortpropertydatatype) : status.sortCriteria.properties.datatype,
+                statements: ($route.current.params.sortpropertystatements) ? ($route.current.params.sortpropertystatements) : status.sortCriteria.properties.statements,
+                qualifiers: ($route.current.params.sortpropertyqualifiers) ? ($route.current.params.sortpropertyqualifiers) : status.sortCriteria.properties.qualifiers,
+                references: ($route.current.params.sortpropertyreferences) ? ($route.current.params.sortpropertyreferences) : status.sortCriteria.properties.references
+              }
+            },
+            classesFilter: {
+              label:  ($route.current.params.classlabelfilter) ? ($route.current.params.classlabelfilter) : status.classesFilter.label,
+              relatedProperty: ($route.current.params.rpcfilter) ? ($route.current.params.rpcfilter) : status.classesFilter.relatedProperty,
+              superclass: ($route.current.params.supercfilter) ? ($route.current.params.supercfilter) : status.classesFilter.superclass,
+              instances: [ ($route.current.params.instancesbegin) ? ($route.current.params.instancesbegin) : status.classesFilter.instances[0], ($route.current.params.instancesend) ? ($route.current.params.instancesend) : status.classesFilter.instances[1]],
+              subclasses: [ ($route.current.params.subclassesbegin) ? ($route.current.params.subclassesbegin) : status.classesFilter.subclasses[0], ($route.current.params.subclassesend) ? ($route.current.params.subclassesend) : status.classesFilter.subclasses[1]],
+            },
+            propertiesFilter: {
+              label: ($route.current.params.propertylabelfilter) ? ($route.current.params.propertylabelfilter) : status.propertiesFilter.label,
+              relatedProperty: ($route.current.params.rppfilter) ? ($route.current.params.rppfilter) : status.propertiesFilter.relatedProperty,
+              relatedQualifier: ($route.current.params.rqualifierfilter) ? ($route.current.params.rqualifierfilter) : status.propertiesFilter.relatedQualifier,
+              directInstanceOf: ($route.current.params.dInstancefilter) ? deserializePropertyClass($route.current.params.dInstancefilter) : status.propertiesFilter.directInstanceOf,
+              statements: [ ($route.current.params.statementsbegin) ? ($route.current.params.statementsbegin) : status.propertiesFilter.statements[0], ($route.current.params.statementsend) ? ($route.current.params.statementsend) : status.propertiesFilter.statements[1]],
+              qualifiers: [ ($route.current.params.qualifiersbegin) ? ($route.current.params.qualifiersbegin) : status.propertiesFilter.qualifiers[0], ($route.current.params.qualifiersend) ? ($route.current.params.qualifiersend) : status.propertiesFilter.qualifiers[1]],
+              references: [ ($route.current.params.referencesbegin) ? ($route.current.params.referencesbegin) : status.propertiesFilter.references[0], ($route.current.params.referencesend) ? ($route.current.params.referencesend) : status.propertiesFilter.references[1]],
+              datatypes: ($route.current.params.datatypes) ? deserializeDatatype($route.current.params.datatypes) : status.propertiesFilter.datatypes
+            }
+          }
+          status.entityType = args.type;
+          status.activePage = args.activePage;
+          status.lang = args.lang;
+          status.sortCriteria = args.sortCriteria;
+          status.classesFilter = args.classesFilter;
+          status.propertiesFilter = args.propertiesFilter;
+        },
+        getArgs: function(){
+          return args;
+        },
+        getStatus: function(){
+          return status;
+        },
+        getStatusStartValues:function(){
+          return util.cloneObject(statusStartValues);
+        },
+        getUrl: function(){
+          var result =  location.origin + location.pathname + "#/browse" 
+            + "?activepage=" + status.activePage
+            + "&type=" + status.entityType
+            + "&lang=" + status.lang;
+          if (status.entityType == "classes"){
+            result += (status.classesFilter.label ? "&classlabelfilter=" + status.classesFilter.label : "")
+              + (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")
+              + (status.classesFilter.superclass ? "&supercfilter=" + status.classesFilter.superclass : "")
+              + (status.classesFilter.instances[0] != 0 ? "&instancesbegin=" + status.classesFilter.instances[0] : "")
+              + (status.classesFilter.instances[1] != 4000000 ? "&instancesend=" + status.classesFilter.instances[1] : "")
+              + (status.classesFilter.subclasses[0] != 0 ? "&subclassesbegin=" + status.classesFilter.subclasses[0] : "")
+              + (status.classesFilter.subclasses[1] != 2000000 ? "&subclassesend=" + status.classesFilter.subclasses[1] : "")
+              + (status.sortCriteria.classes.label != "fa fa-sort" ? "&sortclasslabel=" + status.sortCriteria.classes.label : "")
+              + (status.sortCriteria.classes.instances != "fa fa-sort-desc" ? "&sortclassinstances=" + status.sortCriteria.classes.instances : "")
+              + (status.sortCriteria.classes.subclasses != "fa fa-sort" ? "&sortclasssubclasses=" + status.sortCriteria.classes.subclasses : "")
+            
+          }else{
+            result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "") 
+              + (status.propertiesFilter.relatedProperty ? "&rppfilter=" + status.propertiesFilter.relatedProperty : "")
+              + (status.propertiesFilter.relatedQualifier ? "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier : "")
+              + (status.propertiesFilter.directInstanceOf.id != 1 ? "&dInstancefilter=" + serializePropertyClass(status.propertiesFilter.directInstanceOf) : "")
+              + (status.propertiesFilter.statements[0] != 0 ? "&statementsbegin=" + status.propertiesFilter.statements[0] : "")
+              + (status.propertiesFilter.statements[1] != 20000000 ? "&statementsend=" + status.propertiesFilter.statements[1] : "")
+              + (status.propertiesFilter.qualifiers[0] != 0 ? "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0] : "")
+              + (status.propertiesFilter.qualifiers[1] != 10000000 ? "&qualifiersend=" + status.propertiesFilter.qualifiers[1] : "")
+              + (status.propertiesFilter.references[0] != 0 ? "&referencesbegin=" + status.propertiesFilter.references[0] : "")
+              + (status.propertiesFilter.references[1] != 10000000   ? "&referencesend=" + status.propertiesFilter.references[1] : "")
+              + (status.propertiesFilter.datatypes.id != 1 ? "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes) : "")
+              + (status.sortCriteria.properties.label != "fa fa-sort" ? "&sortpropertylabel=" + status.sortCriteria.properties.label : "")
+              + (status.sortCriteria.properties.datatype != "fa fa-sort" ? "&sortpropertydatatype=" + status.sortCriteria.properties.datatype : "")
+              + (status.sortCriteria.properties.statements != "fa fa-sort-desc" ? "&sortpropertystatements=" + status.sortCriteria.properties.statements : "")
+              + (status.sortCriteria.properties.qualifiers != "fa fa-sort" ? "&sortpropertyqualifiers=" + status.sortCriteria.properties.qualifiers : "")
+              + (status.sortCriteria.properties.references != "fa fa-sort" ? "&sortpropertyreferences=" + status.sortCriteria.properties.references : "");
+          }
+          return result;
+        }
+      }
+  }])
+
+.controller('TableController', ['$scope', '$translate', 'i18n', 'Arguments', 'Classes', 'Properties', 'util',
+  function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
     var tableContent = [];
 
@@ -26,13 +189,13 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
     var getClassFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (Q' + id + ')': 'Q' + id;
-      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
     };
     
     var getPropertyFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (P' + id + ')': 'P' + id;
-      return ['<a href="' + data.getUrl(id) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
+      return ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
@@ -304,11 +467,11 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
 
     var initClassesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
-        {name: "Number of direct instances", from: 0, 
+        {name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0, 
           to: 4000000,
           startVal: status.classesFilter.instances[0], 
           endVal: status.classesFilter.instances[1]},
-        {name: "number of direct subclasses", from: 0,
+        {name: "FILTER_MENUE.FILTER_DIRECT_SUBCL", from: 0,
           to: 2000000,
           startVal: status.classesFilter.subclasses[0], 
           endVal: status.classesFilter.subclasses[1]}];
@@ -316,15 +479,15 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
 
     var initPropertiesSlider = function(){
       $scope.slider = [ // TODO replace numbers with constants
-        {name: "Uses in statements", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_STMTS", from: 0,
           to: 20000000,
           startVal: status.propertiesFilter.statements[0],
           endVal: status.propertiesFilter.statements[1]},
-        {name: "Uses in qualifiers", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_QUALS", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.qualifiers[0],
           endVal: status.propertiesFilter.qualifiers[1]},
-        {name: "Uses in references", from: 0,
+        {name: "FILTER_MENUE.FILTER_USE_REFS", from: 0,
           to: 10000000,
           startVal: status.propertiesFilter.references[0],
           endVal: status.propertiesFilter.references[1]}]; 
@@ -333,21 +496,21 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
     var updateTable = function(){
       if (args.type == "classes") {
         Classes.then(function(data){
+          $scope.tableHeader = data.getClassesHeader(status);
           initClassesSlider();
           var classesArray = initArray(data.getIdArray(), data, applyFilter);
           refreshTableContent(args, classesArray, data, getClassFromId);
           $scope.content = tableContent;
-          $scope.tableHeader = data.classesHeader;
           $scope.pagination.setIndex($scope.content, null);
         });
       }
       if (args.type == "properties") {
           Properties.then(function(data){
+            $scope.tableHeader = data.getPropertiesHeader(status);
             initPropertiesSlider();
             var propertiesArray = initArray(data.getIdArray(), data, applyFilter);
             refreshTableContent(args, propertiesArray, data, getPropertyFromId);
             $scope.content = tableContent;
-            $scope.tableHeader = data.propertiesHeader;
             $scope.pagination.setIndex($scope.content, null);
           });
       }
@@ -439,6 +602,23 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
       {id: 11, name: "Monolingualtext"}],
       selected: status.propertiesFilter.datatypes
     }
+
+    $scope.translations = {};
+
+    $translate(['TABLE_HEADER.LABEL', 'TABLE_HEADER.DATATYPE', 'TABLE_HEADER.USES_IN_STMTS', 
+        'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES', 
+        'TABLE_HEADER.SUBCLASSES']).then(function(translations){
+      translations.LABEL = translations['TABLE_HEADER.LABEL'];
+      translations.DATATYPE = translations['TABLE_HEADER.DATATYPE'];
+      translations.USES_IN_STMTS = translations['TABLE_HEADER.USES_IN_STMTS'];
+      translations.USES_IN_QUALS = translations['TABLE_HEADER.USES_IN_QUALS'];
+      translations.USES_IN_REFS = translations['TABLE_HEADER.USES_IN_REFS'];
+      translations.INSTATNCES = translations['TABLE_HEADER.INSTATNCES'];
+      translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
+
+    });
+
+    i18n.setLanguage(status.lang);
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};
@@ -533,12 +713,12 @@ angular.module('classBrowserApp').controller('TableController', ['$scope', 'Argu
       element[3](status, element[2]);
       if (status.entityType == "classes"){
         Classes.then(function(data){
-          data.sortClasses();
+          data.sortClasses(status);
           updateTable();
         });
       }else{
         Properties.then(function(data){
-          data.sortProperties();
+          data.sortProperties(status);
           updateTable();
         });
       }
