@@ -23,7 +23,6 @@
 	"FILTER_MENUE": {
 		"LABEL_PLACEHOLDER": "Filter anhand engl. Bezeichnern",
 		"PROPERTY_PLACEHOLDER": "Eigenschaft auswählen",
-		"CLASS_PLACEHOLDER": "Klasse auswählen",
 		"FILTER_PROPERTY": "Hat Eigenschaft",
 		"FILTER_SUPERCLASS": "Hat Oberklasse",
 		"FILTER_DATATYPE": "Datentyp auswählen",
@@ -40,13 +39,15 @@
 	"ENTITIES": "Entitäten",
 	"ENTITIES_COUNT": "Gesamtzahl an Entitäten",
 	"PROPTYPE": "Typ",
+	"FURTHER_RESULTS": "&hellip; weitere Ergebnisse",
  	"STATEMENTS": {
 		"PREFERRED_HINT": "Dies ist eine bevorzugte Aussage",
 		"DEPRECATED_HINT": "Dies ist eine überholte Aussage",
 		"NO_VALUE": "kein Wert",
 		"SOME_VALUE": "unspezifizierter Wert",
-		"MORE_STATEMENTS": "weitere {{number}} Aussagen anzeigen",
-		"LESS_STATEMENTS": "{{number}} Aussagen ausblenden"
+		"NUMBER_STATEMENTS": "{{number}} Aussagen",
+		"OUTGOING": "Eigene Aussagen",
+		"INCOMING": "Von verwandten Einträgen"
 	},
 	"TYPICAL_PROPS": {
 		"TYPICAL_PROPS": "Typische Eigenschaften",
@@ -110,6 +111,8 @@
 	"SEC_STATEMENTS": "Aussagen",
 	"SEC_MEDIA": "Medien",
 	"SEC_WIKIMEDIA_PAGES": "Wikimedia-Kategorien und -Portale",
+	"SEC_REFERENCE": "Fundstelle",
+	"NO_REFERENCES_HINT": "keine Fundstellen angegeben",
 	"NOSUCHENTITY_HEADLINE": "Leider konnte ich kein Objekt mit ID \"{{id}}\" finden.",
 	"NOSUCHENTITY_BODY": "Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden."
 }

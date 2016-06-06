@@ -17,8 +17,7 @@
 		"DEPRECATED_HINT": "Dette er et utdatert utsagn",
 		"NO_VALUE": "ingen verdi",
 		"SOME_VALUE": "uspesifisert verdi",
-		"MORE_STATEMENTS": "vis {{number}} flere utsagn",
-		"LESS_STATEMENTS": "skjul {{number}} utsagn"
+		"NUMBER_STATEMENTS": "{{number}} utsagn"
 	},
 	"TYPICAL_PROPS": {
 		"TYPICAL_PROPS": "Typiske egenskaper",

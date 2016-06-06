@@ -4,8 +4,8 @@
 			<h2><span translate="NOSUCHENTITY_HEADLINE" translate-value-id="{{id}}"></span></h2>
 			<p><span translate="NOSUCHENTITY_BODY"></span></p>
 		</div>
-		<div ng-if="entityData.banner" style="overflow: hidden;">
-			<sqid-image file="entityData.banner" width="850"></sqid-image>
+		<div ng-if="banner" style="overflow: hidden;">
+			<sqid-image file="banner" width="850"></sqid-image>
 		</div>
 		
 		<h1>{{entityData.label}} <small>(<a href="{{url}}" target="_blank">{{id}}</a>)</small></h1>
@@ -236,20 +236,20 @@
 				</table>
 			</div>
 		</div>
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_HUMAN_RELATIONS'|translate}}" show="family"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" indata="entityInData" title="{{'SEC_HUMAN_RELATIONS'|translate}}" show="family"></sqid-statement-table>
 
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_STATEMENTS'|translate}}" show="other"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" indata="entityInData" title="{{'SEC_STATEMENTS'|translate}}" show="other"></sqid-statement-table>
 
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_MEDIA'|translate}}" show="media"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" indata="entityInData" title="{{'SEC_MEDIA'|translate}}" show="media"></sqid-statement-table>
 
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" title="{{'SEC_WIKIMEDIA_PAGES'|translate}}" show="wiki"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" indata="entityInData" title="{{'SEC_WIKIMEDIA_PAGES'|translate}}" show="wiki"></sqid-statement-table>
 	</div>
 	<div class="sidebar col-md-3 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" style="padding-bottom: 15px;">
 			<sqid-image file="'Colossal octopus by Pierre Denys de Montfort.jpg'" width="260"></sqid-image>
 		</div>
-		<div ng-if="entityData.images[0]" style="padding-bottom: 15px;">
-			<sqid-image file="entityData.images[0]" width="260"></sqid-image>
+		<div ng-if="images[0]" style="padding-bottom: 15px;">
+			<sqid-image file="images[0]" width="260"></sqid-image>
 		</div>
 		<div class="panel panel-info">
 			<div class="panel-heading"><h2 class="panel-title">
@@ -259,12 +259,12 @@
 				<table class="table table-striped table-condensed">
 					<tbody>
 						<tr><th><a href="{{url}}" target="_blank"><span translate="SEC_LINKS.WIKIDATA"></span></a></th></tr>
-						<tr ng-if="entityData.homepage"><th><a href="{{entityData.homepage}}" target="_blank"><span translate="SEC_LINKS.WEBSITE"></span></a></th></tr>
+						<tr ng-if="homepage"><th><a href="{{homepage}}" target="_blank"><span translate="SEC_LINKS.WEBSITE"></span></a></th></tr>
 						<tr><th><a href="{{urlReasonator}}" target="_blank"><span translate="SEC_LINKS.REASONATOR"></span></a></th></tr>
 					</tbody>
 				</table>
 			</div>
 		</div>
-		<sqid-statement-table ng-if="entityData !== null" data="entityData" show="ids" title="{{'SEC_IDENTIFIERS'|translate}}"></sqid-statement-table>
+		<sqid-statement-table ng-if="entityData !== null" data="entityData" show="ids" narrow="1" title="{{'SEC_IDENTIFIERS'|translate}}"></sqid-statement-table>
 	</div>
 </div>

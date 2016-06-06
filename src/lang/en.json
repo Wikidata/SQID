@@ -22,7 +22,6 @@
 	"FILTER_MENUE": {
 		"LABEL_PLACEHOLDER": "Filter labels",
 		"PROPERTY_PLACEHOLDER": "Select property",
-		"CLASS_PLACEHOLDER": "Select Class",
 		"FILTER_PROPERTY": "Has Property",
 		"FILTER_SUPERCLASS": "Has superclass",
 		"FILTER_DATATYPE": "Select datatype",
@@ -45,8 +44,9 @@
 		"DEPRECATED_HINT": "This is a deprecated statement",
 		"NO_VALUE": "no value",
 		"SOME_VALUE": "unspecified value",
-		"MORE_STATEMENTS": "show {{number}} more statements",
-		"LESS_STATEMENTS": "hide {{number}} statements"
+		"NUMBER_STATEMENTS": "{{number}} statements",
+		"OUTGOING": "Own statements",
+		"INCOMING": "From related entities"
 	},
 	"TYPICAL_PROPS": {
 		"TYPICAL_PROPS": "Typical Properties",
@@ -110,6 +110,8 @@
 	"SEC_STATEMENTS": "Statements",
 	"SEC_MEDIA": "Media",
 	"SEC_WIKIMEDIA_PAGES": "Wikimedia Categories and Portals",
+	"SEC_REFERENCE": "Reference",
+	"NO_REFERENCES_HINT": "no references given",
 	"NOSUCHENTITY_HEADLINE": "Sorry, I could not find any entity with ID '{{id}}'.",
 	"NOSUCHENTITY_BODY": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know."
 }
