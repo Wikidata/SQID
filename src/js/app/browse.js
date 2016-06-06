@@ -176,6 +176,8 @@ angular.module('classBrowserApp')
 
     var tableContent = [];
 
+    var tableSize = 15;
+
     var initArray = function(idArray, data, filterfunc){
       var ret = [];
       for (var i = 0; i < idArray.length; i++){
@@ -186,16 +188,41 @@ angular.module('classBrowserApp')
       return ret;
     };
 
+    var translateItems = function(items){
+      if (i18n.getLanguage() != 'en'){
+        var toTranslate = [];
+        for (var i=0; i<items.length; i++){
+          toTranslate.push(items[i].id);
+        }
+        i18n.waitForTerms(toTranslate).then(function(){
+          for (var i = 0; i < items.length; i++){
+            var label = i18n.getEntityTerms(items[i].id).label;
+            if (label){
+              items[i].content[0] = items[i].template[0] + label + items[i].template[1];
+            }
+          }
+        });
+      }
+    };
+
     var getClassFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (Q' + id + ')': 'Q' + id;
-      return ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>',   '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'];
+      return { 
+        content: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>', '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'],
+        id: 'Q' + String(id),
+        template: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">', ' (Q' + id + ')</a>']
+      };
     };
     
     var getPropertyFromId = function(id, data){
       var label = data.getLabel(id);
       label = label ? label + ' (P' + id + ')': 'P' + id;
-      return ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'];
+      return {
+        content: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>', data.getDatatype(id), '<div class="text-right">' +  data.getStatementCount(id).toString()  + '</div>', '<div class="text-right">' + data.getQualifierCount(id).toString()  + '</div>', '<div class="text-right">' + data.getReferenceCount(id).toString()  + '</div>'],
+        id: 'P' + String(id),
+        template: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">', ' (P' + id + ')</a>']
+      };
     };
     
     var refreshTableContent = function(args, idArray, content, entityConstructor){
@@ -365,7 +392,8 @@ angular.module('classBrowserApp')
         onPageChange: function(){
           status.activePage = $scope.pagination.activePage;
           $scope.filterPermalink =Arguments.getUrl();
-        }
+        },
+        onPageChange: translateItems  
       }
     };
 
@@ -579,7 +607,7 @@ angular.module('classBrowserApp')
     }
 
 
-    $scope.tableSize = 15;
+    $scope.tableSize = tableSize;
     $scope.args=args;
     if (status.entityType == "classes"){
       $scope.filterLabels = status.classesFilter.label;
