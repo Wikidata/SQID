@@ -5,7 +5,7 @@ define([
 	'app/statistics',
 	'app/properties',
 	'util/dataFormatter',
-	'util/i18n'
+	//'util/i18n'
 ], function() {
 ///////////////////////////////////////
 
@@ -69,15 +69,22 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 
 .directive('sqidStatementTable', ['$compile', 'Properties', 'dataFormatter', 'util', 'i18n', function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;
-	var missingTermsListener = { hasMissingTerms : false};
+	var outMissingTermsListener = { hasMissingTerms : false};
+	var inMissingTermsListener = { hasMissingTerms : false};
+	var outHtml = '';
+	var inHtml = '';
 
 	var hideStatementsThreshold = 3; // how many statements are displayed when hiding some
 
 	var link = function (scope, element, attrs) {
 		var show = attrs.show;
 		var title = attrs.title;
+		var narrowTable = ('narrow' in attrs);
 
-		missingTermsListener.hasMissingTerms = false;
+		outHtml = '';
+		inHtml = '';
+		outMissingTermsListener.hasMissingTerms = false;
+		inMissingTermsListener.hasMissingTerms = false;
 
 		var includeProperty = function(numId) {
 			if (!show || show == 'all') {
@@ -129,48 +136,87 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 			}
 		}
 
-		var getHtml = function(statements, propertyList) {
-			missingTermsListener.hasMissingTerms = false;
-			var panelId = 'statements_' + show;
-			var html = '<div class="panel panel-info">\n' +
-						'<div class="panel-heading" data-toggle="collapse" data-target="#' + panelId + '"><h2 class="panel-title">\n' +
-						'<a style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
-						'<div id="' + panelId + '" class="panel-collapse collapse in">' +
-						'<div style="overflow: auto;"><table class="table table-striped table-condensed"><tbody>';
+		var getStatementHtmlTable = function(statements, propertyList, outlinks) {
+			var html = '<table class="table table-striped table-condensed ' + 
+				(narrowTable ? 'narrow-statements-table' : 'statements-table' ) + '"><tbody>';
 			var hasContent = false;
+			var missingTermsListener = outlinks ? outMissingTermsListener : inMissingTermsListener;
+
 			angular.forEach(propertyList, function (propId) {
+				var statementListId = propId + ( outlinks ? '-out' : '-in' );
 				var statementGroup = statements[propId]
-				if (!missingTermsListener.hasMissingTerms) {
-					var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
-					angular.forEach(statementGroup, function (statement, index) {
-						hasContent = true;
-						if (hideSomeStatements && index >= hideStatementsThreshold) {
-							html += '<tr ng-if="showRows(\'' + propId + '\')">';
-						} else {
-							html += '<tr>';
-						}
-						if (index == 0) {
-							html += '<th valign="top" rowspan="'
-								+ (hideSomeStatements ? '{{getRowSpan(\'' + propId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
-								+ '" style="min-width: 20%;">'
-								+ i18n.getPropertyLink(propId)
-								+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><button type="button" class="btn btn-xs" ng-click="toggleRows(\'' + propId + '\')"><span translate="{{getShowRowsMessage(\'' + propId + '\')}}" translate-value-number="' + (statementGroup.length - hideStatementsThreshold) + '"></span></button></div>' : '')
-								+ '</th>';
-						}
-						html += '<td>' + dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener) + '</td>'
-						html += '</tr>';
-					});
-				}
+				var propertyLabel = i18n.getPropertyLabel(propId);
+
+				var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
+				angular.forEach(statementGroup, function (statement, index) {
+					hasContent = true;
+					if (hideSomeStatements && index >= hideStatementsThreshold) {
+						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '">';
+					} else {
+						html += '<tr title="' + propertyLabel + '">';
+					}
+					if (index == 0) {
+						html += '<th valign="top" rowspan="'
+							+ (hideSomeStatements ? '{{getRowSpan(\'' + statementListId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
+							+ '">'
+							+ i18n.getPropertyLink(propId)
+							+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><div class="badge-'
+								+ (narrowTable ? 'small' : 'normal')  +
+							' clickable" ng-click="toggleRows(\'' + statementListId + '\')"><span class="{{getShowRowsClass(\'' + statementListId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementGroup.length) + '"></span></span></div></div>' : '')
+							+ '</th>';
+					}
+
+					if (outlinks) { // expand statement, only used for outlinks right now (may change in future)
+						html += '<td ng-click="toggleRows(\'' + statement.id + '\')" class="clickable">' +
+							'<div style="float: right; "><span class="{{getShowRowsClass(\'' + statement.id + '\')}} light-grey font-tiny clickable"></span></div>'
+					} else {
+						html += '<td>';
+					}
+
+					if (!outlinks) { // show left-arrow for inlinks
+						html += '<span class=" light-grey font-tiny" style="margin-left: -2ex; margin-right: 1ex; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>';
+					}
+					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) +
+						'</td></tr>';
+				});
 			});
 			if (!hasContent) return '';
-			html += '</tbody></table></div></div></div>';
+			html += '</tbody></table>';
 			return html;
 		}
+		
+		var updateHtml = function(element, scope) {
+			var html;
+			if ( scope.outHtml == '' && scope.inHtml == '' ) {
+				html = '';
+			} else {
+				var panelId = 'statements_' + show;
+				html = '<div class="panel panel-info">\n' +
+							'<div class="panel-heading" data-toggle="collapse" data-target="#' + panelId + '"><h2 class="panel-title">\n' +
+							'<a style="cursor:pointer;cursor:hand">' + title + '</a></h2></div>' +
+							'<div id="' + panelId + '" class="panel-collapse collapse in">' +
+							'<div style="overflow: auto;">';
+				if (scope.inHtml != '') {
+					html += '<uib-tabset type="pills" justified="true">' +
+						'<uib-tab classes="shy-pill"><uib-tab-heading><span translate="STATEMENTS.OUTGOING"></span></uib-tab-heading>' +
+						scope.outHtml +
+						'</uib-tab>' +
+						'<uib-tab classes="shy-pill"><uib-tab-heading><span translate="STATEMENTS.INCOMING"></span></uib-tab-heading>' +
+						scope.inHtml +
+						'</uib-tab>' +
+						'</uib-tabset>';
+				} else { // outHtml != '' in this case
+					html += scope.outHtml;
+				}
+				html += '</div></div></div>';
+			}
+			insertAndCompile(html, element, scope);
+		}
 
-		var preparePropertyList = function(itemData) {
+		var preparePropertyList = function(statements) {
 			propertyScores = {};
 			// Note: class-based ranking rarely seems to help; hence using properties only
-			for (propertyId in itemData.statements) {
+			for (propertyId in statements) {
 				angular.forEach(properties.getRelatedProperties(propertyId.substring(1)), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
 						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
@@ -182,7 +228,7 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 
 			scoredProperties = [];
 
-			for (propertyId in itemData.statements) {
+			for (propertyId in statements) {
 				var numPropId = propertyId.substring(1);
 				if (includeProperty(numPropId)) {
 					if (numPropId in propertyScores) {
@@ -230,20 +276,49 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 		scope.getShowRowsMessage = function(id) {
 			return scope.showRows(id) ? 'STATEMENTS.LESS_STATEMENTS' : 'STATEMENTS.MORE_STATEMENTS';
 		}
+		scope.getShowRowsClass = function(id) {
+			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
+		}
+		
+		scope.inHtml = '';
+		scope.outHtml = '';
 
 		scope.$watch(attrs.data, function(itemData){
 			itemData.waitForPropertyLabels().then(function() {
 				Properties.then(function(propertyData){
 					properties = propertyData;
-					var propertyList = preparePropertyList(itemData);
+					var propertyList = preparePropertyList(itemData.statements);
 
-					var html = getHtml(itemData.statements, propertyList);
-					if (missingTermsListener.hasMissingTerms) {
+					scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+					updateHtml(element, scope);
+					if (outMissingTermsListener.hasMissingTerms) {
 						itemData.waitForTerms().then( function() {
-							insertAndCompile(getHtml(itemData.statements, propertyList), element, scope);
+							outMissingTermsListener.hasMissingTerms = false;
+							scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+							updateHtml(element, scope);
+						});
+					}
+				})
+			});
+		});
+
+		scope.$watch(attrs.indata, function(inData){
+			if (!inData) return;
+			inData.waitForPropertyLabels().then(function() {
+				Properties.then(function(propertyData){
+					properties = propertyData;
+					var propertyList = preparePropertyList(inData.statements);
+
+					var inHtml = getStatementHtmlTable(inData.statements, propertyList, false);
+					if (inMissingTermsListener.hasMissingTerms) {
+						inData.waitForTerms().then( function() {
+							inMissingTermsListener.hasMissingTerms = false;
+							scope.inHtml = getStatementHtmlTable(inData.statements, propertyList, false);
+							updateHtml(element, scope);
 						});
 					} else {
-						insertAndCompile(html, element, scope);
+						scope.inHtml = inHtml;
+						updateHtml(element, scope);
 					}
 				})
 			});

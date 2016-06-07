@@ -3,7 +3,7 @@ define([
 	'util/util',
 	'app/classes', // implicit app/app
 	'app/properties',
-	'util/i18n',
+	//'util/i18n',
 	'util/sparql',
 	'util/wikidataapi',
 	'util/pagination'

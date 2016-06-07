@@ -1,7 +1,7 @@
 //////// Module Definition ////////////
 define([
 	'util/util', // pulls in angular
-	'util/i18n'
+	//'util/i18n'
 ], function() {
 ///////////////////////////////////////
 
@@ -59,13 +59,11 @@ WHERE { \n\
 	}
 
 	var fetchPropertySubjects = function(propertyId, objectId, limit) {
-		var url = getQueryUrl(getQueryForPropertySubjects(propertyId, objectId, limit));
-		return util.httpRequest(url);
+		return getQueryRequest(getQueryForPropertySubjects(propertyId, objectId, limit));
 	}
 
 	var fetchPropertyObjects = function(subjectId, propertyId, limit) {
-		var url = getQueryUrl(getQueryForPropertyObjects(subjectId, propertyId, limit));
-		return util.httpRequest(url);
+		return getQueryRequest(getQueryForPropertyObjects(subjectId, propertyId, limit));
 	}
 
 	var getInlinkCount = function(propertyID, objectItemId) {

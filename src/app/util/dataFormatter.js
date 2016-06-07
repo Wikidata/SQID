@@ -1,10 +1,14 @@
 //////// Module Definition ////////////
 define([
 	'util/util', // pulls in angular
-	'util/i18n'
+	//'util/i18n'
 ], function() {
 ///////////////////////////////////////
 
+/**
+ * This component provides methods for turning parts of the Wikidata 
+ * data model into HTML for display.
+ */ 
 angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(util, i18n) {
 
 	var getEntityTerms = function(entityId, missingTermsListener) {
@@ -24,7 +28,7 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 	 * cache. This usually means that rendering will have to wait until labels have
 	 * been fetched.
 	 */
-	var getValueHtml = function(datavalue, numPropId, properties, missingTermsListener, inline) {
+	var getValueHtml = function(datavalue, numPropId, properties, missingTermsListener, inline, short) {
 		switch (datavalue.type) {
 			case 'wikibase-entityid':
 				if (datavalue.value["entity-type"] == "item") {
@@ -61,18 +65,22 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 				}
 				return result + epochModifier;
 			case 'string':
+				var displayString = datavalue.value;
+				if (short && displayString.length > 15) {
+					displayString = displayString.substring(0,6) + "..." + displayString.substring(displayString.length-6);
+				}
 				switch (properties.getDatatype(numPropId)) {
 					case 'Url':
-						return '<a class="ext-link" href="' + datavalue.value + '" target="_blank">' + datavalue.value + '</a>';
+						return '<a class="ext-link" href="' + datavalue.value + '" target="_blank">' + displayString + '</a>';
 					case 'CommonsMedia':
-						return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + datavalue.value + '</a>';
+						return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + displayString + '</a>';
 					//case 'String': etc.
 					default:
 						var urlPattern = properties.getUrlPattern(numPropId);
 						if (urlPattern) {
-							return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank">' + datavalue.value + '</a>';
+							return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank" title="' + datavalue.value + '">' + displayString + '</a>';
 						} else {
-							return datavalue.value;
+							return '<span title="' + datavalue.value + '">' + displayString + '</span>';
 						}
 				}
 			case 'monolingualtext':
@@ -97,6 +105,8 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 					globe = '';
 				}
 				return '(' + datavalue.value.latitude + ', ' + datavalue.value.longitude + ')' + globe;
+			case 'sqid-text':
+				return datavalue.value;
 			default:
 				return 'value type "' + datavalue.type + '" is not supported yet.';
 		}
@@ -111,7 +121,7 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 	 * cache. This usually means that rendering will have to wait until labels have
 	 * been fetched.
 	 */
-	var getSnakHtml = function(snak, showProperty, properties, missingTermsListener, inline) {
+	var getSnakHtml = function(snak, showProperty, properties, missingTermsListener, inline, short) {
 		var ret = '';
 		var propId = snak.property;
 		if (showProperty) {
@@ -119,7 +129,7 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 		}
 		switch (snak.snaktype) {
 			case 'value': 
-				ret += getValueHtml(snak.datavalue, propId.substring(1), properties, missingTermsListener, inline);
+				ret += getValueHtml(snak.datavalue, propId.substring(1), properties, missingTermsListener, inline, short);
 				break;
 			case 'somevalue':
 				ret += getSomeValueHtml();
@@ -130,9 +140,9 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 		}
 		return ret;
 	}
-	
-	var getStatementMainValueHtml = function(statement, properties, missingTermsListener, inline) {
-		var ret = getSnakHtml(statement.mainsnak, false, properties, missingTermsListener, inline);
+
+	var getStatementMainValueHtml = function(statement, properties, missingTermsListener, inline, short) {
+		var ret = getSnakHtml(statement.mainsnak, false, properties, missingTermsListener, inline, short);
 		if (statement.rank == 'preferred') {
 			ret += ' <span class="glyphicon glyphicon-star" aria-hidden="true" title="{{\'STATEMENTS.PREFERRED_HINT\'|translate}}"></span>';
 		} else if (statement.rank == 'deprecated') {
@@ -141,11 +151,30 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 		return ret;
 	}
 
-	var getStatementQualifiersHtml = function(statement, properties, missingTermsListener, inline) {
+	var getSnaksHtml = function(snaks, properties, missingTermsListener, inline, short) {
 		var ret = '';
-		angular.forEach(statement.qualifiers, function (snakList) {
+		angular.forEach(snaks, function (snakList) {
 			angular.forEach(snakList, function(snak) {
-				ret += '<div>' + getSnakHtml(snak, true, properties, missingTermsListener, inline) + '</div>';
+				ret += '<div>' + getSnakHtml(snak, true, properties, missingTermsListener, inline, short) + '</div>';
+			});
+		});
+		return ret;
+	}
+
+	var getSnaksTableHtml = function(snaks, properties, missingTermsListener, inline) {
+		var ret = '';
+		angular.forEach(snaks, function (snakList) {
+			var first = true;
+			angular.forEach(snakList, function(snak) {
+				ret += '<tr>';
+				if (first) {
+					first = false;
+					ret += '<td valign="top" rowspan="' + snakList.length + '">' +
+						i18n.getPropertyLink(snak.property) +
+						'</td>';
+				}
+				ret += '<td>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
+				ret += '</tr>';
 			});
 		});
 		return ret;
@@ -159,14 +188,42 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 	 * cache. This usually means that rendering will have to wait until labels have
 	 * been fetched.
 	 */
-	var getStatementValueBlockHtml = function(statement, properties, missingTermsListener) {
-		var ret = getStatementMainValueHtml(statement, properties, missingTermsListener, false);
+	var getStatementValueBlockHtml = function(statement, properties, missingTermsListener, showReferences, short) {
+		var statementId = statement.id;
+
+		var refTable = '';
+		var refCount = 0;
+		if (showReferences) {
+			refTable += '<div style="overflow: auto; clear: both; padding-top: 4px;" ng-if="showRows(\'' + statementId + '\')">';
+			if ('references' in statement) {
+				refCount = statement.references.length;
+				refTable += '<table class="reference-table">';
+				angular.forEach(statement.references, function(reference) {
+					refTable += '<tr><th colspan="2">{{\'SEC_REFERENCE\'|translate}}</th></tr>'
+						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, false);
+				});
+				refTable += '</table>';
+			} else {
+				refTable += '<span class="font-small">{{\'NO_REFERENCES_HINT\'|translate}}</span>'
+			}
+			refTable += '</div>';
+		}
+
+		var ret = getStatementMainValueHtml(statement, properties, missingTermsListener, false, short);
+
+		// Showing this everywhere seems too obstrusive. We should have a way to toggle such information.
+// 		if (showReferences && refCount == 0) {
+// 			ret += '<span title="{{\'NO_REFERENCES_HINT\'|translate}}"  class="unsourced light-grey"></span>';
+// 		}
 
 		if ('qualifiers' in statement) {
-			ret += '<div style="padding-left: 10px; font-size: 80%; ">'
-				+ getStatementQualifiersHtml(statement, properties, missingTermsListener, false)
+			ret += '<div class="qualifiers">'
+				+ getSnaksHtml(statement.qualifiers, properties, missingTermsListener, false, short)
 				+ '</div>';
 		}
+
+		ret += refTable;
+
 		return ret;
 	}
 
@@ -185,7 +242,7 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 
 		if ('qualifiers' in statement) {
 			ret += ' <span uib-popover-html="\''
-				+  getStatementQualifiersHtml(statement, properties, missingTermsListener, true)//.replace(/"/g,"'")
+				+  getSnaksHtml(statement.qualifiers, properties, missingTermsListener, true)//.replace(/"/g,"'")
 				+ '\'"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></span>';
 		}
 
@@ -200,7 +257,9 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 		getStatementValueBlockHtml: getStatementValueBlockHtml,
 		getStatementValueInlineHtml: getStatementValueInlineHtml,
 		getStatementMainValueHtml: getStatementMainValueHtml,
-		getStatementQualifiersHtml: getStatementQualifiersHtml
+		getStatementQualifiersHtml: function(statement, properties, missingTermsListener, inline) {
+			return getSnaksHtml(statement.qualifiers, properties, missingTermsListener, true);
+		}
 	};
 }]);
 

@@ -1,5 +1,5 @@
 requirejs.config({
-	baseUrl: './js',
+	baseUrl: './app',
 	"paths": {
 
 		"jquery": "../lib/jquery",
@@ -31,7 +31,7 @@ requirejs.config({
 		'ngAnimate': ['angular'],
 		'ngRoute': ['angular'],
 		'ngCookies': ['angular'],
-		'ngTranslate-core': ['angular'],
+		'ngTranslate-core': ['angular'], 
 		'ngTranslate-loader': ['ngTranslate-core'],
 		'ngTranslate-storage-cook': ['ngTranslate-core', 'ngCookies'],
 		'ngTranslate-storage-loc': ['ngTranslate-storage-cook'],
@@ -41,23 +41,9 @@ requirejs.config({
 
 
 // Load everything, start the app 
-requirejs([
-	'ngCookies',				//
-	'ngTranslate-core',			// cannot for the life of me sort out the 
-	'ngTranslate-loader',		// dependency in a way that the bundle will
-	'ngTranslate-storage-cook',	// execute in the right order when optimized
-	'ngTranslate-storage-loc',	// unless loading in this order explicitly
-
-	'jquery-ui',
-	'app/browse',		// everything else
-	'app/view', 		// is implicitly
-	'app/translate',	// pulled via
-	'util/directives',	// dependencies
-	'query/query'
-	
-], function() {
+requirejs([ 'sqid.module' ], function() {
 	jQuery(function() {
-		//console.log('haz all filez, ready, acshionz!');
-		angular.bootstrap( document, ['classBrowserApp'], { strictDi: true } );
+		console.log('haz all filez, ready, acshionz!');
+		angular.bootstrap( document, ['sqid'], { strictDi: true } );
 	});
 });

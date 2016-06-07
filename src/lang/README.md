@@ -1,6 +1,6 @@
 ## Translators
 
-<sub>It's awesome that you are showing interest in translating SQID! We encourage and apprechiate all community efforts to make this project accessible to as wide an audience as possible. Pull requests welcome!</sub>
+__It's great that you are showing interest in translating SQID!__ We encourage and apprechiate all community efforts to make this project accessible to as wide an audience as possible. Pull requests welcome!
 
 The files in this folder are simple JSON maps. Has to be valid JSON or the parsing will fail (if in doubt: [JSONLint](http://jsonlint.com/)). `{{variable}}` inside a translation string will be replaced with corresponding value.
 
