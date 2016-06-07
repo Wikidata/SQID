@@ -4,7 +4,7 @@ define([
   'app/classes',
   'app/properties',
   'util/util',
-  'util/i18n',
+  'i18n/i18n.module',
   'util/pagination'
 ], function() {
 ///////////////////////////////////////

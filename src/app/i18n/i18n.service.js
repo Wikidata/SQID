@@ -1,14 +1,15 @@
 //////// Module Definition ////////////
 define([
+	'i18n/i18n.module',
 	'util/util', // pulls in angular
 	'util/wikidataapi',
-	'app/properties',
+	'data/properties.service',
 	//'ngTranslate' // loaded explicitly in main.js
 ], function() {
 ///////////////////////////////////////
 
 
-angular.module('utilities').factory('i18n', ['wikidataapi', 'Properties', '$translate', function(wikidataapi, Properties, $translate) {
+angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate', function(wikidataapi, Properties, $translate) {
 	var language = null; // defaults to "en" in this case
 
 	var idTerms = {}; // cache for labels/descriptions of items
@@ -166,5 +167,4 @@ angular.module('utilities').factory('i18n', ['wikidataapi', 'Properties', '$tran
 	};
 }]);
 
-return {}; // module
-});		  // definition end
+return {}; }); // module definition end

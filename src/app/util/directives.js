@@ -5,7 +5,7 @@ define([
 	'app/statistics',
 	'app/properties',
 	'util/dataFormatter',
-	'util/i18n'
+	//'util/i18n'
 ], function() {
 ///////////////////////////////////////
 

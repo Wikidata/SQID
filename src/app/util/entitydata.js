@@ -2,7 +2,7 @@
 define([
 	'util/util', // pulls in angular
 	'util/wikidataapi',
-	'util/i18n'
+	//'util/i18n'
 ], function() {
 ///////////////////////////////////////
 

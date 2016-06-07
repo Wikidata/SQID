@@ -3,7 +3,7 @@ define([
 	'app/app', // pulls angular, ngroute and utilties
 	'util/sparql',
 	'util/entitydata',
-	'util/i18n',
+	//'util/i18n',
 	// implicit 'util/util', // also contains htmlCache
 	'util/dataFormatter',
 	'app/properties',

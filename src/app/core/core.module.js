@@ -3,29 +3,31 @@
 define([ // module definition dependencies
 	'ngAnimate', 
 	'ngRoute',
-	'ngCookies',
+	//'ngCookies',
 	//'ngTranslate', // is (has to be?) loaded explicitly in main.js
-	'ngComplete',
-	'util/util',
+	//'ngComplete',
+	//'util/util',
 	'ui-boostrap-tpls', // implicit bootstrap
+	//'i18n/i18n.module'
 ], function() {
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('classBrowserApp',[
-	'ngAnimate', 'ngRoute', 'ngCookies',  'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 
-	'utilities','queryInterface'
+var classBrowser = angular.module('core',[
+	'ngAnimate', 'ngRoute', //'ngCookies',  
+	'ui.bootstrap', 'pascalprecht.translate', //'angucomplete-alt', 
+	//'i18n', 'utilities'//,'queryInterface'
 ])
 
 	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
-			.when('/', {templateUrl: 'views/start.html'})
-			.when('/browse', { templateUrl: 'views/browseData.html' })
-			.when('/datatypes', { templateUrl: 'views/datatypes.html' })
+			.when('/', {templateUrl: 'app/core/start.html'})
+			// .when('/browse', { templateUrl: 'views/browseData.html' })
+			// .when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'views/about.html' })
-			.when('/status', { templateUrl: 'views/status.html' })
-			.when('/view', { templateUrl: 'views/view.html' })
-			.when('/query', { templateUrl: 'views/queryview.html'})
+			// .when('/status', { templateUrl: 'views/status.html' })
+			// .when('/view', { templateUrl: 'views/view.html' })
+			// .when('/query', { templateUrl: 'views/queryview.html'})
 			.otherwise({redirectTo: '/'});
 	}])
 

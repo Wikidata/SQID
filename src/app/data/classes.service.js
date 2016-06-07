@@ -1,12 +1,12 @@
 //////// Module Definition ////////////
 define([
-	'app/app', // pulls angular, ngroute and utilties
+	'data/data.module',
 	'util/util'
 ], function() {
 ///////////////////////////////////////
 
 
-angular.module('classBrowserApp').factory('Classes', ['$http', '$route', 'util', function($http, $route, util) {
+angular.module('classBrowserApp').factory('classes', ['$http', '$route', 'util', function($http, $route, util) {
 	var promise;
 	var classes;
 	var idArray;
