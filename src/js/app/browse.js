@@ -82,7 +82,7 @@ angular.module('classBrowserApp')
           args = {
             type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
             activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
-            lang : ($route.current.params.lang) ? ($route.current.params.lang) : status.lang,
+            lang : ($route.current.params.lang) ? ($route.current.params.lang) : i18n.getLanguage(),
             sortCriteria: {
               classes: {
                 label: ($route.current.params.sortclasslabel) ? ($route.current.params.sortclasslabel) : status.sortCriteria.classes.label,
@@ -585,6 +585,8 @@ angular.module('classBrowserApp')
     
     var timeoutIsSet = false;
 
+    i18n.setLanguage(status.lang);
+
     $scope.suggestFilters = {
       data: {
         propertyIndex: initPropertyIndex(),
@@ -645,8 +647,6 @@ angular.module('classBrowserApp')
       translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
 
     });
-
-    i18n.setLanguage(status.lang);
 
     $scope.filterPermalink =Arguments.getUrl();
     if (!$scope.filterText) {$scope.filterText = ""};

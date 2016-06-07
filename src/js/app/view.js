@@ -45,6 +45,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 
 		updateLang: function() {
 			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : null;
+			console.log("call");
 			i18n.setLanguage(lang);
 		},
 
