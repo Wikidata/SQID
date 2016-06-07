@@ -3,13 +3,14 @@
 define([ // module definition dependencies
 	'ngAnimate', 
 	'ngRoute',
+	'jquery-ui',
 	//'ngCookies',
 	//'ngTranslate', // is (has to be?) loaded explicitly in main.js
 	//'ngComplete',
 	//'util/util',
 	'ui-boostrap-tpls', // implicit bootstrap
-	'i18n/i18n.module'
-	// 'i18n/translate.config'
+	// 'i18n/i18n.module',
+	
 ], function() {
 
 $("[data-toggle=popover]").popover({html:true});
@@ -17,7 +18,7 @@ $("[data-toggle=popover]").popover({html:true});
 angular.module('core',[
 	'ngAnimate', 'ngRoute', //'ngCookies',  
 	'ui.bootstrap', 'pascalprecht.translate', //'angucomplete-alt', 
-	'i18n'//, 'utilities'//,'queryInterface'
+	//'i18n'//, 'utilities'//,'queryInterface'
 ])
 
 
@@ -25,7 +26,7 @@ angular.module('core',[
 	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
 			.when('/', {templateUrl: 'app/core/start.html'})
-			// .when('/browse', { templateUrl: 'views/browseData.html' })
+			.when('/browse', { templateUrl: 'app/browse/browse.html' })
 			// .when('/datatypes', { templateUrl: 'views/datatypes.html' })
 			.when('/about', { templateUrl: 'app/core/about.html' })
 			// .when('/status', { templateUrl: 'views/status.html' })

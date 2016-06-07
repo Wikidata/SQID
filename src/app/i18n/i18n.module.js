@@ -1,5 +1,5 @@
 define([ // module definition dependencies
-	'core/core.module',
+	// 'core/core.module',
 	'data/data.module', 
 	// 'util/util',
 
@@ -13,11 +13,11 @@ define([ // module definition dependencies
 
 angular.module('i18n', [
 	'ngCookies', 'pascalprecht.translate',
-	'core', 'utilities'
-]); require([
-	'i18n/translate.config',
-	'i18n/i18n.service'
-]);
+	'utilities'
+]);// require([
+// 	'i18n/translate.config',
+// 	'i18n/i18n.service'
+// ]);
 	
 
 return {};}); // module definition end

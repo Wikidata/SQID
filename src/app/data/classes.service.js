@@ -6,7 +6,7 @@ define([
 ///////////////////////////////////////
 
 
-angular.module('classBrowserApp').factory('classes', ['$http', '$route', 'util', function($http, $route, util) {
+angular.module('data').factory('classes', ['$http', '$route', 'util', function($http, $route, util) {
 	var promise;
 	var classes;
 	var idArray;
@@ -34,7 +34,7 @@ angular.module('classBrowserApp').factory('classes', ['$http', '$route', 'util',
 	};
 
 	var getLabel = function(id){ return getData(id, 'l', null); };
-	var getUrl = function(id, lang = null) {
+	var getUrl = function(id, lang) { if(lang === undefined) { lang = null; }
 		var str = "#/view?id=Q" + id;
 		if (lang != null){
 			str += '&lang=' + lang;

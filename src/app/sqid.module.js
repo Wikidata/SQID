@@ -11,7 +11,8 @@ define([ // module definition dependencies
 	'i18n/i18n.module',
 	'core/core.module',
 	// 'query/query'
-	'i18n/i18n.service',
+	// 'i18n/i18n.service',
+	'browse/browse.module',
 	// 'ngCookies',				//
 	// 'ngTranslate-core',			// cannot for the life of me sort out the 
 	// 'ngTranslate-loader',		// dependency in a way that the bundle will
@@ -27,7 +28,8 @@ $("[data-toggle=popover]").popover({html:true});
 
 var classBrowser = angular.module('sqid',[
 	// 'ngCookies', //'ngAnimate', 'ngRoute', 'ngCookies',  'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 
-	'core', 'data', 'i18n', 'utilities'//,'queryInterface'
+	'core', 'data', 'i18n', 'utilities',//,'queryInterface'
+	'browse'
 ]); //.controller('Foo', ['$translate', function(i18n) {
 // 	console.log(i18n);
 // 	angular.transalat = i18n;
