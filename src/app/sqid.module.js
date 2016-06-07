@@ -9,7 +9,7 @@ define([ // module definition dependencies
 	// 'util/util',
 	'ui-boostrap-tpls', // implicit bootstrap
 	'i18n/i18n.module',
-	'core/core.module',
+	//'core/core.module',
 	// 'query/query'
 	// 'i18n/i18n.service',
 	'browse/browse.module',
@@ -22,7 +22,11 @@ define([ // module definition dependencies
 	// 'ngTranslate-storage-loc',	// unless loading in this order explicitly
 
 	// config blocks must register before bootstrap
-	'i18n/translate.config'
+	'core/core.config',
+	'i18n/translate.config',
+	'layout/layout.module',
+	'layout/layout.directives',
+	'meta/meta.config'
 
 ], function() {
 
@@ -31,7 +35,7 @@ $("[data-toggle=popover]").popover({html:true});
 var classBrowser = angular.module('sqid',[
 	// 'ngCookies', //'ngAnimate', 'ngRoute', 'ngCookies',  'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 
 	'core', 'data', 'i18n', 'util',//,'queryInterface'
-	'browse'
+	'browse', 'layout'
 ]); //.controller('Foo', ['$translate', function(i18n) {
 // 	console.log(i18n);
 // 	angular.transalat = i18n;

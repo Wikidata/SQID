@@ -23,18 +23,6 @@ angular.module('core',[
 
 
 
-	.config(['$routeProvider', function($routeProvider) {
-		$routeProvider
-			.when('/', {templateUrl: 'app/core/start.html'})
-			.when('/browse', { templateUrl: 'app/browse/browse.html' })
-			// .when('/datatypes', { templateUrl: 'views/datatypes.html' })
-			.when('/about', { templateUrl: 'app/core/about.html' })
-			// .when('/status', { templateUrl: 'views/status.html' })
-			// .when('/view', { templateUrl: 'views/view.html' })
-			// .when('/query', { templateUrl: 'views/queryview.html'})
-			.otherwise({redirectTo: '/'});
-	}])
-
 	.filter('to_trusted', ['$sce', function($sce){
 		return function(text) {
 			return $sce.trustAsHtml(text);
