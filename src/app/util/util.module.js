@@ -1,14 +1,12 @@
 //////// Module Definition ////////////
 define([
-	//'core/core.module',
-	'util/util.module'
+	'angular',
 ], function() {
 ///////////////////////////////////////
 
 
-angular.module('data', [
-	'ngRoute',
-	'util'
+angular.module('util', [
+
 ]);
 
 return {}; }); // module definition end

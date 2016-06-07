@@ -2,8 +2,7 @@
 define([
 	'i18n/i18n.module',
 	'i18n/translate.config',
-	'util/util', // pulls in angular
-	'util/wikidataapi',
+	'util/wikidataapi.service',
 	'data/properties.service',
 	//'ngTranslate' // loaded explicitly in main.js
 ], function() {

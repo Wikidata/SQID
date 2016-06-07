@@ -63,11 +63,11 @@
 
 //////// Module Definition ////////////
 define([
-	'util/util' // pulls in angular
+	'util/util.module' // pulls in angular
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').controller('PaginationController', ['$scope', function($scope) {
+angular.module('util').controller('PaginationController', ['$scope', function($scope) {
 	//init pagination config from parent or default
 	if($scope.pagination === undefined) { $scope.pagination = {}; }
 	var pgnt = {
@@ -149,5 +149,4 @@ angular.module('utilities').controller('PaginationController', ['$scope', functi
 }]);
 
 
-return {}; // module
-});		  // definition end
+return {}; }); // module definition end

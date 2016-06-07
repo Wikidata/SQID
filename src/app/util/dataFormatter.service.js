@@ -1,7 +1,8 @@
 //////// Module Definition ////////////
 define([
-	'util/util', // pulls in angular
-	//'util/i18n'
+	'util/util.module',
+	'util/util.service',
+	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
@@ -9,7 +10,7 @@ define([
  * This component provides methods for turning parts of the Wikidata 
  * data model into HTML for display.
  */ 
-angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(util, i18n) {
+angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, i18n) {
 
 	var getEntityTerms = function(entityId, missingTermsListener) {
 		if (!i18n.hasEntityTerms(entityId)) {
@@ -264,5 +265,4 @@ angular.module('utilities').factory('dataFormatter', ['util', 'i18n', function(u
 }]);
 
 
-return {}; // module
-});		  // definition end
+return {}; }); // module definition end

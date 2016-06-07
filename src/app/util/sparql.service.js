@@ -1,11 +1,12 @@
 //////// Module Definition ////////////
 define([
-	'util/util', // pulls in angular
-	//'util/i18n'
+	'util/util.module',
+	'util/util.service',
+	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').factory('sparql', ['util', 'i18n', function(util, i18n) {
+angular.module('util').factory('sparql', ['util', 'i18n', function(util, i18n) {
 
 	var SPARQL_SERVICE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql";
 	var SPARQL_UI_PREFIX = "https://query.wikidata.org/#";
@@ -126,5 +127,4 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 
 }]);
 
-return {}; // module
-});		  // definition end
+return {}; }); // module definition end

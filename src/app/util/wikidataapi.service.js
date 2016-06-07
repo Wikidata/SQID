@@ -1,10 +1,11 @@
 //////// Module Definition ////////////
 define([
-	'util/util' // pulls in angular
+	'util/util.module',
+	'util/util.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').factory('wikidataapi', ['util', '$q', function(util, $q) {
+angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) {
 
 	var getEntityData = function(id, language) {
 		// Special:EntityData does not always return current data, not even with "action=purge"
@@ -79,5 +80,4 @@ angular.module('utilities').factory('wikidataapi', ['util', '$q', function(util,
 	};
 }]);
 
-return {}; // module
-});		  // definition end
+return {}; }); // module definition end

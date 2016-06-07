@@ -9,7 +9,7 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wikidataapi) {
+angular.module('layout').directive('sqidImage', ['wikidataapi', function(wikidataapi) {
 
 	var link = function (scope, element, attrs) {
 		scope.$watch(attrs.file, function(file){
@@ -331,5 +331,5 @@ angular.module('utilities').directive('sqidImage', ['wikidataapi', function(wiki
 	};
 }]);
 
-return {}; // module
-});		  // definition end
+
+return {}; }); // module definition end

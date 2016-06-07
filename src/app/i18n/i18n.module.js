@@ -13,7 +13,7 @@ define([ // module definition dependencies
 
 angular.module('i18n', [
 	'ngCookies', 'pascalprecht.translate',
-	'utilities'
+	'util'
 ]);// require([
 // 	'i18n/translate.config',
 // 	'i18n/i18n.service'

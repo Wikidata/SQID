@@ -1,12 +1,16 @@
 //////// Module Definition ////////////
 define([
-	'util/util', // pulls in angular
-	'util/wikidataapi',
-	//'util/i18n'
+	'util/util.module',
+	'util/wikidataapi.service',
+	'util/util.service',
+	'util/sparql.service',
+	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('utilities').factory('entitydata', ['wikidataapi', 'util', 'i18n', 'sparql', '$q', function(wikidataapi, util, i18n, sparql, $q) {
+angular.module('util').factory('entitydata', [
+'wikidataapi', 'util', 'i18n', 'sparql', '$q', 
+function(wikidataapi, util, i18n, sparql, $q) {
 
 	var getStatementValue = function(statementJson, defaultValue) {
 		try {
@@ -313,5 +317,4 @@ SELECT DISTINCT ?p { \n\
 	};
 }]);
 
-return {}; // module
-});		  // definition end
+return {}; }); // module definition end

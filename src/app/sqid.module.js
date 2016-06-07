@@ -6,13 +6,15 @@ define([ // module definition dependencies
 	'ngCookies',
 	//'ngTranslate', // is (has to be?) loaded explicitly in main.js
 	//'ngComplete',
-	'util/util',
+	// 'util/util',
 	'ui-boostrap-tpls', // implicit bootstrap
 	'i18n/i18n.module',
 	'core/core.module',
 	// 'query/query'
 	// 'i18n/i18n.service',
 	'browse/browse.module',
+	'browse/arguments.service',
+	'browse/table.controller',
 	// 'ngCookies',				//
 	// 'ngTranslate-core',			// cannot for the life of me sort out the 
 	// 'ngTranslate-loader',		// dependency in a way that the bundle will
@@ -28,7 +30,7 @@ $("[data-toggle=popover]").popover({html:true});
 
 var classBrowser = angular.module('sqid',[
 	// 'ngCookies', //'ngAnimate', 'ngRoute', 'ngCookies',  'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 
-	'core', 'data', 'i18n', 'utilities',//,'queryInterface'
+	'core', 'data', 'i18n', 'util',//,'queryInterface'
 	'browse'
 ]); //.controller('Foo', ['$translate', function(i18n) {
 // 	console.log(i18n);

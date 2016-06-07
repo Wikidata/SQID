@@ -1,7 +1,7 @@
 //////// Module Definition ////////////
 define([
 	'data/data.module',
-	'util/util'
+	'util/util.service'
 ], function() {
 ///////////////////////////////////////
 
