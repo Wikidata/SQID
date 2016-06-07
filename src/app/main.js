@@ -41,22 +41,7 @@ requirejs.config({
 
 
 // Load everything, start the app 
-requirejs([ 'sqid.module'
-	// 'ngCookies',				//
-	// 'ngTranslate-core',			// cannot for the life of me sort out the 
-	// 'ngTranslate-loader',		// dependency in a way that the bundle will
-	// 'ngTranslate-storage-cook',	// execute in the right order when optimized
-	// 'ngTranslate-storage-loc',	// unless loading in this order explicitly
-
-	// 'jquery-ui',
-	// 'app/browse',		// everything else
-	// 'app/view', 		// is implicitly
-	// //'app/translate',	// pulled via
-	// 'util/directives',	// dependencies
-	// 'query/query',
-	// 'i18n/i18n.module',
-	
-], function() {
+requirejs([ 'sqid.module' ], function() {
 	jQuery(function() {
 		console.log('haz all filez, ready, acshionz!');
 		angular.bootstrap( document, ['sqid'], { strictDi: true } );

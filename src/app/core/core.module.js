@@ -8,23 +8,26 @@ define([ // module definition dependencies
 	//'ngComplete',
 	//'util/util',
 	'ui-boostrap-tpls', // implicit bootstrap
-	//'i18n/i18n.module'
+	'i18n/i18n.module'
+	// 'i18n/translate.config'
 ], function() {
 
 $("[data-toggle=popover]").popover({html:true});
 
-var classBrowser = angular.module('core',[
+angular.module('core',[
 	'ngAnimate', 'ngRoute', //'ngCookies',  
 	'ui.bootstrap', 'pascalprecht.translate', //'angucomplete-alt', 
-	//'i18n', 'utilities'//,'queryInterface'
+	'i18n'//, 'utilities'//,'queryInterface'
 ])
+
+
 
 	.config(['$routeProvider', function($routeProvider) {
 		$routeProvider
 			.when('/', {templateUrl: 'app/core/start.html'})
 			// .when('/browse', { templateUrl: 'views/browseData.html' })
 			// .when('/datatypes', { templateUrl: 'views/datatypes.html' })
-			.when('/about', { templateUrl: 'views/about.html' })
+			.when('/about', { templateUrl: 'app/core/about.html' })
 			// .when('/status', { templateUrl: 'views/status.html' })
 			// .when('/view', { templateUrl: 'views/view.html' })
 			// .when('/query', { templateUrl: 'views/queryview.html'})

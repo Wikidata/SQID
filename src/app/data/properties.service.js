@@ -36,7 +36,7 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 
 	var getLabel = function(id) { return getData(id, 'l', null); };
 	var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); };
-	var getUrl = function(id, lang = null) { 
+	var getUrl = function(id, lang) { if(lang === undefined) { lang = null; }
 		var str = "#/view?id=P" + id;
 		if (lang != null){
 			str += '&lang=' + lang;

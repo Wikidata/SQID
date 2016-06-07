@@ -1,6 +1,7 @@
 //////// Module Definition ////////////
 define([
 	'i18n/i18n.module',
+	'i18n/translate.config',
 	'util/util', // pulls in angular
 	'util/wikidataapi',
 	'data/properties.service',
@@ -10,6 +11,8 @@ define([
 
 
 angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate', function(wikidataapi, Properties, $translate) {
+
+
 	var language = null; // defaults to "en" in this case
 
 	var idTerms = {}; // cache for labels/descriptions of items
