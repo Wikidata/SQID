@@ -2,8 +2,6 @@
 define([
 	'browse/browse.module',
 	'browse/arguments.service',
-	// 'app/classes',
-	// 'app/properties',
 	'util/util.service',
 	'i18n/i18n.service',
 	'i18n/translate.config',

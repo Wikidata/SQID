@@ -23,7 +23,6 @@ angular.module('i18n').config(['$translateProvider', function ($translateProvide
 		}).determinePreferredLanguage()
 		//.useSanitizeValueStrategy('escape') // using this makes it impossible to use HTML (links, tooltips, etc.) in variable replacements
 		;
-		console.log('did some translate provider setup');
 }]);
 
 return {};}); // module definition end

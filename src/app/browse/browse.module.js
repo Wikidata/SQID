@@ -1,8 +1,6 @@
 //////// Module Definition ////////////
 define([
 	'core/core.module',
-	// 'app/classes',
-	// 'app/properties',
 	'i18n/i18n.service',
 	'util/util.module',
 	'util/pagination.controller',

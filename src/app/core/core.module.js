@@ -4,16 +4,9 @@ define([ // module definition dependencies
 	'ngAnimate', 
 	'ngRoute',
 	'jquery-ui',
-	//'ngCookies',
-	//'ngTranslate', // is (has to be?) loaded explicitly in main.js
-	//'ngComplete',
-	//'util/util',
-	'ui-boostrap-tpls', // implicit bootstrap
-	// 'i18n/i18n.module',
-	
+	'ui-boostrap-tpls' // implicit bootstrap
 ], function() {
 
-$("[data-toggle=popover]").popover({html:true});
 
 angular.module('core',[
 	'ngAnimate', 'ngRoute', //'ngCookies',  
@@ -21,7 +14,9 @@ angular.module('core',[
 	//'i18n'//, 'utilities'//,'queryInterface'
 ])
 
-
+	////////////
+	/// TODO /////////////////////////////////////////////
+	// following components should go somewhere else ? //
 
 	.filter('to_trusted', ['$sce', function($sce){
 		return function(text) {
