@@ -28,7 +28,8 @@ define([ // module definition dependencies
 	'layout/layout.directives',
 	'meta/meta.config',
 	'browse/browse.config',
-	'view/view.config'
+	'view/view.config',
+	'query/sparqly.config'
 
 ], function() {
 
@@ -37,7 +38,7 @@ $("[data-toggle=popover]").popover({html:true}); // <-- is this in use?
 var classBrowser = angular.module('sqid',[
 	// 'ngCookies', //'ngAnimate', 'ngRoute', 'ngCookies',  'ui.bootstrap', 'pascalprecht.translate', 'angucomplete-alt', 
 	'core', 'data', 'i18n', 'util',//,'queryInterface'
-	'browse', 'layout', 'view'
+	'browse', 'layout', 'view', 'sparqly'
 ]); //.controller('Foo', ['$translate', function(i18n) {
 // 	console.log(i18n);
 // 	angular.transalat = i18n;

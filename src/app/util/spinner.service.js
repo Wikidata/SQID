@@ -1,8 +1,9 @@
 //////// Module Definition ////////////
 define([
+	'require',
 	'util/util.module',
-	// 'spin'
-], function() {
+	'spin'
+], function(require) {
 ///////////////////////////////////////
 
 
