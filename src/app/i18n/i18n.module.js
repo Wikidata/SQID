@@ -1,23 +1,19 @@
 define([ // module definition dependencies
-	// 'core/core.module',
 	'data/data.module', 
-	// 'util/util',
+	'util/util.module',
 
-	'ngCookies',				//
-	'ngTranslate-core',			// cannot for the life of me sort out the 
-	'ngTranslate-loader',		// dependency in a way that the bundle will
-	'ngTranslate-storage-cook',	// execute in the right order when optimized
-	'ngTranslate-storage-loc',	// unless loading in this order explicitly
+	'ngRoute',
+	'ngCookies',
+	'ngTranslate-core',
+	'ngTranslate-loader',
+	'ngTranslate-storage-cook',
+	'ngTranslate-storage-loc'
 ], function() {
 
 
 angular.module('i18n', [
-	'ngCookies', 'pascalprecht.translate',
-	'util'
-]);// require([
-// 	'i18n/translate.config',
-// 	'i18n/i18n.service'
-// ]);
-	
+	'ngRoute', 'ngCookies', 'pascalprecht.translate',
+	'util', 'data'
+]);	
 
 return {};}); // module definition end

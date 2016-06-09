@@ -4,7 +4,6 @@ define([
 	'i18n/translate.config',
 	'util/wikidataapi.service',
 	'data/properties.service',
-	//'ngTranslate' // loaded explicitly in main.js
 ], function() {
 ///////////////////////////////////////
 

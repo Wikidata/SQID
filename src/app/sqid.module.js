@@ -5,7 +5,7 @@ define([ // sqid application wrapper module
 	
 	// config blocks must register before bootstrap
 	'core/core.config',
-	'i18n/translate.config',
+	'i18n/i18n.config',
 	'meta/meta.config',
 	'browse/browse.config',
 	'view/view.config',
