@@ -1,11 +1,12 @@
 //////// Module Definition ////////////
 define([
-	'angular'
+	'angular',
+	'ngRoute'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('meta', [
-
+	'ngRoute'
 ]);
 
 return {}; }); // module definition end

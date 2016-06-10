@@ -2,8 +2,7 @@
 define([
 	'browse/browse.module',
 	'browse/arguments.service',
-	'browse/table.controller',
-	'ngRoute'
+	'browse/table.controller'
 ], function() {
 ///////////////////////////////////////
 

@@ -4,7 +4,7 @@ define([ // sqid application wrapper module
 	'layout/layout.directives',
 	
 	// config blocks must register before bootstrap
-	'core/core.config',
+	// 'core/core.config',
 	'i18n/i18n.config',
 	'meta/meta.config',
 	'browse/browse.config',
@@ -19,7 +19,7 @@ angular.module('sqid',[						// the application wrapper module
 
 	'data', 'i18n', 'util', 'layout',				// shared modules
 	
-	'core', 'meta', 'browse', 'view', 'sparqly'		// feature / content modules
+	 'meta', 'browse', 'view', 'sparqly'		// feature / content modules
 ]); 
 
 return {};}); // module definition end

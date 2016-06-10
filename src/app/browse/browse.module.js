@@ -1,17 +1,17 @@
 //////// Module Definition ////////////
 define([
-	'core/core.module',
+	'angular',
+	'ngRoute',
+	'ngComplete',
 	'i18n/i18n.service',
 	'util/util.module',
-	'data/data.module',
-	'ngComplete'
+	'data/data.module'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('browse', [
-	'ngRoute', 
-	'data', 'util', 'i18n', 'angucomplete-alt'
+	'ngRoute', 'angucomplete-alt',
+	'data', 'util', 'i18n'
 ]);
-
 
 return {}; }); // module definition end
