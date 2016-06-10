@@ -22,6 +22,7 @@
 	"FILTER_MENUE": {
 		"LABEL_PLACEHOLDER": "Filter labels",
 		"PROPERTY_PLACEHOLDER": "Select property",
+		"CLASS_PLACEHOLDER": "Select class",
 		"FILTER_PROPERTY": "Has Property",
 		"FILTER_SUPERCLASS": "Has superclass",
 		"FILTER_DATATYPE": "Select datatype",

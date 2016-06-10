@@ -389,11 +389,11 @@ angular.module('classBrowserApp')
       $scope.pagination = {
         index: $scope.content,
         activePage: $scope.args.activePage || 1,
-        onPageChange: function(){
+        onPageChange: function(items){
           status.activePage = $scope.pagination.activePage;
           $scope.filterPermalink =Arguments.getUrl();
+          translateItems(items);
         },
-        onPageChange: translateItems  
       }
     };
 
@@ -428,9 +428,13 @@ angular.module('classBrowserApp')
     };
 
     var initClassIndex = function(){
+      console.log("get here");
       var result = [];
       Classes.then(function(data){
+        console.log("fill");
         var idArray = data.getIdArray();
+        console.log("idArray size ");
+        console.log(idArray.length);
         for (var i = 0; i < idArray.length; i++){
           var elem = {
             name: data.getLabel(idArray[i]),
@@ -438,7 +442,6 @@ angular.module('classBrowserApp')
             id: idArray[i].toString()
           }
           result.push(elem);
-          
           if (idArray[i].toString() == status.classesFilter.superclass.toString()){
             $scope.suggestFilters.classes.superclass = elem;
           }
@@ -587,6 +590,8 @@ angular.module('classBrowserApp')
 
     i18n.setLanguage(status.lang);
 
+
+
     $scope.suggestFilters = {
       data: {
         propertyIndex: initPropertyIndex(),
@@ -602,7 +607,7 @@ angular.module('classBrowserApp')
         directInstanceOf: ""
       }
     };
-
+    console.log($scope.suggestFilters.data.classIndex.length);
     $scope.propertyClassFilter = {
       options: initPropertyClassIndex(),
       selected: status.propertiesFilter.directInstanceOf
@@ -832,6 +837,7 @@ angular.module('classBrowserApp')
     };
 
     $scope.localSearchClasses = function(str){
+      console.log($scope.suggestFilters.data.classIndex.length);
       return localSearch(str, $scope.suggestFilters.data.classIndex);
     };
 
