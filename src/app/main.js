@@ -43,7 +43,6 @@ requirejs.config({
 // Load everything, start the app 
 requirejs([ 'sqid.module' ], function() {
 	jQuery(function() {
-		console.log('haz all filez, ready, acshionz!');
 		angular.bootstrap( document, ['sqid'], { strictDi: true } );
 	});
 });
