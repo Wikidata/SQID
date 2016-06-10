@@ -70,25 +70,7 @@ angular.module('core',[
 	      },
 	      link: link
 	    };
-	})
-
-	.controller('TypeSelectorController', function($scope, Arguments){
-		Arguments.refreshArgs();
-		var args = Arguments.getArgs();
-		switch (args.type) {
-			case "classes":
-				$scope.firstActive = "active";
-				$scope.secondActive = "";
-				break;
-			case "properties":
-				$scope.firstActive = "";
-				$scope.secondActive = "active";
-				break;
-			default:
-				console.log("type: " + args.type + " is unknown");
-				$scope.firstActive = "active";
-				$scope.secondActive = "";
-		}
 	});
+
 
 return {};}); // module definition end
