@@ -1,6 +1,6 @@
 //////// Module Definition ////////////
 define([
-	//'core/core.module',
+	'ngRoute',
 	'util/util.module'
 ], function() {
 ///////////////////////////////////////

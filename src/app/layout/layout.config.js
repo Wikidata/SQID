@@ -1,8 +1,8 @@
 //////// Module Definition ////////////
 define([
-	'layout.module',
-	'layout.controller',
-	'layout.directives'
+	'layout/layout.module',
+	'layout/layout.controller',
+	'layout/layout.directives'
 ], function() {
 ///////////////////////////////////////
 

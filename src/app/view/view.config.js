@@ -1,6 +1,5 @@
 //////// Module Definition ////////////
 define([
-	'ngRoute',
 	'view/view.module',
 	'view/view.service',
 	'view/view.controller'

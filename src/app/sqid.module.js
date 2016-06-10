@@ -1,25 +1,30 @@
 'use strict'; // indicate that code is executed in strict mode
 
+/////////////////////////////////////////////////////////////////////////
 define([ // sqid application wrapper module
-	'layout/layout.directives',
-	
-	// config blocks must register before bootstrap
-	// 'core/core.config',
-	'i18n/i18n.config',
-	'meta/meta.config',
-	'browse/browse.config',
-	'view/view.config',
-	'query/sparqly.config'
+
+	// Note: The *.config files wrap up their respective modules 
+	// and do initial setup work, so they are convenient
+	// 'all components of that module'-dependencies
+
+	'layout/layout.config',	// the body template, pulls in some application wide dependencies
+	'i18n/i18n.config',		// localisation module
+	'meta/meta.config',		// pages about pages, like start about and statistics
+	'browse/browse.config',	// wikidata classes and properties browser
+	'view/view.config',		// wikidata entity viewer
+	'query/sparqly.config'	// sparql query generator interface
+
 ], function() {
+/////////////////////////////////////////////////////////////////////////
 
 $("[data-toggle=popover]").popover({html:true}); // <-- is this in use?
 
 
 angular.module('sqid',[						// the application wrapper module
 
-	'data', 'i18n', 'util', 'layout',				// shared modules
+	'data', 'i18n', 'util', 'layout',		// shared modules
 	
-	 'meta', 'browse', 'view', 'sparqly'		// feature / content modules
+	'meta', 'browse', 'view', 'sparqly'		// feature / content modules
 ]); 
 
 return {};}); // module definition end
