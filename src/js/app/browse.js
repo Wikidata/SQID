@@ -428,13 +428,9 @@ angular.module('classBrowserApp')
     };
 
     var initClassIndex = function(){
-      console.log("get here");
       var result = [];
       Classes.then(function(data){
-        console.log("fill");
         var idArray = data.getIdArray();
-        console.log("idArray size ");
-        console.log(idArray.length);
         for (var i = 0; i < idArray.length; i++){
           var elem = {
             name: data.getLabel(idArray[i]),
@@ -607,7 +603,7 @@ angular.module('classBrowserApp')
         directInstanceOf: ""
       }
     };
-    console.log($scope.suggestFilters.data.classIndex.length);
+
     $scope.propertyClassFilter = {
       options: initPropertyClassIndex(),
       selected: status.propertiesFilter.directInstanceOf
@@ -837,7 +833,6 @@ angular.module('classBrowserApp')
     };
 
     $scope.localSearchClasses = function(str){
-      console.log($scope.suggestFilters.data.classIndex.length);
       return localSearch(str, $scope.suggestFilters.data.classIndex);
     };
 
