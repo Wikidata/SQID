@@ -44,11 +44,6 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			id = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
 		},
 
-		updateLang: function() {
-			var lang = ($route.current.params.lang) ? ($route.current.params.lang) : null;
-			i18n.setLanguage(lang);
-		},
-
 		getId: function(){
 			return id;
 		},

@@ -30,7 +30,6 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 	$scope.getCachedHtml = htmlCache.getValue;
 
 	View.updateId();
-	View.updateLang();
 	$scope.id = View.getId();
 	var numId = $scope.id.substring(1);
 	$scope.isItem = ( $scope.id.substring(0,1) != 'P' );

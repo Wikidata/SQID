@@ -458,8 +458,6 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
 	});
 
-	i18n.setLanguage(status.lang);
-
 	$scope.filterPermalink =Arguments.getUrl();
 	if (!$scope.filterText) {$scope.filterText = ""};
 	
