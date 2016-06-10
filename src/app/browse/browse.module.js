@@ -3,7 +3,6 @@ define([
 	'core/core.module',
 	'i18n/i18n.service',
 	'util/util.module',
-	'util/pagination.controller',
 	'data/data.module',
 	'ngComplete'
 ], function() {

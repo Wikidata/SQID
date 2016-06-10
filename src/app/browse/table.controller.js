@@ -3,6 +3,7 @@ define([
 	'browse/browse.module',
 	'browse/arguments.service',
 	'util/util.service',
+	'util/pagination.controller',
 	'util/ngSlider.directive',
 	'util/to_trusted.filter',
 	'i18n/i18n.service',
