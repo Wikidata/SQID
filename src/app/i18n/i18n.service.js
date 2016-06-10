@@ -25,7 +25,7 @@ angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate
 	}
 
 	var getLanguage = function() {
-		return language != null ? language : 'en';
+		return language || $translate.use();
 	}
 
 	// Check if an explicit lanuage was set.
