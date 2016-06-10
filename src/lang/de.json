@@ -23,6 +23,7 @@
 	"FILTER_MENUE": {
 		"LABEL_PLACEHOLDER": "Filter anhand engl. Bezeichnern",
 		"PROPERTY_PLACEHOLDER": "Eigenschaft auswählen",
+		"CLASS_PLACEHOLDER": "Klasse auswählen",
 		"FILTER_PROPERTY": "Hat Eigenschaft",
 		"FILTER_SUPERCLASS": "Hat Oberklasse",
 		"FILTER_DATATYPE": "Datentyp auswählen",

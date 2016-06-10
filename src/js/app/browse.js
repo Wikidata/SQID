@@ -389,11 +389,11 @@ angular.module('classBrowserApp')
       $scope.pagination = {
         index: $scope.content,
         activePage: $scope.args.activePage || 1,
-        onPageChange: function(){
+        onPageChange: function(items){
           status.activePage = $scope.pagination.activePage;
           $scope.filterPermalink =Arguments.getUrl();
+          translateItems(items);
         },
-        onPageChange: translateItems  
       }
     };
 
@@ -438,7 +438,6 @@ angular.module('classBrowserApp')
             id: idArray[i].toString()
           }
           result.push(elem);
-          
           if (idArray[i].toString() == status.classesFilter.superclass.toString()){
             $scope.suggestFilters.classes.superclass = elem;
           }
@@ -586,6 +585,8 @@ angular.module('classBrowserApp')
     var timeoutIsSet = false;
 
     i18n.setLanguage(status.lang);
+
+
 
     $scope.suggestFilters = {
       data: {
