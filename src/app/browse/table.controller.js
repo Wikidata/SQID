@@ -3,6 +3,7 @@ define([
 	'browse/browse.module',
 	'browse/arguments.service',
 	'util/util.service',
+	'util/ngSlider.directive',
 	'i18n/i18n.service',
 	'i18n/translate.config',
 	'data/classes.service',
