@@ -77,7 +77,7 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  args = {
 			type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
 			activePage: ($route.current.params.activepage) ? parseInt(($route.current.params.activepage)) : status.activePage,
-			lang : ($route.current.params.lang) ? ($route.current.params.lang) : status.lang,
+			lang : ($route.current.params.lang) ? ($route.current.params.lang) : i18n.getLanguage(),
 			sortCriteria: {
 			  classes: {
 				label: ($route.current.params.sortclasslabel) ? ($route.current.params.sortclasslabel) : status.sortCriteria.classes.label,
