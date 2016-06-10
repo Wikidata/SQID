@@ -1,14 +1,13 @@
 //////// Module Definition ////////////
 define([
-	'angular',
-	// 'ngRoute'
+	'layout/layout.module'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('layout').controller('LayoutController', [function() {
+// angular.module('layout').controller('LayoutController', [function() {
 
+// 	// STUB
 
-
-}]);
+// }]);
 
 return {}; }); // module definition end
