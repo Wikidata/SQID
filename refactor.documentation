@@ -1,4 +1,107 @@
+next structure proposal
+=======================
+
+this outlines a possible setup with very strong module granularity. 
+note that the js/ folder was renamed in app/ and the files from the 
+view/ folder have moved to the subfolders of the modules they would belong to.
+
+some parts are still unclear. like 
+what purpose the core module actually has, 
+if start and about views couldn't better fit into meta or even layout. 
+shouldn't squidStatementTable rather be part of layout as well? 
+or would data make more sense in core instead of an own module (or the other way round)? 
+is bundling utils i18n with the angular-translate parts into their own module sensible? 
+can util be broken down further?
+
+to me it seems like finer granularity also makes it less obvious for some components where they belong.
+
+src/
+	app/
+		core/
+			about.view.html
+			core.module.js  // the heart of the apps functionality (mostly what former app module was about)
+			start.view.html
+		browse/
+			arguments.service.js
+			browse.controller.js
+			browse.module.js
+			browse.view.html
+		data/
+			classes.service.js
+			data.module.js
+			properties.service.js
+		i18n/
+			i18n.module.js
+			i18n.service.js
+			location.service.js // (?) something to keep track of lang param in url etc.?
+			translate.config.js
+		layout/
+			layout.controller.js
+			layout.directives.js
+			layout.view.html
+			squdFooter.tpl.hmtl
+			squidImage.tpl.html
+		meta/
+			datatypes.view.html // not implemented
+			meta.module.js
+			statistics.controller.js
+			statistics.service.js
+			statistics.view.html
+		query/
+			query.module.js
+			query.view.html
+			queryInterface.controller.js
+			queryInterface.service.js
+		util/
+			dataFormatter.service.js
+			entitydata.service.js
+			pagination.controller.js
+			sparql.service.js
+			squidCompile.directive.js
+			squidStatementTable.directive.js
+			util.module.js
+			wikidataapi.service.js
+		view/
+			view.view.html
+			view.js
+			view.controller.js
+			view.service.js
+		app.module.js // pulls together all the modules that make up the app
+		build.options.js
+		dist.min.js
+		main.js 
+	data/ ...
+	img/ ...
+	lang/ ...
+	lib/ ...
+	angucomplete-alt.css 
+	index.html
+	style.css
+
+
+////////////////////////////////////////////////////////////////////////////
+// app.module.js basically bundles up the apps modules in a manifest like fashion:
+angular.module('sqid', [
+
+	// core logic and APIs
+	'core', 	// gluing the most basic parts together
+	'i18n', 	// internationalization of messages and labels
+	'data',		// the generated data from our json files
+	'layout',	// manage the main layout, header, navbar, etc.
+	'util',		// all kinds of stuff?
+	
+	// feature modules
+	'meta',		// statistics, pages about the page
+	'browse',	// Properties and Classes browser
+	'view',		// Propertiy and Class viewer
+	'query'		// sparql abstraction wrapper
+]);
+//////////////////////////////////////////////////////////////////////////////
+
+
+============================
 documentation of refactoring
+(what happened so far:)
 ============================
 
 
