@@ -22,6 +22,12 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 		direction: -1
 	};
 
+	var sortCriteria = [[null, "l", "label"], 
+			[null, "d", "datatype"], 
+			[null, "s", "statements"], 
+			[null, "q", "qualifiers"],
+			[null, "e", "references"]];
+
 	var getData = function(id, key, defaultValue) {
 		try {
 			var result = properties[id][key];
@@ -58,11 +64,12 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 	}
 
 	var getSortCriteria = function(status){
-		return [[status.sortCriteria.properties.label, "l", "label"], 
-			[status.sortCriteria.properties.datatype, "d", "datatype"], 
-			[status.sortCriteria.properties.statements, "s", "statements"], 
-			[status.sortCriteria.properties.qualifiers, "q", "qualifiers"],
-			[status.sortCriteria.properties.references, "e", "references"]];
+		sortCriteria[0][0] = status.sortCriteria.properties.label;
+		sortCriteria[1][0] = status.sortCriteria.properties.datatype;
+		sortCriteria[2][0] = status.sortCriteria.properties.statements;
+		sortCriteria[3][0] = status.sortCriteria.properties.qualifiers;
+		sortCriteria[4][0] = status.sortCriteria.properties.references;
+		return sortCriteria;
 	}
 
 	var updateSorting = function(sortCriteria){
@@ -87,10 +94,6 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 
 			var getPropertiesHeader = function(status){
 				var sortCriteria = getSortCriteria(status);
-
-				for (var i=0; i < sortCriteria.length; i++){
-					sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
-				}
 				updateSorting(sortCriteria);
 
 				return [["TABLE_HEADER.LABEL", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
@@ -98,6 +101,10 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 					["TABLE_HEADER.USES_IN_STMTS", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
 					["TABLE_HEADER.USES_IN_QUALS", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
 					["TABLE_HEADER.USES_IN_REFS", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]];
+			}
+
+			for (var i=0; i < sortCriteria.length; i++){
+				sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
 			}
 
 			return {

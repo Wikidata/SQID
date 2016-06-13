@@ -232,11 +232,11 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  $scope.pagination = {
 		index: $scope.content,
 		activePage: $scope.args.activePage || 1,
-		onPageChange: function(){
+		onPageChange: function(items){
 		  status.activePage = $scope.pagination.activePage;
 		  $scope.filterPermalink =Arguments.getUrl();
-		},
-        onPageChange: translateItems  
+		  translateItems(items);
+		}
 	  }
 	};
 
@@ -427,6 +427,8 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	var propertyClassIndexInitialized = false;
 	
 	var timeoutIsSet = false;
+
+
 
 	$scope.suggestFilters = {
 	  data: {

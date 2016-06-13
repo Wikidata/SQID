@@ -21,6 +21,10 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 		direction: -1
 	};
 
+	var sortCriteria = [[null, "l", "label"], 
+			[null, "i", "instances"], 
+			[null, "s", "subclasses"]];
+
 	var getData = function(id, key, defaultValue) {
 		try {
 			var result = classes[id][key];
@@ -53,9 +57,10 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 	}
 
 	var getSortCriteria = function(status){
-		return [[status.sortCriteria.classes.label, "l", "label"], 
-			[status.sortCriteria.classes.instances, "i", "instances"], 
-			[status.sortCriteria.classes.subclasses, "s", "subclasses"]];
+		sortCriteria[0][0] = status.sortCriteria.classes.label;
+		sortCriteria[1][0] = status.sortCriteria.classes.instances;
+		sortCriteria[2][0] = status.sortCriteria.classes.subclasses;
+		return sortCriteria;
 	}
 
 	var updateSorting = function(sortCriteria){
@@ -78,17 +83,18 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 			};
 
 			var getClassesHeader = function(status){
-				var sortCriteria = getSortCriteria(status);
-
-				for (var i=0; i < sortCriteria.length; i++){
-						sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
-					}
+				sortCriteria = getSortCriteria(status);
 				updateSorting(sortCriteria);
 
 				return [["TABLE_HEADER.LABEL", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
 					["TABLE_HEADER.INSTATNCES", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
 					["TABLE_HEADER.SUBCLASSES", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]];
 			}
+
+			for (var i=0; i < sortCriteria.length; i++){
+				sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
+			}
+
 			return {
 				getClassesHeader: getClassesHeader,
 				getClasses: function(){ return classes; },
