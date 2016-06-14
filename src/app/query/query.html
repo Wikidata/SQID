@@ -115,21 +115,9 @@
 					</tr>
 				</tbody>
 			</table>
-			<div class="pagination-nav-caption">
-				Showing <span class="info-badge">{{pagination.fromItem}} - {{pagination.toItem}}</span>
-				of <span class="info-badge">{{pagination.numItems}}</span> results.
-			</div>
-			<nav><uib-pagination 
-				total-items="qui.pagination.numItems"
-				items-per-page="qui.pagination.tableSize"
-				ng-model="qui.pagination.activePage"
-				max-size="qui.pagination.pageSelectorSize"
-				previous-text="&laquo;"
-				next-text="&raquo;"
-				class="pagination-sm"
-				boundary-link-numbers="true"
-				ng-change="qui.pagination.setPage()"
-			></uib-pagination></nav>
+			<pagination-index-range></pagination-index-range>
+			<table-size-selector></table-size-selector>
+			<nav pagination="qui.pagination"></nav>
 		</div>
 	</div>
 </div>
