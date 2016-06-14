@@ -117,25 +117,19 @@
 			</table>
 			<div class="pagination-nav-caption">
 				Showing <span class="info-badge">{{pagination.fromItem}} - {{pagination.toItem}}</span>
-				of <span class="info-badge">{{pagination.numItems}}</span> results.</div>
-			<nav>
-
-				<ul class="pagination">
-					<li data-ng-class="{disabled: qui.pagination.nav.prevLiDisabled()}">
-						<a href="" data-ng-click="qui.pagination.nav.selectPrev()" aria-label="Previous">
-							<span aria-hidden="true">&laquo;</span>
-						</a>
-					</li>
-					<li ng-repeat="page in qui.pagination.nav.pages" data-ng-class="{active: qui.pagination.nav.liActive(page)}">
-						<a href="" data-ng-click="pagination.nav.selectPage(page)">{{page}}</a>
-					</li>
-					<li data-ng-class="{disabled: qui.pagination.nav.nextLiDisabled()}">
-						<a href="" data-ng-click="qui.pagination.nav.selectNext()" aria-label="Next">
-							<span aria-hidden="true">&raquo;</span>
-						</a>
-					</li>
-				</ul>
-			</nav>
+				of <span class="info-badge">{{pagination.numItems}}</span> results.
+			</div>
+			<nav><uib-pagination 
+				total-items="qui.pagination.numItems"
+				items-per-page="qui.pagination.tableSize"
+				ng-model="qui.pagination.activePage"
+				max-size="qui.pagination.pageSelectorSize"
+				previous-text="&laquo;"
+				next-text="&raquo;"
+				class="pagination-sm"
+				boundary-link-numbers="true"
+				ng-change="qui.pagination.setPage()"
+			></uib-pagination></nav>
 		</div>
 	</div>
 </div>
