@@ -93,9 +93,16 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 .pagination-table-size-selector {
 	float: right;
 }
-
+.pagination-table-size-selector label {
+	margin-right: .5em;
+}
+.pagination-table-size-selector label:after {
+	content: ':';
+}
 .pagination-table-size-selector input[type=number]{
-	width: 6em;
+	width: 4em;
+	padding-left: 2px;
+	padding-right: 0px;
 }
 
 .pagination-nav-caption {
