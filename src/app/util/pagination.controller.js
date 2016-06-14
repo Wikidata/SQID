@@ -63,7 +63,8 @@
 
 //////// Module Definition ////////////
 define([
-	'util/util.module' // pulls in angular
+	'util/util.module', // pulls in angular
+	'util/pagination.directives'
 ], function() {
 ///////////////////////////////////////
 
@@ -72,6 +73,9 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 	if($scope.pagination === undefined) { $scope.pagination = {}; }
 	var pgnt = {
 		tableSize: $scope.pagination.tableSize || 15, // number of rows per page
+		tableSizeMin: $scope.pagination.tableSizeMin || 3, // minimum allowed number of rows per page
+		tableSizeMax: $scope.pagination.tableSizeMax || 2000, // maximum allowed number of rows per page
+		tableSizeOpts: $scope.pagination.tableSizeOpts || [15,50,1000], // selectable tableSize options
 		pageSelectorSize: $scope.pagination.pageSelectorSize || 4, // number of explicit links left AND right from the active page
 		index: $scope.pagination.index || [], // an array of things to paginate
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
@@ -84,6 +88,8 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 
 	$scope.pagination = pgnt; // expose to own and
 	$scope.$parent.pagination = pgnt; // parent scope
+
+	$scope.tableSizeSelect = pgnt.tableSize;
 
 	// init navigation state and behavior
 	pgnt.numPages = 0;
@@ -143,6 +149,19 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 
 		if(typeof callback === "function") { callback.call(pgnt, pgnt.activeIndex); }
 	};
+
+	pgnt.setTableSize = function(k) {
+		if(k === undefined) { k = parseInt($scope.tableSizeSelect); }
+		k = Math.min(this.tableSizeMax, Math.max(this.tableSizeMin, k) );
+		
+		// adapt the page number so we still see (roughly) the same items at the start of the page
+		this.activePage = Math.floor((this.fromItem - 1) / k) + 1;
+		
+		$scope.tableSizeSelect = k;
+		this.tableSize = k;
+		this.setPage();
+
+	}
 
 	// init on init
 	if(pgnt.autoBoot) { pgnt.setIndex(pgnt.index); }
