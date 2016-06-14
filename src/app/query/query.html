@@ -60,8 +60,10 @@
 			</div>
 
 			<div ng-show="resultListMode">
-				<button class="btn btn-info" ng-click="qui.showQuery = !qui.showQuery">Show query</button> 
-				<a href="{{qui.wikidataQueryHref}}" class="btn btn-primary" target="wdqs">Open in Wikidata Query Service</a>
+				<button class="btn btn-info" ng-click="qui.showQuery = !qui.showQuery" translate>
+					{{qui.showQuery ?  'QUERY.RUN.BTN_HIDE' : 'QUERY.RUN.BTN_SHOW'}}
+				</button> 
+				<a href="{{qui.wikidataQueryHref}}" class="btn btn-primary" target="wdqs" translate>QUERY.RUN.BTN_OPEN_WDQS</a>
 				<pre ng-show="qui.showQuery">{{qui.sparqlQuery}}</pre>
 
 			</div>
