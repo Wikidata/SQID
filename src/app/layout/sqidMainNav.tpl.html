@@ -1,5 +1,27 @@
 <!--<div sqid-main-nav class="collapse navbar-collapse" id="main-navbar">-->
-<ul class="nav navbar-nav navbar-right"> 
+<ul class="nav navbar-nav navbar-right">
+	<li class="nav-element">
+		<form class="form-horizontal ng-pristine ng-valid" role="form">		
+				<div ng-controller="searchField">
+					<div class="col-xs-10 less-padding">
+						<angucomplete-alt id="related-properties-classes"
+						              placeholder="{{ 'NAV.UNIVERSAL_SEARCH' | translate }}"
+						              pause="100"
+						              selected-object="suggestSelectFunctions.classes.relatedProperty"
+						              local-data="suggestFilters.data.propertyIndex"
+						              title-field="name,idName"
+						              initial-value="suggestFilters.classes.relatedProperty"
+						              minlength="1"
+						              maxlength="100"
+						              input-class="form-control form-control-small"
+						              local-search="localSearch"></angucomplete-alt>
+					</div>
+					<div class="col-xs-2 less-padding">
+						<button type="button" id="ctc-button" class="btn btn-default" ng-click="searchEntity()"><i class="glyphicon glyphicon-search"></i></button>
+					<div>
+				</div>
+		</form>
+	</li> 
 	<li class="nav-link"><a href="#/"><span translate="NAV.START"></span></a></li>
 	<li class="nav-link"><a href="#/browse?type=properties"><span translate="NAV.PROPERTIES"></span></a></li>
 	<li class="nav-link"><a href="#/browse?type=classes"><span translate="NAV.CLASSES"></span></a></li>

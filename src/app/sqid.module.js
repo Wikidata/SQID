@@ -12,7 +12,8 @@ define([ // sqid application wrapper module
 	'meta/meta.config',		// pages about pages, like start about and statistics
 	'browse/browse.config',	// wikidata classes and properties browser
 	'view/view.config',		// wikidata entity viewer
-	'query/sparqly.config'	// sparql query generator interface
+	'query/sparqly.config',	// sparql query generator interface
+	'search/search.config' // search field
 
 ], function() {
 /////////////////////////////////////////////////////////////////////////
@@ -22,7 +23,7 @@ $("[data-toggle=popover]").popover({html:true}); // <-- is this in use?
 
 angular.module('sqid',[						// the application wrapper module
 
-	'data', 'i18n', 'util', 'layout',		// shared modules
+	'data', 'i18n', 'util', 'layout', 'search',	// shared modules
 	
 	'meta', 'browse', 'view', 'sparqly'		// feature / content modules
 ]); 

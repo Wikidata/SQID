@@ -56,6 +56,11 @@ body{
 	font-size: 1em;
 }
 
+.nav-element{
+	padding-top: 10px;
+	margin-right: 15px;
+}
+
 .navbar-default{
 
 /*background: rgba(255,255,255,1);
@@ -89,6 +94,11 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 /*#navigation{
 	height: 100px;
 }*/
+
+.less-padding{
+	padding-left: 0px;
+	padding-right: 5px;
+}
 
 .pagination-nav-caption {
 	margin: 20px 0 -10px 6px;

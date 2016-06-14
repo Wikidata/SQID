@@ -4,7 +4,8 @@
 		"PROPERTIES": "Eigenschaften",
 		"CLASSES": "Klassen",
 		"START": "Start",
-		"ABOUT": "Über SQID"
+		"ABOUT": "Über SQID",
+		"UNIVERSAL_SEARCH": "Suche"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistiken Stand {{date}}",
