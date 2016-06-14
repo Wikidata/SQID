@@ -90,6 +90,14 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	height: 100px;
 }*/
 
+.pagination-table-size-selector {
+	float: right;
+}
+
+.pagination-table-size-selector input[type=number]{
+	width: 6em;
+}
+
 .pagination-nav-caption {
 	margin: 20px 0 -10px 6px;
 }

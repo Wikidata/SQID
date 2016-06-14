@@ -1,0 +1,18 @@
+<div class="pagination-table-size-selector">
+	<span translate>PAGINATION.ITEMS_PER_PAGE</span>
+	<div class="btn-group" uib-dropdown>
+		<input type="number" id="split-button" class="btn btn-default"
+			ng-model="tableSizeSelect" 
+			ng-blur="qui.pagination.setTableSize()"
+			ng-keyup="$event.keyCode == 13 && qui.pagination.setTableSize()"
+		/>
+		<button type="button" class="btn btn-default" uib-dropdown-toggle>
+			<span class="caret"></span>
+			<span class="sr-only">Split button</span>
+		</button>
+		<ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="split-button">
+			<li role="menuitem" ng-repeat="k in qui.pagination.tableSizeOpts">
+				<a href ng-click="qui.pagination.setTableSize(k)">{{k}}</a></li>
+		</ul>
+	</div>
+</div>
