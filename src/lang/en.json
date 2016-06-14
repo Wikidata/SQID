@@ -12,7 +12,8 @@
 	},
 	"PAGINATION": {
 		"ITEMS_PER_PAGE": "Items per page",
-		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Select table page size"
+		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Select table page size",
+		"ACTIVE_INDEX_CAPTION_TEXT": "Showing {{from}} - {{to}} of {{total}} results."
 	},
 	"TABLE_HEADER": {
 		"LABEL": "Label (ID)",
