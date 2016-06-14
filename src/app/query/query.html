@@ -59,15 +59,22 @@
 				</div>
 			</div>
 
+			<div ng-show="resultListMode">
+				<button class="btn btn-info" ng-click="qui.showQuery = !qui.showQuery">Show query</button> 
+				<a href="{{qui.wikidataQueryHref}}" class="btn btn-primary" target="wdqs">Open in Wikidata Query Service</a>
+				<pre ng-show="qui.showQuery">{{qui.sparqlQuery}}</pre>
+
+			</div>
+
 			<hr>
 			<!-- generated sparql query -->
-			<div data-ng-show="qui.sparqlQuery" class="form-group">
+			<div data-ng-show="!resultListMode && qui.sparqlQuery" class="form-group">
 				<textarea class="form-control" rows="10" data-ng-model="qui.sparqlQuery">{{qui.sparqlQuery}}</textarea>
 			</div>
 		</form>
 		<form id="qry-form-request" novalidate data-ng-submit="runSparql()">
 			<div data-ng-show="qui.sparqlQuery" class="form-group">
-				<button type="submit" class="btn" id="qry-submit-sparql" ng-class="{
+				<button type="submit" class="btn" id="qry-submit-sparql" ng-show="!resultListMode" ng-class="{
 					'btn-primary': !qui.queryParms.heavy || qui.queryParms.limitResults, 
 					'btn-warning': qui.queryParms.heavy && !qui.queryParms.limitResults}">Run query</button>
 				<label ng-show="qui.queryParms.big" class="checkbox-inline">&nbsp;
