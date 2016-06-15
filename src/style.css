@@ -100,6 +100,10 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	padding-right: 5px;
 }
 
+.search-field{
+	width: 307px;
+}
+
 .pagination-nav-caption {
 	margin: 20px 0 -10px 6px;
 }

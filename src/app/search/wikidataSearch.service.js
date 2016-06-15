@@ -11,7 +11,8 @@ angular.module('search').factory('wikidataSearch', [
 '$translate', 'i18n', 'util',
 function($translate, i18n, util){
 
-	return {};
+	return {
+	};
 
 }]);
 

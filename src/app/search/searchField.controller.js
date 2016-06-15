@@ -9,14 +9,27 @@ define([
 ///////////////////////////////////////
 
 angular.module('search').controller('searchField', [
-'$scope', '$translate', 'wikidataSearch', 'i18n', 'util',
-function($scope, $translate, i18n, wikidataSearch, util){
-	$scope.localSearch = function(){
-
-	}
-	$scope.searchEntity = function(){
-		console.log("CALL search");
-	}
+'$scope', '$translate', '$window', 'wikidataSearch', 'wikidataapi', 'i18n', 'util',
+function($scope, $translate, $window, wikidataSearch, wikidataapi, i18n, util){
+	$scope.selectedEntity = "";
+	var lang = i18n.getLanguage();
+	$scope.localSearch = function(str, timeoutPromise){
+		var promise = wikidataapi.searchEntities(str, lang).then(function(data){
+			suggestions = [];
+			for (var i= 0; i < data.length; i++){
+				var alias = '';
+				if (data[i].aliases){
+					alias = ' (' + data[i].aliases[0] + ')';
+				}
+				suggestions.push({name: data[i].label + alias, idName: data[i].id, id: String(i)});
+			}
+			return {data: suggestions};
+		});
+		return promise;
+	};
+	$scope.searchEntity= function () {
+		$window.location.href = '/#/view?id=' + $scope.selectedEntity.originalObject.idName + '&lang=' + lang;
+	};
   }]);
 
 return {}; }); // module definition end
