@@ -6,7 +6,7 @@ You can use the application online without installing anything.
 
 ## Submitting comments, bug reports, feature requests
 
-Use the [SQID Issues](https://github.com/Wikidata/WikidataClassBrowser/issues) page on
+Use the [SQID Issues](https://github.com/Wikidata/SQID/issues) page on
 github to report issues and to find out if your issue is already known or even being worked on.
 
 ## Installation

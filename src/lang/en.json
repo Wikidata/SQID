@@ -11,6 +11,11 @@
 		"STAT_LINK": "details",
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
 	},
+	"PAGINATION": {
+		"ITEMS_PER_PAGE": "Items per page",
+		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Select table page size",
+		"ACTIVE_INDEX_CAPTION_TEXT": "Showing {{from}} - {{to}} of {{total}} results."
+	},
 	"TABLE_HEADER": {
 		"LABEL": "Label (ID)",
 		"DATATYPE": "Datatype",
