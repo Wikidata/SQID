@@ -12,6 +12,23 @@ angular.module('util').factory('entitydata', [
 'wikidataapi', 'util', 'i18n', 'sparql', '$q', 
 function(wikidataapi, util, i18n, sparql, $q) {
 
+	/**
+	 * Returns the "best" value among a list of statements. This is the value of
+	 * the first preferred statement, or (if no statement exists), the value of the
+	 * first non-deprecated statement.
+	 */
+	var getBestStatementValue = function(statementsJson, defaultValue) {
+		var result = null;
+		angular.forEach(statementsJson, function(statementJson) {
+			if (statementJson.rank == 'preferred') {
+				return getStatementValue(statementJson, defaultValue);
+			} else if (statementJson.rank != 'deprecated' && result == null) {
+				result = getStatementValue(statementJson, defaultValue);
+			}
+		});
+		return result != null ? result : defaultValue;
+	}
+
 	var getStatementValue = function(statementJson, defaultValue) {
 		try {
 			var ret = statementJson.mainsnak.datavalue.value;
@@ -312,6 +329,7 @@ SELECT DISTINCT ?p { \n\
 
 	return {
 		getStatementValue: getStatementValue,
+		getBestStatementValue: getBestStatementValue,
 		getEntityData: getEntityData,
 		getInlinkData: getInlinkData
 	};

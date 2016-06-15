@@ -117,20 +117,20 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			return ret;
 		},
 		
-		// Find Wikivoyage banner; only pick the first banner if multiple
+		// Find best Wikivoyage banner
 		getBanner: function(statements) {
 			if ("P948" in statements) {
-				var imageFileName = entitydata.getStatementValue(statements.P948[0],null);
+				var imageFileName = entitydata.getBestStatementValue(statements.P948,null);
 				return imageFileName.replace(" ","_");
 			} else {
 				return null;
 			}
 		},
 
-		// homepage URL; only pick the first URL if multiple
+		// Find best homepage URL
 		getHomepage: function(statements) {
 			if ("P856" in statements) {
-				return entitydata.getStatementValue(statements.P856[0],null);
+				return entitydata.getBestStatementValue(statements.P856, null);
 			} else {
 				return null;
 			}
