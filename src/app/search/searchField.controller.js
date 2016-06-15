@@ -28,7 +28,9 @@ function($scope, $translate, $window, wikidataSearch, wikidataapi, i18n, util){
 		return promise;
 	};
 	$scope.searchEntity= function () {
-		$window.location.href = '/#/view?id=' + $scope.selectedEntity.originalObject.idName + '&lang=' + lang;
+		if ($scope.selectedEntity){
+			$window.location.href = '/#/view?id=' + $scope.selectedEntity.originalObject.idName + '&lang=' + lang;
+		}
 	};
   }]);
 
