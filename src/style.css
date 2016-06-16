@@ -41,6 +41,11 @@ body{
     margin-bottom: 20px;
 }
 
+#search-form{
+	height: 40px;
+	padding-left: 10px;
+}
+
 #pageSelector{
 /*    margin-top: 10px;
     margin-bottom: 20px;*/
@@ -57,8 +62,7 @@ body{
 }
 
 .nav-element{
-	padding-top: 10px;
-	margin-right: 15px;
+	padding-top: 8px;
 }
 
 .navbar-default{
