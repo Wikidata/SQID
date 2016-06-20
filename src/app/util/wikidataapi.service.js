@@ -66,7 +66,6 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 		var url = 'https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&language=en&uselang=' + lang + '&type=item&continue=0&search=' + str + '&callback=JSON_CALLBACK';
 		return util.jsonpRequest(url).then(function(response){
 			if (!response.search){
-				console.log("response was empty");
 				return null;
 			};
 			return response.search;

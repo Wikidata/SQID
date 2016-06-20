@@ -2,13 +2,14 @@
 <ul class="nav navbar-nav navbar-right">
 	<li class="nav-element">
 		<form class="form-horizontal ng-pristine ng-valid" role="form" id="search-form">		
-				<div ng-controller="searchField" class="search-field">
+				<div ng-controller="entitySearchField" class="search-field">
 					<div class="col-xs-10 less-padding">
-						<angucomplete-alt id="univeral-search"
-						              placeholder="{{ 'NAV.UNIVERSAL_SEARCH' | translate }}"
+						<angucomplete-alt id="item-search"
+						              placeholder="{{ 'NAV.ITEM_SEARCH' | translate }}"
 						              pause="100"
 						              selected-object="selectedEntity"
-						              title-field="name,idName"
+						              title-field="name"
+						              description-field="description"
 						              initial-value=""
 						              minlength="1"
 						              maxlength="100"

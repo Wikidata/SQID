@@ -4,7 +4,7 @@
 		"CLASSES": "Classes",
 		"START": "Start",
 		"ABOUT": "About",
-		"UNIVERSAL_SEARCH": "Search"
+		"ITEM_SEARCH": "Search Item"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistics based on data dump {{date}}",

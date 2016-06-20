@@ -562,3 +562,24 @@ div.qualifiers {
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
+/*
+#item-search_dropdown{
+	font-weight: bold;
+}*/
+
+#item-search_dropdown{
+	max-height: 300px;
+}
+
+#item-search_dropdown .angucomplete-row .angucomplete-description {
+    font-size: 12px;
+}
+
+
+#item-search_dropdown .angucomplete-row .angucomplete-title {
+    font-weight: bold;
+}
+
+#item-search_dropdown .angucomplete-selected-row{
+	background: #337ab7;
+}

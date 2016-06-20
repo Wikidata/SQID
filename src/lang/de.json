@@ -5,7 +5,7 @@
 		"CLASSES": "Klassen",
 		"START": "Start",
 		"ABOUT": "Über SQID",
-		"UNIVERSAL_SEARCH": "Suche"
+		"ITEM_SEARCH": "Suche nach Item"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistiken Stand {{date}}",

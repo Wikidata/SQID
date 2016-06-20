@@ -1,7 +1,7 @@
 //////// Module Definition ////////////
 define([
-	'search/search.module',
-	'search/searchField.controller'
+	'entitySearch/entitySearch.module',
+	'entitySearch/entitySearchField.controller'
 ], function() {
 ///////////////////////////////////////
 

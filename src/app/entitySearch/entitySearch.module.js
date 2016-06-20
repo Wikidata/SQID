@@ -8,7 +8,7 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('search', [
+angular.module('entitySearch', [
 	'ngRoute', 'angucomplete-alt',
 	'util', 'i18n'
 ]);

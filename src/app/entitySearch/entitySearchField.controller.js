@@ -1,13 +1,13 @@
 //////// Module Definition ////////////
 define([
-	'search/search.module',
+	'entitySearch/entitySearch.module',
 	'util/util.service',
 	'i18n/i18n.service',
 	'i18n/translate.config'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('search').controller('searchField', [
+angular.module('entitySearch').controller('entitySearchField', [
 '$scope', '$translate', '$window', 'wikidataapi', 'i18n', 'util',
 function($scope, $translate, $window, wikidataapi, i18n, util){
 	$scope.selectedEntity = "";
@@ -22,7 +22,8 @@ function($scope, $translate, $window, wikidataapi, i18n, util){
 				if (data[i].aliases){
 					alias = ' (' + data[i].aliases[0] + ')';
 				}
-				suggestions.push({name: data[i].label + alias, idName: data[i].id, id: String(i)});
+				console.log(data[i].id);
+				suggestions.push({name: data[i].label, idName: data[i].id, id: String(i), description: alias + ' ' + (data[i].description ? data[i].description : '')});
 			}
 			return {data: suggestions};
 		});
@@ -30,7 +31,7 @@ function($scope, $translate, $window, wikidataapi, i18n, util){
 	};
 	$scope.searchEntity= function () {
 		if ($scope.selectedEntity){
-			$window.location.href = '/#/view?id=' + $scope.selectedEntity.originalObject.idName + '&lang=' + lang;
+			$window.location.href = i18n.getEntityUrl($scope.selectedEntity.originalObject.idName);
 		}
 	};
 

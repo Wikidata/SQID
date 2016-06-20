@@ -6,7 +6,7 @@ define([
 	'jquery-ui',
 	'ui-boostrap-tpls',
 	'meta/meta.module',
-	'search/search.module'
+	'entitySearch/entitySearch.module'
 ], function() {
 ///////////////////////////////////////
 
