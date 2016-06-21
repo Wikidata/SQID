@@ -3,7 +3,7 @@
 	<li class="nav-element">
 		<form class="form-horizontal ng-pristine ng-valid" role="form" id="search-form">		
 				<div ng-controller="entitySearchField" class="search-field">
-					<div class="col-xs-10 less-padding">
+					<div class="right-inner-addon">
 						<angucomplete-alt id="item-search"
 						              placeholder="{{ 'NAV.ITEM_SEARCH' | translate }}"
 						              pause="100"
@@ -15,10 +15,8 @@
 						              maxlength="100"
 						              input-class="form-control form-control-small"
 						              remote-api-handler="localSearch"></angucomplete-alt>
+						<i class="glyphicon glyphicon-search"></i>
 					</div>
-					<div class="col-xs-2 less-padding">
-						<button type="button" id="ctc-button" class="btn btn-default" ng-click="searchEntity()"><i class="glyphicon glyphicon-search"></i></button>
-					<div>
 				</div>
 		</form>
 	</li> 

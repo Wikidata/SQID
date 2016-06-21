@@ -10,29 +10,36 @@ define([
 angular.module('entitySearch').controller('entitySearchField', [
 '$scope', '$translate', '$window', 'wikidataapi', 'i18n', 'util',
 function($scope, $translate, $window, wikidataapi, i18n, util){
-	$scope.selectedEntity = "";
+	$scope.selectedEntity = function(entity){
+		if (entity){
+			$window.location.href = i18n.getEntityUrl(entity.originalObject.idName);
+		}
+	};
 	var lang = i18n.getLanguage();
 
 	$scope.localSearch = function(str, timeoutPromise){
+		var kMaxSize = 20;
 		updateLanguage();
-		var promise = wikidataapi.searchEntities(str, lang).then(function(data){
+		var promise = wikidataapi.searchEntities(str, lang, kMaxSize).then(function(data){
 			suggestions = [];
 			for (var i= 0; i < data.length; i++){
 				var alias = '';
 				if (data[i].aliases){
-					alias = ' (' + data[i].aliases[0] + ')';
+					if (data[i].description){
+						alias = ' (' + data[i].aliases[0] + ')';
+					}else{
+						alias = data[i].aliases[0];
+					}
+				}else{
+					if (!data[i].description){
+						alias = data[i].id;
+					}
 				}
-				console.log(data[i].id);
 				suggestions.push({name: data[i].label, idName: data[i].id, id: String(i), description: alias + ' ' + (data[i].description ? data[i].description : '')});
 			}
 			return {data: suggestions};
 		});
 		return promise;
-	};
-	$scope.searchEntity= function () {
-		if ($scope.selectedEntity){
-			$window.location.href = i18n.getEntityUrl($scope.selectedEntity.originalObject.idName);
-		}
 	};
 
 	var updateLanguage = function(){

@@ -567,8 +567,19 @@ div.qualifiers {
 	font-weight: bold;
 }*/
 
+.right-inner-addon{
+	position: relative;
+}
+
+.right-inner-addon i{
+	position: absolute;
+	right: 0px;
+	padding: 10px 12px;
+}
+
 #item-search_dropdown{
 	max-height: 300px;
+	width: 307px;
 }
 
 #item-search_dropdown .angucomplete-row .angucomplete-description {
