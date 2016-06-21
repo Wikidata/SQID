@@ -1,5 +1,25 @@
 <!--<div sqid-main-nav class="collapse navbar-collapse" id="main-navbar">-->
-<ul class="nav navbar-nav navbar-right"> 
+<ul class="nav navbar-nav navbar-right">
+	<li class="nav-element">
+		<form class="form-horizontal ng-pristine ng-valid" role="form" id="search-form">		
+				<div ng-controller="entitySearchField" class="search-field">
+					<div class="right-inner-addon">
+						<angucomplete-alt id="item-search"
+						              placeholder="{{ 'NAV.ITEM_SEARCH' | translate }}"
+						              pause="100"
+						              selected-object="selectedEntity"
+						              title-field="name"
+						              description-field="description"
+						              initial-value=""
+						              minlength="1"
+						              maxlength="100"
+						              input-class="form-control form-control-small"
+						              remote-api-handler="localSearch"></angucomplete-alt>
+						<i class="glyphicon glyphicon-search"></i>
+					</div>
+				</div>
+		</form>
+	</li> 
 	<li class="nav-link"><a href="#/"><span translate="NAV.START"></span></a></li>
 	<li class="nav-link"><a href="#/browse?type=properties"><span translate="NAV.PROPERTIES"></span></a></li>
 	<li class="nav-link"><a href="#/browse?type=classes"><span translate="NAV.CLASSES"></span></a></li>

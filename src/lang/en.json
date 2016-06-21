@@ -3,7 +3,8 @@
 		"PROPERTIES": "Properties",
 		"CLASSES": "Classes",
 		"START": "Start",
-		"ABOUT": "About"
+		"ABOUT": "About",
+		"ITEM_SEARCH": "Search Item"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistics based on data dump {{date}}",

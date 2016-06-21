@@ -62,6 +62,16 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 		});
 	};
 
+	var searchEntities = function(str, lang='en', limit=7) {
+		var url = 'https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&limit=' + String(limit) +  '&language='+ lang + '&uselang=' + lang + '&type=item&continue=0&search=' + str + '&callback=JSON_CALLBACK';
+		return util.jsonpRequest(url).then(function(response){
+			if (!response.search){
+				return null;
+			};
+			return response.search;
+		});
+	};
+
 	var getImageData = function(fileName, width) {
 		var url = 'https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo&titles=File%3A' +
 			encodeURIComponent(fileName) + '&iiprop=size%7Curl&iiurlwidth=' + width + '&callback=JSON_CALLBACK';
@@ -71,11 +81,11 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 			}
 		});
 	};
-
 	return {
 		getEntityData: getEntityData,
 		getEntityTerms: getEntityTerms,
 		getEntityLabels: getEntityLabels,
+		searchEntities: searchEntities,
 		getImageData: getImageData
 	};
 }]);

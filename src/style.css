@@ -41,6 +41,11 @@ body{
     margin-bottom: 20px;
 }
 
+#search-form{
+	height: 40px;
+	padding-left: 10px;
+}
+
 #pageSelector{
 /*    margin-top: 10px;
     margin-bottom: 20px;*/
@@ -54,6 +59,10 @@ body{
 	position: absolute;
 	bottom: 0;
 	font-size: 1em;
+}
+
+.nav-element{
+	padding-top: 8px;
 }
 
 .navbar-default{
@@ -89,6 +98,15 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 /*#navigation{
 	height: 100px;
 }*/
+
+.less-padding{
+	padding-left: 0px;
+	padding-right: 5px;
+}
+
+.search-field{
+	width: 307px;
+}
 
 .pagination-table-size-selector {
 	float: right;
@@ -543,4 +561,36 @@ div.qualifiers {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+/*
+#item-search_dropdown{
+	font-weight: bold;
+}*/
+
+.right-inner-addon{
+	position: relative;
+}
+
+.right-inner-addon i{
+	position: absolute;
+	right: 0px;
+	padding: 10px 12px;
+}
+
+#item-search_dropdown{
+	max-height: 300px;
+	width: 307px;
+}
+
+#item-search_dropdown .angucomplete-row .angucomplete-description {
+    font-size: 12px;
+}
+
+
+#item-search_dropdown .angucomplete-row .angucomplete-title {
+    font-weight: bold;
+}
+
+#item-search_dropdown .angucomplete-selected-row{
+	background: #337ab7;
 }

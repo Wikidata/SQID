@@ -5,7 +5,8 @@ define([
 	'ngRoute',
 	'jquery-ui',
 	'ui-boostrap-tpls',
-	'meta/meta.module'
+	'meta/meta.module',
+	'entitySearch/entitySearch.module'
 ], function() {
 ///////////////////////////////////////
 
