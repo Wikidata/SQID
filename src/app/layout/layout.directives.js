@@ -1,13 +1,15 @@
 //////// Module Definition ////////////
 define([
 	'layout/layout.module',
+	'i18n/i18n.config',
 	'meta/statistics.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('layout').directive('sqidApp', [function() {
 	return {
-		templateUrl: 'app/layout/layout.html'
+		templateUrl: 'app/layout/layout.html',
+		restrict: 'A'
 	};
 }]).directive('sqidMainNav', [function() {
 	return {
@@ -15,6 +17,58 @@ angular.module('layout').directive('sqidApp', [function() {
 	};
 }])
 
+.directive('sqidTitle', ['$rootScope', 'i18n', '$translate', function($rootScope, i18n, $translate) {
+
+	return {
+		link: link,
+		restrict: 'A'
+	};
+	function link(scope, element, attrs) {
+
+		$rootScope.$on('$routeChangeStart', function(e, next, current) {
+			var page, 
+				custom = '',
+				suffix = ' - SQID';
+
+			switch(next.$$route.originalPath.substr(1)) {
+				case '': page = 'PAGE_TITLE.START'; break;
+				case 'about': page = 'NAV.ABOUT'; break;
+				case 'browse':browseTitle(); break;
+				case 'view' : viewTitle(); break;
+				case 'query': page = 'PAGE_TITLE.QUERY'; break;
+				default: page = false;
+			}
+			if(page) { 
+				$translate(page).then(function(str) {
+					page = str;
+					updateElement();
+				});
+			}
+
+			function browseTitle() {
+				page = (next.params.type === 'properties' ? 'PAGE_TITLE.PROPERTIES' : 'PAGE_TITLE.CLASSES');
+			}
+
+			function viewTitle() {
+				page = 'PAGE_TITLE.VIEW';
+				if(next.params.id) {
+					i18n.waitForTerms([next.params.id]).then(function() {
+						custom = ': ' + i18n.getEntityLabel(next.params.id);
+						updateElement();
+					});
+				}
+			}
+
+			function updateElement() {
+				var text = 'SQID - Wikidata Explorer';
+				if(page) {
+					text = page + custom + suffix;
+				}
+				element.text(text);
+			}
+		});
+	}
+}])
 
 .directive('sqidImage', ['wikidataapi', function(wikidataapi) {
 

@@ -1,9 +1,17 @@
 {
+	"PAGE_TITLE": {
+		"CLASSES": "Classes Browser",
+		"PROPERTIES": "Properties Browser",
+		"START": "Start",
+		"ABOUT": "About",
+		"VIEW" : "View",
+		"QUERY": "Query Interface"
+	},
 	"NAV": {
 		"PROPERTIES": "Properties",
 		"CLASSES": "Classes",
 		"START": "Start",
-		"ABOUT": "About",
+		"ABOUT": "@:PAGE_TITLE.ABOUT",
 		"ITEM_SEARCH": "Search Item"
 	},
 	"FOOTER": {
