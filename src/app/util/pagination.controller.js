@@ -93,36 +93,6 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 
 	// init navigation state and behavior
 	pgnt.numPages = 0;
-	pgnt.nav = {
-		// xYClass return classname strings, xY(Active|Disabled) return boolean
-		prevLiClass: function() { return ( pgnt.activePage < 2 ? 'disabled' : ''); },
-		prevLiDisabled: function() { return (pgnt.activePage < 2); },
-		nextLiClass: function() { return ( pgnt.activePage >= pgnt.numPages ? 'disabled' : ''); },
-		nextLiDisabled: function() { return (pgnt.activePage >= pgnt.numPages); },
-		liClass: function(p) { return (p == pgnt.activePage ? 'active' : ''); },
-		liActive: function(p) { return (p == pgnt.activePage); },
-
-		pages:  [],
-		selectPage: function(p) { pgnt.setPage(p); },
-		selectPrev: function() { pgnt.setPage(pgnt.activePage - 1); },
-		selectNext: function() { pgnt.setPage(pgnt.activePage + 1); }
-	};
-
-	
-	// updates the model that controls the page numbers shown in the nav
-	var updatePageSelectionModel = function() {
-		var pss = pgnt.pageSelectorSize, pages = [], p;
-
-		// loop over the pagelinks left of the active one
-		for(var i = 0; i < pss; i++) { 
-			p = pgnt.activePage - pss + i; 
-			if(p > 0){ pages.push(p); }
-		}
-		// loop over the remaining, including the active one
-		while(p < pgnt.numPages && pages.length < pss*2+1) { pages.push(++p); }
-		
-		pgnt.nav.pages = pages;
-	};
 
 	// sets new index data for pagination and updates the model
 	pgnt.setIndex = function(index, callback) {
@@ -144,8 +114,6 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 		this.fromItem = (pgnt.activePage-1) * pgnt.tableSize + 1;
 		this.toItem = Math.min(this.activePage * this.tableSize, this.numItems);
 		pgnt.activeIndex = pgnt.index.slice( this.fromItem - 1, this.toItem); // (slice is excluding the end of range index)
-
-		updatePageSelectionModel();
 
 		if(typeof callback === "function") { callback.call(pgnt, pgnt.activeIndex); }
 	};
