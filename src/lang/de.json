@@ -12,6 +12,11 @@
 		"STAT_LINK": "Details",
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
 	},
+	"PAGINATION": {
+		"ITEMS_PER_PAGE": "Items pro Seite",
+		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Wähle Tabellenseitengröße",
+		"ACTIVE_INDEX_CAPTION_TEXT": "Angezeigt werden {{from}} - {{to}} von {{total}} Entitäten."
+	},
 	"TABLE_HEADER": {
 		"LABEL": "Bezeichner (ID)",
 		"DATATYPE": "Datentyp",
@@ -39,7 +44,6 @@
 		"PERMALINK": "Permanentlink (inkl. Filter Positionen)"	
 	},
 	"ENTITIES": "Entitäten",
-	"ENTITIES_COUNT": "Gesamtzahl an Entitäten",
 	"PROPTYPE": "Typ",
 	"FURTHER_RESULTS": "&hellip; weitere Ergebnisse",
  	"STATEMENTS": {

@@ -76,7 +76,7 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 		tableSizeMin: $scope.pagination.tableSizeMin || 3, // minimum allowed number of rows per page
 		tableSizeMax: $scope.pagination.tableSizeMax || 2000, // maximum allowed number of rows per page
 		tableSizeOpts: $scope.pagination.tableSizeOpts || [15,50,1000], // selectable tableSize options
-		pageSelectorSize: $scope.pagination.pageSelectorSize || 4, // number of explicit links left AND right from the active page
+		pageSelectorSize: $scope.pagination.pageSelectorSize || 8, // number of explicit links left AND right from the active page
 		index: $scope.pagination.index || [], // an array of things to paginate
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
 		onPageChange: $scope.pagination.onPageChange || undefined, // callback function that runs on every page change

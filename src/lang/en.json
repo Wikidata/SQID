@@ -14,7 +14,7 @@
 	"PAGINATION": {
 		"ITEMS_PER_PAGE": "Items per page",
 		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Select table page size",
-		"ACTIVE_INDEX_CAPTION_TEXT": "Showing {{from}} - {{to}} of {{total}} results."
+		"ACTIVE_INDEX_CAPTION_TEXT": "Showing {{from}} - {{to}} of {{total}} entities."
 	},
 	"TABLE_HEADER": {
 		"LABEL": "Label (ID)",
@@ -43,7 +43,6 @@
 		"PERMALINK": "Link with filter states"	
 	},
 	"ENTITIES": "Entities",
-	"ENTITIES_COUNT": "Total number of entities",
 	"PROPTYPE": "Type",
 	"FURTHER_RESULTS": "&hellip; further results",
 	"STATEMENTS": {
