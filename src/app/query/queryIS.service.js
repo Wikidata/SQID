@@ -45,6 +45,8 @@ angular.module('sparqly')
 				queryError: '', // error message string returned from query.wikidata.org if something went wrong
 				//queryShowSuccess: false, // success message toggle for complete queries
 
+				showQuery: false // show the query in run mode?
+
 				// pagination: undefined // persist pagination (unnecessary statement for the sake of verbosity)
 			};
 		}();

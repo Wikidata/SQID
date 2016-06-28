@@ -6,12 +6,12 @@ define([
 
 angular.module('util')
 
-/////////////////////////////////////////////////
-///// widget for selecting number of entities //	
-//// 								per page //		*  customize proposed options like
-/// use like								//	    * $scope.pagination.tableSizeOpts = [15,25,50,100];
-// <tableSizeSelector></tableSizeSelector> //
-////////////////////////////////////////////
+/////////////////////////////////////////////////////
+/////     widget for selecting number of entities //	
+//// 								    per page //		*  customize proposed options like
+/// use like								    //	    * $scope.pagination.tableSizeOpts = [15,25,50,100];
+// <table-size-selector></table-size-selector> //
+////////////////////////////////////////////////
 .directive('tableSizeSelector', function() {
 	return {
 		templateUrl: 'app/util/pagination.tableSizeSelector.tpl.html',

@@ -122,6 +122,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	padding-left: 2px;
 	padding-right: 0px;
 }
+.pagination-table-size-selector .dropdown-menu {
+	left: initial;
+	right: 0;
+	min-width: 100%;
+	text-align: right;
+}
 
 .pagination-nav-caption {
 	margin: 20px 0 -10px 6px;
