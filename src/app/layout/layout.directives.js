@@ -38,11 +38,16 @@ angular.module('layout').directive('sqidApp', [function() {
 				case 'query': page = 'PAGE_TITLE.QUERY'; break;
 				default: page = false;
 			}
-			if(page) { 
-				$translate(page).then(function(str) {
-					page = str;
-					updateElement();
-				});
+			if(page) {
+				(function translatePageName() {
+					if(!$translate.isReady()) { setTimeout(translatePageName,100); }
+					else {
+						$translate(page).then(function(str) {
+							page = str;
+							updateElement();
+						});
+					}
+				})();
 			}
 
 			function browseTitle() {
