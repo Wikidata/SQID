@@ -32,7 +32,13 @@
 				</table>
 	        </div>
 	        <nav pagination="pagination"></nav>
-	        <pagination-index-range></pagination-index-range>
+	        <table-size-selector></table-size-selector>
+	        <div ng-if='args.type == "classes"'>
+	        	<pagination-index-range index-range-string='"PAGINATION.ACTIVE_INDEX_CAPTION_TEXT_CLASSES"'></pagination-index-range>
+	        </div>
+	        <div ng-if='args.type == "properties"'>
+	        	<pagination-index-range index-range-string='"PAGINATION.ACTIVE_INDEX_CAPTION_TEXT_PROPERTIES"'></pagination-index-range>
+	        </div>
 	      </div>
 	    </div>
 	    <div class="col-xs-3">

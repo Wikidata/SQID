@@ -15,7 +15,10 @@
 	"PAGINATION": {
 		"ITEMS_PER_PAGE": "Items pro Seite",
 		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Wähle Tabellenseitengröße",
-		"ACTIVE_INDEX_CAPTION_TEXT": "Angezeigt werden {{from}} - {{to}} von {{total}} Entitäten."
+		"ACTIVE_INDEX_CAPTION_TEXT_CLASSES": "Angezeigt werden {{from}} - {{to}} von {{total}} Klassen.",
+		"ACTIVE_INDEX_CAPTION_TEXT_PROPERTIES": "Angezeigt werden {{from}} - {{to}} von {{total}} Eigenschaften.",
+		"CLASSES": "Klassen",
+		"PROPERTIES": "Eigenschaften"
 	},
 	"TABLE_HEADER": {
 		"LABEL": "Bezeichner (ID)",

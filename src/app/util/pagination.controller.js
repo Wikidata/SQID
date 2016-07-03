@@ -80,7 +80,8 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 		index: $scope.pagination.index || [], // an array of things to paginate
 		activePage: $scope.pagination.activePage || 1, // the currently active/visible page
 		onPageChange: $scope.pagination.onPageChange || undefined, // callback function that runs on every page change
-		autoBoot: $scope.pagination.autoBoot || false // automatically create the pagination model when the controller is loaded (start manually with setIndex(indexArray))
+		autoBoot: $scope.pagination.autoBoot || false, // automatically create the pagination model when the controller is loaded (start manually with setIndex(indexArray))
+		indexRangeString: $scope.pagination.resultsName || "PAGINATION.ACTIVE_INDEX_CAPTION_TEXT"
 	};
 
 	// custom init hook
@@ -90,6 +91,8 @@ angular.module('util').controller('PaginationController', ['$scope', function($s
 	$scope.$parent.pagination = pgnt; // parent scope
 
 	$scope.tableSizeSelect = pgnt.tableSize;
+
+	$scope.pagination.tableSizeOpts = [15,25,50,100];
 
 	// init navigation state and behavior
 	pgnt.numPages = 0;
