@@ -13,8 +13,8 @@
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
 	},
 	"PAGINATION": {
-		"ITEMS_PER_PAGE": "Items pro Seite",
-		"ITEMS_PER_PAGE_OPEN_DROPDOWN": "Wähle Tabellenseitengröße",
+		"ENTRIES_PER_PAGE": "Zeilen pro Seite",
+		"ENTRIES_PER_PAGE_OPEN_DROPDOWN": "Wähle Tabellenseitengröße",
 		"ACTIVE_INDEX_CAPTION_TEXT_CLASSES": "Angezeigt werden {{from}} - {{to}} von {{total}} Klassen.",
 		"ACTIVE_INDEX_CAPTION_TEXT_PROPERTIES": "Angezeigt werden {{from}} - {{to}} von {{total}} Eigenschaften.",
 		"CLASSES": "Klassen",
