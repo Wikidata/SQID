@@ -120,5 +120,13 @@
 	"SEC_REFERENCE": "Reference",
 	"NO_REFERENCES_HINT": "no references given",
 	"NOSUCHENTITY_HEADLINE": "Sorry, I could not find any entity with ID '{{id}}'.",
-	"NOSUCHENTITY_BODY": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know."
+	"NOSUCHENTITY_BODY": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know.",
+
+	"QUERY": {
+		"RUN": {
+			"BTN_SHOW": "Show query",
+			"BTN_HIDE": "Hide query",
+			"BTN_OPEN_WDQS": "Open in Wikidata Query Service"
+		}
+	}
 }

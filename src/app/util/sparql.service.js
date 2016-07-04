@@ -20,6 +20,11 @@ angular.module('util').factory('sparql', ['util', 'i18n', function(util, i18n) {
 		//return SPARQL_UI_PREFIX + encodeURIComponent(sparqlQuery);
 	}
 
+	var getWdqsUiUrl = function(sparqlQuery) {
+		return SPARQL_UI_PREFIX +
+			(sparqlQuery === undefined ? '' : encodeURIComponent(sparqlQuery));
+	}
+
 	var getStandardPrefixes = function() {
 		return 	"PREFIX wikibase: <http://wikiba.se/ontology#> \n" +
 				"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n" +
@@ -117,6 +122,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 	return {
 		getQueryUrl: getQueryUrl,
 		getQueryUiUrl: getQueryUiUrl,
+		getWdqsUiUrl: getWdqsUiUrl,
 		getQueryRequest: getQueryRequest,
 		getStandardPrefixes: getStandardPrefixes,
 		getInlinkCount: getInlinkCount,

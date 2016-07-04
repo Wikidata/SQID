@@ -1,0 +1,8 @@
+{
+    "name" : "sqid",
+    "title" : "SQID Wikidata Browser",
+    "description" : "Browse Wikidata classes and properties with statistics",
+    "url" : "https://tools.wmflabs.org/sqid/",
+    "keywords" : "wikidata, classes, properties, stats",
+    "repository" : "https://github.com/Wikidata/SQID.git"
+}
