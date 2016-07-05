@@ -5,6 +5,8 @@ define([
 	'ngRoute',
 	'jquery-ui',
 	'ui-boostrap-tpls',
+	'i18n/i18n.module',
+	'util/util.module',
 	'meta/meta.module',
 	'entitySearch/entitySearch.module'
 ], function() {
@@ -12,7 +14,7 @@ define([
 
 angular.module('layout', [
 	'ngAnimate', 'ngRoute', 'ui.bootstrap', 'pascalprecht.translate',
-	'meta'
+	'i18n',	'util', 'entitySearch', 'meta'
 ]);
 
 return {}; }); // module definition end

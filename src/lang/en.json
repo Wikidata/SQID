@@ -1,9 +1,16 @@
 {
-	"NAV": {
-		"PROPERTIES": "Properties",
+	"PAGE_TITLE": {
 		"CLASSES": "Classes",
+		"PROPERTIES": "Properties",
 		"START": "Start",
 		"ABOUT": "About",
+		"QUERY": "Query"
+	},
+	"NAV": {
+		"PROPERTIES": "@:PAGE_TITLE.PROPERTIES",
+		"CLASSES": "@:PAGE_TITLE.CLASSES",
+		"START": "@:PAGE_TITLE.START",
+		"ABOUT": "@:PAGE_TITLE.ABOUT",
 		"ITEM_SEARCH": "Search Item"
 	},
 	"FOOTER": {

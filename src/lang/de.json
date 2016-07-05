@@ -1,10 +1,17 @@
 
 {
-	"NAV": {
-		"PROPERTIES": "Eigenschaften",
+	"PAGE_TITLE": {
 		"CLASSES": "Klassen",
+		"PROPERTIES": "Eigenschaften",
 		"START": "Start",
 		"ABOUT": "Über SQID",
+		"QUERY": "Suche"
+	},
+	"NAV": {
+		"PROPERTIES": "@:PAGE_TITLE.PROPERTIES",
+		"CLASSES": "@:PAGE_TITLE.CLASSES",
+		"START": "@:PAGE_TITLE.START",
+		"ABOUT": "@:PAGE_TITLE.ABOUT",
 		"ITEM_SEARCH": "Suche nach Item"
 	},
 	"FOOTER": {
