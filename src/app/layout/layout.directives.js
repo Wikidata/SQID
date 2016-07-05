@@ -26,14 +26,13 @@ angular.module('layout').directive('sqidApp', [function() {
 	function link(scope, element, attrs) {
 
 		$rootScope.$on('$routeChangeStart', function(e, next, current) {
-			var page, 
-				custom = '',
+			var page,
 				suffix = ' - SQID';
 
 			switch(next.$$route.originalPath.substr(1)) {
 				case '': page = 'PAGE_TITLE.START'; break;
 				case 'about': page = 'NAV.ABOUT'; break;
-				case 'browse':browseTitle(); break;
+				case 'browse': browseTitle(); break;
 				case 'view' : viewTitle(); break;
 				case 'query': page = 'PAGE_TITLE.QUERY'; break;
 				default: page = false;
@@ -58,7 +57,7 @@ angular.module('layout').directive('sqidApp', [function() {
 				page = 'PAGE_TITLE.VIEW';
 				if(next.params.id) {
 					i18n.waitForTerms([next.params.id]).then(function() {
-						custom = ': ' + i18n.getEntityLabel(next.params.id);
+						page = i18n.getEntityLabel(next.params.id);
 						updateElement();
 					});
 				}
@@ -66,8 +65,8 @@ angular.module('layout').directive('sqidApp', [function() {
 
 			function updateElement() {
 				var text = 'SQID - Wikidata Explorer';
-				if(page) {
-					text = page + custom + suffix;
+				if (page) {
+					text = page + suffix;
 				}
 				element.text(text);
 			}
