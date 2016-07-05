@@ -30,12 +30,12 @@ angular.module('layout').directive('sqidApp', [function() {
 				suffix = ' - SQID';
 
 			switch(next.$$route.originalPath.substr(1)) {
-				case '': page = 'PAGE_TITLE.START'; break;
-				case 'about': page = 'NAV.ABOUT'; break;
+				case '':       page = 'PAGE_TITLE.START'; break;
+				case 'about':  page = 'PAGE_TITLE.ABOUT'; break;
 				case 'browse': browseTitle(); break;
-				case 'view' : viewTitle(); break;
-				case 'query': page = 'PAGE_TITLE.QUERY'; break;
-				default: page = false;
+				case 'view' :  viewTitle(); break;
+				case 'query':  page = 'PAGE_TITLE.QUERY'; break;
+				default:       page = false;
 			}
 			if(page) {
 				(function translatePageName() {
@@ -54,7 +54,7 @@ angular.module('layout').directive('sqidApp', [function() {
 			}
 
 			function viewTitle() {
-				page = 'PAGE_TITLE.VIEW';
+				page = false;
 				if(next.params.id) {
 					i18n.waitForTerms([next.params.id]).then(function() {
 						page = i18n.getEntityLabel(next.params.id);
