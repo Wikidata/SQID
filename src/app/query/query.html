@@ -59,15 +59,24 @@
 				</div>
 			</div>
 
+			<div ng-show="resultListMode">
+				<button class="btn btn-info" ng-click="qui.showQuery = !qui.showQuery" translate>
+					{{qui.showQuery ?  'QUERY.RUN.BTN_HIDE' : 'QUERY.RUN.BTN_SHOW'}}
+				</button> 
+				<a href="{{qui.wikidataQueryHref}}" class="btn btn-primary" target="wdqs" translate>QUERY.RUN.BTN_OPEN_WDQS</a>
+				<pre ng-show="qui.showQuery">{{qui.sparqlQuery}}</pre>
+
+			</div>
+
 			<hr>
 			<!-- generated sparql query -->
-			<div data-ng-show="qui.sparqlQuery" class="form-group">
+			<div data-ng-show="!resultListMode && qui.sparqlQuery" class="form-group">
 				<textarea class="form-control" rows="10" data-ng-model="qui.sparqlQuery">{{qui.sparqlQuery}}</textarea>
 			</div>
 		</form>
 		<form id="qry-form-request" novalidate data-ng-submit="runSparql()">
 			<div data-ng-show="qui.sparqlQuery" class="form-group">
-				<button type="submit" class="btn" id="qry-submit-sparql" ng-class="{
+				<button type="submit" class="btn" id="qry-submit-sparql" ng-show="!resultListMode" ng-class="{
 					'btn-primary': !qui.queryParms.heavy || qui.queryParms.limitResults, 
 					'btn-warning': qui.queryParms.heavy && !qui.queryParms.limitResults}">Run query</button>
 				<label ng-show="qui.queryParms.big" class="checkbox-inline">&nbsp;
@@ -106,27 +115,9 @@
 					</tr>
 				</tbody>
 			</table>
-			<div class="pagination-nav-caption">
-				Showing <span class="info-badge">{{pagination.fromItem}} - {{pagination.toItem}}</span>
-				of <span class="info-badge">{{pagination.numItems}}</span> results.</div>
-			<nav>
-
-				<ul class="pagination">
-					<li data-ng-class="{disabled: qui.pagination.nav.prevLiDisabled()}">
-						<a href="" data-ng-click="qui.pagination.nav.selectPrev()" aria-label="Previous">
-							<span aria-hidden="true">&laquo;</span>
-						</a>
-					</li>
-					<li ng-repeat="page in qui.pagination.nav.pages" data-ng-class="{active: qui.pagination.nav.liActive(page)}">
-						<a href="" data-ng-click="pagination.nav.selectPage(page)">{{page}}</a>
-					</li>
-					<li data-ng-class="{disabled: qui.pagination.nav.nextLiDisabled()}">
-						<a href="" data-ng-click="qui.pagination.nav.selectNext()" aria-label="Next">
-							<span aria-hidden="true">&raquo;</span>
-						</a>
-					</li>
-				</ul>
-			</nav>
+			<pagination-index-range></pagination-index-range>
+			<table-size-selector></table-size-selector>
+			<nav pagination="qui.pagination"></nav>
 		</div>
 	</div>
 </div>

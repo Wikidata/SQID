@@ -11,7 +11,7 @@ body{
 .footer {
 	text-align: center;
 	color: #666;
-	margin-bottom: 500px; /* make it big enough to ensure we see scroll bars at all times; avoid jumping layout */
+	margin-bottom: 20px;
 }
 
 #icon{
@@ -121,6 +121,12 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', end
 	width: 4em;
 	padding-left: 2px;
 	padding-right: 0px;
+}
+.pagination-table-size-selector .dropdown-menu {
+	left: initial;
+	right: 0;
+	min-width: 100%;
+	text-align: right;
 }
 
 .pagination-nav-caption {

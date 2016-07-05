@@ -265,6 +265,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 	// immediately fire the request when in resultListMode
 	if($scope.resultListMode) { 
 		qis.sparqlQuery = $routeParams.run;
+		qis.wikidataQueryHref = sparql.getWdqsUiUrl($routeParams.run);
 		setTimeout(function() {	$scope.runSparql(); }, 0); // timeout of 0 prevents some weird bug to happen
 	}
 

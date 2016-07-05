@@ -18,9 +18,6 @@ define([ // sqid application wrapper module
 ], function() {
 /////////////////////////////////////////////////////////////////////////
 
-$("[data-toggle=popover]").popover({html:true}); // <-- is this in use?
-
-
 angular.module('sqid',[						// the application wrapper module
 
 	'data', 'i18n', 'util', 'layout', 'entitySearch',	// shared modules
