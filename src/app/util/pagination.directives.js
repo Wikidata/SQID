@@ -49,11 +49,11 @@ angular.module('util')
 		 	$scope.getTotal = function() { return '<span class="info-badge">' + pgnt.numItems + '</span>'; 	}
 
 		}],
-		template: '<div class="pagination-nav-caption" ' + 
-				'translate="PAGINATION.ACTIVE_INDEX_CAPTION_TEXT" ' +
+		template: function(elem, attr){ return '<div class="pagination-nav-caption" ' + 
+				'translate=' + attr.indexRangeString +' ' +
 				'translate-values=\'{ to: getTo(), from: getFrom(), total: getTotal() }\' ' + 
 				'translate-compile> ' +
-			'</div>',
+			'</div>'},
 		restrict: 'E'
 	};
 }]);
