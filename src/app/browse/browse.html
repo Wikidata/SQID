@@ -114,6 +114,21 @@
 		              <br/>
 				</div>
 				<div ng-if='args.type == "properties"'>
+					<p><strong>{{ 'FILTER_MENUE.FILTER_USED_FOR_CLASS' | translate }}:</strong></p>
+					<angucomplete-alt id="used-for-class"
+		              placeholder="{{ 'FILTER_MENUE.CLASS_PLACEHOLDER' | translate }}"
+		              pause="100"
+		              selected-object="suggestSelectFunctions.properties.usedForClass"
+		              local-data="suggestFilters.data.classIndex"
+		              title-field="name,idName"
+		              initial-value="suggestFilters.properties.usedForClass"
+		              minlength="1"
+		              maxlength="100"
+		              input-class="form-control form-control-small"
+		              local-search="localSearchClasses"></angucomplete-alt>
+		              <br/>
+				</div>
+				<div ng-if='args.type == "properties"'>
 					<p><strong>{{ 'FILTER_MENUE.FILTER_DIRECT_CLASS' | translate }}:</strong></p>
 					<select class="form-control" data-ng-options="classOption.name for classOption in propertyClassFilter.options track by classOption.id" ng-model="propertyClassFilter.selected" ng-change="setPropertyClassFilter(propertyClassFilter.selected)">
 					</select>

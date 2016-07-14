@@ -41,6 +41,7 @@
 		"FILTER_PROPERTY": "Has Property",
 		"FILTER_SUPERCLASS": "Has superclass",
 		"FILTER_DATATYPE": "Select datatype",
+		"FILTER_USED_FOR_CLASS": "Used for class",
 		"FILTER_REL_QUAL": "Related qualifier properties",
 		"FILTER_USE_STMTS": "Uses in statements",
 		"FILTER_USE_QUALS": "Uses in qualifiers",

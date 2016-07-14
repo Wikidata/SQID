@@ -21,10 +21,10 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
 	var tableSize = 15;
 
-	var initArray = function(idArray, data, filterfunc){
+	var initArray = function(idArray, data, data2, filterfunc){
 	  var ret = [];
 	  for (var i = 0; i < idArray.length; i++){
-		  if (filterfunc(idArray[i], data)) {
+		  if (filterfunc(idArray[i], data, data2)) {
 			  ret.push(idArray[i]);
 		  }
 	  }
@@ -76,7 +76,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	};
 	
 	var entityFilters = {
-	  labelFilter: function(entry, data){
+	  labelFilter: function(entry, data, data2){
 		var filter;
 		var id;
 		if (status.entityType == "classes"){
@@ -105,7 +105,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  return false;
 		}
 	  },
-	  datatypeFilter: function(entry, data){
+	  datatypeFilter: function(entry, data, data2){
 		var filter;
 		if (status.entityType == "classes"){
 		  return true;
@@ -124,7 +124,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  return false;
 		}
 	  },
-	  propertyClassFilter: function(entry, data){
+	  propertyClassFilter: function(entry, data, data2){
 		var filter;
 		if (status.entityType == "classes"){
 		  return true;
@@ -141,7 +141,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  }
 		}
 	  },
-	  suggestFilters: function(entry, data){
+	  suggestFilters: function(entry, data, data2){
 		var suggestFiltersHelper = function(entry, getter, value){
 		  if (!value){
 			return true;
@@ -167,15 +167,33 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 			}
 		  }
 		};
+		var suggestUsedInHelper = function(entry, getter, value){
+			if (!value){
+				return true;
+			}
+			if (value == ""){
+				return true;
+			}
+			var list = getter(value);
+			if (!list){
+				return false;
+			}
+			if (list[entry]){
+				return true;
+			}else{
+				return false;
+			}
+		};
 		if (status.entityType == "classes"){
 		  return suggestFiltersHelper(entry, data.getRelatedProperties, status.classesFilter.relatedProperty)
-			&& suggestFiltersHelper(entry, data.getSuperClasses, status.classesFilter.superclass)
+			&& suggestFiltersHelper(entry, data.getSuperClasses, status.classesFilter.superclass);
 		}else{
 			return suggestFiltersHelper(entry, data.getRelatedProperties, status.propertiesFilter.relatedProperty)
 			  && suggestFiltersHelper(entry, data.getQualifiers, status.propertiesFilter.relatedQualifier)
+			  && suggestUsedInHelper(entry, data2.getRelatedProperties, status.propertiesFilter.usedForClass);
 		}
 	  },
-	  sliderFilter: function(entry, data){
+	  sliderFilter: function(entry, data, data2){
 		if (status.entityType == "classes"){
 		  var filter = status.classesFilter,
 			dic = data.getDirectInstanceCount(entry),
@@ -207,10 +225,10 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  }
 	}
 
-	var applyFilter = function(entry, data){
+	var applyFilter = function(entry, data, data2){
 	  for (var key in entityFilters){
 		if (entityFilters.hasOwnProperty(key)) {
-		  if (!entityFilters[key](entry, data)){
+		  if (!entityFilters[key](entry, data, data2)){
 			return false;
 		  }
 		}
@@ -223,6 +241,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  $scope.$broadcast('angucomplete-alt:changeInput', 'direct-superclass-of-class', $scope.suggestFilters.classes.superclass);
 	  $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties-properties', $scope.suggestFilters.properties.relatedProperty);
 	  $scope.$broadcast('angucomplete-alt:changeInput', 'related-qualifiers', $scope.suggestFilters.properties.relatedQualifier);
+	  $scope.$broadcast('angucomplete-alt:changeInput', 'used-for-class', $scope.suggestFilters.properties.usedForClass);
 	};
 
 	var initPaginations = function(){
@@ -284,6 +303,9 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  
 		  if (idArray[i].toString() == status.classesFilter.superclass.toString()){
 			$scope.suggestFilters.classes.superclass = elem;
+		  }
+		  if (idArray[i].toString() == status.propertiesFilter.usedForClass.toString()){
+			$scope.suggestFilters.properties.usedForClass = elem;
 		  }
 
 		}
@@ -369,7 +391,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		Classes.then(function(data){
 		  $scope.tableHeader = data.getClassesHeader(status);
 		  initClassesSlider();
-		  var classesArray = initArray(data.getIdArray(), data, applyFilter);
+		  var classesArray = initArray(data.getIdArray(), data, {}, applyFilter);
 		  refreshTableContent(args, classesArray, data, getClassFromId);
 		  $scope.content = tableContent;
 		  $scope.pagination.setIndex($scope.content, null);
@@ -377,12 +399,14 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  }
 	  if (args.type == "properties") {
 		  Properties.then(function(data){
-			$scope.tableHeader = data.getPropertiesHeader(status);
-			initPropertiesSlider();
-			var propertiesArray = initArray(data.getIdArray(), data, applyFilter);
-			refreshTableContent(args, propertiesArray, data, getPropertyFromId);
-			$scope.content = tableContent;
-			$scope.pagination.setIndex($scope.content, null);
+		  	Classes.then(function(classData){
+				$scope.tableHeader = data.getPropertiesHeader(status);
+				initPropertiesSlider();
+				var propertiesArray = initArray(data.getIdArray(), data, classData, applyFilter);
+				refreshTableContent(args, propertiesArray, data, getPropertyFromId);
+				$scope.content = tableContent;
+				$scope.pagination.setIndex($scope.content, null);
+		  	});
 		  });
 	  }
 	};
@@ -442,6 +466,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  properties: {
 		relatedProperty: "",
 		relatedQualifier: "",
+		usedForClass: "",
 		directInstanceOf: ""
 	  }
 	};
@@ -520,8 +545,10 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	$scope.resetFilters = function(){
 	  status.classesFilter = Arguments.getStatusStartValues().classesFilter;
 	  status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
-	  $scope.suggestFilters.classes.relatedProperty = "";
-	  $scope.$broadcast('angucomplete-alt:changeInput', 'related-properties', $scope.suggestFilters.classes.relatedProperty);
+	  $scope.$broadcast('angucomplete-alt:clearInput');
+	  $scope.datatypeSelector.selected = status.propertiesFilter.datatypes;
+	  $scope.propertyClassFilter.selected = status.propertiesFilter.directInstanceOf;
+	  $scope.filterLabels = "";
 	  updateTable();
 	}
 
@@ -622,6 +649,12 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  status.propertiesFilter.relatedQualifier, $scope.suggestFilters.properties.relatedQualifier);
 		  status.propertiesFilter.relatedQualifier = result[0];
 		  $scope.suggestFilters.properties.relatedQualifier = result[1];
+		},
+		usedForClass : function(selected){
+		  var result = selectElementForSuggestFilter(selected, 
+		  status.propertiesFilter.usedForClass, $scope.suggestFilters.properties.usedForClass);
+		  status.propertiesFilter.usedForClass = result[0];
+		  $scope.suggestFilters.properties.usedForClass = result[1];
 		}
 	  }
 	};

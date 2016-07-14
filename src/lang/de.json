@@ -44,6 +44,7 @@
 		"FILTER_PROPERTY": "Hat Eigenschaft",
 		"FILTER_SUPERCLASS": "Hat Oberklasse",
 		"FILTER_DATATYPE": "Datentyp auswählen",
+		"FILTER_USED_FOR_CLASS": "Benutzt für Klasse",
 		"FILTER_REL_QUAL": "Verwandte Qualifikatoren",
 		"FILTER_USE_STMTS": "Verwendung für Aussagen",
 		"FILTER_USE_QUALS": "Verwendung für Qualifikatoren",
