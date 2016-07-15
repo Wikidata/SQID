@@ -41,7 +41,8 @@ function($compile, Properties, dataFormatter, util, i18n) {
 			var isHumanRelation = false;
 			var isMedia = (properties.getDatatype(numId) == 'CommonsMedia');
 			var isAboutWikiPages = (numId == '1151') || // "topic's main Wikimedia portal"
-									(numId == '910'); // "topic's main category"
+									(numId == '910') || // "topic's main category"
+									(numId == '1204'); // "Wikimedia portal's main topic"
 			angular.forEach(properties.getClasses(numId), function(classId) {
 				if (classId == '19847637' || // "Wikidata property representing a unique identifier"
 					classId == '18614948' || // "Wikidata property for authority control"
