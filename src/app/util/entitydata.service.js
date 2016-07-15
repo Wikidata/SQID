@@ -129,6 +129,116 @@ function(wikidataapi, util, i18n, sparql, $q) {
 		return Object.keys(result);
 	}
 
+	/**
+	 * Returns a number to represent the rank of the given statement.
+	 * Deprecated is 1, normal is 2, and preferred is 3.
+	 */
+	var getRankNumber = function(statement) {
+		switch (statement.rank) {
+			case 'deprecated': return 1;
+			case 'preferred': return 3;
+			default: case 'normal': return 2;
+		}
+	}
+
+	/**
+	 * Returns the first snak assigned to the first qualifier in the list, or null
+	 * if none of the qualifiers in the list have any value.
+	 */
+	var getQualifierSnak = function(statement, qualifierPropertyList) {
+		var snak = null;
+		if ('qualifiers' in statement) {
+			angular.forEach(qualifierPropertyList, function(qualifierProperty) {
+				if (snak != null) return;
+				angular.forEach(statement.qualifiers, function(snakList, property) {
+					if (snak == null && property == qualifierProperty) {
+						snak = snakList[0];
+					}
+				});
+			});
+		}
+		return snak;
+	}
+
+	/**
+	 * Returns a list representation of a time associated with the statement,
+	 * or the maximal date if there is none. 
+	 */
+	var getStatementTime = function(statement) {
+		var dateSnak = getQualifierSnak(statement, ['P580','P585','P582']);
+		if (dateSnak != null && dateSnak.snaktype == 'value') {
+			return util.getTimeComponents(dateSnak.datavalue, [0,1,1,0,0,0]);
+		} else {
+			return [Number.MAX_VALUE,12,31,23,59,59];
+		}
+	}
+
+	getStatementLanguage = function(statement, language) {
+		var lang = 'ZZZ';
+		if (statement.mainsnak.snaktype == 'value' && statement.mainsnak.datavalue.type == 'monolingualtext') {
+			lang = statement.mainsnak.datavalue.value.language;
+			if (lang == language) {
+				lang = '0'; // sorts first
+			}
+		}
+		return lang;
+	}
+
+	/**
+	 * Returns the integer representation of the numeric position or rank qualifier
+	 * value associated with a statement, or Number.MAX_VALUE if there is no such qualifier.
+	 */
+	var getStatementPosition = function(statement) {
+		var posSnak = getQualifierSnak(statement, ['P1352','P1545']);
+		if (posSnak != null && posSnak.snaktype == 'value') {
+			return parseInt(posSnak.datavalue.value.amount);
+		} else {
+			return Number.MAX_VALUE;
+		}
+	}
+
+	/**
+	 * Sorts the list of statements of one property based on a number
+	 * of hierarchical criteria such as rank, time qualifiers, position
+	 * quantifiers, and language.
+	 */
+	var sortStatementGroup = function(statementGroup, language) {
+		statementGroup.sort(function(s1, s2) {
+			var rank1 = getRankNumber(s1);
+			var rank2 = getRankNumber(s2);
+			if (rank1 < rank2) {
+				return 1;
+			} else if (rank2 < rank1) {
+				return -1;
+			} else {
+				var time1 = getStatementTime(s1);
+				var time2 = getStatementTime(s2);
+				var comparison = util.lexicographicComparator(time1,time2);
+				if (comparison != 0) {
+					return comparison;
+				} else {
+					var pos1 = getStatementPosition(s1);
+					var pos2 = getStatementPosition(s2);
+					if (pos1 < pos2) {
+						return -1;
+					} else if (pos1 > pos2) {
+						return 1;
+					} else {
+						var lang1 = getStatementLanguage(s1, language);
+						var lang2 = getStatementLanguage(s2, language);
+						if (lang1 < lang2) {
+							return -1;
+						} else if (lang1 > lang2) {
+							return 1;
+						} else {
+							return 0;
+						}
+					}
+				}
+			}
+		});
+	}
+
 	var getEntityData = function(id) {
 		var language = i18n.getLanguage();
 		return wikidataapi.getEntityData(id, language).then(function(response) {
@@ -179,7 +289,11 @@ function(wikidataapi, util, i18n, sparql, $q) {
 				}
 			}
 			if ("claims" in entityData) {
-				ret.statements = entityData.claims;
+				ret.statements = {};
+				angular.forEach(entityData.claims, function(statementGroup, property) {
+					sortStatementGroup(statementGroup, ret.language);
+					ret.statements[property] = statementGroup;
+				});
 			}
 
 			return ret;
