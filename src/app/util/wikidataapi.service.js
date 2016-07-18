@@ -62,7 +62,7 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 		});
 	};
 
-	var searchEntities = function(str, lang='en', limit=7) {
+	var searchEntities = function(str, lang, limit) {
 		var url = 'https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&limit=' + String(limit) +  '&language='+ lang + '&uselang=' + lang + '&type=item&continue=0&search=' + str + '&callback=JSON_CALLBACK';
 		return util.jsonpRequest(url).then(function(response){
 			if (!response.search){
