@@ -13,14 +13,15 @@ define([ // sqid application wrapper module
 	'browse/browse.config',	// wikidata classes and properties browser
 	'view/view.config',		// wikidata entity viewer
 	'query/sparqly.config',	// sparql query generator interface
-	'entitySearch/entitySearch.config' // search field
+	'entitySearch/entitySearch.config', // search field
+	'oauth/oauth.config' // login and edit function
 
 ], function() {
 /////////////////////////////////////////////////////////////////////////
 
 angular.module('sqid',[						// the application wrapper module
 
-	'data', 'i18n', 'util', 'layout', 'entitySearch',	// shared modules
+	'data', 'i18n', 'util', 'layout', 'entitySearch', 'oauth',	// shared modules
 	
 	'meta', 'browse', 'view', 'sparqly'			// feature / content modules
 ]); 

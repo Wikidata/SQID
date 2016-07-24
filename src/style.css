@@ -600,3 +600,18 @@ div.qualifiers {
 #item-search_dropdown .angucomplete-selected-row{
 	background: #337ab7;
 }
+
+.login-username {
+	padding-bottom: 15px;
+	padding-top: 7px;
+	font-size: 1em;
+}
+
+.login a {
+	padding-left: 15px;
+	color: #337ab7;
+}
+
+.login a:hover {
+	text-decoration: none;
+}
