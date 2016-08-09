@@ -249,6 +249,7 @@ function(wikidataapi, util, i18n, sparql, $q) {
 				description: '',
 				aliases: [],
 				statements: {},
+				sitelinks: {},
 				missing: false,
 				termsPromise: null,
 				propLabelPromise: null,
@@ -295,6 +296,13 @@ function(wikidataapi, util, i18n, sparql, $q) {
 					ret.statements[property] = statementGroup;
 				});
 			}
+			if ("sitelinks" in entityData) {
+				ret.sitelinks = {};
+				for (var i in entityData.sitelinks){
+					ret.sitelinks[entityData.sitelinks[i].site] = entityData.sitelinks[i].title;
+				}
+			}			
+
 
 			return ret;
 		});
