@@ -53,6 +53,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 	$scope.entityData = null;
 	$scope.banner = null;
 	$scope.homepage = null;
+	$scope.urlWikipedia = null;
 	$scope.images = [];
 	$scope.entityInData = null;
 	$scope.richDescription = null;
@@ -86,6 +87,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.images = View.getImages(data.statements);
 		$scope.banner = View.getBanner(data.statements);
 		$scope.homepage = View.getHomepage(data.statements);
+		$scope.urlWikipedia = View.getUrlWikipedia(data.sitelinks);
 		$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
 		data.waitForPropertyLabels().then( function() {
 			$scope.instanceOfUrl = i18n.getEntityUrl("P31");
