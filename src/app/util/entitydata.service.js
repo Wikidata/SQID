@@ -19,9 +19,14 @@ function(wikidataapi, util, i18n, sparql, $q) {
 	 */
 	var getBestStatementValue = function(statementsJson, defaultValue) {
 		var result = null;
+		var hasPreferred = false;
 		angular.forEach(statementsJson, function(statementJson) {
+			if (hasPreferred) { // poor man's "break"
+				return;
+			}
 			if (statementJson.rank == 'preferred') {
-				return getStatementValue(statementJson, defaultValue);
+				hasPreferred = true;
+				result = getStatementValue(statementJson, defaultValue);
 			} else if (statementJson.rank != 'deprecated' && result == null) {
 				result = getStatementValue(statementJson, defaultValue);
 			}
