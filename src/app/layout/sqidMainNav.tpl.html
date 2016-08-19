@@ -25,13 +25,14 @@
 	<li class="nav-link"><a href="#/browse?type=classes"><span translate="NAV.CLASSES"></span></a></li>
 	<li class="nav-link"><a href="#/about"><span translate="NAV.ABOUT"></span></a></li>
 	<li class="nav-element">
-		<div ng-controller="Login">
-			<div ng-if='showLogin' class="login login-button">
-				<a href="{{ authorizationLink }}"><button type="button" class="btn btn-primary">Login</button></a>
-			</div>
-			<div ng-if='!showLogin' class="login login-username"><a>{{ username }}</a></div>
+	<div ng-controller="Login">
+		<div ng-if='showLogin' class="login login-button">
+			<a target="_blank" href="{{ authorizationLink }}"><button type="button" class="btn btn-primary">{{ 'NAV.AUTHORIZE' | translate }}</button></a>
+			<button type="button" ng-click="refresh()" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i></button>
 		</div>
-	</li>
+		<div ng-if='!showLogin' class="login login-username"><a>{{ username }}</a></div>
+	</div>
+	</li>	
 </ul>
 
 	<!-- Dropdown example: -->

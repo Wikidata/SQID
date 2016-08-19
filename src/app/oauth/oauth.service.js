@@ -4,21 +4,48 @@ define([
 	'util/util.service'
 ], function() {
 ///////////////////////////////////////
-angular.module('oauth').factory('oauth', ['util', '$http', function(util, $http) {
+angular.module('oauth').factory('oauth', ['util', '$http', '$location', function(util, $http, $location) {
+	var promise;
 
 	var getUserInfo = function(){
-		return $http.jsonp('http://tools.wmflabs.org/sqid/oauth.php?action=userinfo&format=json&callback=JSON_CALLBACK').then(function(response){
+		promise = $http.get($location.protocol() + '://tools.wmflabs.org/widar/?action=get_rights&botmode=1').then(function(response){
 			if (response){
-				return response.data;
+				return response.data.result.query;
 			}else{
 				return null;
 			}
 		});
-		// return util.httpRequest('http://tools.wmflabs.org/sqid/oauth.php?action=userinfo&format=json');
-		// return util.jsonpRequest('http://tools.wmflabs.org/sqid/oauth.php?action=userinfo&format=json');
+		return promise;
 	};
+
+	var setLabel = function(id, label, lang){
+		var result = $http.get($location.protocol() 
+				+ '://tools.wmflabs.org/widar/index.php?action=set_label&q=' 
+				+ id + '&lang=' 
+				+ lang + '&label=' 
+				+ encodeURIComponent(label) + '&botmode=1').then(function(response){
+			if (response){
+				return response;
+				console.log(response);
+			}else{
+				return null;
+			}});
+		return result;
+	};
+
+
+	var userinfo = function(){
+		if (!promise){
+			return getUserInfo();
+		}else{
+			return promise;
+		}
+	};
+
 	return {
-		getUserInfo: getUserInfo
+		userinfo: userinfo,
+		refreshUserInfo: getUserInfo,
+		setLabel: setLabel
 	};
 }]);
 

@@ -11,12 +11,25 @@
 		"CLASSES": "@:PAGE_TITLE.CLASSES",
 		"START": "@:PAGE_TITLE.START",
 		"ABOUT": "@:PAGE_TITLE.ABOUT",
-		"ITEM_SEARCH": "Search Item"
+		"ITEM_SEARCH": "Search Item",
+		"AUTHORIZE" : "Authorize"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistics based on data dump {{date}}",
 		"STAT_LINK": "details",
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
+	},
+	"EDITS": {
+		"EDIT_LABEL": "edit label"	
+	},
+	"MODALS": {
+		"CLOSE": "Close",
+		"SAVE_CHANGES": "Save changes",
+		"EMPTY_FIELDS_ERROR": "Please, fill out all the input fields!",
+		"EXECUTION_ERROR": "Could not apply your changes due to errors",
+		"EXECUTION_SUCCESSFUL": "Successful!",
+		"TITLE_EDIT_LABEL": "Edit label",
+		"CAPTION_EDIT_LABEL": "New label for "
 	},
 	"PAGINATION": {
 		"ENTRIES_PER_PAGE": "Rows per page",
@@ -105,6 +118,7 @@
 		"SEC_LINKS": "Links",
 		"WIKIDATA": "Wikidata page",
 		"WEBSITE": "Official website",
+		"WIKIPEDIA": "Wikipedia article",
 		"REASONATOR": "Reasonator"
 	},
 	"SEC_PROP_USE": {

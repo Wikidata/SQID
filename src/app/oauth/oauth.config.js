@@ -6,5 +6,4 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-
 return {}; }); // module definition end

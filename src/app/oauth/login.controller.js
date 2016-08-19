@@ -6,21 +6,30 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('util').controller('Login', ['oauth', '$scope', function(oauth, $scope) {
+
+angular.module('util').controller('Login', ['oauth', '$scope', '$location', function(oauth, $scope, $location) {
 	$scope.username = '';
-	$scope.authorizationLink = 'http://tools.wmflabs.org/sqid/oauth.php?action=authorize';
+	$scope.authorizationLink = $location.protocol() + '://tools.wmflabs.org/widar/?action=authorize';
 	$scope.showLogin = false;
-	console.log("ger here");
-	oauth.getUserInfo().then(function(data){
-		if (data){
-			$scope.username = data.name;
-			$scope.showLogin = false;
-			console.log("get here");
-			console.log($scope.username);
-		}else{
-			$scope.showLogin = true;
-		}
-	});
+
+	var requestUserInfo = function(){
+		oauth.userinfo().then(function(data){
+			if (data){
+				$scope.username = data.userinfo.name;
+				$scope.showLogin = false;
+			}else{
+				$scope.showLogin = true;
+			}
+		});	
+	}
+	$scope.refresh = function(){
+		oauth.refreshUserInfo().then(function(data){
+			requestUserInfo();		
+		});
+	};
+
+	requestUserInfo();
+
 	// oauth.getUserInfo().then(function(response){
 	// 	console.log(response);
 	// 	// $scope.username = response.name;

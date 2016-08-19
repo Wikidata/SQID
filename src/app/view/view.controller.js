@@ -11,13 +11,14 @@ define([
 	'util/sqidCompile.directive',	
 	'data/properties.service',
 	'data/classes.service',
+	'oauth/oauth.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('view').controller('ViewController', [
-'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'sparql', 'util', 'i18n', 'htmlCache',
-function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
+'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache',
+function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache){
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 10;
 	var MAX_PROP_SUBJECTS = 10;
@@ -36,7 +37,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 	
 	$scope.translations = {};
 
-	$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
+	$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT', 'MODALS.EMPTY_FIELDS_ERROR', 'MODALS.EXECUTION_ERROR', 'MODALS.EXECUTION_SUCCESSFUL']).then( function(translations) {
 		$scope.translations['SUBCLASS_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT'];
 		$scope.translations['INSTANCE_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT'];
 		$scope.translations['ALL_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT'];
@@ -46,6 +47,9 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.translations['PROP_VALUES_HINT'] = translations['SEC_PROP_USE.VALUES_HINT'];
 		$scope.translations['PROP_STATEMENTS_HINT'] = translations['SEC_PROP_USE.STATEMENTS_HINT'];
 		$scope.translations['PROP_QUALIFIERS_HINT'] = translations['SEC_PROP_USE.QUALIFIERS_HINT'];
+		$scope.translations['MODALS_EMPTY_FIELDS_ERROR'] = translations['MODALS.EMPTY_FIELDS_ERROR'];
+		$scope.translations['MODALS_EXECUTION_ERROR'] = translations['MODALS.EXECUTION_ERROR'];
+		$scope.translations['MODALS_EXECUTION_SUCCESSFUL'] = translations['MODALS.EXECUTION_SUCCESSFUL'];
 	});
 
 	$scope.classes = null;
@@ -76,6 +80,19 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 	$scope.propertyQualifierCount = 0;
 	$scope.propertyReferenceCount = 0;
 	$scope.propertyDatatype = null;
+
+	$scope.hasEditRights = true;
+
+	$scope.modalResponse = null;
+	$scope.modalResponseClass = null;
+
+	oauth.userinfo().then(function(data){
+		if (data){
+			$scope.hasEditRights = true;
+		}else{
+			$scope.hasEditRights = false;
+		}
+	});
 
 	View.getEntityInlinks().then(function(data) {
 		$scope.entityInData = data;
@@ -194,6 +211,37 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 			}
 		}
 	});
+
+	$scope.editLabel = function(){
+		var newLabel = $scope.newLabel;
+		var lang = i18n.getLanguage();
+		var id = $scope.id;
+		if (newLabel){
+			var response = oauth.setLabel(id, newLabel, lang);
+			response.then(function(data){
+				console.log(data);
+				if (data.data.error == "OK"){
+					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
+					$scope.modalResponseClass = "text-success";
+				}else{
+					
+					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] + 
+						( (data.data.error) ? ("</br>" + String(data.data.error)) : "");
+					$scope.modalResponseClass = "text-danger";
+				}
+				console.log(newLabel);
+			});
+		}else{
+			$scope.modalResponse = $scope.translations['MODALS_EMPTY_FIELDS_ERROR'];
+			$scope.modalResponseClass = "text-danger";
+		}
+	}
+
+	$scope.closeModal = function(){
+		$scope.modalResponse = null;
+		$scope.modalResponseClass = null;
+	}
+
 }]);
 
 return {};}); // module definition end

@@ -615,3 +615,23 @@ div.qualifiers {
 .login a:hover {
 	text-decoration: none;
 }
+
+.edit-link{
+	font-size: 0.8em;
+}
+
+.edit-link:hover{
+	text-decoration: none;
+}
+
+.edit-label{
+	text-align: right;
+	float: right;
+	margin-top: 10px;
+	cursor: pointer;
+}
+
+.normal-weight{
+	font-weight: normal;
+}
+
