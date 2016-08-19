@@ -26,7 +26,6 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', function
 				+ encodeURIComponent(label) + '&botmode=1').then(function(response){
 			if (response){
 				return response;
-				console.log(response);
 			}else{
 				return null;
 			}});

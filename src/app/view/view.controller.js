@@ -219,7 +219,6 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 		if (newLabel){
 			var response = oauth.setLabel(id, newLabel, lang);
 			response.then(function(data){
-				console.log(data);
 				if (data.data.error == "OK"){
 					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
 					$scope.modalResponseClass = "text-success";
@@ -229,7 +228,6 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 						( (data.data.error) ? ("</br>" + String(data.data.error)) : "");
 					$scope.modalResponseClass = "text-danger";
 				}
-				console.log(newLabel);
 			});
 		}else{
 			$scope.modalResponse = $scope.translations['MODALS_EMPTY_FIELDS_ERROR'];
