@@ -32,7 +32,7 @@ def sparqlQuery(query):
 			return doSparqlQuery(query)
 		except ValueError:
 			print "Failed to get SPARQL results. Giving up."
-			return json.loads('{ results: { bindings: {} }')
+			return json.loads('{ "error": "timeout", "results": { "bindings": {} } }')
 
 
 def setPropertyStatistics(propertyStatistics, propertyId, statisticType, numberString):
@@ -55,12 +55,25 @@ def updateClassRecords() :
 	print "[" + startTime + "] Fetching class ids and labels for classes with direct instances ..."
 
 	resultsClasses = sparqlQuery("""SELECT ?cl ?clLabel ?c
-	WHERE {
+WHERE {
 	{ SELECT ?cl (count(*) as ?c) WHERE { ?i wdt:P31 ?cl } GROUP BY ?cl }
 	SERVICE wikibase:label {
 			bd:serviceParam wikibase:language "en" .
 	}
-	}""")
+}""")
+
+	if ( "error" in resultsClasses ):
+		print "Failed to fetch class data from SPARQL. Trying simpler query ..."
+		resultsClasses = sparqlQuery("""SELECT ?cl ?clLabel
+WHERE {
+	{ SELECT DISTINCT ?cl WHERE { ?i wdt:P31 ?cl } }
+	SERVICE wikibase:label {
+			bd:serviceParam wikibase:language "en" .
+	}
+}""")
+		if ( "error" in resultsClasses ):
+			print "Failed to fetch class data from SPARQL. Giving up."
+			return
 
 	print "Augmenting current class data ..."
 	classesWithInstances = {}
@@ -72,12 +85,15 @@ def updateClassRecords() :
 				classId = classUri[32:]
 				classesWithInstances[classId] = True
 				classLabel = binding['clLabel']['value']
-				classInstances = int(binding['c']['value'])
 				if classId in data:
 					data[classId]['l'] = classLabel
-					data[classId]['i'] = classInstances
+					if "c" in binding:
+						data[classId]['i'] = int(binding['c']['value'])
 				else:
-					data[classId] = {'l':classLabel, 'i':classInstances}
+					if "c" in binding:
+						data[classId] = {'l':classLabel, 'i':int(binding['c']['value'])}
+					else:
+						data[classId] = {'l':classLabel}
 		# zero instance counts for classes not found in the query:
 		for classId in data :
 			if classId not in classesWithInstances :
