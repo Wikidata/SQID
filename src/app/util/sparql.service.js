@@ -12,7 +12,7 @@ angular.module('util').factory('sparql', ['util', 'i18n', function(util, i18n) {
 	var SPARQL_UI_PREFIX = "https://query.wikidata.org/#";
 
 	var getQueryUrl = function(sparqlQuery) {
-		return SPARQL_SERVICE + "?query=" + encodeURIComponent("#SQID#\n" + sparqlQuery);
+		return SPARQL_SERVICE + "?query=" + encodeURIComponent("#TOOL:SQID, http://tools.wmflabs.org/sqid/\n" + sparqlQuery);
 	}
 
 	var getQueryUiUrl = function(sparqlQuery) {

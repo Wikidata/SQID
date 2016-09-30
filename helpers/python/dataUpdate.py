@@ -18,7 +18,7 @@ import time
 SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
 
 def doSparqlQuery(query):
-	r = requests.get(SPARQL_SERVICE_URL, params={'query': "#SQID-Helper#\n" + query, 'format': 'json'});
+	r = requests.get(SPARQL_SERVICE_URL, params={'query': "#TOOL:SQID Python Helper\n" + query, 'format': 'json'});
 	return json.loads(r.text)
 
 def sparqlQuery(query):
