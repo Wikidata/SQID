@@ -603,13 +603,18 @@ div.qualifiers {
 
 .login-username {
 	padding-bottom: 15px;
-	padding-top: 7px;
-	font-size: 1em;
+	padding-top: 4px;
+	font-size: 12px;
+	float: left;
 }
 
 .login a {
 	padding-left: 15px;
 	color: #337ab7;
+}
+
+.logout{
+	float: left;
 }
 
 .login a:hover {

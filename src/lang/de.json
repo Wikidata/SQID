@@ -13,7 +13,8 @@
 		"START": "@:PAGE_TITLE.START",
 		"ABOUT": "@:PAGE_TITLE.ABOUT",
 		"ITEM_SEARCH": "Suche nach Item",
-		"AUTHORIZE" : "Authorisieren"
+		"AUTHORIZE" : "Autorisieren",
+		"UNAUTHORIZE" : "Deautorisieren"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistiken Stand {{date}}",

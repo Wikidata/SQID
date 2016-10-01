@@ -7,9 +7,10 @@ define([
 ///////////////////////////////////////
 
 
-angular.module('util').controller('Login', ['oauth', '$scope', '$location', function(oauth, $scope, $location) {
+angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$window', function(oauth, $scope, $location, $window) {
 	$scope.username = '';
 	$scope.authorizationLink = $location.protocol() + '://tools.wmflabs.org/widar/?action=authorize';
+	$scope.unauthorizationLink = $location.protocol() + '://tools.wmflabs.org/widar/?action=logout';
 	$scope.showLogin = false;
 
 	var requestUserInfo = function(){
@@ -22,10 +23,19 @@ angular.module('util').controller('Login', ['oauth', '$scope', '$location', func
 			}
 		});	
 	}
+
+	$scope.logout = function(){
+		$scope.username = '';
+		$scope.showLogin = true;
+		oauth.logout();
+		$window.location.href = '#/';
+	}
+
 	$scope.refresh = function(){
 		oauth.refreshUserInfo().then(function(data){
 			requestUserInfo();		
 		});
+		$window.location.href = '#/';
 	};
 
 	requestUserInfo();

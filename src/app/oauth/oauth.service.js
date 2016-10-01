@@ -32,6 +32,38 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', function
 		return result;
 	};
 
+	// Only use for properties with data type item
+	var setClaims = function(ids, prop, target){
+		var result = $http.get($location.protocol()
+				+ '://tools.wmflabs.org/widar/index.php?action=set_claims&ids='
+				+ ids + '&prop='
+				+ prop + '&target='
+				+ targets + '&botmode=1'
+			).then(function(response){
+				if (response){
+					return response;
+				}else{
+					return null;
+				}
+			});
+		return result;
+	}
+
+	var setString = function(id, prop, text){
+		var result = $http.get($location.protocol()
+			+ '://tools.wmflabs.org/widar/index.php?action=set_string&id='
+			+ id + '&prop='
+			+ prop + '&text='
+			+ text + '&botmode=1'
+			).then(function(response){
+				if (response){
+					return response;
+				}else{
+					return null;
+				}
+			});
+		return result;
+	}
 
 	var userinfo = function(){
 		if (!promise){
@@ -41,10 +73,17 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', function
 		}
 	};
 
+	var logout = function(){
+		promise = null;
+	}
+
 	return {
 		userinfo: userinfo,
 		refreshUserInfo: getUserInfo,
-		setLabel: setLabel
+		setLabel: setLabel,
+		setClaims: setClaims,
+		setString: setString,
+		logout: logout
 	};
 }]);
 

@@ -27,10 +27,17 @@
 	<li class="nav-element">
 	<div ng-controller="Login">
 		<div ng-if='showLogin' class="login login-button">
-			<a target="_blank" href="{{ authorizationLink }}"><button type="button" class="btn btn-primary">{{ 'NAV.AUTHORIZE' | translate }}</button></a>
-			<button type="button" ng-click="refresh()" class="btn btn-primary"><i class="fa fa-refresh" aria-hidden="true"></i></button>
+			<a target="_blank" href="{{ authorizationLink }}"><button type="button" class="btn btn-primary btn-xs">{{ 'NAV.AUTHORIZE' | translate }}</button></a>
+			<button type="button" ng-click="refresh()" class="btn btn-primary btn-xs"><i class="fa fa-refresh" aria-hidden="true"></i></button>
 		</div>
-		<div ng-if='!showLogin' class="login login-username"><a>{{ username }}</a></div>
+		<div ng-if='!showLogin'>
+			<div class="login login-username">
+				<a>{{ username }}</a>
+			</div>
+			<div class="login login-button logout">
+				<a target="_blank" href="{{ unauthorizationLink }}"><button type="button" class="btn btn-primary btn-xs" ng-click="logout()">{{ 'NAV.UNAUTHORIZE' | translate }}</button></a>
+			</div>
+		</div>
 	</div>
 	</li>	
 </ul>

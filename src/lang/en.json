@@ -12,7 +12,8 @@
 		"START": "@:PAGE_TITLE.START",
 		"ABOUT": "@:PAGE_TITLE.ABOUT",
 		"ITEM_SEARCH": "Search Item",
-		"AUTHORIZE" : "Authorize"
+		"AUTHORIZE" : "Authorize",
+		"UNAUTHORIZE" : "Unauthorize"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistics based on data dump {{date}}",

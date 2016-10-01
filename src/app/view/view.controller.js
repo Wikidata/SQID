@@ -98,35 +98,39 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 		$scope.entityInData = data;
 	});
 	
-	View.getEntityData().then(function(data) {
-		$scope.entityData = data;
-		$scope.images = View.getImages(data.statements);
-		$scope.banner = View.getBanner(data.statements);
-		$scope.homepage = View.getHomepage(data.statements);
-		$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
-		data.waitForPropertyLabels().then( function() {
-			$scope.instanceOfUrl = i18n.getEntityUrl("P31");
-			$scope.instanceOfLabel = i18n.getPropertyLabel("P31");
-			$scope.subclassOfUrl = i18n.getEntityUrl("P279");
-			$scope.subclassOfLabel = i18n.getPropertyLabel("P279");
-			$scope.subpropertyOfUrl = i18n.getEntityUrl("P1647");
-			$scope.subpropertyOfLabel = i18n.getPropertyLabel("P1647");
-		});
-
-		Classes.then(function(classes){
-			View.getValueList(data, 'P31', classes).then( function(instanceClasses) {
-				$scope.instanceClassCount = instanceClasses.length;
-				$scope.instanceClassesHtml = View.getValueListTrustedHtml(instanceClasses, false);
+	var refreshContent = function(useCache){
+		var func = useCache ? View.getEntityData : View.getEntityDataUncached;
+		func().then(function(data) {
+			$scope.entityData = data;
+			$scope.images = View.getImages(data.statements);
+			$scope.banner = View.getBanner(data.statements);
+			$scope.homepage = View.getHomepage(data.statements);
+			$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
+			data.waitForPropertyLabels().then( function() {
+				$scope.instanceOfUrl = i18n.getEntityUrl("P31");
+				$scope.instanceOfLabel = i18n.getPropertyLabel("P31");
+				$scope.subclassOfUrl = i18n.getEntityUrl("P279");
+				$scope.subclassOfLabel = i18n.getPropertyLabel("P279");
+				$scope.subpropertyOfUrl = i18n.getEntityUrl("P1647");
+				$scope.subpropertyOfLabel = i18n.getPropertyLabel("P1647");
 			});
-			if ($scope.isItem) {
-				View.getValueList(data, 'P279', classes).then( function(superClasses) {
-					$scope.superClassCount = superClasses.length;
-					$scope.superClassesHtml = View.getValueListTrustedHtml(superClasses, false);
-					$scope.superClassesHtmlWithCounts = View.getValueListTrustedHtml(superClasses, true);
+
+			Classes.then(function(classes){
+				View.getValueList(data, 'P31', classes).then( function(instanceClasses) {
+					$scope.instanceClassCount = instanceClasses.length;
+					$scope.instanceClassesHtml = View.getValueListTrustedHtml(instanceClasses, false);
 				});
-			}
+				if ($scope.isItem) {
+					View.getValueList(data, 'P279', classes).then( function(superClasses) {
+						$scope.superClassCount = superClasses.length;
+						$scope.superClassesHtml = View.getValueListTrustedHtml(superClasses, false);
+						$scope.superClassesHtmlWithCounts = View.getValueListTrustedHtml(superClasses, true);
+					});
+				}
+			});
 		});
-	});
+	};
+	refreshContent(true);
 
 	Properties.then(function(properties){
 		if (!$scope.isItem) {
@@ -213,6 +217,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 	});
 
 	$scope.editLabel = function(){
+		var modalId = '#editLabelModal';
 		var newLabel = $scope.newLabel;
 		var lang = i18n.getLanguage();
 		var id = $scope.id;
@@ -220,8 +225,11 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 			var response = oauth.setLabel(id, newLabel, lang);
 			response.then(function(data){
 				if (data.data.error == "OK"){
-					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
-					$scope.modalResponseClass = "text-success";
+					// $scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
+					// $scope.modalResponseClass = "text-success";
+					$(modalId).modal('hide');
+					$scope.closeModal();
+					refreshContent(false);
 				}else{
 					
 					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] + 

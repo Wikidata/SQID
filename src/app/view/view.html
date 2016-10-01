@@ -272,18 +272,39 @@
 	</div>
 
 <!-- Modals -->
+
 <div class="modal fade" id="editLabelModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">{{ 'MODALS.TITLE_EDIT_LABEL' | translate }}</h4>
+        <h4 class="modal-title" id="modalLabelTitle">{{ 'MODALS.TITLE_EDIT_LABEL' | translate }}</h4>
       </div>
       <div class="modal-body">
 	<div class="form-group">
 	  <label for="labelEditField" class="normal-weight">{{ 'MODALS.CAPTION_EDIT_LABEL' | translate }} {{id}}</label>
 	  <input type="text" class="form-control" placeholder="{{entityData.label}}" id="labelEditField" ng-model="newLabel">
-	   <p ng-if="modalResponse" class="{{modalResponseClass}}">{{modalResponse}}</p>
+	   <label ng-if="modalResponse" class="{{modalResponseClass}}">{{modalResponse}}</label>
+	</div>        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="closeModal()">{{ 'MODALS.CLOSE' | translate }}</button>
+        <button type="button" class="btn btn-primary" ng-click="editLabel()">{{ 'MODALS.SAVE_CHANGES' | translate }}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editAliasesModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" ng-click="closeModal()"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="modalAliasesTitle">{{ 'MODALS.TITLE_EDIT_ALIASES' | translate }}</h4>
+      </div>
+      <div class="modal-body">
+	<div class="form-group">
+	   <label ng-if="modalResponse" class="{{modalResponseClass}}">{{modalResponse}}</label>
 	</div>        
       </div>
       <div class="modal-footer">

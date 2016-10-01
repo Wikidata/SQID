@@ -39,6 +39,19 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 		return ret;
 	}
 
+	// Get a promise for the entity data.
+	// It is cached since the controller needs it in several places.
+	var getEntityData = function() {
+		if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
+			entityDataPromise = entitydata.getEntityData(id).then(function(data) {
+				return data;
+			});
+			fetchedEntityId = id;
+			fetchedEntityLanguage = i18n.getLanguage();
+		}
+		return entityDataPromise;
+	};
+
 	return {
 		updateId: function() {
 			id = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
@@ -92,17 +105,13 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			return $sce.trustAsHtml(result);
 		},
 
-		// Get a promise for the entity data.
-		// It is cached since the controller needs it in several places.
-		getEntityData: function() {
-			if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
-				entityDataPromise = entitydata.getEntityData(id).then(function(data) {
-					return data;
-				});
-				fetchedEntityId = id;
-				fetchedEntityLanguage = i18n.getLanguage();
-			}
-			return entityDataPromise;
+		getEntityData: getEntityData,
+
+		getEntityDataUncached: function() {
+			entityDataPromise = null;
+			fetchedEntityId = null;
+			fetchedEntityLanguage = null;
+			return getEntityData();
 		},
 
 		// Find images from statements
