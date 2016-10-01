@@ -17,8 +17,7 @@ requirejs.config({
 		"ngTranslate-storage-cook": "../lib/angular-translate-storage-cookie",
 		"ngTranslate-storage-loc": "../lib/angular-translate-storage-local",
 		"ngComplete": "../lib/angucomplete-alt",
-		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2",
-		"ngTagsInput": "../lib/ng-tags-input"
+		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2"
 	},
 	shim: {
 		'jquery-ui': ['jquery'],
@@ -36,8 +35,7 @@ requirejs.config({
 		'ngTranslate-loader': ['ngTranslate-core'],
 		'ngTranslate-storage-cook': ['ngTranslate-core', 'ngCookies'],
 		'ngTranslate-storage-loc': ['ngTranslate-storage-cook'],
-		'ngComplete': ['angular'],
-		'ngTagsInput' : ['angular']
+		'ngComplete': ['angular']
 	}
 });
 
