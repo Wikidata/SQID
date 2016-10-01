@@ -35,7 +35,12 @@
 				<a>{{ username }}</a>
 			</div>
 			<div class="login login-button logout">
+				<div ng-if='!dummy'>
 				<a target="_blank" href="{{ unauthorizationLink }}"><button type="button" class="btn btn-primary btn-xs" ng-click="logout()">{{ 'NAV.UNAUTHORIZE' | translate }}</button></a>
+				</div>
+				<div ng-if='dummy'>
+					<a><button type="button" class="btn btn-primary btn-xs" ng-click="logout()">{{ 'NAV.UNAUTHORIZE' | translate }}</button></a>
+				</div>
 			</div>
 		</div>
 	</div>

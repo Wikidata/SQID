@@ -7,11 +7,28 @@ define([
 ///////////////////////////////////////
 
 
-angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$window', function(oauth, $scope, $location, $window) {
+angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$window', '$route', function(oauth, $scope, $location, $window, $route) {
 	$scope.username = '';
 	$scope.authorizationLink = $location.protocol() + '://tools.wmflabs.org/widar/?action=authorize';
 	$scope.unauthorizationLink = $location.protocol() + '://tools.wmflabs.org/widar/?action=logout';
 	$scope.showLogin = false;
+	$scope.dummy = false;
+
+	// TODO: if login=dev -> userinfo fake einsetzen
+
+	var checkDummy = function(){
+		if ($route.current.params.dummy){
+			if ((String($route.current.params.dummy) == 'true') || 
+				(String($route.current.params.dummy) == '1')){
+				oauth.setDummyLogin();
+			$scope.dummy=true;
+			}else{
+				oauth.unsetDummyLogin();
+			}
+		}else{
+			oauth.unsetDummyLogin();
+		}
+	}
 
 	var requestUserInfo = function(){
 		oauth.userinfo().then(function(data){
@@ -36,8 +53,10 @@ angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$wi
 			requestUserInfo();		
 		});
 		$window.location.href = '#/';
+		checkDummy();
 	};
 
+	checkDummy();
 	requestUserInfo();
 
 	// oauth.getUserInfo().then(function(response){
