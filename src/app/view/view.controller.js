@@ -114,10 +114,14 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		});
 	});
 	
-	View.getEntityDataInferred().then(function(data) {
-		$scope.test = 'test';
-		$scope.entityDataInf = data;
+	View.getTest().then(function(data) {
 		$scope.test = data;
+	});
+
+	
+	View.getEntityDataInferred().then(function(data) {
+//		$scope.test = 'test';
+		$scope.entityDataInf = data;
 	});
 
 	Properties.then(function(properties){

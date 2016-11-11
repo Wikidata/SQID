@@ -11,6 +11,55 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 		// Special:EntityData does not always return current data, not even with "action=purge"
 		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
 	}
+	
+	var getEntityPropertyClaims = function(entitiesList,language) { //entityIds,properties,language) {
+//		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' 
+//				+ entityIds.join('|') + '&redirects=yes&props=' + properties.join('|') + '&languages=' + language + '&callback=JSON_CALLBACK');
+//		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=Q1339&redirects=yes&props=claims&languages=' + language + '&callback=JSON_CALLBACK');
+		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&redirects=yes&props=claims'+
+			//
+			'&languages=' + language + '&callback=JSON_CALLBACK';
+		var requests = [];
+		
+		
+//		return util.jsonpRequest(baseUrl + '&ids=' + entitiesList[0].entityids.join('|') );
+
+//		for (var i = 0; i < entityIds.length; i += 50) {
+//			requests.push(util.jsonpRequest(baseUrl + '&ids=' + entitiesList[0].entityids[0]));
+//		}
+
+//		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities'// + language +
+//			;//ids=Q1339&props=claims
+//		var requests = [];
+////		
+////		
+//		requests.push(util.jsonpRequest(baseUrl) + '&ids=Q1339'// +entitiesList[0].entityids.join('|') 
+//				+ '&props=claims&format=json&redirects=yes&languages=en&callback=JSON_CALLBACK');
+		angular.forEach(entitiesList, function(entities) {
+//			requests.push(util.jsonpRequest(baseUrl) + '&ids=Q1339'//+entities.entityids.join('|') 
+//					+ '&props=P26&format=json&redirects=yes&languages=en');// + entities.properties.join('|')));
+//			
+			requests.push(util.jsonpRequest(baseUrl + '&ids=' + entities.entityids.join('|') ));
+		});
+//
+		return $q.all(requests);
+//		//.then( function(responses) {//return requests;//[0];
+//			var entityLabels = {}
+//			angular.forEach(responses, function(response) {
+//				if ("entities" in response) {
+//					angular.forEach(response.entities, function(data,entityId) {
+//						if ('labels' in data && language in data.labels) { 
+//							entityLabels[entityId] = data.labels[language].value;
+//						} else {
+//							entityLabels[entityId] = entityId;
+//						}
+//					});
+//				}
+//			});
+//			return entityLabels;//responses.entities;
+//		});
+
+	}
 
 	var getEntityTerms = function(entityIds, language) {
 		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&redirects=yes&props=descriptions%7Clabels&languages=' + language + '&callback=JSON_CALLBACK';
@@ -83,6 +132,7 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 	};
 	return {
 		getEntityData: getEntityData,
+		getEntityPropertyClaims: getEntityPropertyClaims,
 		getEntityTerms: getEntityTerms,
 		getEntityLabels: getEntityLabels,
 		searchEntities: searchEntities,
