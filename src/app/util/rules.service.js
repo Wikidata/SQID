@@ -198,9 +198,9 @@ var mergeMaps = function(map1,map2) {
 		  if (map1.hasOwnProperty(key)) {
 			  if (map2.hasOwnProperty(v)) {
 				  
-				  setVars2[v]= setVars2[v].concat(setVars[v]);
+				  map2[v]= map2[v].concat(map1[v]);
 			  } else {
-				  setVars2[v]= setVars[v];
+				  map2[v]= map1[v];
 			  }
 		  }
 	}
@@ -552,7 +552,7 @@ var getStatementsInferred = function(id) {
 			angular.forEach(rules[i].rule.body.atoms, function (atom) {
 				
 				if(atom.type == 'relational') { 
-					if(atom.entity.type == 'variable') {
+					if(atom.entity.type == 'variable') {//TODO fix the [0]
 						entities.push(response.results.bindings[0][atom.entity.value].value
 							.substring("http://www.wikidata.org/entity/".length));						
 					} else {
