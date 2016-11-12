@@ -469,6 +469,18 @@ SELECT DISTINCT ?p { \n\
 				missing: false,
 				termsPromise: null,
 				propLabelPromise: null,
+//				waitForPropertyLabels: function() {
+//					if (this.propLabelPromise == null) {
+//						this.propLabelPromise = i18n.waitForPropertyLabels(Object.keys(propertyIds), language);
+//					}
+//					return this.propLabelPromise;
+//				},
+//				waitForTerms: function() {
+//					if (this.termsPromise == null) {
+//						this.termsPromise = i18n.waitForTerms(Object.keys(itemIds), language);
+//					}
+//					return this.termsPromise;
+//				}
 				waitForPropertyLabels: function() {
 					if (this.propLabelPromise == null) {
 						var propIdList = getPropertyIds(this.statements);
