@@ -566,11 +566,11 @@ var getStatementsInferred = function(id) {
 			
 			resultEntities.push({ entityids:entities, properties:properties });
 		});
-	return resultEntities;
+	
 		return	wikidataapi.getEntityPropertyClaims(resultEntities,language).then(function(responses2){
 			
 			for (var i = 0; i < rules.length; i ++) {
-				addInferredFromQuery(id, rules[i].rule,id, rules[i].qvalueatommap,
+				addInferredFromQuery(id, rules[i].rule,rules[i].qvalueatommap,
 						responses[i].results.bindings,responses2[i].entities, 
 						statements, propertyIds, itemIds );
 			}
