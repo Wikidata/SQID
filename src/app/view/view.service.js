@@ -107,10 +107,42 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			return entityDataPromise;
 		},
 		
-		getEntityDataInferred: function() { 
-				if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
+//		getEntityDataInferred : //entitydata.getEntityDataInferred(id),
+//			
+//			function() { return
+//				if (true) {//fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
+//					this.entityDataInfPromise = entitydata.getEntityDataInferred(id).then(function(data) {
+//					return data;
+//					});
+//
+//				}
+//				return this.entityDataInfPromise;
+//		},
+		
+		getEntityDataInferred : //entitydata.getEntityDataInferred(id),
+			
+//			function(callback) { 
+//			entitydata.getEntityDataInferred(id, callback);
+////			if (true) { //fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
+////				this.entityDataInfPromise = entitydata.getEntityDataInferred(id).then(function(data) {
+////				return data;
+////				});
+////
+////			}
+////			return this.entityDataInfPromise;
+//	},
+//			function(callback) { 
+//			if(true)//fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage())
+//				entitydata.getEntityDataInferred(id).then(function(data) {
+//					callback(data);
+//					});
+//
+//		},
+			
+			function() { 
+				if (true) {//fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
 					this.entityDataInfPromise = entitydata.getEntityDataInferred(id).then(function(data) {
-					return data;
+						return data;
 					});
 
 				}
@@ -118,9 +150,9 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 		},
 		
 		getTest: function() { 
-				if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
+				if (true) {//fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
 					this.entityDataTestPromise = entitydata.getTest(id).then(function(data) {
-					return data;
+						return data;
 					});
 
 				}

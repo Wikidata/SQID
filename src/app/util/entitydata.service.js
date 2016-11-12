@@ -486,22 +486,45 @@ SELECT DISTINCT ?p { \n\
 			};
 	}
 	
-//	TODO fix label ids...
-	var getEntityDataInferred = function(id) {	
-		
-		return rules.getStatementsInferred(id).then(function(statements) {
 
+//	var entityDataInfPromise = null;
+//	TODO fix label ids...
+	var getEntityDataInferred = function(id) {
+		return rules.getStatementsInferred(id).then(function(statements){
+	
 			return getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);});
 	};
+		
+		
+//		function(id) {	
+////		if (this.entityDataInferredPromise == null) {
+////			var stmts = rules.getStatementsInferred(id);//getPropertyIds(this.statements);
+////			this.entityDataInferredPromise = getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);
+////		}
+////		return this.entityDataInferredPromise;
+//		if (this.entityDataInfPromise == null) {
+//			this.entityDataInfPromise = rules.getStatementsInferred(id).then(function(statements) {
+//
+//				return getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);});
+//		}
+////			var stmts = ;//getPropertyIds(this.statements);
+////			this.entityDataInferredPromise = getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);
+////		}
+//		
+//		return this.entityDataInfPromise;
+//	};
 
 	
-	var getTest = function() {	
+	var getTest = function(id) {	
 		
-		return rules.getTest();
+		return rules.getTest(id).then(function(test) {
+
+			return test;
+	});
+		};
 //		(id).then(function(statements) {
 //
 //			return getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);});
-	};
 
 
 	return {

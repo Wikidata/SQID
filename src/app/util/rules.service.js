@@ -517,7 +517,7 @@ var addInferredFromQuery = function(itemId, rule, qvalueAtomMap, allSparqlBindin
 				qualifiers: getQualifierSnaksForRule(rule.head.atom.set.value, rule, qvalueAtomMap, sparqlBindings, apiBindings)
 		}; 
 		
-		statements[pid].push(stmt);
+		statements[property].push(stmt);
 	});
 
 }
@@ -566,12 +566,13 @@ var getStatementsInferred = function(id) {
 			
 			resultEntities.push({ entityids:entities, properties:properties });
 		});
-	
+	return resultEntities;
 		return	wikidataapi.getEntityPropertyClaims(resultEntities,language).then(function(responses2){
 			
 			for (var i = 0; i < rules.length; i ++) {
-				addInferredFromQuery(rules[i].rule,responses[i].results.bindings,responses2[i].entities, 
-						statements, propertyIds, itemIds, id, rules[i].headqualifiers);
+				addInferredFromQuery(id, rules[i].rule,id, rules[i].qvalueatommap,
+						responses[i].results.bindings,responses2[i].entities, 
+						statements, propertyIds, itemIds );
 			}
 			
 			return statements;
@@ -586,61 +587,96 @@ var getStatementsInferred = function(id) {
 
 
 
-var addStatementsInfFromQuery22 = function(rule, instanceJson, instanceJson2, statements, propertyIds, itemIds, objectId, headqualifiers) { // fixedPropId
+var addInferredFromQuery2 = function(itemId, rule, qvalueAtomMap, allSparqlBindings, apiBindings, statements, propertyIds, itemIds) { 
+	var sparqlBindings = allSparqlBindings[0];
+	
+	var property = rule.head.atom.property;
+	var pvalue = rule.head.atom.pvalue.type == 'variable' ? sparqlBindings[rule.head.atom.pvalue.value].value
+			.substring("http://www.wikidata.org/entity/".length) : rule.head.atom.pvalue.value;
 
-	
-	return getQualifierData22(instanceJson[0], instanceJson2,rule.head.atom.set.value,headqualifiers, rule);
-	
-	
-	
-	angular.forEach(instanceJson, function(result) {return "zzcc";
-		var vstr = rule.head.atom.pvalue.value;//rule.body.relatoms[0].entity.value;//+ "entity";//rule.head.value + "entity";
-		var eid = rule.head.atom.pvalue.type=='variable' ? 
-				result[vstr].value.substring("http://www.wikidata.org/entity/".length) : rule.head.pvalue.value;
-		
-		
-//					var eid = rule.body.relatoms[0].entity.type=='variable' ? 
-//						result[vstr].value.substring("http://www.wikidata.org/entity/".length) : rule.body.relatoms[0].entity.value;
-		var pid = rule.head.atom.property;
-//					TODO new stmt id
-		var sid = 0;
+	if (! (property in statements) ) {
+		statements[property] = [];
+		propertyIds[property] = true;
+	}
 
+//TODO consider case that too many? 
+//TODO we currently only consider statements the other case, not sure how to consider the first	
+	var entityType;
+//				if (pvalue.substring(0,1) == "P") {
+//					entityType = "property";
+//					propertyIds[pvalue] = true;
+//				} else
+	{
+		entityType = "item";
+		itemIds[pvalue] = true;
+	}
+
+	var value = { "entity-type": entityType, "numeric-id": pvalue.substring(1)};
 	
-		if (! (pid in statements) ) {
-			statements[pid] = [];
-			propertyIds[pid] = true;
+	var snak = {
+		snaktype: "value",
+		property: property,
+		datatype: "wikibase-item",
+		datavalue: {value: value, type: "wikibase-entityid"}
+	}; 
+	
+//	TODO fix 
+	var stmtId = 0;
+//	TODO the set may be a variable/action! so fix qualifiers, 
+	var stmt = { mainsnak: snak, rank: "normal", type: "statement", 
+			id: stmtId, 
+			qualifiers: []//getQualifierSnaksForRule(rule.head.atom.set.value, rule, qvalueAtomMap, sparqlBindings, apiBindings)
+	}; 
+	return stmt;
+	statements[property].push(stmt);
+	
+	
+	angular.forEach(allSparqlBindings, function(sparqlBindings) {
+		
+		var property = rule.head.atom.property;
+		var pvalue = rule.head.atom.pvalue.type == 'variable' ? sparqlBindings[rule.head.atom.pvalue.value].value
+				.substring("http://www.wikidata.org/entity/".length) : rule.head.atom.pvalue.value;
+	
+		if (! (property in statements) ) {
+			statements[property] = [];
+			propertyIds[property] = true;
 		}
 
 //TODO consider case that too many? 
-//TODO need the following?				
+//TODO we currently only consider statements the other case, not sure how to consider the first	
 		var entityType;
-//					if (eid.substring(0,1) == "P") {
+//					if (pvalue.substring(0,1) == "P") {
 //						entityType = "property";
-//						propertyIds[eid] = true;
+//						propertyIds[pvalue] = true;
 //					} else
 		{
 			entityType = "item";
-			itemIds[eid] = true;
+			itemIds[pvalue] = true;
 		}
 
-		var value = { "entity-type": entityType, "numeric-id": parseInt(eid.substring(1))};
+		var value = { "entity-type": entityType, "numeric-id": pvalue.substring(1)};
 		
 		var snak = {
 			snaktype: "value",
-			property: pid,
+			property: property,
 			datatype: "wikibase-item",
 			datavalue: {value: value, type: "wikibase-entityid"}
 		}; 
 		
+//		TODO fix 
+		var stmtId = 0;
+//		TODO the set may be a variable/action! so fix qualifiers, 
 		var stmt = { mainsnak: snak, rank: "normal", type: "statement", 
-				id: sid, 
-				qualifiers: getQualifierData(result, instanceJson2,rule.head.atom.set.value,headqualifiers, rule)
-				}; 
+				id: stmtId, 
+				qualifiers: []//getQualifierSnaksForRule(rule.head.atom.set.value, rule, qvalueAtomMap, sparqlBindings, apiBindings)
+		}; 
 		
-		statements[pid].push(stmt);
+		statements[property].push(stmt);
 	});
 
 }
+
+
 //		{"mainsnak":{
 	//	"snaktype":"value",
 //			"property":"P1038",
@@ -711,70 +747,60 @@ var stmtIndex = qvalueAtomMap[qualifier.qvalue.value];
 	
 var getTest = function(id) {
 	
-	var language = i18n.getLanguage();
-	var label = '';
-
-var rules = getRules(id, language);
-
-
-var requests = [];
-angular.forEach(rules, function (rule) {
-	requests.push( sparql.getQueryRequest(rule.sparql) );
-});
-
-var statements = {};
-var propertyIds = {};
-var itemIds = {};
-
-return $q.all(requests).then( function(responses) {
 	
-//	var resultEntities = [];
-//	angular.forEach(responses, function (response,i) {
-//		var entityIds = [];
-//		var properties = [];
-//
-//		
-//		angular.forEach(rules[i].rule.body.atoms, function (atom) {
-//			
-//			if(atom.type=='relational') {
-//				if(atom.entity.type=='variable') {
-//					entityIds.push(response.results.bindings[0][atom.entity.value].value
-//							.substring("http://www.wikidata.org/entity/".length));						
-//				} else {
-//					entityIds.push(atom.entity.value);
-//				};
-//				
-//				properties.push(atom.property);
-//			}
-//			
-//
-//		});		
-//		resultEntities.push({entityids:entityIds,
-//			properties:properties});
-//	});
-//	 
-////		return resultEntities;
-//	
-////			entityIds,properties//
-//	
-//	return	wikidataapi.getEntityPropertyClaims(resultEntities,language).//
-////			getEntityTerms(['Q1339'],'en').
-//		then(function(responses2){
-////				return rules[0].rule.body.atoms[0];//resp[0].entities;
-////				return resultEntities;
-////				return resp[0].entities["Q57487"].id;//return resp.entities;
-////				if(resp.entities.Q1339 == null);// return;
-//		
-//		for (var i = 0; i < rules.length; i ++) {
-//			return addStatementsInfFromQuery22(rules[i].rule,responses[i].results.bindings,responses2[i].entities, 
-//					statements, propertyIds, itemIds, id, rules[i].headqualifiers);
-//		}
-//		
-//		return statements;//getEntityDataInfRecord(language, label, id, statements);// propertyIds, itemIds);
-//		
-//	});
-//			return getEntityDataInfRecord(language, label, id, statements);
+	var language = i18n.getLanguage();
+	
+	var rules = getRules(id, language);
+	var requests = [];
+	
+	angular.forEach(rules, function (rule) {
+		requests.push(sparql.getQueryRequest(rule.sparql));
+	});
+	
+	var statements = {};
+//	TODO return below
+	var propertyIds = {};
+	var itemIds = {};
+	
+	return $q.all(requests).then( function(responses) {
+
+//		collect the ids needed to request the qualifiers
+		var resultEntities = []; //return responses;
+		angular.forEach(responses, function (response, i) {
+			
+			var entities = [];
+			var properties = [];
+			
+			angular.forEach(rules[i].rule.body.atoms, function (atom) {
+				
+				if(atom.type == 'relational') { 
+					if(atom.entity.type == 'variable') {
+						entities.push(response.results.bindings[0][atom.entity.value].value
+							.substring("http://www.wikidata.org/entity/".length));						
+					} else {
+						entities.push(atom.entity.value);
+					};			
+					
+					properties.push(atom.property);
+				}
+			});	
+//			TODO collect also those from the actions!
+			
+			resultEntities.push({ entityids:entities, properties:properties });
 		});
+		
+		return	wikidataapi.getEntityPropertyClaims(resultEntities,language).then(function(responses2){
+//			return responses[0].results.bindings;
+			for (var i = 0; i < rules.length; i ++) {
+				addInferredFromQuery(id, rules[i].rule,rules[i].qvalueatommap,
+						responses[i].results.bindings,responses2[i].entities, 
+						statements, propertyIds, itemIds );
+			}
+			
+			return statements;
+			
+		});		
+	});
 };
 
 
