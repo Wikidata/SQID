@@ -151,6 +151,17 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 				return null;
 			}
 		},
+		
+		// Find Wikipedia article
+		getUrlWikipedia: function(sitelinks) {
+			var wikiName = i18n.getLanguage() + 'wiki';
+			if (i18n.getLanguage() != null && wikiName in sitelinks) {
+				return  'https://' + i18n.getLanguage() + '.wikipedia.org/wiki/' + sitelinks[wikiName].replace(" ","_");
+			} else {
+				return null;
+			}
+		},
+
 
 		getEntityInlinks: function() {
 			// Not chached. Should only be asked for in one place in the controller (alternatively add caching)

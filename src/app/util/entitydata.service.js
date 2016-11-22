@@ -20,9 +20,14 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 	 */
 	var getBestStatementValue = function(statementsJson, defaultValue) {
 		var result = null;
+		var hasPreferred = false;
 		angular.forEach(statementsJson, function(statementJson) {
+			if (hasPreferred) { // poor man's "break"
+				return;
+			}
 			if (statementJson.rank == 'preferred') {
-				return getStatementValue(statementJson, defaultValue);
+				hasPreferred = true;
+				result = getStatementValue(statementJson, defaultValue);
 			} else if (statementJson.rank != 'deprecated' && result == null) {
 				result = getStatementValue(statementJson, defaultValue);
 			}
@@ -250,6 +255,7 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 				description: '',
 				aliases: [],
 				statements: {},
+				sitelinks: {},
 				missing: false,
 				termsPromise: null,
 				propLabelPromise: null,
@@ -299,6 +305,13 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 					ret.statements[property] = statementGroup;
 				});
 			}
+			if ("sitelinks" in entityData) {
+				ret.sitelinks = {};
+				for (var i in entityData.sitelinks){
+					ret.sitelinks[entityData.sitelinks[i].site] = entityData.sitelinks[i].title;
+				}
+			}			
+
 
 			if (withProposals == true){
 				ret = includeProposals(id, ret);
