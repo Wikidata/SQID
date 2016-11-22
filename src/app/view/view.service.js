@@ -8,12 +8,13 @@ define([
 	'util/dataFormatter.service',
 	'util/htmlCache.service',
 	'data/properties.service',
+	'oauth/oauth.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache',
-function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
+angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache', 'oauth',
+function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache, oauth) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -43,8 +44,14 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 	// It is cached since the controller needs it in several places.
 	var getEntityData = function() {
 		if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
-			entityDataPromise = entitydata.getEntityData(id).then(function(data) {
-				return data;
+			entityDataPromise = oauth.userinfo().then(function(userdata){
+				var showProposals = false;
+				if (userdata){
+					showProposals = true;
+				}
+				return entitydata.getEntityData(id, showProposals).then(function(data) {
+					return data;
+				});
 			});
 			fetchedEntityId = id;
 			fetchedEntityLanguage = i18n.getLanguage();

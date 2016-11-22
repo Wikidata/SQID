@@ -81,6 +81,32 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 		return result;
 	}
 
+	var addStatement = function(qid, statement){
+		var data = '"{\\\"claims\\\":[' + statement.replace(/"/g, '\\\"') + ']}"';
+		var jsonArg = '{"action": "wbeditentity", "id":"' + qid  +'", "data": ' + data + '}';
+		var genericQueryString = $location.protocol() 
+			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=generic&json=' + encodeURIComponent(jsonArg);
+		var resp = $http.get(genericQueryString).then(function(response){
+			if (response.data.error){
+				console.log(response.data.error);
+			}
+		});
+		return resp;
+	}
+
+	var addSource = function(snaks, stmtId){
+		var jsonArg = JSON.stringify(snaks);
+		var url = $location.protocol()
+			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=add_source&statement=' 
+			+ stmtId + '&snaks=' + jsonArg;
+		var resp = $http.get(url).then(function(response){
+			if (response.data.error){
+				console.log(response.data.error);
+			}
+		});
+		return resp;
+	}
+
 	var userinfo = function(){
 		if (!promise){
 			return getUserInfo();
@@ -99,6 +125,8 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 		setLabel: setLabel,
 		setClaims: setClaims,
 		setString: setString,
+		addStatement: addStatement,
+		addSource: addSource,
 		logout: logout,
 		setDummyLogin: setDummyLogin,
 		unsetDummyLogin: unsetDummyLogin

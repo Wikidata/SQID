@@ -8,7 +8,8 @@ define([
 	'util/util.service',
 	'util/htmlCache.service',
 	'util/sqidStatementTable.directive',
-	'util/sqidCompile.directive',	
+	'util/sqidCompile.directive',
+	'util/primarySources.service',
 	'data/properties.service',
 	'data/classes.service',
 	'oauth/oauth.service',
@@ -17,8 +18,8 @@ define([
 ///////////////////////////////////////
 
 angular.module('view').controller('ViewController', [
-'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache',
-function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache){
+'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources',
+function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources){
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 10;
 	var MAX_PROP_SUBJECTS = 10;
@@ -32,9 +33,15 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 
 	View.updateId();
 	$scope.id = View.getId();
+	// primarySources.getStatements($scope.id).then(function(results){
+	// 	console.log(results);	
+	// });
+
 	var numId = $scope.id.substring(1);
 	$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 	
+	$scope.lang = i18n.getLanguage();
+
 	$scope.translations = {};
 
 	$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT', 'MODALS.EMPTY_FIELDS_ERROR', 'MODALS.EXECUTION_ERROR', 'MODALS.EXECUTION_SUCCESSFUL']).then( function(translations) {
@@ -130,6 +137,9 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 			});
 		});
 	};
+
+	primarySources.setRefreshFunction(refreshContent);
+
 	refreshContent(true);
 
 	Properties.then(function(properties){

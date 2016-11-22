@@ -12,8 +12,8 @@
 		"START": "@:PAGE_TITLE.START",
 		"ABOUT": "@:PAGE_TITLE.ABOUT",
 		"ITEM_SEARCH": "Search Item",
-		"AUTHORIZE" : "Authorize",
-		"UNAUTHORIZE" : "Unauthorize"
+		"AUTHORIZE" : "Login",
+		"UNAUTHORIZE" : "Logout"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistics based on data dump {{date}}",
@@ -30,7 +30,8 @@
 		"EXECUTION_ERROR": "Could not apply your changes due to errors",
 		"EXECUTION_SUCCESSFUL": "Successful!",
 		"TITLE_EDIT_LABEL": "Edit label",
-		"CAPTION_EDIT_LABEL": "New label for "
+		"CAPTION_EDIT_LABEL": "New label for ",
+		"CAPTION_LANGUAGE": "Language: "
 	},
 	"PAGINATION": {
 		"ENTRIES_PER_PAGE": "Rows per page",
@@ -145,6 +146,9 @@
 	"NO_REFERENCES_HINT": "no references given",
 	"NOSUCHENTITY_HEADLINE": "Sorry, I could not find any entity with ID '{{id}}'.",
 	"NOSUCHENTITY_BODY": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know.",
+	"PROPOSAL": "(Proposal)",
+	"SOURCE": "Source",
+	"PROPOSAL_SOURCE": "Proposal Source",
 
 	"QUERY": {
 		"RUN": {

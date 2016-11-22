@@ -4,13 +4,14 @@ define([
 	'util/wikidataapi.service',
 	'util/util.service',
 	'util/sparql.service',
+	'util/primarySources.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('util').factory('entitydata', [
-'wikidataapi', 'util', 'i18n', 'sparql', '$q', 
-function(wikidataapi, util, i18n, sparql, $q) {
+'wikidataapi', 'util', 'i18n', 'sparql', 'primarySources', '$q', 
+function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 
 	/**
 	 * Returns the "best" value among a list of statements. This is the value of
@@ -239,9 +240,9 @@ function(wikidataapi, util, i18n, sparql, $q) {
 		});
 	}
 
-	var getEntityData = function(id) {
+	var getEntityData = function(id, withProposals) {
 		var language = i18n.getLanguage();
-		return wikidataapi.getEntityData(id, language).then(function(response) {
+		return wikidataapi.getEntityData(id, language, true).then(function(response) {
 			var ret = {
 				language: language, // this is fixed for this result!
 				label: '',
@@ -292,10 +293,21 @@ function(wikidataapi, util, i18n, sparql, $q) {
 				ret.statements = {};
 				angular.forEach(entityData.claims, function(statementGroup, property) {
 					sortStatementGroup(statementGroup, ret.language);
+					for (var i=0; i < statementGroup.length; i++){
+						statementGroup[i]['source'] = 'Wikidata';
+					}
 					ret.statements[property] = statementGroup;
 				});
 			}
 
+			if (withProposals == true){
+				ret = includeProposals(id, ret);
+				// ret = includeProposals(id, ret).then(function(data){
+				// 	return data.waitForPropertyLabels().then(function(response){
+				// 		return data;
+				// 	});
+				// });
+			}
 			return ret;
 		});
 	};
@@ -439,6 +451,193 @@ SELECT DISTINCT ?p { \n\
 				})
 			}
 		});
+	}
+
+	var includeProposals = function(id, entities){
+		return primarySources.getStatements(id).then(function(response){
+			if ('claims' in response){
+				angular.forEach(response.claims, function(statementGroup, property) {
+					sortStatementGroup(statementGroup, entities.language);
+					for (var i=0; i < statementGroup.length; i++){
+						statementGroup[i]['source'] = 'PrimarySources';
+						statementGroup[i]['reject'] = function(refresh){ primarySources.reject(statementGroup[i], refresh); };
+					}
+					if (property in entities.statements){
+						angular.forEach(statementGroup, function(pStmt){
+							var isNew = true;
+							var newRef = true;
+							var equivalentStatements = [];
+							angular.forEach(entities.statements[property], function(eStmt){
+								if (valueIsEquivalent(eStmt.mainsnak.datavalue, pStmt.mainsnak.datavalue)){
+									
+									// check qualifiers
+									var qualEq = true;
+									if (pStmt.qualifiers){
+										angular.forEach(eStmt.qualifiers, function(qualifierGroup, qProperty){
+											if (qProperty in pStmt.qualifiers){
+												angular.forEach(qualifierGroup, function(qStmt){
+													var eqExists = false;
+													angular.forEach(pStmt.qualifiers[qProperty], function(pqStmt){
+														if (valueIsEquivalent(qStmt.datavalue, pqStmt.datavalue)){
+															eqExists = true;
+														}
+													});
+													if (!eqExists){
+														qualEq = false;
+													}
+												})
+											}
+										});
+									}
+
+									if (qualEq){
+										equivalentStatements.push(eStmt);
+											isNew = false;
+									}else{
+										isNew = true;
+									}
+								}
+							});
+							
+							if (equivalentStatements.length > 0){
+								var result = hasNoneDuplicates(pStmt.references, equivalentStatements);
+								if (result.nonProposal){
+									angular.forEach(result.refStatements, function(ref){
+										if (result.nonProposal.references){
+											ref['refId'] = pStmt.id; // add primary sources id to approve or reject reference
+											result.nonProposal.references.push(ref);
+										}else{
+											ref['refId'] = pStmt.id;
+											result.nonProposal.references = [ref];
+										}
+									});
+								}else{
+									if (result.refStatements != []){
+										entities.statements[property].push(pStmt);
+									}
+								}
+
+							}
+
+
+							if (isNew){
+								entities.statements[property].push(pStmt);
+							}else{
+
+							}
+						});
+					}else{
+						entities.statements[property] = statementGroup;
+					}
+					sortStatementGroup(entities.statements[property], entities.language);
+				});
+			}
+			return entities;
+		});
+	}
+
+	var valueIsEquivalent = function(v1, v2){
+		
+		if (v1.type != v2.type){
+			return false;
+		}
+
+		if (v1.value == v2.value){ // type=string
+			return true;
+		}
+
+		if (v1.type == 'quantity'){
+			return (v1.value.amount == v2.value.amount);
+		}
+
+		if (v1.type == 'wikibase-entityid'){
+			return ((v1.value['numeric-id'] == v2.value['numeric-id']) &&
+				(v1.value['entity-type'] == v2.value['entity-type']));
+		}
+
+		if (v1.type == 'time'){
+			return (v1.value.time == v2.value.time);
+		}
+
+		if (v1.type == 'globecoordinate'){
+			return ((v1.value.globe == v2.value.globe) &&
+				(v1.value.latitude == v2.value.latitude) && 
+				(v1.value.longitude == v2.value.longitude));
+		}
+
+		if (v1.type == 'monolingualtext'){
+			return ((v1.value.language == v2.value.language) &&
+				(v1.value.text == v2.value.text));
+		}
+
+		return false;
+
+	}
+
+	hasNoneDuplicates = function(pReferences, eStatements){
+		var nonEquivalentRefsStatements = [];
+		var hasEquivalent = false;
+		angular.forEach(eStatements, function(eStmt){
+			// check if eStmt has references
+			var equivalent = true;
+			angular.forEach(pReferences, function(pRef){ // check if all pReferences in eStmt
+				var pRefExists = false;
+				angular.forEach(eStmt.references, function(eRef){
+					// check if eRef == pRef -> set pRefExists = true
+					var snakGroupMissing = false;
+					angular.forEach(pRef.snaks, function(pRefGroup, pProperty){
+						var eHasSnakGroup = false;
+						angular.forEach(eRef.snaks, function(eRefGroup, eProperty){
+							var eRefGroupIsPRefGroup = true;
+							if (eProperty == pProperty){
+								angular.forEach(pRefGroup, function(pRefGroupValue){
+									var pRefGroupValueIneRefGroup = false;
+										angular.forEach(eRefGroup, function(eRefGroupValue){
+											if (valueIsEquivalent(eRefGroupValue.datavalue, pRefGroupValue.datavalue)){
+												pRefGroupValueIneRefGroup = true;
+											}
+										});
+									if (!pRefGroupValueIneRefGroup){
+										eRefGroupIsPRefGroup = false;
+									}
+								})
+							}else{
+								eRefGroupIsPRefGroup = false;
+							}
+							if (eRefGroupIsPRefGroup){
+								eHasSnakGroup = true;
+							}
+						});
+						if (!eHasSnakGroup){
+							snakGroupMissing = true;
+						}
+					});
+					if (!snakGroupMissing){
+						pRefExists = true;
+					}
+				});
+				if (!pRefExists){
+					equivalent = false;
+				}
+			});
+			if (equivalent){
+				hasEquivalent = true;
+			}
+		});
+		if (!hasEquivalent){
+			angular.forEach(pReferences, function(pRef){
+				pRef.source = 'PrimarySources';
+				nonEquivalentRefsStatements.push(pRef);
+			});
+		}
+		var result = {};
+		result.refStatements = nonEquivalentRefsStatements;
+		for (var i=0; i < eStatements.length; i++){
+			if (eStatements[i].source == 'Wikidata'){
+				result.nonProposal = eStatements[i];
+			}
+		}
+		return result;
 	}
 
 	return {

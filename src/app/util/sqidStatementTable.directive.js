@@ -3,14 +3,15 @@ define([
 	'util/util.module',
 	'util/util.service',
 	'util/dataFormatter.service',
+	'util/primarySources.service',
 	'i18n/i18n.service',
 	'data/properties.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('util').directive('sqidStatementTable', [
-'$compile', 'properties', 'dataFormatter', 'util', 'i18n', 
-function($compile, Properties, dataFormatter, util, i18n) {
+'$compile', 'properties', 'dataFormatter', 'util', 'i18n', 'primarySources', 
+function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 	var properties = null;
 	var outMissingTermsListener = { hasMissingTerms : false};
 	var inMissingTermsListener = { hasMissingTerms : false};
@@ -94,13 +95,14 @@ function($compile, Properties, dataFormatter, util, i18n) {
 				var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
 				angular.forEach(statementGroup, function (statement, index) {
 					hasContent = true;
+					var isProposal = (statement.source != 'Wikidata') && (statement.source);
 					if (hideSomeStatements && index >= hideStatementsThreshold) {
-						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '">';
+						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '"' + (isProposal ? ' class="proposal"' : "") + '>';
 					} else {
-						html += '<tr title="' + propertyLabel + '">';
+						html += '<tr title="' + propertyLabel + '"' + (isProposal ? ' class="proposal"' : "") + '>';
 					}
 					if (index == 0) {
-						html += '<th valign="top" rowspan="'
+						html += '<th valign="top" class="statements-table-left" rowspan="'
 							+ (hideSomeStatements ? '{{getRowSpan(\'' + statementListId + '\',' + statementGroup.length + ')}}' : statementGroup.length )
 							+ '">'
 							+ i18n.getPropertyLink(propId)
@@ -120,8 +122,16 @@ function($compile, Properties, dataFormatter, util, i18n) {
 					if (!outlinks) { // show left-arrow for inlinks
 						html += '<span class=" light-grey font-tiny" style="margin-left: -2ex; margin-right: 1ex; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>';
 					}
-					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) +
-						'</td></tr>';
+					
+					if (isProposal){
+						html += '<div class="proposal-ctrl"><span translate="PROPOSAL"></span>'
+							+ '<i class="fa fa-times-circle proposal-reject" ng-click="reject(\'' + encodeURIComponent(JSON.stringify(statement)) + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approve(\'' + encodeURIComponent(JSON.stringify(statement)) + '\');$event.stopPropagation()"></i>'
+							+ '<span style="display: block"><span translate="SOURCE"></span>: ' + statement.source + ' </span></div>';
+					}
+
+					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) 
+						+ '</td></tr>';
 				});
 			});
 			if (!hasContent) return '';
@@ -223,7 +233,22 @@ function($compile, Properties, dataFormatter, util, i18n) {
 		scope.getShowRowsClass = function(id) {
 			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
 		}
-		
+		scope.approve = function(statement){
+			primarySources.approve(scope.id, decodeURIComponent(statement), true);
+		}
+		scope.reject = function(statement){
+			primarySources.reject(scope.id, decodeURIComponent(statement), true);
+		}
+		scope.approveReference = function(stmtId, reference){
+			var ref = JSON.parse(decodeURIComponent(reference));
+			primarySources.approveReference(stmtId, ref.snaks, ref.refId, true);
+		}
+		scope.rejectReference = function(stmtId, reference){
+			var ref = JSON.parse(decodeURIComponent(reference));
+			primarySources.rejectReference(stmtId, ref.snaks, ref.refId, true);
+		}
+
+
 		scope.inHtml = '';
 		scope.outHtml = '';
 

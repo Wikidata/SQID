@@ -621,6 +621,10 @@ div.qualifiers {
 	text-decoration: none;
 }
 
+.login-bar{
+	margin-bottom: 10px;
+}
+
 .edit-link{
 	font-size: 0.8em;
 }
@@ -640,3 +644,52 @@ div.qualifiers {
 	font-weight: normal;
 }
 
+.table-striped > tbody > tr:nth-of-type(odd).proposal{
+	background: #c3e1ef;
+}
+
+.proposal{
+	background: #d9edf7;
+}
+
+.proposal-ctrl{
+	float: right;
+	margin-right: 20px;
+	min-width: 40px;
+
+}
+
+.proposal-ctrl > span{
+	color: #777;
+	font-size: 12px;	
+	vertical-align: top;
+	font-weight: 100;
+}
+
+.proposal-font-format{
+	color: #777;
+	font-size: 12px;
+}
+
+.proposal-ctrl > i{
+	font-size: 16px;
+	color: #275c8a;
+	margin-left: 5px;
+	float: right;
+}
+
+.proposal-accept:hover{
+	color: #5cb85c;
+}
+
+.proposal-reject:hover{
+	color: #d9534f;
+}
+
+.modal-notes{
+	padding-top: 5px;
+}
+
+.statements-table-left{
+	background: #fff;
+}

@@ -284,6 +284,7 @@
 	<div class="form-group">
 	  <label for="labelEditField" class="normal-weight">{{ 'MODALS.CAPTION_EDIT_LABEL' | translate }} {{id}}</label>
 	  <input type="text" class="form-control" placeholder="{{entityData.label}}" id="labelEditField" ng-model="newLabel">
+	  <div class="modal-notes"><label class="normal-weight">({{ 'MODALS.CAPTION_LANGUAGE' | translate }} {{ lang }})</label></div>
 	   <label ng-if="modalResponse" class="{{modalResponseClass}}">{{modalResponse}}</label>
 	</div>        
       </div>
