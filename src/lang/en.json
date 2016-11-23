@@ -31,7 +31,14 @@
 		"EXECUTION_SUCCESSFUL": "Successful!",
 		"TITLE_EDIT_LABEL": "Edit label",
 		"CAPTION_EDIT_LABEL": "New label for ",
-		"CAPTION_LANGUAGE": "Language: "
+		"CAPTION_LANGUAGE": "Language: ",
+		"TITLE_LOGIN_LABEL": "Connect SQID with your Wikimedia Account",
+		"LOGIN_DESCRIPTION": "You can connect SQID with your Wikimedia Account which gives you the possibility to do edit Wikidata in SQID. If you want to do this follow the instruction:",
+		"LOGIN_STEP_ONE": "Click on \"Connect\"",
+		"LOGIN_STEP_TWO": "Authorize Widar",
+		"LOGIN_STEP_THREE": "Click on  the \"Done\" button below",
+		"CONNECT": "Connect",
+		"DONE": "Done"
 	},
 	"PAGINATION": {
 		"ENTRIES_PER_PAGE": "Rows per page",
