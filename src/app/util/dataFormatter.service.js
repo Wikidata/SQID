@@ -204,6 +204,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				refTable += '<table class="reference-table">';
 				angular.forEach(statement.references, function(reference) {
 					var isProposal = false;
+					var showControls = false;
 					var referenceId = statement.id;
 					if ('source' in reference){
 						if (reference.source != 'Wikidata'){
@@ -211,10 +212,13 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 							if ('refId' in reference){
 								referenceId = reference.refId;
 							}
+							if (statement.source == 'Wikidata'){
+								showControls = true;
+							}
 						}
 					}
 					var proposalControls = '';
-					if (isProposal){
+					if (showControls){
 						proposalControls = '<th><div class="proposal-ctrl">'
 							+ '<i class="fa fa-times-circle proposal-reject" ng-click="rejectReference(\'' + statement.id  + '\', \'' + encodeURIComponent(JSON.stringify(reference)) + '\');$event.stopPropagation()"></i>'
 							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + statement.id  + '\', \'' + encodeURIComponent(JSON.stringify(reference)) + '\');$event.stopPropagation()"></i>'
