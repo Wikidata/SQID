@@ -33,9 +33,6 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 
 	View.updateId();
 	$scope.id = View.getId();
-	// primarySources.getStatements($scope.id).then(function(results){
-	// 	console.log(results);	
-	// });
 
 	var numId = $scope.id.substring(1);
 	$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
@@ -89,16 +86,20 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 	$scope.propertyReferenceCount = 0;
 	$scope.propertyDatatype = null;
 
-	$scope.hasEditRights = true;
-
 	$scope.modalResponse = null;
 	$scope.modalResponseClass = null;
 
 	oauth.userinfo().then(function(data){
 		if (data){
-			$scope.hasEditRights = true;
+			if (!View.hasEditRights()){
+				View.clearEntityDataCache();
+			}
+			View.setEditRights(true);
 		}else{
-			$scope.hasEditRights = false;
+			if (View.hasEditRights){
+				View.clearEntityDataCache();
+			}
+			View.setEditRights(false);
 		}
 	});
 

@@ -117,6 +117,7 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 
 	var logout = function(){
 		promise = null;
+		unsetDummyLogin();
 	}
 
 	return {

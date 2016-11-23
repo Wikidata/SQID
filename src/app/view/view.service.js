@@ -19,6 +19,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
 	var entityDataPromise = null;
+	var hasEditRights = false;
 
 	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
 		var ret = [];
@@ -114,11 +115,23 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 
 		getEntityData: getEntityData,
 
-		getEntityDataUncached: function() {
+		clearEntityDataCache: function(){
 			entityDataPromise = null;
 			fetchedEntityId = null;
-			fetchedEntityLanguage = null;
+			fetchedEntityLanguage = null;			
+		},
+
+		getEntityDataUncached: function() {
+			clearEntityDataCache();
 			return getEntityData();
+		},
+
+		hasEditRights: function(){
+			return hasEditRights;
+		},
+
+		setEditRights: function(hasRights){
+			hasEditRights = hasRights;
 		},
 
 		// Find images from statements
