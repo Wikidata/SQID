@@ -60,6 +60,12 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 		return entityDataPromise;
 	};
 
+	var clearEntityDataCache = function(){
+		entityDataPromise = null;
+		fetchedEntityId = null;
+		fetchedEntityLanguage = null;			
+	};
+
 	return {
 		updateId: function() {
 			id = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
@@ -115,11 +121,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 
 		getEntityData: getEntityData,
 
-		clearEntityDataCache: function(){
-			entityDataPromise = null;
-			fetchedEntityId = null;
-			fetchedEntityLanguage = null;			
-		},
+		clearEntityDataCache: clearEntityDataCache,
 
 		getEntityDataUncached: function() {
 			clearEntityDataCache();
