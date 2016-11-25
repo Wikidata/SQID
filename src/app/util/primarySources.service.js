@@ -138,12 +138,12 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 				.replace(/\{\{user\}\}/, user)
 				.replace(/\{\{state\}\}/, STATEMENT_STATES.wrong)
 				.replace(/\{\{id\}\}/, psId);
-		});
-		$http.post(url).then(function(res){
-			console.log(res);
-			if (refresh){
-				refreshFunction();
-			}
+			$http.post(url).then(function(res){
+				console.log(res);
+				if (refresh){
+					refreshFunction();
+				}
+			});
 		});
 	}
 
