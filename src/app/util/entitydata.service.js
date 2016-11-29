@@ -502,9 +502,9 @@ SELECT DISTINCT ?p { \n\
 //	var entityDataInfPromise = null;
 //	TODO fix label ids...
 	var getEntityDataInferred = function(id) {
-		return rules.getStatementsInferred(id).then(function(statements){
+		return rules.getStatementsInferred(id).then(function(result){
 	
-			return getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);});
+			return getEntityDataInferredRecord(i18n.getLanguage(), '', id, result.statements);});
 	};
 		
 		
