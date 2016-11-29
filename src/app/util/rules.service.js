@@ -43,33 +43,34 @@ head: { atom :
 }
 },
 
-//
-//	{
-//	body: { atoms : [
-//			{
-//				type: "set",
-//				variable:"S",
-//				attribute:{value:"P580", type:"property"},
-//				qvalue:{value:"start", type:"variable"}
-//			},{
-//				type: "relational",
-//				entity: {value:"x", type:"variable"},//Q57487)
-//				property: "P26",
-//				pvalue: {value:"y", type:"variable"},
-//				set: {value:"S", type:"variable" }
-//			}]
-//	},
-//	head: { atom : 
-//		{
-//			type:"relational",//not necessary
-//			entity: {value:"y", type:"variable"},
-//			property:"P26",
-//			pvalue: {value:"x", type:"variable"},
-//			set: {value:"S", type:"variable" }
-//		}
-//	}
-//	},
-//
+
+	{
+	body: { atoms : [
+			{
+				type: "set",
+				variable:"S",
+				value:[{
+					attribute:{value:"P580", type:"property"},
+				    qvalue:{value:"start", type:"variable"}} ]
+			},{
+				type: "relational",
+				entity: {value:"x", type:"variable"},//Q57487)
+				property: "P26",
+				pvalue: {value:"y", type:"variable"},
+				set: {value:"S", type:"variable" }
+			}]
+	},
+	head: { atom : 
+		{
+			type:"relational",//not necessary
+			entity: {value:"y", type:"variable"},
+			property:"P26",
+			pvalue: {value:"x", type:"variable"},
+			set: {value:"S", type:"variable" }
+		}
+	}
+	},
+
 //	//
 //	{
 //	body: { atoms : [
@@ -170,10 +171,11 @@ head: { atom:
 	property:"P1038",
 	pvalue: {value:"gf", type:"variable"},
 	set: {
+		type:"set" ,
 		value:[{
 		attribute:{value:"P1039", type:"property"},
-	    qvalue:{value:"Q9238344", type:"item"}} ], type:"set" }
-		
+	    qvalue:{value:"Q9238344", type:"item"}} ]
+		}		
 	}
 }
 }
@@ -220,6 +222,7 @@ var addQualifierSPARQL = function(qualifier, stmtvar, sparql, itementity, itemid
 	var qvalue = !(qualifier.qvalue.type == "variable")  ? qualifier.qvalue.value : 
 					qvalueIsVar ? "?"+qualifier.qvalue.value : itemid;
 	
+//	TODO maybe replace stmt attr value with other names. currently we have a problem if the variables in the rule have these names
 	var s1;
 	if(attrIsVar) {
 		s1 =	" \n stmt attr value. \n\
@@ -254,7 +257,7 @@ var addRelTripleSPARQL = function(atom, stmtvar, sparql, itementity, itemid, lan
 	
 	var lvar = stmtvar + "Label";
 	
-
+//	TODO maybe replace entity ... with other names. currently we have a problem if the variables in the rule have these names
 	var s0 =	" \n\
 	entity p:property stmt. \n\
 	stmt ps:property value. \n\
@@ -313,8 +316,11 @@ var getSetQualifiers = function(atoms) {
 	
 	angular.forEach(atoms, function(atom) {
 		if(atom.type == "set") { 
-			put(sets, atom.variable, atom);
-		} else if(atom.type == "specifier") {
+			angular.forEach(atom.value, function(qualifier) {
+				put(sets, atom.variable, qualifier);
+			});
+			
+		} else if(atom.type == "specifier") {//TODO fix as other one
 			angular.forEach(atom.value, function(qualifier) {
 				put(sets, atom.variable, qualifier);
 			});
@@ -322,6 +328,27 @@ var getSetQualifiers = function(atoms) {
 	});
 	
 	return sets;
+};
+
+
+var getRelAtom = function(rule, index) {	
+	
+	var j = 0;
+	for (var i = 0; i < rule.body.atoms.length; i++) {
+		if(rule.body.atoms[i].type == "relational"){
+			if(index == j) return rule.body.atoms[i];
+			j++;
+		}
+	}
+//	why does this not work?
+//	angular.forEach(rule.body.atoms, function(atom) {
+//		if(atom.type == "relational"){
+//			if(index == i) return atom;
+//			i++;
+//		}
+//	});
+	return null;
+//	TODO include atms from function
 };
 
 	
@@ -365,13 +392,13 @@ var getRules = function(id,language) {
 		var optionals = "";
 //		starts counting in parallel
 		var stmtIndex2 = 0;
-			
+		
 		if(rule.head.atom.set.type == 'function') {
 			
 			angular.forEach(rule.head.atom.set.actions, function(action) {
 
 				var setVarMap2 = getSetQualifiers(action.conditions);
-				mergeMaps(setVarMap, setVarMap2);
+				mergeMaps(setVarMap2, setVarMap);
 								
 				angular.forEach(action.conditions, function(atom) {
 //					we (can) assume that there are relational atoms in the body where the variable occurs in
@@ -397,7 +424,7 @@ var getRules = function(id,language) {
 
 					if(atom.type == "relational"){
 
-						addRelAtomSPARQL(atom, stmtIndex++, rule, setVarMap2, qvalueAtomMap, sparql, id, language);
+						addRelAtomSPARQL(atom, stmtIndex++, rule, setVarMap, qvalueAtomMap, sparql, id, language);
 					}				
 				});	
 				optionals += " OPTIONAL {" + sparql.where + "} ";
@@ -421,7 +448,7 @@ var getRules = function(id,language) {
 			"SELECT " + select + " WHERE { " + where + optionals + sparql.filter + " } LIMIT 10 ";
 		
 			
-		ruleData.push({rule: rule, qvalueatommap: qvalueAtomMap, sparql: query});
+		ruleData.push({rule: rule, qvalueatommap: qvalueAtomMap, setvarmap: setVarMap, sparql: query});
 	
 	});
 	
@@ -429,7 +456,7 @@ var getRules = function(id,language) {
 };
 
 
-var getQualifierSnaksForRule = function(qualifierset, rule, qvalueAtomMap, sparqlBindings, apiBindings) {
+var getQualifierSnaksForRule = function(itemId, qualifierset, rule, qvalueAtomMap, sparqlBindings, apiBindings) {
 	var qualifiers = {};
 
 	angular.forEach(qualifierset, function(qualifier) {
@@ -456,11 +483,23 @@ var getQualifierSnaksForRule = function(qualifierset, rule, qvalueAtomMap, sparq
 		} else {
 			var stmtIndex = qvalueAtomMap[qualifier.qvalue.value];
 			
-			var atom = rule.body.atoms[stmtIndex];
+			var atom = getRelAtom(rule,stmtIndex);//rule.body.atoms[stmtIndex];
 			var entityId = atom.entity.type == 'variable' ? sparqlBindings[atom.entity.value].value
-					.substring("http://www.wikidata.org/entity/".length) : atom.entity.value;
-			
-			snak = apiBindings[entityId].claims[atom.property][0].qualifiers[attr][0] ;//TODO fix the [0]s
+					.substring("http://www.wikidata.org/entity/".length) : atom.entity.value;				
+			var pvalueId = atom.pvalue.type == 'variable' ? 
+					atom.pvalue.value == rule.head.atom.entity.value ? itemId :
+						sparqlBindings[atom.pvalue.value].value.substring("http://www.wikidata.org/entity/".length) : atom.pvalue.value;
+					
+			var claimIndex;
+			angular.forEach(apiBindings[entityId].claims[atom.property], function(claim, i) {
+				if(claim.mainsnak.datavalue.value.id == pvalueId) {
+					claimIndex = i;
+				}
+			});
+
+					//first get all mainsnaks -> we need pvalue to get right one
+					//sec all poss qualifiers
+			snak = apiBindings[entityId].claims[atom.property][claimIndex].qualifiers[attr][0] ;//TODO fix the [0]s
 		}
 
 
@@ -475,7 +514,9 @@ var getQualifierSnaksForRule = function(qualifierset, rule, qvalueAtomMap, sparq
 }
 
 
-var addInferredFromQuery = function(itemId, rule, qvalueAtomMap, allSparqlBindings, apiBindings, statements, propertyIds, itemIds) { 
+var addInferredFromQuery = function(itemId, ruleData, allSparqlBindings, apiBindings, statements, propertyIds, itemIds) { 
+	
+	var rule = ruleData.rule;
 
 	angular.forEach(allSparqlBindings, function(sparqlBindings) {
 		
@@ -499,6 +540,12 @@ var addInferredFromQuery = function(itemId, rule, qvalueAtomMap, allSparqlBindin
 			entityType = "item";
 			itemIds[pvalue] = true;
 		}
+		
+		var qset = rule.head.atom.set.type == "set" ? rule.head.atom.set.value : 
+			rule.head.atom.set.type == "variable" ? ruleData.setvarmap[rule.head.atom.set.value] :
+				rule.head.atom.set.type == "function" ?  [] : [];//later should never be the case//TODO fix []
+
+		
 
 		var value = { "entity-type": entityType, "numeric-id": pvalue.substring(1)};
 		
@@ -508,13 +555,13 @@ var addInferredFromQuery = function(itemId, rule, qvalueAtomMap, allSparqlBindin
 			datatype: "wikibase-item",
 			datavalue: {value: value, type: "wikibase-entityid"}
 		}; 
-		
+
 //		TODO fix 
 		var stmtId = 0;
 //		TODO the set may be a variable/action! so fix qualifiers, 
 		var stmt = { mainsnak: snak, rank: "normal", type: "statement", 
 				id: stmtId, 
-				qualifiers: getQualifierSnaksForRule(rule.head.atom.set.value, rule, qvalueAtomMap, sparqlBindings, apiBindings)
+				qualifiers: getQualifierSnaksForRule(itemId, qset, rule, ruleData.qvalueatommap, sparqlBindings, apiBindings)
 		}; 
 		
 		statements[property].push(stmt);
@@ -536,7 +583,6 @@ var getStatementsInferred = function(id) {
 	});
 	
 	var statements = {};
-//	TODO return below
 	var propertyIds = {};
 	var itemIds = {};
 	
@@ -552,9 +598,11 @@ var getStatementsInferred = function(id) {
 			angular.forEach(rules[i].rule.body.atoms, function (atom) {
 				
 				if(atom.type == 'relational') { 
-					if(atom.entity.type == 'variable') {//TODO fix the [0]
-						entities.push(response.results.bindings[0][atom.entity.value].value
-							.substring("http://www.wikidata.org/entity/".length));						
+					if(atom.entity.type == 'variable') {
+						angular.forEach(response.results.bindings, function (result) {
+							entities.push(result[atom.entity.value].value
+									.substring("http://www.wikidata.org/entity/".length));	
+						});
 					} else {
 						entities.push(atom.entity.value);
 					};			
@@ -570,12 +618,12 @@ var getStatementsInferred = function(id) {
 		return	wikidataapi.getEntityPropertyClaims(resultEntities,language).then(function(responses2){
 			
 			for (var i = 0; i < rules.length; i ++) {
-				addInferredFromQuery(id, rules[i].rule,rules[i].qvalueatommap,
+				addInferredFromQuery(id, rules[i],//.rule,rules[i].qvalueatommap,rules[i].setvarmap,
 						responses[i].results.bindings,responses2[i].entities, 
 						statements, propertyIds, itemIds );
 			}
 			
-			return statements;
+			return { statements:statements, propertyids: propertyIds,itemids:itemIds};
 			
 		});		
 	});
@@ -587,8 +635,10 @@ var getStatementsInferred = function(id) {
 
 
 
-var addInferredFromQuery2 = function(itemId, rule, qvalueAtomMap, allSparqlBindings, apiBindings, statements, propertyIds, itemIds) { 
+var addInferredFromQuery2 = function(itemId, ruleData, qvalueAtomMap, allSparqlBindings, apiBindings, statements, propertyIds, itemIds) { 
 	var sparqlBindings = allSparqlBindings[0];
+	
+	var rule = ruleData.rule;
 	
 	var property = rule.head.atom.property;
 	var pvalue = rule.head.atom.pvalue.type == 'variable' ? sparqlBindings[rule.head.atom.pvalue.value].value
@@ -599,8 +649,8 @@ var addInferredFromQuery2 = function(itemId, rule, qvalueAtomMap, allSparqlBindi
 		propertyIds[property] = true;
 	}
 
-//TODO consider case that too many? 
-//TODO we currently only consider statements the other case, not sure how to consider the first	
+// consider case that too many? 
+// we currently only consider statements the other case, not sure how to consider the first	
 	var entityType;
 //				if (pvalue.substring(0,1) == "P") {
 //					entityType = "property";
@@ -620,9 +670,9 @@ var addInferredFromQuery2 = function(itemId, rule, qvalueAtomMap, allSparqlBindi
 		datavalue: {value: value, type: "wikibase-entityid"}
 	}; 
 	
-//	TODO fix 
+//	 fix 
 	var stmtId = 0;
-//	TODO the set may be a variable/action! so fix qualifiers, 
+//	the set may be a variable/action! so fix qualifiers, 
 	var stmt = { mainsnak: snak, rank: "normal", type: "statement", 
 			id: stmtId, 
 			qualifiers: []//getQualifierSnaksForRule(rule.head.atom.set.value, rule, qvalueAtomMap, sparqlBindings, apiBindings)
@@ -642,8 +692,8 @@ var addInferredFromQuery2 = function(itemId, rule, qvalueAtomMap, allSparqlBindi
 			propertyIds[property] = true;
 		}
 
-//TODO consider case that too many? 
-//TODO we currently only consider statements the other case, not sure how to consider the first	
+// consider case that too many? 
+// we currently only consider statements the other case, not sure how to consider the first	
 		var entityType;
 //					if (pvalue.substring(0,1) == "P") {
 //						entityType = "property";
@@ -663,9 +713,9 @@ var addInferredFromQuery2 = function(itemId, rule, qvalueAtomMap, allSparqlBindi
 			datavalue: {value: value, type: "wikibase-entityid"}
 		}; 
 		
-//		TODO fix 
+//		fix 
 		var stmtId = 0;
-//		TODO the set may be a variable/action! so fix qualifiers, 
+//		 the set may be a variable/action! so fix qualifiers, 
 		var stmt = { mainsnak: snak, rank: "normal", type: "statement", 
 				id: stmtId, 
 				qualifiers: []//getQualifierSnaksForRule(rule.head.atom.set.value, rule, qvalueAtomMap, sparqlBindings, apiBindings)
@@ -704,7 +754,7 @@ var stmtIndex = qvalueAtomMap[qualifier.qvalue.value];
 				var atom = rule.body.atoms[stmtIndex];
 				var entityId = atom.entity.type == 'variable' ? bindings[atom.entity.value] : atom.entity.value;
 			return entityId ;
-			var snak = bindings2[entityId].claims[atom.property][0].qualifiers[attr][0] ;//TODO fix the [0]
+			var snak = bindings2[entityId].claims[atom.property][0].qualifiers[attr][0] ;//fix the [0]
 			
 			
 			
@@ -726,7 +776,7 @@ var stmtIndex = qvalueAtomMap[qualifier.qvalue.value];
 //			
 		var pqsnak = {
 				snaktype: "value",
-				property: qualifier.attribute.value,//bindings[qualifier.attribute].value,//TODO might be no var
+				property: qualifier.attribute.value,//bindings[qualifier.attribute].value,// might be no var
 				datatype: 'string',//x.type,//or type?
 				datavalue: atom//{//value: bindings[qualifier.value].value, type: template.type}
 			}; 
@@ -758,12 +808,12 @@ var getTest = function(id) {
 	});
 	
 	var statements = {};
-//	TODO return below
+//	 return below
 	var propertyIds = {};
 	var itemIds = {};
 	
 	return $q.all(requests).then( function(responses) {
-
+		return rules[0];
 //		collect the ids needed to request the qualifiers
 		var resultEntities = []; //return responses;
 		angular.forEach(responses, function (response, i) {
@@ -774,9 +824,11 @@ var getTest = function(id) {
 			angular.forEach(rules[i].rule.body.atoms, function (atom) {
 				
 				if(atom.type == 'relational') { 
-					if(atom.entity.type == 'variable') {
-						entities.push(response.results.bindings[0][atom.entity.value].value
-							.substring("http://www.wikidata.org/entity/".length));						
+					if(atom.entity.type == 'variable') {	
+						angular.forEach(response.results.bindings, function (result) {
+							entities.push(result[atom.entity.value].value
+									.substring("http://www.wikidata.org/entity/".length));	
+						});
 					} else {
 						entities.push(atom.entity.value);
 					};			
@@ -784,7 +836,7 @@ var getTest = function(id) {
 					properties.push(atom.property);
 				}
 			});	
-//			TODO collect also those from the actions!
+//			 collect also those from the actions!
 			
 			resultEntities.push({ entityids:entities, properties:properties });
 		});
@@ -792,7 +844,7 @@ var getTest = function(id) {
 		return	wikidataapi.getEntityPropertyClaims(resultEntities,language).then(function(responses2){
 //			return responses[0].results.bindings;
 			for (var i = 0; i < rules.length; i ++) {
-				addInferredFromQuery(id, rules[i].rule,rules[i].qvalueatommap,
+				addInferredFromQuery(id, rules[i],//rules[i].qvalueatommap,
 						responses[i].results.bindings,responses2[i].entities, 
 						statements, propertyIds, itemIds );
 			}
