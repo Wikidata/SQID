@@ -27,16 +27,17 @@
 	"MODALS": {
 		"CLOSE": "Schließen",
 		"SAVE_CHANGES": "Änderungen speichern",
-		"EMPTY_FIELDS_ERROR": "Bitte füllen sie alle Eingabefelder aus!",
-		"EXECUTION_ERROR": "Ihre Änderungen konnten aufgrund eines Fehlers leider nicht ausgeführt werden.",
+		"EMPTY_FIELDS_ERROR": "Bitte alle Eingabefelder ausfüllen!",
+		"EXECUTION_ERROR": "Die Änderungen konnten aufgrund eines Fehlers leider nicht ausgeführt werden.",
 		"EXECUTION_SUCCESSFUL": "Erfolgreich!",
 		"TITLE_EDIT_LABEL": "Bezeichner ändern",
 		"CAPTION_EDIT_LABEL": "Neuer Bezeichner für ",
 		"CAPTION_LANGUAGE": "Sprache: ",
-		"LOGIN_DESCRIPTION": "You can connect SQID with your Wikimedia Account which gives you the possibility to do edit Wikidata in SQID. If you want to do this follow the instruction:",
-		"LOGIN_STEP_ONE": "Klicke auf \"Verbinden\"",
-		"LOGIN_STEP_TWO": "Erteile Widar die notwendigen Berechtigungen",
-		"LOGIN_STEP_THREE": "Klicke auf \"Anmeldung abschließen\" (unten rechts)",
+		"TITLE_LOGIN_LABEL": "Einloggen mit Wikimedia Account",
+		"LOGIN_DESCRIPTION": "Eine Anmeldung ist nötig um Wikidata von SQID aus editieren zu können.",
+		"LOGIN_STEP_ONE": "Auf \"Verbinden\" klicken (öffnet neues Tab/Fenster)",
+		"LOGIN_STEP_TWO": "Widar die nötigen Berechtigungen erteilen (das Tab/Fenster kann dannach geschlossen werden)",
+		"LOGIN_STEP_THREE": "Unten auf \"Anmeldung abschließen\" klicken",
 		"CONNECT": "Verbinden",
 		"DONE": "Anmeldung abschließen"
 	},
@@ -156,6 +157,6 @@
 	"NOSUCHENTITY_HEADLINE": "Leider konnte ich kein Objekt mit ID \"{{id}}\" finden.",
 	"NOSUCHENTITY_BODY": "Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden.",
 	"PROPOSAL": "(Vorschlag)",
-	"SOURCE": "Ursprung",
+	"SOURCE": "Quelle",
 	"PROPOSAL_SOURCE": "Vorschlag aus"
 }
