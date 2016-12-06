@@ -95,7 +95,12 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 				var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
 				angular.forEach(statementGroup, function (statement, index) {
 					hasContent = true;
-					var isProposal = (statement.source != 'Wikidata') && (statement.source);
+					var isProposal = false;
+					if (statement.source){
+						if (statement.source != 'Wikidata'){
+							isProposal = true;
+						}
+					}
 					if (hideSomeStatements && index >= hideStatementsThreshold) {
 						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '"' + (isProposal ? ' class="proposal"' : "") + '>';
 					} else {
@@ -124,11 +129,29 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 					}
 					
 					if (isProposal){
+						if (!scope.proposalRegister){
+							scope.proposalRegister = {};
+						}
+						scope.proposalRegister[statement.id] = statement;
 						html += '<div class="proposal-ctrl"><span translate="PROPOSAL"></span>'
-							+ '<i class="fa fa-times-circle proposal-reject" ng-click="reject(\'' + encodeURIComponent(JSON.stringify(statement)) + '\');$event.stopPropagation()"></i>'
-							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approve(\'' + encodeURIComponent(JSON.stringify(statement)) + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-times-circle proposal-reject" ng-click="reject(\'' + statement.id + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approve(\'' + statement.id + '\');$event.stopPropagation()"></i>'
 							+ '<span style="display: block"><span translate="SOURCE"></span>: ' + statement.source + ' </span></div>';
 					}
+
+					// add reference proposal to proposal register
+					angular.forEach(statement.references, function(reference){
+						if ('source' in reference){
+							if (reference.source != 'Wikidata'){
+								if ('refId' in reference){
+									if (!scope.proposalRegister){
+										scope.proposalRegister = {};
+									}
+									scope.proposalRegister[reference.refId] = reference;
+								}
+							}
+						}
+					});
 
 					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) 
 						+ '</td></tr>';
@@ -234,18 +257,16 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
 		}
 		scope.approve = function(statement){
-			primarySources.approve(scope.id, decodeURIComponent(statement), true);
+			scope.proposalRegister[statement].approve();
 		}
 		scope.reject = function(statement){
-			primarySources.reject(scope.id, decodeURIComponent(statement), true);
+			scope.proposalRegister[statement].reject();
 		}
-		scope.approveReference = function(stmtId, reference){
-			var ref = JSON.parse(decodeURIComponent(reference));
-			primarySources.approveReference(stmtId, ref.snaks, ref.refId, true);
+		scope.approveReference = function(stmtId, referenceId){
+			scope.proposalRegister[referenceId].approve();
 		}
-		scope.rejectReference = function(stmtId, reference){
-			var ref = JSON.parse(decodeURIComponent(reference));
-			primarySources.rejectReference(stmtId, ref.snaks, ref.refId, true);
+		scope.rejectReference = function(stmtId, referenceId){
+			scope.proposalRegister[referenceId].reject();
 		}
 
 

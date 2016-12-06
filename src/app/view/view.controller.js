@@ -89,16 +89,22 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 	$scope.modalResponse = null;
 	$scope.modalResponseClass = null;
 
+	$scope.hasEditRights = false;
+
 	oauth.userinfo().then(function(data){
 		if (data){
 			if (!View.hasEditRights()){
 				View.clearEntityDataCache();
 			}
 			View.setEditRights(true);
+			$scope.hasEditRights = true;
+			console.log('has edit right');
 		}else{
 			if (View.hasEditRights){
 				View.clearEntityDataCache();
 			}
+			$scope.hasEditRights = true;
+			console.log('has no edit right')
 			View.setEditRights(false);
 		}
 	});

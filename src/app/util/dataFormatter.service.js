@@ -174,10 +174,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 						i18n.getPropertyLink(snak.property) +
 						'</td>';
 				}
-				ret += '<td>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
-				if (isProposal){
-					ret += '<td></td>';
-				}
+				ret += '<td' + (isProposal ? ' colspan="2"' : '') +  '>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
 				ret += '</tr>';
 			});
 		});
@@ -220,8 +217,8 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 					var proposalControls = '';
 					if (showControls){
 						proposalControls = '<th><div class="proposal-ctrl">'
-							+ '<i class="fa fa-times-circle proposal-reject" ng-click="rejectReference(\'' + statement.id  + '\', \'' + encodeURIComponent(JSON.stringify(reference)) + '\');$event.stopPropagation()"></i>'
-							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + statement.id  + '\', \'' + encodeURIComponent(JSON.stringify(reference)) + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-times-circle proposal-reject" ng-click="rejectReference(\'' + statement.id  + '\', \'' + reference.refId + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + statement.id  + '\', \'' + reference.refId + '\');$event.stopPropagation()"></i>'
 							+ '</div></th>';
 					}
 					refTable += '<tr' + (isProposal ? ' class="proposal"' : '') + '><th colspan="2">{{\'SEC_REFERENCE\'|translate}}' + (isProposal ? ' {{ \'PROPOSAL\' | translate }}' : '') + '</th>'
@@ -229,7 +226,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 						+ '</tr>'
 						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, isProposal);
 					if (isProposal){
-						refTable += '<tr class="proposal"><td class="proposal-font-format"><span translate="PROPOSAL_SOURCE"></span></td><td class="proposal-font-format">' + reference.source + '</td><td></td></tr>';
+						refTable += '<tr class="proposal"><td class="proposal-font-format"><span translate="PROPOSAL_SOURCE"></span></td><td colspan="2" class="proposal-font-format">' + reference.source + '</td></tr>';
 					}
 				});
 				refTable += '</table>';

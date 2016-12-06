@@ -67,13 +67,15 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 	};	
 
 	var approve = function(qid, statement, refresh){
-		var stmt = JSON.parse(statement);
+		var stmt = statement
 		var psId = stmt.id;
 		delete stmt.id;
 		delete stmt.source;
+		delete stmt.approve;
+		delete stmt.reject;
 		stmt.type = 'statement';
-		statement = JSON.stringify(stmt);
-		return oauth.addStatement(qid, statement).then(function(){
+		statementJSON = JSON.stringify(stmt);
+		return oauth.addStatement(qid, statementJSON).then(function(){
 			oauth.userinfo().then(function(data){
 				var user = data.userinfo.name;
 				var url = STATEMENT_APPROVAL_URL
@@ -97,7 +99,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 			var url = STATEMENT_APPROVAL_URL
 				.replace(/\{\{user\}\}/, user)
 				.replace(/\{\{state\}\}/, STATEMENT_STATES.wrong)
-				.replace(/\{\{id\}\}/, JSON.parse(statement).id);
+				.replace(/\{\{id\}\}/, statement.id);
 
 			$http.post(url).then(function(res){
 				console.log(res);

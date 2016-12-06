@@ -5,7 +5,7 @@ define([
 ], function() {
 ///////////////////////////////////////
 angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route', function(util, $http, $location, $route) {
-	var promise;
+	var promiseUserInfo;
 	var dummyLogin = false;
 
 	var setDummyLogin = function(){
@@ -19,19 +19,19 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 
 	var getUserInfo = function(){
 		if (dummyLogin){
-			return Promise.resolve({"userinfo": {"name": "Dummy"}});
+			return promiseUserInfo.resolve({"userinfo": {"name": "Dummy"}});
 		}
 		if ($location.host() == "localhost"){
-			return Promise.resolve(null);
+			return promiseUserInfo.resolve(null);
 		}
-		promise = $http.get($location.protocol() + '://tools.wmflabs.org/widar/?action=get_rights&botmode=1').then(function(response){
+		promiseUserInfo = $http.get($location.protocol() + '://tools.wmflabs.org/widar/?action=get_rights&botmode=1').then(function(response){
 			if (response){
 				return response.data.result.query;
 			}else{
 				return null;
 			}
 		});
-		return promise;
+		return promiseUserInfo;
 	};
 
 	var setLabel = function(id, label, lang){
@@ -108,15 +108,15 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 	}
 
 	var userinfo = function(){
-		if (!promise){
+		if (!promiseUserInfo){
 			return getUserInfo();
 		}else{
-			return promise;
+			return promiseUserInfo;
 		}
 	};
 
 	var logout = function(){
-		promise = null;
+		promiseUserInfo = null;
 		unsetDummyLogin();
 	}
 

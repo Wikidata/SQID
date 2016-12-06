@@ -471,10 +471,20 @@ SELECT DISTINCT ?p { \n\
 			if ('claims' in response){
 				angular.forEach(response.claims, function(statementGroup, property) {
 					sortStatementGroup(statementGroup, entities.language);
+					// add proposal information
 					for (var i=0; i < statementGroup.length; i++){
 						statementGroup[i]['source'] = 'PrimarySources';
-						statementGroup[i]['reject'] = function(refresh){ primarySources.reject(statementGroup[i], refresh); };
+						statementGroup[i]['approve'] = function(){
+							primarySources.approve(id, this, true);
+						};
+						statementGroup[i]['reject'] = function(){
+							primarySources.reject(id, this, true);
+						};
+						angular.forEach(statementGroup[i].references, function(ref){
+							ref['source'] = 'PrimarySources';
+						});
 					}
+
 					if (property in entities.statements){
 						angular.forEach(statementGroup, function(pStmt){
 							var isNew = true;
@@ -518,6 +528,12 @@ SELECT DISTINCT ?p { \n\
 									angular.forEach(result.refStatements, function(ref){
 										if (result.nonProposal.references){
 											ref['refId'] = pStmt.id; // add primary sources id to approve or reject reference
+											ref['approve'] = function(){
+												primarySources.approveReference(result.nonProposal.id, ref.snaks, pStmt.id, true);
+											};
+											ref['reject'] = function(){
+												primarySources.rejectReference(result.nonProposal.id, ref.snaks, pStmt.id, true);
+											};
 											result.nonProposal.references.push(ref);
 										}else{
 											ref['refId'] = pStmt.id;
@@ -639,7 +655,6 @@ SELECT DISTINCT ?p { \n\
 		});
 		if (!hasEquivalent){
 			angular.forEach(pReferences, function(pRef){
-				pRef.source = 'PrimarySources';
 				nonEquivalentRefsStatements.push(pRef);
 			});
 		}
