@@ -19,10 +19,10 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 
 	var getUserInfo = function(){
 		if (dummyLogin){
-			return promiseUserInfo.resolve({"userinfo": {"name": "Dummy"}});
+			return Promise.resolve({"userinfo": {"name": "Dummy"}});
 		}
 		if ($location.host() == "localhost"){
-			return promiseUserInfo.resolve(null);
+			return Promise.resolve(null);
 		}
 		promiseUserInfo = $http.get($location.protocol() + '://tools.wmflabs.org/widar/?action=get_rights&botmode=1').then(function(response){
 			if (response){
