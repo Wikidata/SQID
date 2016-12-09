@@ -262,10 +262,10 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 		scope.reject = function(statement){
 			scope.proposalRegister[statement].reject();
 		}
-		scope.approveReference = function(stmtId, referenceId){
+		scope.approveReference = function(referenceId){
 			scope.proposalRegister[referenceId].approve();
 		}
-		scope.rejectReference = function(stmtId, referenceId){
+		scope.rejectReference = function(referenceId){
 			scope.proposalRegister[referenceId].reject();
 		}
 
