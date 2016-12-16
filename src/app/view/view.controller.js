@@ -98,13 +98,13 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 			}
 			View.setEditRights(true);
 			$scope.hasEditRights = true;
-			console.log('has edit right');
+			// console.log('has edit right');
 		}else{
 			if (View.hasEditRights){
 				View.clearEntityDataCache();
 			}
 			$scope.hasEditRights = true;
-			console.log('has no edit right')
+			// console.log('has no edit right')
 			View.setEditRights(false);
 		}
 	});
