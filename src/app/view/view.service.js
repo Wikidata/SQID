@@ -8,16 +8,18 @@ define([
 	'util/dataFormatter.service',
 	'util/htmlCache.service',
 	'data/properties.service',
+	'oauth/oauth.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache',
-function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache) {
+angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache', 'oauth',
+function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache, oauth) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
 	var entityDataPromise = null;
+	var hasEditRights = false;
 
 	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
 		var ret = [];
@@ -38,6 +40,31 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 		util.sortByField(ret, 'count');
 		return ret;
 	}
+
+	// Get a promise for the entity data.
+	// It is cached since the controller needs it in several places.
+	var getEntityData = function() {
+		if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
+			entityDataPromise = oauth.userinfo().then(function(userdata){
+				var showProposals = false;
+				if (userdata){
+					showProposals = true;
+				}
+				return entitydata.getEntityData(id, showProposals).then(function(data) {
+					return data;
+				});
+			});
+			fetchedEntityId = id;
+			fetchedEntityLanguage = i18n.getLanguage();
+		}
+		return entityDataPromise;
+	};
+
+	var clearEntityDataCache = function(){
+		entityDataPromise = null;
+		fetchedEntityId = null;
+		fetchedEntityLanguage = null;			
+	};
 
 	return {
 		updateId: function() {
@@ -92,17 +119,21 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			return $sce.trustAsHtml(result);
 		},
 
-		// Get a promise for the entity data.
-		// It is cached since the controller needs it in several places.
-		getEntityData: function() {
-			if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
-				entityDataPromise = entitydata.getEntityData(id).then(function(data) {
-					return data;
-				});
-				fetchedEntityId = id;
-				fetchedEntityLanguage = i18n.getLanguage();
-			}
-			return entityDataPromise;
+		getEntityData: getEntityData,
+
+		clearEntityDataCache: clearEntityDataCache,
+
+		getEntityDataUncached: function() {
+			clearEntityDataCache();
+			return getEntityData();
+		},
+
+		hasEditRights: function(){
+			return hasEditRights;
+		},
+
+		setEditRights: function(hasRights){
+			hasEditRights = hasRights;
 		},
 
 		// Find images from statements

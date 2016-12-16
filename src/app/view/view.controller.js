@@ -8,16 +8,18 @@ define([
 	'util/util.service',
 	'util/htmlCache.service',
 	'util/sqidStatementTable.directive',
-	'util/sqidCompile.directive',	
+	'util/sqidCompile.directive',
+	'util/primarySources.service',
 	'data/properties.service',
 	'data/classes.service',
+	'oauth/oauth.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('view').controller('ViewController', [
-'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'sparql', 'util', 'i18n', 'htmlCache',
-function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, util, i18n, htmlCache){
+'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources',
+function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources){
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 10;
 	var MAX_PROP_SUBJECTS = 10;
@@ -31,12 +33,15 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 
 	View.updateId();
 	$scope.id = View.getId();
+
 	var numId = $scope.id.substring(1);
 	$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 	
+	$scope.lang = i18n.getLanguage();
+
 	$scope.translations = {};
 
-	$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT']).then( function(translations) {
+	$translate(['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT', 'SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT', 'TYPICAL_PROPS.HINT_CLASS', 'TYPICAL_PROPS.HINT_PROP', 'SEC_PROP_USE.ENTITIES_HINT', 'SEC_PROP_USE.VALUES_HINT', 'SEC_PROP_USE.STATEMENTS_HINT', 'SEC_PROP_USE.QUALIFIERS_HINT', 'MODALS.EMPTY_FIELDS_ERROR', 'MODALS.EXECUTION_ERROR', 'MODALS.EXECUTION_SUCCESSFUL']).then( function(translations) {
 		$scope.translations['SUBCLASS_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.SUBCLASS_SUBCLASSES_HINT'];
 		$scope.translations['INSTANCE_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.INSTANCE_SUBCLASSES_HINT'];
 		$scope.translations['ALL_SUBCLASSES_HINT'] = translations['SEC_CLASSIFICATION.ALL_SUBCLASSES_HINT'];
@@ -46,6 +51,9 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.translations['PROP_VALUES_HINT'] = translations['SEC_PROP_USE.VALUES_HINT'];
 		$scope.translations['PROP_STATEMENTS_HINT'] = translations['SEC_PROP_USE.STATEMENTS_HINT'];
 		$scope.translations['PROP_QUALIFIERS_HINT'] = translations['SEC_PROP_USE.QUALIFIERS_HINT'];
+		$scope.translations['MODALS_EMPTY_FIELDS_ERROR'] = translations['MODALS.EMPTY_FIELDS_ERROR'];
+		$scope.translations['MODALS_EXECUTION_ERROR'] = translations['MODALS.EXECUTION_ERROR'];
+		$scope.translations['MODALS_EXECUTION_SUCCESSFUL'] = translations['MODALS.EXECUTION_SUCCESSFUL'];
 	});
 
 	$scope.classes = null;
@@ -78,40 +86,70 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 	$scope.propertyReferenceCount = 0;
 	$scope.propertyDatatype = null;
 
+	$scope.modalResponse = null;
+	$scope.modalResponseClass = null;
+
+	$scope.hasEditRights = false;
+
+	oauth.userinfo().then(function(data){
+		if (data){
+			if (!View.hasEditRights()){
+				View.clearEntityDataCache();
+			}
+			View.setEditRights(true);
+			$scope.hasEditRights = true;
+			// console.log('has edit right');
+		}else{
+			if (View.hasEditRights){
+				View.clearEntityDataCache();
+			}
+			$scope.hasEditRights = true;
+			// console.log('has no edit right')
+			View.setEditRights(false);
+		}
+	});
+
 	View.getEntityInlinks().then(function(data) {
 		$scope.entityInData = data;
 	});
 	
-	View.getEntityData().then(function(data) {
-		$scope.entityData = data;
-		$scope.images = View.getImages(data.statements);
-		$scope.banner = View.getBanner(data.statements);
-		$scope.homepage = View.getHomepage(data.statements);
-		$scope.urlWikipedia = View.getUrlWikipedia(data.sitelinks);
-		$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
-		data.waitForPropertyLabels().then( function() {
-			$scope.instanceOfUrl = i18n.getEntityUrl("P31");
-			$scope.instanceOfLabel = i18n.getPropertyLabel("P31");
-			$scope.subclassOfUrl = i18n.getEntityUrl("P279");
-			$scope.subclassOfLabel = i18n.getPropertyLabel("P279");
-			$scope.subpropertyOfUrl = i18n.getEntityUrl("P1647");
-			$scope.subpropertyOfLabel = i18n.getPropertyLabel("P1647");
-		});
-
-		Classes.then(function(classes){
-			View.getValueList(data, 'P31', classes).then( function(instanceClasses) {
-				$scope.instanceClassCount = instanceClasses.length;
-				$scope.instanceClassesHtml = View.getValueListTrustedHtml(instanceClasses, false);
+	var refreshContent = function(useCache){
+		var func = useCache ? View.getEntityData : View.getEntityDataUncached;
+		func().then(function(data) {
+			$scope.entityData = data;
+			$scope.images = View.getImages(data.statements);
+			$scope.banner = View.getBanner(data.statements);
+			$scope.homepage = View.getHomepage(data.statements);
+			$scope.urlWikipedia = View.getUrlWikipedia(data.sitelinks);
+			$scope.richDescription = $sce.trustAsHtml(i18n.autoLinkText($scope.entityData.description));
+			data.waitForPropertyLabels().then( function() {
+				$scope.instanceOfUrl = i18n.getEntityUrl("P31");
+				$scope.instanceOfLabel = i18n.getPropertyLabel("P31");
+				$scope.subclassOfUrl = i18n.getEntityUrl("P279");
+				$scope.subclassOfLabel = i18n.getPropertyLabel("P279");
+				$scope.subpropertyOfUrl = i18n.getEntityUrl("P1647");
+				$scope.subpropertyOfLabel = i18n.getPropertyLabel("P1647");
 			});
-			if ($scope.isItem) {
-				View.getValueList(data, 'P279', classes).then( function(superClasses) {
-					$scope.superClassCount = superClasses.length;
-					$scope.superClassesHtml = View.getValueListTrustedHtml(superClasses, false);
-					$scope.superClassesHtmlWithCounts = View.getValueListTrustedHtml(superClasses, true);
+
+			Classes.then(function(classes){
+				View.getValueList(data, 'P31', classes).then( function(instanceClasses) {
+					$scope.instanceClassCount = instanceClasses.length;
+					$scope.instanceClassesHtml = View.getValueListTrustedHtml(instanceClasses, false);
 				});
-			}
+				if ($scope.isItem) {
+					View.getValueList(data, 'P279', classes).then( function(superClasses) {
+						$scope.superClassCount = superClasses.length;
+						$scope.superClassesHtml = View.getValueListTrustedHtml(superClasses, false);
+						$scope.superClassesHtmlWithCounts = View.getValueListTrustedHtml(superClasses, true);
+					});
+				}
+			});
 		});
-	});
+	};
+
+	primarySources.setRefreshFunction(refreshContent);
+
+	refreshContent(true);
 
 	Properties.then(function(properties){
 		if (!$scope.isItem) {
@@ -196,6 +234,39 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 			}
 		}
 	});
+
+	$scope.editLabel = function(){
+		var modalId = '#editLabelModal';
+		var newLabel = $scope.newLabel;
+		var lang = i18n.getLanguage();
+		var id = $scope.id;
+		if (newLabel){
+			var response = oauth.setLabel(id, newLabel, lang);
+			response.then(function(data){
+				if (data.data.error == "OK"){
+					// $scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
+					// $scope.modalResponseClass = "text-success";
+					$(modalId).modal('hide');
+					$scope.closeModal();
+					refreshContent(false);
+				}else{
+					
+					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] + 
+						( (data.data.error) ? ("</br>" + String(data.data.error)) : "");
+					$scope.modalResponseClass = "text-danger";
+				}
+			});
+		}else{
+			$scope.modalResponse = $scope.translations['MODALS_EMPTY_FIELDS_ERROR'];
+			$scope.modalResponseClass = "text-danger";
+		}
+	}
+
+	$scope.closeModal = function(){
+		$scope.modalResponse = null;
+		$scope.modalResponseClass = null;
+	}
+
 }]);
 
 return {};}); // module definition end

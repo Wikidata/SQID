@@ -162,19 +162,19 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		return ret;
 	}
 
-	var getSnaksTableHtml = function(snaks, properties, missingTermsListener, inline) {
+	var getSnaksTableHtml = function(snaks, properties, missingTermsListener, inline, isProposal) {
 		var ret = '';
 		angular.forEach(snaks, function (snakList) {
 			var first = true;
 			angular.forEach(snakList, function(snak) {
-				ret += '<tr>';
+				ret += '<tr' + (isProposal ? ' class="proposal"' : '') + '>';
 				if (first) {
 					first = false;
 					ret += '<td valign="top" rowspan="' + snakList.length + '">' +
 						i18n.getPropertyLink(snak.property) +
 						'</td>';
 				}
-				ret += '<td>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
+				ret += '<td' + (isProposal ? ' colspan="2"' : '') +  '>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
 				ret += '</tr>';
 			});
 		});
@@ -200,8 +200,34 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				refCount = statement.references.length;
 				refTable += '<table class="reference-table">';
 				angular.forEach(statement.references, function(reference) {
-					refTable += '<tr><th colspan="2">{{\'SEC_REFERENCE\'|translate}}</th></tr>'
-						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, false);
+					var isProposal = false;
+					var showControls = false;
+					var referenceId = statement.id;
+					if ('source' in reference){
+						if (reference.source != 'Wikidata'){
+							isProposal = true;
+							if ('refId' in reference){
+								referenceId = reference.refId;
+							}
+							if (statement.source == 'Wikidata'){
+								showControls = true;
+							}
+						}
+					}
+					var proposalControls = '';
+					if (showControls){
+						proposalControls = '<th><div class="proposal-ctrl">'
+							+ '<i class="fa fa-times-circle proposal-reject" ng-click="rejectReference(\'' + reference.refId + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + reference.refId + '\');$event.stopPropagation()"></i>'
+							+ '</div></th>';
+					}
+					refTable += '<tr' + (isProposal ? ' class="proposal"' : '') + '><th colspan="2">{{\'SEC_REFERENCE\'|translate}}' + (isProposal ? ' {{ \'PROPOSAL\' | translate }}' : '') + '</th>'
+						+ proposalControls
+						+ '</tr>'
+						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, isProposal);
+					if (isProposal){
+						refTable += '<tr class="proposal"><td class="proposal-font-format"><span translate="PROPOSAL_SOURCE"></span></td><td colspan="2" class="proposal-font-format">' + reference.source + '</td></tr>';
+					}
 				});
 				refTable += '</table>';
 			} else {

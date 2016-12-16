@@ -12,12 +12,34 @@
 		"CLASSES": "@:PAGE_TITLE.CLASSES",
 		"START": "@:PAGE_TITLE.START",
 		"ABOUT": "@:PAGE_TITLE.ABOUT",
-		"ITEM_SEARCH": "Suche nach Item"
+		"ITEM_SEARCH": "Suche nach Item",
+		"AUTHORIZE" : "Anmelden",
+		"UNAUTHORIZE" : "Abmelden"
 	},
 	"FOOTER": {
 		"STAT_DATE": "Statistiken Stand {{date}}",
 		"STAT_LINK": "Details",
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
+	},
+	"EDITS": {
+		"EDIT_LABEL": "Bezeichner ändern"	
+	},
+	"MODALS": {
+		"CLOSE": "Schließen",
+		"SAVE_CHANGES": "Änderungen speichern",
+		"EMPTY_FIELDS_ERROR": "Bitte alle Eingabefelder ausfüllen!",
+		"EXECUTION_ERROR": "Die Änderungen konnten aufgrund eines Fehlers leider nicht ausgeführt werden.",
+		"EXECUTION_SUCCESSFUL": "Erfolgreich!",
+		"TITLE_EDIT_LABEL": "Bezeichner ändern",
+		"CAPTION_EDIT_LABEL": "Neuer Bezeichner für ",
+		"CAPTION_LANGUAGE": "Sprache: ",
+		"TITLE_LOGIN_LABEL": "Einloggen mit Wikimedia Account",
+		"LOGIN_DESCRIPTION": "Eine Anmeldung ist nötig um Wikidata von SQID aus editieren zu können.",
+		"LOGIN_STEP_ONE": "Auf \"Verbinden\" klicken (öffnet neues Tab/Fenster)",
+		"LOGIN_STEP_TWO": "Widar die nötigen Berechtigungen erteilen (das Tab/Fenster kann dannach geschlossen werden)",
+		"LOGIN_STEP_THREE": "Unten auf \"Anmeldung abschließen\" klicken",
+		"CONNECT": "Verbinden",
+		"DONE": "Anmeldung abschließen"
 	},
 	"PAGINATION": {
 		"ENTRIES_PER_PAGE": "Zeilen pro Seite",
@@ -133,5 +155,8 @@
 	"SEC_REFERENCE": "Fundstelle",
 	"NO_REFERENCES_HINT": "keine Fundstellen angegeben",
 	"NOSUCHENTITY_HEADLINE": "Leider konnte ich kein Objekt mit ID \"{{id}}\" finden.",
-	"NOSUCHENTITY_BODY": "Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden."
+	"NOSUCHENTITY_BODY": "Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden.",
+	"PROPOSAL": "(Vorschlag)",
+	"SOURCE": "Quelle",
+	"PROPOSAL_SOURCE": "Vorschlag aus"
 }

@@ -67,7 +67,6 @@ define([
 	'util/pagination.directives'
 ], function() {
 ///////////////////////////////////////
-
 angular.module('util').controller('PaginationController', ['$scope', function($scope) {
 	//init pagination config from parent or default
 	if($scope.pagination === undefined) { $scope.pagination = {}; }

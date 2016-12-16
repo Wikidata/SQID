@@ -600,3 +600,96 @@ div.qualifiers {
 #item-search_dropdown .angucomplete-selected-row{
 	background: #337ab7;
 }
+
+.login-username {
+	padding-bottom: 15px;
+	padding-top: 4px;
+	font-size: 12px;
+	float: left;
+}
+
+.login a {
+	padding-left: 15px;
+	color: #337ab7;
+}
+
+.logout{
+	float: left;
+}
+
+.login a:hover {
+	text-decoration: none;
+}
+
+.login-bar{
+	margin-bottom: 10px;
+}
+
+.edit-link{
+	font-size: 0.8em;
+}
+
+.edit-link:hover{
+	text-decoration: none;
+}
+
+.edit-label{
+	text-align: right;
+	float: right;
+	margin-top: 10px;
+	cursor: pointer;
+}
+
+.normal-weight{
+	font-weight: normal;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd).proposal{
+	background: #c3e1ef;
+}
+
+.proposal{
+	background: #d9edf7;
+}
+
+.proposal-ctrl{
+	float: right;
+	margin-right: 20px;
+	min-width: 40px;
+
+}
+
+.proposal-ctrl > span{
+	color: #777;
+	font-size: 12px;	
+	vertical-align: top;
+	font-weight: 100;
+}
+
+.proposal-font-format{
+	color: #777;
+	font-size: 12px;
+}
+
+.proposal-ctrl > i{
+	font-size: 16px;
+	color: #275c8a;
+	margin-left: 5px;
+	float: right;
+}
+
+.proposal-accept:hover{
+	color: #5cb85c;
+}
+
+.proposal-reject:hover{
+	color: #d9534f;
+}
+
+.modal-notes{
+	padding-top: 5px;
+}
+
+.statements-table-left{
+	background: #fff;
+}
