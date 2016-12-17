@@ -100,10 +100,13 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 				});
 
 				var statementCountString;
+				var statementBadgeExtraClass;
 				if (proposedStatementsCount == 0) {
 					statementCountString = statementGroup.length.toString();
+					statementBadgeExtraClass = "";
 				} else {
 					statementCountString = (statementGroup.length-proposedStatementsCount).toString() + "+" + proposedStatementsCount.toString();
+					statementBadgeExtraClass = " info";
 				}
 
 				var hideSomeStatements = (statementGroup.length > hideStatementsThreshold + 1);
@@ -122,7 +125,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 							+ i18n.getPropertyLink(propId)
 							+ (hideSomeStatements ? '<br /><div style="margin-top: 15px; "><div class="badge-'
 								+ (narrowTable ? 'small' : 'normal')  +
-							' clickable" ng-click="toggleRows(\'' + statementListId + '\')"><span class="{{getShowRowsClass(\'' + statementListId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementCountString) + '"></span></span></div></div>' : '')
+							' clickable' + statementBadgeExtraClass + '" ng-click="toggleRows(\'' + statementListId + '\')"><span class="{{getShowRowsClass(\'' + statementListId + '\')}}"><span translate="STATEMENTS.NUMBER_STATEMENTS" translate-value-number="' + (statementCountString) + '"></span></span></div></div>' : '')
 							+ '</th>';
 					}
 
