@@ -36,9 +36,9 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 					var itemId = "Q" + datavalue.value["numeric-id"];
 					var terms = getEntityTerms(itemId, missingTermsListener);
 					if (inline) {
-						return '<a title="' + terms.description + '" href="' + i18n.getEntityUrl(itemId) + '">' + terms.label + '</a>';
+						return '<a title="' + terms.description + '" href="' + i18n.getEntityUrl(itemId) + '" ng-click="$event.stopPropagation()">' + terms.label + '</a>';
 					} else {
-						return '<a href="' + i18n.getEntityUrl(itemId) + '">' + terms.label + '</a>' +
+						return '<a href="' + i18n.getEntityUrl(itemId) + '" ng-click="$event.stopPropagation()">' + terms.label + '</a>' +
 							( terms.description != '' ? ' <span class="smallnote">(' + i18n.autoLinkText(terms.description) + ')</span>' : '' );
 					}
 				} else if (datavalue.value["entity-type"] == "property") {
@@ -72,14 +72,14 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				}
 				switch (properties.getDatatype(numPropId)) {
 					case 'Url':
-						return '<a class="ext-link" href="' + datavalue.value + '" target="_blank">' + displayString + '</a>';
+						return '<a class="ext-link" href="' + datavalue.value + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 					case 'CommonsMedia':
-						return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank">' + displayString + '</a>';
+						return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 					//case 'String': etc.
 					default:
 						var urlPattern = properties.getUrlPattern(numPropId);
 						if (urlPattern) {
-							return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank" title="' + datavalue.value + '">' + displayString + '</a>';
+							return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank" title="' + datavalue.value + '" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 						} else {
 							return '<span title="' + datavalue.value + '">' + displayString + '</span>';
 						}
@@ -195,7 +195,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		var refTable = '';
 		var refCount = 0;
 		if (showReferences) {
-			refTable += '<div style="overflow: auto; clear: both; padding-top: 4px;" ng-if="showRows(\'' + statementId + '\')">';
+			refTable += '<div style="overflow: auto; clear: both; padding-top: 4px;" ng-if="showRows(\'' + statementId + '\')" ng-click="$event.stopPropagation()">';
 			if ('references' in statement) {
 				refCount = statement.references.length;
 				refTable += '<table class="reference-table">';
@@ -244,7 +244,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 // 		}
 
 		if ('qualifiers' in statement) {
-			ret += '<div class="qualifiers">'
+			ret += '<div class="qualifiers" ng-click="$event.stopPropagation()">'
 				+ getSnaksHtml(statement.qualifiers, properties, missingTermsListener, false, short)
 				+ '</div>';
 		}
