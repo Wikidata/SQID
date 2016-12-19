@@ -1,6 +1,7 @@
 //////// Module Definition ////////////
 define([
 	'util/util.module',
+'util/ruleExamples.service',
 'util/wikidataapi.service',
 'util/util.service',
 'util/sparql.service',
@@ -9,357 +10,11 @@ define([
 ///////////////////////////////////////
 
 angular.module('util').factory('rules', [
-'wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', 
-function(wikidataapi, util, i18n, sparql, $q, $http) {
+'ruleExamples','wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', 
+function(ruleExamples, wikidataapi, util, i18n, sparql, $q, $http) {
 	
-	  
-//TODO add rule with >1 qualifiers per pvalue
-var JSONRules = [
-
-////ENTITY IS PROPERTY
-	  {
-	body: { atoms : [
-			{
-				type: "relational-atom",
-				entity: {value:"x", type:"variable"},
-				property: "P1696",//inverseOf
-				pvalue: {value:"y", type:"variable"},
-				set: {
-					type:"set-expression",
-					value:[]
-					 }
-			}]
-	},
-	head: { atom : 
-		{
-			type:"relational-atom",
-			entity: {value:"y", type:"variable"},
-			property:"P1696",
-			pvalue: {value:"x", type:"variable"},
-			set: {
-				type:"set-expression",
-				value:[]	
-			}
-		}
-	}
-	},   
+var sparqlLimit = 100;
 	
-////	SOME RULE DIFFERENT FROM SPOUSE...
-{
-	body: { atoms : [
-			{
-				type: "relational-atom",
-				entity: {value:"x", type:"variable"},//Q57487)
-				property: "P361",//PartOf//"P1709",
-				pvalue: {value:"y", type:"variable"},
-				set: {
-					type:"set-expression",
-					value:[
-//					       {
-//						attribute:{value:"att", type:"variable"},
-//					    qvalue:{value:"start", type:"variable"}} 
-					       ]
-					 }
-			}]
-	},
-	head: { atom : 
-		{
-			type:"relational-atom",//not necessary
-			entity: {value:"y", type:"variable"},
-			property:"P527",//hasPart
-			pvalue: {value:"x", type:"variable"},
-			set: {
-				type:"set-expression",
-				value:[
-//				       {
-//					attribute:{value:"att", type:"variable"},
-//				    qvalue:{value:"start", type:"variable"}} 
-				       ]	
-			}
-		}
-	}
-	},
-	
-////QUALIFIER-ATTRIBUTE IS VARIABLE           
-//{
-//body: { atoms : [
-//		{
-//			type: "relational-atom",
-//			entity: {value:"x", type:"variable"},//Q57487)
-//			property: "P26",
-//			pvalue: {value:"y", type:"variable"},
-//			set: {
-//				type:"set-expression",
-//				value:[
-//				       {
-//					attribute:{value:"att", type:"variable"},
-//				    qvalue:{value:"start", type:"variable"}} 
-//				       ]
-//				 }
-//		}]
-//},
-//head: { atom : 
-//	{
-//		type:"relational-atom",//not necessary
-//		entity: {value:"y", type:"variable"},
-//		property:"P26",
-//		pvalue: {value:"x", type:"variable"},
-//		set: {
-//			type:"set-expression",
-//			value:[
-//			       {
-//				attribute:{value:"att", type:"variable"},
-//			    qvalue:{value:"start", type:"variable"}} 
-//			       ]	
-//		}
-//	}
-//}
-//},
-
-//	//SET EXPRESSION IN HEAD
-//{
-//body: { atoms : [
-//		{
-//			type: "relational-atom",
-//			entity: {value:"x", type:"variable"},//Q57487)
-//			property: "P26",
-//			pvalue: {value:"y", type:"variable"},
-//			set: {
-//				value:[{
-//				attribute:{value:"P580", type:"property"},
-//			    qvalue:{value:"start", type:"variable"}} ], type:"set-expression" }
-//		}]
-//},
-//head: { atom : 
-//	{
-//		type:"relational-atom",//not necessary
-//		entity: {value:"y", type:"variable"},
-//		property:"P26",
-//		pvalue: {value:"x", type:"variable"},
-//		set: {
-//			value:[{
-//			attribute:{value:"P580", type:"property"},
-//		    qvalue:{value:"start", type:"variable"}} ], type:"set-expression" }
-//	}
-//}
-//},
-//
-////SET ATOM
-//	{
-//	body: { atoms : [
-//			{
-//				type: "set-atom",
-//				variable:"S",
-//				
-//					attribute:{value:"P580", type:"property"},
-//				    qvalue:{value:"start", type:"variable"} 
-//			},{
-//				type: "relational-atom",
-//				entity: {value:"x", type:"variable"},//Q57487)
-//				property: "P26",
-//				pvalue: {value:"y", type:"variable"},
-//				set: {value:"S", type:"set-variable" }
-//			}]
-//	},
-//	head: { atom : 
-//		{
-//			type:"relational-atom",//not necessary
-//			entity: {value:"y", type:"variable"},
-//			property:"P26",
-//			pvalue: {value:"x", type:"variable"},
-//			set: {value:"S", type:"set-variable" }
-//		}
-//	}
-//	},
-
-//	//CLOSED SPECIFIER
-//	{
-//	body: { atoms : [
-//			{
-//				type: "closed-specifier",
-//				variable:"S",
-//				value: [{//attribute:{value:"provar", type:"variable"},//
-//					attribute:{value:"P580", type:"property"},//attribute:{value:"attrvar", type:"variable"},//
-//					qvalue:{value:"start", type:"variable"}
-//				}]				
-//			},{
-//				type: "relational-atom",
-//				entity: {value:"x", type:"variable"},//Q57487)
-//				property: "P26",
-//				pvalue: {value:"y", type:"variable"},
-//				set: {value:"S", type:"set-variable" }
-//			}]
-//	},
-//	head: { atom : 
-//		{
-//			type:"relational-atom",//not necessary
-//			entity: {value:"y", type:"variable"},
-//			property:"P26",
-//			pvalue: {value:"x", type:"variable"},
-//			set: {value:"S", type:"set-variable" }
-//		}
-//	}
-//	},
-//
-//	//OPEN SPECIFIER
-//	{
-//	body: { atoms : [
-//			{
-//				type: "open-specifier",
-//				variable:"S",
-//				value: []				
-//			},{
-//				type: "relational-atom",
-//				entity: {value:"x", type:"variable"},//Q57487)
-//				property: "P26",
-//				pvalue: {value:"y", type:"variable"},
-//				set: {value:"S", type:"set-variable" }
-//			}]
-//	},
-//	head: { atom : 
-//		{
-//			type:"relational-atom",//not necessary
-//			entity: {value:"y", type:"variable"},
-//			property:"P26",
-//			pvalue: {value:"x", type:"variable"},
-//			set: {value:"S", type:"set-variable" }
-//		}
-//	}
-//	},
-//
-
-	//FUNCTION
-	{
-	body: { atoms : [
-			{
-				type: "relational-atom",
-				entity: {value:"x", type:"variable"},//Q57487)
-				property: "P26",
-				pvalue: {value:"y", type:"variable"},
-				set: {value:"S", type:"set-variable" }
-			},
-			//Just to test, makes no sense
-			{
-				type: "relational-atom",
-				entity: {value:"x", type:"variable"},
-				property:"P1038",
-				pvalue: {value:"gf", type:"variable"},
-				set: {
-					type:"set-variable" ,
-					value:"T"}
-			}
-			
-			]
-	},
-	head: { atom : 
-		{
-			type:"relational-atom",//not necessary
-			entity: {value:"y", type:"variable"},
-			property:"P26",
-			pvalue: {value:"x", type:"variable"},
-			set: {
-				type:"function-term",
-				value :[//only 1 function:
-				          {
-				        	  conditions:[
-								{
-								type: "open-specifier",
-								variable:"S",
-								value: [
-								        {	attribute:{value:"P580", type:"property"},
-										    qvalue:{value:"start", type:"variable"}}
-								        ]				
-								},
-//				        	    //START TIME
-//								{
-//									type: "set-atom",
-//									variable:"S",
-//									
-//										attribute:{value:"P580", type:"property"},
-//									    qvalue:{value:"start", type:"variable"}
-//								},
-								//END TIME
-								{
-									type: "set-atom",
-									variable:"S",
-									
-										attribute:{value:"P582", type:"property"},
-									    qvalue:{value:"end", type:"variable"}
-								},
-								//TEST GROUND SET ATOM typeOfKinship=grandfather
-								{
-									type: "set-atom",
-									variable:"T",
-									
-									attribute:{value:"P1039", type:"property"},
-									qvalue:{value:"Q9238344", type:"item"}						
-								},
-								{
-									type: "relational-atom",
-									entity: {value:"x", type:"variable"},
-									property:"P1038",
-									pvalue: {value:"gf1", type:"variable"},
-									set: {
-										type:"set-expression" ,
-										value:[]}
-								}
-								], 
-							  insert:[
-								{
-								attribute:{value:"P580", type:"property"},
-								qvalue:{value:"start", type:"variable"}
-								},
-								{
-									attribute:{value:"P582", type:"property"},
-									qvalue:{value:"end", type:"variable"}
-									}]
-				          }]
-			}//set
-		}
-	}
-	},
-
-//
-{
-body: {
-	atoms : [
-		{
-			type: "relational-atom",
-		entity: {value:"gf", type:"variable"},
-		property: "P21",
-		pvalue: {value:"Q6581097", type:"item"},
-		set: {}
-	},
-	{
-		type: "relational-atom",
-		entity: {value:"gf", type:"variable"},
-		property: "P40",
-		pvalue: {value:"f", type:"variable"},
-		set: {}
-	},{
-		type: "relational-atom",
-		entity: {value:"f", type:"variable"},
-		property: "P40",
-		pvalue: {value:"s", type:"variable"},
-			set: {}
-		}]
-},
-head: { atom: 
-	{
-		entity: {value:"s", type:"variable"},
-	property:"P1038",
-	pvalue: {value:"gf", type:"variable"},
-	set: {
-		type:"set-expression" ,
-		value:[{
-		attribute:{value:"P1039", type:"property"},
-	    qvalue:{value:"Q9238344", type:"item"}} ]
-		}		
-	}
-}
-}
-	];
-		
 
 
 var addIfNew = function(value, list) {
@@ -413,8 +68,8 @@ var addQualifierSPARQL = function(qualifier, stmtvar, pvalue, sparql, itemInRule
 //	TODO maybe replace stmt attr value with other names. currently we have a problem if the variables in the rule have these names
 	var s1;
 	if(attrIsVar) {
-		s1 =	" \n stmt attr value. "+
-				pvalue+" wikibase:qualifier attr";//TODO I am not sure if we can use one "dummyprop"
+		s1 =	" \n stmt attr value. " + //p:"+ pvalue +
+				"?dummyprop wikibase:qualifier attr.";//TODO I am not sure if we can use one "dummyprop"
 		
 		addIfNew(attr,sparql.selectvars);
 		
@@ -488,7 +143,7 @@ var addRelAtomSPARQL = function(atom, stmtIndex, rule, setVarMap, qvalueAtomMap,
 		
 	angular.forEach(qualifiers, function(qualifier) {
 		
-		addQualifierSPARQL(qualifier,stmtVar, pvalue, sparql,rule.head.atom.entity.value,id);		
+		addQualifierSPARQL(qualifier,stmtVar, atom.property, sparql,rule.head.atom.entity.value,id);		
 		
 		qvalueAtomMap[qualifier.qvalue.value] = stmtIndex;
 	});	
@@ -584,20 +239,6 @@ var getOpenSpecRelAtomMap = function(rule) {
 //		}
 //	});
 //	
-////	TODO not sure if we need this
-//	if(rule.head.atom.set.type == "function-term") {
-//
-//		angular.forEach(rule.head.atom.set.value, function(f) {
-//			angular.forEach(f.conditions, function(atom) {
-//				if(atom.type == "relational-atom") {
-//					if(atom.set.type == "set-variable")
-//						result[atom.set.value] = index;
-//					
-//					index++;
-//				}
-//			});
-//		});
-//	}
 //}
 
 //we currently assume each set var to occur only in one rel atom
@@ -614,20 +255,23 @@ var getSetVarAtomMap = function(rule) {
 		}
 	});
 	
-//	TODO not sure if we need this
-	if(rule.head.atom.set.type == "function-term") {
-
-		angular.forEach(rule.head.atom.set.value, function(f) {
-			angular.forEach(f.conditions, function(atom) {
-				if(atom.type == "relational-atom") {
-					if(atom.set.type == "set-variable")
-						result[atom.set.value] = {atom:atom, index:index};
-					
-					index++;
-				}
-			});
-		});
-	}
+//	something like this is probably only needed if set variables in the function conditions
+//	can refer to set variables introduced only with relational atoms in the same condition
+//	but then we need to make sure that we do not refer to relational atoms from other conditions
+//	this is not yet covered by the below code
+//	if(rule.head.atom.set.type == "function-term") {
+//
+//		angular.forEach(rule.head.atom.set.value, function(f) {
+//			angular.forEach(f.conditions, function(atom) {
+//				if(atom.type == "relational-atom") {
+//					if(atom.set.type == "set-variable")
+//						result[atom.set.value] = {atom:atom, index:index};
+//					
+//					index++;
+//				}
+//			});
+//		});
+//	}
 	
 	return result;
 }
@@ -648,8 +292,7 @@ var getRelAtom = function(rule, index) {
 //			i++;
 //		}
 //	});
-	
-//	TODO this has not been tested yet:
+
 	if(rule.head.atom.set.type == "function-term") {
 		var functions = rule.head.atom.set.value;
 		for (var i = 0; i < functions.length; i++) {
@@ -680,7 +323,7 @@ var getRules = function(id,language) {
 //			promise = $http.get("data/rules.json").then(function(response){
 //				var JSONRules = response.rules;
 	
-	angular.forEach(JSONRules, function(rule) {
+	angular.forEach(ruleExamples.getRules(), function(rule) {
 //		parameters to pass by reference
 		var sparql = {
 			selectvars: [],
@@ -707,9 +350,11 @@ var getRules = function(id,language) {
 		});
 		
 		
-//		we (re)use the sparql.where to store the OPTIONAL, therefore save the real where
+//		we (re)use the sparql.where/filter to store the OPTIONAL/OPTIONAL filters, therefore save the real ones
 		var where = sparql.where;
+		var filter = sparql.filter;
 		sparql.where =  "";	
+		sparql.filter =  "";	
 		
 		var optionals = "";
 
@@ -770,7 +415,8 @@ var getRules = function(id,language) {
 				optLabels.push("optlabel"+ findex);
 				optionals += " OPTIONAL {" + sparql.where + 
 				entityTerm0 + " rdfs:label " + lvar0 +
-				". FILTER (lang(" + lvar0 +" ) = \""+ language +"\") } ";
+				". FILTER (lang(" + lvar0 +" ) = \""+ language +"\")." +
+				sparql.filter + " } ";
 
 			});		
 		}
@@ -792,7 +438,7 @@ var getRules = function(id,language) {
 			"PREFIX pq: <http://www.wikidata.org/prop/qualifier/> \n" +
 			"PREFIX wikibase: <http://wikiba.se/ontology#>" +
 			
-			"SELECT " + select + " WHERE { " + where + optionals + sparql.filter + " } LIMIT 100 ";
+			"SELECT " + select + " WHERE { " + where + optionals + filter + " } LIMIT " + sparqlLimit;
 		
 			
 		ruleData.push({rule: rule, 	//setvaratommap: setVarAtomMap,
@@ -1036,7 +682,7 @@ var getStatementsInferred = function(id) {
 					properties.push(atom.property);
 				}
 			});	
-			//TODO test the following if
+
 			if(rules[i].rule.head.atom.set.type == "function-term") {
 				angular.forEach(rules[i].rule.head.atom.set.value, function (f) {
 					angular.forEach(f.conditions, function (atom) {
