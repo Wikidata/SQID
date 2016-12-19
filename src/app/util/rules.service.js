@@ -68,8 +68,8 @@ var addQualifierSPARQL = function(qualifier, stmtvar, pvalue, sparql, itemInRule
 //	TODO maybe replace stmt attr value with other names. currently we have a problem if the variables in the rule have these names
 	var s1;
 	if(attrIsVar) {
-		s1 =	" \n stmt attr value. " + //p:"+ pvalue +
-				"?dummyprop wikibase:qualifier attr.";//TODO I am not sure if we can use one "dummyprop"
+		s1 =	" \n stmt attr value. " + attr +//p:"+ pvalue +
+				"qualifier wikibase:qualifier attr.";//TODO I am not sure if we can use one "dummyprop"
 		
 		addIfNew(attr,sparql.selectvars);
 		
