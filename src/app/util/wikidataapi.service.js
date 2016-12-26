@@ -12,6 +12,17 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' + id + '&redirects=yes&props=sitelinks|descriptions|claims|datatype|aliases|labels&languages=' + language + '&callback=JSON_CALLBACK');
 	}
 	
+	var getClaims = function(stmtIds) { 
+		var baseUrl = 'https://www.wikidata.org/w/api.php?action=wbgetclaims&format=json&callback=JSON_CALLBACK&claim=';
+		var requests = [];
+		
+		angular.forEach(stmtIds, function(stmtId) {
+			requests.push(util.jsonpRequest(baseUrl + stmtId));
+		});
+
+		return $q.all(requests);
+	}
+	
 	var getEntityPropertyClaims = function(entitiesList,language) { //entityIds,properties,language) {
 //		return util.jsonpRequest('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=' 
 //				+ entityIds.join('|') + '&redirects=yes&props=' + properties.join('|') + '&languages=' + language + '&callback=JSON_CALLBACK');
@@ -132,6 +143,7 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 	};
 	return {
 		getEntityData: getEntityData,
+		getClaims: getClaims,
 		getEntityPropertyClaims: getEntityPropertyClaims,
 		getEntityTerms: getEntityTerms,
 		getEntityLabels: getEntityLabels,

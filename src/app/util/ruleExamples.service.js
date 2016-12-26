@@ -338,7 +338,11 @@ body: { atoms : [
 		
 
 var getRules = function() {	
-	return JSONRules;
+	return [
+	        JSONRules[0],JSONRules[1],JSONRules[2],
+	        JSONRules[3], 
+	        JSONRules[5]
+	];
 };
 
 return {
