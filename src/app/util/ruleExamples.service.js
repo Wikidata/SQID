@@ -225,7 +225,8 @@ body: { atoms : [
 			set: {
 				type:"set-variable" ,
 				value:"T"}
-		}]
+		}
+		]
 }, head: { atom : 
 	{
 		type:"relational-atom",//not necessary
@@ -261,7 +262,7 @@ body: { atoms : [
 								attribute:{value:"P582", type:"property"},
 							    qvalue:{value:"end", type:"variable"}
 							},
-							//TEST GROUND SET ATOM typeOfKinship=Grandfather
+//							//TEST GROUND SET ATOM typeOfKinship=Grandfather
 							{
 								type: "set-atom",
 								variable:"T",
@@ -283,11 +284,13 @@ body: { atoms : [
 							{
 								attribute:{value:"P580", type:"property"},
 								qvalue:{value:"start", type:"variable"}
-							},
+							}
+							,
 							{
 								attribute:{value:"P582", type:"property"},
 								qvalue:{value:"end", type:"variable"}
-							}]
+							}
+							]
 			          }]
 		}//set
 	}
@@ -338,11 +341,23 @@ body: { atoms : [
 		
 
 var getRules = function() {	
-	return [
-	        JSONRules[0],JSONRules[1],JSONRules[2],
-	        JSONRules[3], 
-	        JSONRules[5]
-	];
+	return [//JSONRules[0],JSONRules[1],JSONRules[2],JSONRules[3],JSONRules[4],JSONRules[5],
+	        JSONRules[6]];
+//	        JSONRules[7]]; //JSONRules;	
+//	[
+//////	 		other than p26
+////	        JSONRules[0],
+////	        JSONRules[1],
+//////	        attr var
+////	        JSONRules[2],
+//	        JSONRules[3],
+//////	        specs
+////	        JSONRules[4],
+////	        JSONRules[5],
+//////	        funct
+//////	        JSONRules[6],
+////	        JSONRules[7], 
+//	];
 };
 
 return {
