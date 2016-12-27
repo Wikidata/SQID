@@ -13,8 +13,10 @@ angular.module('util').factory('rules', [
 'ruleExamples','wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', 
 function(ruleExamples, wikidataapi, util, i18n, sparql, $q, $http) {
 	
-var sparqlLimit = 100;
-	
+var SPARQL_LIMIT = 100;
+//TODO select one
+//prefix we use for variables in SPARQL. disallow for user variables
+var VAR_PREFIX = "?VAR";
 
 
 var addIfNew = function(value, list) {
@@ -65,30 +67,35 @@ var addQualifierSPARQL = function(qualifier, stmtvar, pvalue, sparql, itemInRule
 	var qvalueIsVar = isSPARQLVar(qualifier.qvalue, itemInRule);
 	var qvalue = getSPARQLTerm(qualifier.qvalue, itemInRule, itemId);
 	
-//	TODO maybe replace stmt attr value with other names. currently we have a problem if the variables in the rule have these names
-	var s1;
+	var value = qvalueIsVar ? qvalue : "wd:"+qvalue;
+
 	if(attrIsVar) {
-		s1 =	" \n stmt attr value. " + attr +
-				"qualifier wikibase:qualifier attr.";
+		sparql.where +=	
+			" \n "+ 
+			stmtvar +" "+ 
+			attr +" "+ 	
+			(qvalueIsVar ? qvalue : "wd:"+qvalue) + ". " + 
+			VAR_PREFIX+attr.substring(1)+"qualifier " +
+			"wikibase:qualifier " + 
+			attr + ". ";
 		
 		addIfNew(attr,sparql.selectvars);
 		
 	} else {
-		s1 =	" \n stmt pq:attr value. \n";
+		sparql.where +=	
+			" \n "+ 
+			stmtvar + " "+
+			"pq:"+ attr + " " + 
+			(qvalueIsVar ? qvalue : "wd:"+qvalue) +". ";
 	} 
 	
 	if(qvalueIsVar) addIfNew(qvalue,sparql.selectvars);
-
-	sparql.where +=  s1
-	.replace(/stmt/g, stmtvar)
-	.replace(/attr/g, attr)
-	.replace(/value/g, qvalueIsVar ? qvalue : "wd:"+qvalue);
 	
 };
 
 //atom needs entity, property, and pvalue
 //itementity is id or var, the term representing item in the rule
-var addRelTripleSPARQL = function(atom, stmtvar, sparql, itemInRule, itemId, language) { 
+var addRelTripleSPARQL = function(atom, stmtvar, sparql, itemInRule, itemId) { 
 	
 	var entityIsVar = isSPARQLVar(atom.entity, itemInRule);
 	var entity = getSPARQLTerm(atom.entity, itemInRule, itemId);
@@ -96,21 +103,18 @@ var addRelTripleSPARQL = function(atom, stmtvar, sparql, itemInRule, itemId, lan
 	var pvalueIsVar = isSPARQLVar(atom.pvalue, itemInRule);
 	var pvalue = getSPARQLTerm(atom.pvalue, itemInRule, itemId); 
 	
-//	TODO maybe replace entity ... with other names. currently we have a problem if the variables in the rule have these names
-	var s0 =	" \n\
-	entity p:property stmt. \n\
-	stmt ps:property value. ";
+	sparql.where += 	" \n "+
+	(entityIsVar ? entity : "wd:"+entity) + " " +
+	"p:" + atom.property + " " +
+	stmtvar + ". \n " +
+	stmtvar + " " +
+	"ps:" + atom.property + " " + 
+	(pvalueIsVar ? pvalue : "wd:"+pvalue) + ". ";
 
 	if(entityIsVar) addIfNew(entity,sparql.selectvars);
 	if(pvalueIsVar) addIfNew(pvalue,sparql.selectvars);
 	addIfNew(stmtvar,sparql.selectvars);
 
-
-	sparql.where += s0
-		.replace(/entity/g, entityIsVar ? entity : "wd:"+entity)
-		.replace(/value/g, pvalueIsVar ? pvalue : "wd:"+pvalue)
-		.replace(/property/g, atom.property)
-		.replace(/stmt/g, stmtvar);
 
 };
 
@@ -122,16 +126,16 @@ var getStatementVariable = function(atom, index, itemInRule, itemId) {
 	var entityIsVar = isSPARQLVar(atom.entity, itemInRule);
 	var entity = getSPARQLTerm(atom.entity, itemInRule, itemId);
 	
-	return (entityIsVar ? entity : "?"+entity) + "stmt" + index;
+	return VAR_PREFIX + (entityIsVar ? entity.substring(1) : entity) + "stmt" + index;
 
 };	
 
 
-var addRelAtomSPARQL = function(atom, index, rule, setVarMap, qvalueAtomMap, sparql, id, language) {
+var addRelAtomSPARQL = function(atom, index, rule, setVarMap, qvalueAtomMap, sparql, id) {
 	
 	var stmtVar = getStatementVariable(atom, index, rule, id);
 	
-	addRelTripleSPARQL(atom,stmtVar,sparql, rule.head.atom.entity.value,id,language);
+	addRelTripleSPARQL(atom,stmtVar,sparql, rule.head.atom.entity.value,id);
 	
 	var qualifiers = atom.set.type == "set-expression" ? atom.set.value : setVarMap[atom.set.value];
 	var pvalue = getSPARQLTerm(atom.pvalue, rule.head.atom.entity.value, id); 
@@ -303,7 +307,7 @@ var getAtom = function(rule, index) {
 
 
 	
-var getRules = function(id,language) {	
+var getRules = function(id) {	
 //	qvalueAtomMap: maps qualifiers to relational atom it is associated to (to ease property... finding later)
 //	form: {rule: rule, qvalueatommap: qvalueAtomMap, sparql: query}
 	var ruleData = [];
@@ -337,7 +341,7 @@ var getRules = function(id,language) {
 		angular.forEach(rule.body.atoms, function(atom) {
 			if(atom.type == "relational-atom"){
 				
-				addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueAtomMap, sparql, id, language);
+				addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueAtomMap, sparql, id);
 			}
 			index++;
 		});
@@ -378,7 +382,7 @@ var getRules = function(id,language) {
 						
 					} else if(atom.type == "relational-atom"){
 
-						addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueAtomMap, sparql, id, language);
+						addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueAtomMap, sparql, id);
 						
 						if(i==0) entityTerm0 = getSPARQLTerm(atom.entity,rule.head.atom.entity.value,id);//getStatementVariable(atom, stmtIndex-1, rule, id);
 					
@@ -405,13 +409,8 @@ var getRules = function(id,language) {
 					index++;
 				});	
 				
-//				//	TODO maybe rename. currently we have a problem if the variables in the rule have this name
-//				var lvar0 = "?optlabel"+ findex;
-//				optLabels.push("optlabel"+ findex);
-				optionals += " OPTIONAL {" + sparql.where + 
-//				entityTerm0 + " rdfs:label " + lvar0 +
-//				". FILTER (lang(" + lvar0 +" ) = \""+ language +"\")." +
-				sparql.filter + " } ";
+
+				optionals += " OPTIONAL {" + sparql.where + sparql.filter + " } ";
 
 			});		
 		}
@@ -421,25 +420,21 @@ var getRules = function(id,language) {
 		angular.forEach(sparql.selectvars, function(v) {
 			select +=  v + " ";
 		});
-//		angular.forEach(optLabels, function(v) {
-//			select += "?" +v + " ";
-//		});
 
 		var query =	//sparql.getStandardPrefixes() 			currently too few 
-			"PREFIX wd: <http://www.wikidata.org/entity/> \n" +
-			"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n" +
-			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-			"PREFIX ps: <http://www.wikidata.org/prop/statement/> \n" +
-			"PREFIX pq: <http://www.wikidata.org/prop/qualifier/> \n" +
-			"PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/> \n" +
-			"PREFIX wikibase: <http://wikiba.se/ontology#>" +
+			"PREFIX wd: <http://www.wikidata.org/entity/> \n " +
+			"PREFIX wdt: <http://www.wikidata.org/prop/direct/> \n " +
+			"PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n " +
+			"PREFIX ps: <http://www.wikidata.org/prop/statement/> \n " +
+			"PREFIX pq: <http://www.wikidata.org/prop/qualifier/> \n " +
+			"PREFIX pqv: <http://www.wikidata.org/prop/qualifier/value/> \n " +
+			"PREFIX wikibase: <http://wikiba.se/ontology#> \n " +
 			
-			"SELECT " + select + " WHERE { " + where + optionals + filter + " } LIMIT " + sparqlLimit;
+			"SELECT " + select + " WHERE { " + where + optionals + filter + " } LIMIT " + SPARQL_LIMIT;
 		
 			
 		ruleData.push({rule: rule, 	//setvaratommap: setVarAtomMap,
 			qvalueatommap: qvalueAtomMap, setvarmap: setVarQualifiersMap, setvaropeninfo: setVarOpenInfo, 
-			//optlabels: optLabels,
 			sparql: query});
 	
 	});
@@ -659,9 +654,7 @@ var addInferredFromQuery = function(itemId, ruleData, allSparqlBindings, apiBind
 
 var getStatementsInferred = function(id) {
 	
-	var language = i18n.getLanguage();
-	
-	var rules = getRules(id, language);
+	var rules = getRules(id);
 	var requests = [];
 	
 	angular.forEach(rules, function (rule) {
@@ -763,10 +756,8 @@ var getStatementsInferred = function(id) {
 
 	
 var getTest = function(id) {
-	
-	var language = i18n.getLanguage();
-	
-	var rules = getRules(id, language);
+
+	var rules = getRules(id);
 	var requests = [];
 	
 	angular.forEach(rules, function (rule) {
