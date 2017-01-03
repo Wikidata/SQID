@@ -17,7 +17,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 		wrong: 'wrong',
 		duplicate: 'duplicate',
 		blacklisted: 'blacklisted',
-		unapproved: 'unapproved'
+		unapproved: 'unapproved'	
   };
 
 	var getStatements = function(qId){
@@ -67,13 +67,21 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 	};	
 
 	var approve = function(qid, statement, refresh){
-		var stmt = statement
+		var stmt = statement;
 		var psId = stmt.id;
 		delete stmt.id;
 		delete stmt.source;
 		delete stmt.approve;
 		delete stmt.reject;
 		stmt.type = 'statement';
+		if (stmt.references){
+			angular.forEach(stmt.references, function(ref){
+				delete ref.parent;
+				delete ref.refId;
+				delete ref.approve;
+				delete ref.reject;
+			});
+		}
 		statementJSON = JSON.stringify(stmt);
 		return oauth.addStatement(qid, statementJSON).then(function(){
 			oauth.userinfo().then(function(data){
@@ -110,6 +118,38 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 		});
 	};
 
+	var approveBareStatement = function(qid, statement, refresh){
+		var stmt = {};
+		angular.forEach(statement, function(value, key){
+			if (key != 'references'){
+				stmt[key] = value;
+			}
+		});
+		delete stmt.id;
+		delete stmt.source;
+		delete stmt.approve;
+		delete stmt.reject;
+		stmt.type = 'statement';
+		statementJSON = JSON.stringify(stmt);
+		return oauth.addStatement(qid, statementJSON).then(function(){
+			if (refresh){
+				refreshFunction();
+			}
+		});
+	};
+
+	var approveNewStatementsReference = function(qid, statement, refId, refresh){
+		var newRefs = [];
+		angular.forEach(statement.references, function(ref){
+			if (ref['refId'] == refId){
+				newRefs = [ref];
+			}
+		});
+		statement.references = newRefs;
+		statement.id = refId;
+		return approve(qid, statement, refresh);
+	}
+
 	var approveReference = function(stmtId, snaks, psId, refresh){
 		psId = psId ? psId : stmtId;
 		return oauth.addSource(snaks, stmtId).then(function(){
@@ -133,6 +173,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 	}
 
 	var rejectReference = function(stmtId, snaks, psId, refresh){
+		console.log('call rejectReference ' + stmtId + ' ' + psId);
 		psId = psId ? psId : stmtId;
 		oauth.userinfo().then(function(data){
 			var user = data.userinfo.name;
@@ -173,6 +214,8 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 		setRefreshFunction: setRefreshFunction,
 		approve: approve,
 		reject: reject,
+		approveBareStatement: approveBareStatement,
+		approveNewStatementsReference: approveNewStatementsReference,
 		approveReference: approveReference,
 		rejectReference: rejectReference
 	};

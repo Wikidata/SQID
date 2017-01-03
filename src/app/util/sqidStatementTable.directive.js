@@ -159,7 +159,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 									if (!scope.proposalRegister){
 										scope.proposalRegister = {};
 									}
-									scope.proposalRegister[reference.refId] = reference;
+									scope.proposalRegister['ref' + reference.refId] = reference;
 								}
 							}
 						}
@@ -269,16 +269,16 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
 		}
 		scope.approve = function(statement){
-			scope.proposalRegister[statement].approve();
+			scope.proposalRegister[statement].approve(true);
 		}
 		scope.reject = function(statement){
-			scope.proposalRegister[statement].reject();
+			scope.proposalRegister[statement].reject(true);
 		}
 		scope.approveReference = function(referenceId){
-			scope.proposalRegister[referenceId].approve();
+			scope.proposalRegister[referenceId].approve(true);
 		}
 		scope.rejectReference = function(referenceId){
-			scope.proposalRegister[referenceId].reject();
+			scope.proposalRegister[referenceId].reject(true);
 		}
 
 
