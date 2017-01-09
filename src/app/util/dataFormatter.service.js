@@ -209,16 +209,14 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 							if ('refId' in reference){
 								referenceId = reference.refId;
 							}
-							if (statement.source == 'Wikidata'){
-								showControls = true;
-							}
+							showControls = true;
 						}
 					}
 					var proposalControls = '';
 					if (showControls){
 						proposalControls = '<th><div class="proposal-ctrl">'
-							+ '<i class="fa fa-times-circle proposal-reject" ng-click="rejectReference(\'' + reference.refId + '\');$event.stopPropagation()"></i>'
-							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + reference.refId + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-times-circle proposal-reject" ng-click="rejectReference(\'' + 'ref' + reference.refId + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + 'ref' + reference.refId + '\');$event.stopPropagation()"></i>'
 							+ '</div></th>';
 					}
 					refTable += '<tr' + (isProposal ? ' class="proposal"' : '') + '><th colspan="2">{{\'SEC_REFERENCE\'|translate}}' + (isProposal ? ' {{ \'PROPOSAL\' | translate }}' : '') + '</th>'

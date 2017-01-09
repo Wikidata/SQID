@@ -473,13 +473,48 @@ SELECT DISTINCT ?p { \n\
 					sortStatementGroup(statementGroup, entities.language);
 					// add proposal information
 					for (var i=0; i < statementGroup.length; i++){
+						if (statementGroup[i].references){
+							// approve function only add the bare Statement to Wikidata
+							statementGroup[i]['approve'] = function(refresh){
+								primarySources.approveBareStatement(id, this, refresh);
+							};
+							// reject function reject all proposals which propose the statement 
+							// Note: every reference refers to a different proposal
+							//			-- references are added to the statement by the code below
+							statementGroup[i]['reject'] = function(refresh){
+								var p = Promise.resolve({refs: this.references, i: 0});
+								var i;
+								for (i = 0; i < (this.references.length - 1); i++){
+									var ref = this.references[i];
+									p = p.then(function(it){
+										it.refs[it.i].reject(false);
+										it.i++;
+										return it;
+									});
+								}
+								p.then(function(it){
+									it.refs[it.i].reject(refresh);
+								});
+							};
+							angular.forEach(statementGroup[i].references, function(ref){
+								ref['refId'] = statementGroup[i].id;
+								ref['approve'] = function(refresh){
+									primarySources.approve(id, this.parent, refresh);
+								};
+								ref['reject'] = function(refresh){
+									primarySources.rejectReference(this.refId, this.snaks, this.refId, refresh);
+								};
+								ref['parent'] = statementGroup[i]
+							});
+						}else{
+							statementGroup[i]['approve'] = function(refresh){
+								primarySources.approve(id, this, refresh);
+							};
+							statementGroup[i]['reject'] = function(refresh){
+								primarySources.reject(id, this, refresh);
+							};
+						}
 						statementGroup[i]['source'] = 'PrimarySources';
-						statementGroup[i]['approve'] = function(){
-							primarySources.approve(id, this, true);
-						};
-						statementGroup[i]['reject'] = function(){
-							primarySources.reject(id, this, true);
-						};
 						angular.forEach(statementGroup[i].references, function(ref){
 							ref['source'] = 'PrimarySources';
 						});
@@ -525,14 +560,16 @@ SELECT DISTINCT ?p { \n\
 							if (equivalentStatements.length > 0){
 								var result = hasNoneDuplicates(pStmt.references, equivalentStatements);
 								if (result.nonProposal){
+									// add proposed references to already existing Wikidata-Statement
+									// -> approve add the reference to the respective Wikidata-Statement 
 									angular.forEach(result.refStatements, function(ref){
 										if (result.nonProposal.references){
 											ref['refId'] = pStmt.id; // add primary sources id to approve or reject reference
-											ref['approve'] = function(){
-												primarySources.approveReference(result.nonProposal.id, ref.snaks, pStmt.id, true);
+											ref['approve'] = function(refresh){
+												primarySources.approveReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
 											};
-											ref['reject'] = function(){
-												primarySources.rejectReference(result.nonProposal.id, ref.snaks, pStmt.id, true);
+											ref['reject'] = function(refresh){
+												primarySources.rejectReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
 											};
 											result.nonProposal.references.push(ref);
 										}else{
@@ -541,8 +578,23 @@ SELECT DISTINCT ?p { \n\
 										}
 									});
 								}else{
+									// merge proposed references to a single statement
+									// -> approve functions create new Wikidata-Statements
 									if (result.refStatements != []){
-										entities.statements[property].push(pStmt);
+										if (result.duplicate){
+											angular.forEach(result.refStatements, function(ref){
+												ref['refId'] = pStmt.id;
+												ref['approve'] = function(refresh){
+													primarySources.approveNewStatementsReference(id, ref.parent, pStmt.id, refresh);
+												};
+												ref['reject'] = function(refresh){
+													primarySources.rejectReference(result.duplicate.id, ref.snaks, pStmt.id, refresh);
+												};
+												mergeReferences(result.duplicate, ref);
+											})
+										}else{
+											entities.statements[property].push(pStmt);
+										}
 									}
 								}
 
@@ -603,7 +655,7 @@ SELECT DISTINCT ?p { \n\
 
 	}
 
-	hasNoneDuplicates = function(pReferences, eStatements){
+	var hasNoneDuplicates = function(pReferences, eStatements){
 		var nonEquivalentRefsStatements = [];
 		var hasEquivalent = false;
 		angular.forEach(eStatements, function(eStmt){
@@ -665,7 +717,13 @@ SELECT DISTINCT ?p { \n\
 				result.nonProposal = eStatements[i];
 			}
 		}
+		result.duplicate = eStatements[0];
 		return result;
+	}
+
+	var mergeReferences = function(statement, reference){
+		reference.parent = statement
+		statement.references.push(reference);
 	}
 
 	return {
