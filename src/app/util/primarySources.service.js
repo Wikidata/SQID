@@ -2,11 +2,12 @@
 define([
 	'util/util.module',
 	'util/util.service',
+	'i18n/translate.config',
 	'oauth/oauth.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('util').factory('primarySources', ['util', '$http', '$location', 'oauth', function(util, $http, $location, oauth) {
+angular.module('util').factory('primarySources', ['util', '$http', '$templateCache', '$location', '$translate', 'oauth', function(util, $http, $templateCache, $location, $translate, oauth) {
 	var baseUrl = $location.protocol() + '://tools.wmflabs.org/wikidata-primary-sources/';
 
 	var STATEMENT_APPROVAL_URL = 'https://tools.wmflabs.org/wikidata-primary-sources/statements/{{id}}' +
@@ -18,7 +19,9 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 		duplicate: 'duplicate',
 		blacklisted: 'blacklisted',
 		unapproved: 'unapproved'	
-  };
+  	};
+
+
 
 	var getStatements = function(qId){
 		var url = baseUrl + 'entities/' + qId + '?callback=JSON_CALLBACK';
@@ -66,6 +69,10 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 		refreshFunction = refresh;
 	};	
 
+	setAlertFunction = function(alert){
+		alertFunction = alert;
+	}
+
 	var approve = function(qid, statement, refresh){
 		var stmt = statement;
 		var psId = stmt.id;
@@ -102,18 +109,22 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 	};
 
 	var reject = function(qid, statement, refresh){
-		oauth.userinfo().then(function(data){
+		oauth.userinfo().success(function(data){
 			var user = data.userinfo.name;
 			var url = STATEMENT_APPROVAL_URL
 				.replace(/\{\{user\}\}/, user)
 				.replace(/\{\{state\}\}/, STATEMENT_STATES.wrong)
 				.replace(/\{\{id\}\}/, statement.id);
 
-			$http.post(url).then(function(res){
+			$http.post(url).success(function(res){
 				console.log(res);
 				if(refresh){
 					refreshFunction();
 				}
+			}).error(function(){
+				$translate('ALERTS.REJECT_FAILED').then(function(translation){
+					alertFunction(translation);
+				});				
 			});
 		});
 	};
@@ -181,11 +192,16 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 				.replace(/\{\{user\}\}/, user)
 				.replace(/\{\{state\}\}/, STATEMENT_STATES.wrong)
 				.replace(/\{\{id\}\}/, psId);
-			$http.post(url).then(function(res){
+			$http.post(url).success(function(res){
 				console.log(res);
 				if (refresh){
 					refreshFunction();
 				}
+			}).error(function() {
+				console.log($translate);
+				$translate('ALERTS.REJECT_FAILED').then(function(translation){
+					alertFunction(translation);
+				});
 			});
 		});
 	}
@@ -209,9 +225,12 @@ angular.module('util').factory('primarySources', ['util', '$http', '$location', 
 
 	var refreshFunction = function(){};
 
+	var alertFunction = function(message){};
+
 	return {
 		getStatements: getStatements,
 		setRefreshFunction: setRefreshFunction,
+		setAlertFunction : setAlertFunction,
 		approve: approve,
 		reject: reject,
 		approveBareStatement: approveBareStatement,

@@ -91,6 +91,8 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 
 	$scope.hasEditRights = false;
 
+	$scope.alertText = '';
+
 	oauth.userinfo().then(function(data){
 		if (data){
 			if (!View.hasEditRights()){
@@ -145,7 +147,16 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 		});
 	};
 
+	var createAlert = function(message){
+		$scope.alertText = message;
+		$('#alert-message').css('display', 'block');
+		window.setTimeout(function(){
+			$('#alert-message').css('display', 'none');
+		}, 2000);
+	};
+
 	primarySources.setRefreshFunction(refreshContent);
+	primarySources.setAlertFunction(createAlert);
 
 	refreshContent(true);
 

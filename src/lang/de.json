@@ -158,5 +158,8 @@
 	"NOSUCHENTITY_BODY": "Vielleicht wurde es gelöscht. Vielleicht hat es niemals existiert. Vielleicht werden wir es nie herausfinden.",
 	"PROPOSAL": "(Vorschlag)",
 	"SOURCE": "Quelle",
-	"PROPOSAL_SOURCE": "Vorschlag aus"
+	"PROPOSAL_SOURCE": "Vorschlag aus",
+	"ALERTS": {
+		"REJECT_FAILED": "Zurückweisung fehlgeschlagen!"
+	}
 }
