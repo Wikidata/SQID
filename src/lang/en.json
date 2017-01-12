@@ -165,6 +165,6 @@
 		}
 	},
 	"ALERTS": {
-		"REJECT_FAILED": "Reject failed!"
+		"REJECT_FAILED": "Error: The proposal could not be rejected."
 	}
 }
