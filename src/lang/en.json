@@ -163,5 +163,8 @@
 			"BTN_HIDE": "Hide query",
 			"BTN_OPEN_WDQS": "Open in Wikidata Query Service"
 		}
+	},
+	"ALERTS": {
+		"REJECT_FAILED": "Error: The proposal could not be rejected."
 	}
 }

@@ -1,4 +1,7 @@
 <div ng-controller="ViewController">
+	<div class="alert alert-danger hidden-alert" id="alert-message">
+    	<span>{{alertText}}</span>
+	</div>
 	<div class="mainbar col-lg-9 col-md-12 col-sm-12">
 		<div ng-if="entityData != null && entityData.missing == true" class="well" >
 			<h2><span translate="NOSUCHENTITY_HEADLINE" translate-value-id="{{id}}"></span></h2>
