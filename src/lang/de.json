@@ -160,6 +160,6 @@
 	"SOURCE": "Quelle",
 	"PROPOSAL_SOURCE": "Vorschlag aus",
 	"ALERTS": {
-		"REJECT_FAILED": "Zurückweisung fehlgeschlagen!"
+		"REJECT_FAILED": "Fehler: Der Vorschlag konnte nicht zurückgewiesen werden."
 	}
 }
