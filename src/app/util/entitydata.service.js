@@ -499,6 +499,7 @@ SELECT DISTINCT ?p { \n\
 							angular.forEach(statementGroup[i].references, function(ref){
 								ref['refId'] = statementGroup[i].id;
 								ref['approve'] = function(refresh){
+									this.parent.references = [this];
 									primarySources.approve(id, this.parent, refresh);
 								};
 								ref['reject'] = function(refresh){

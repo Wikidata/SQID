@@ -184,7 +184,6 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 	}
 
 	var rejectReference = function(stmtId, snaks, psId, refresh){
-		console.log('call rejectReference ' + stmtId + ' ' + psId);
 		psId = psId ? psId : stmtId;
 		oauth.userinfo().then(function(data){
 			var user = data.userinfo.name;
