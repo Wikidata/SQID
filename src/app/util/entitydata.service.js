@@ -499,6 +499,7 @@ SELECT DISTINCT ?p { \n\
 							angular.forEach(statementGroup[i].references, function(ref){
 								ref['refId'] = statementGroup[i].id;
 								ref['approve'] = function(refresh){
+									this.parent.references = [this];
 									primarySources.approve(id, this.parent, refresh);
 								};
 								ref['reject'] = function(refresh){
@@ -519,97 +520,95 @@ SELECT DISTINCT ?p { \n\
 							ref['source'] = 'PrimarySources';
 						});
 					}
-
-					if (property in entities.statements){
-						angular.forEach(statementGroup, function(pStmt){
-							var isNew = true;
-							var newRef = true;
-							var equivalentStatements = [];
-							angular.forEach(entities.statements[property], function(eStmt){
-								if (valueIsEquivalent(eStmt.mainsnak.datavalue, pStmt.mainsnak.datavalue)){
-									
-									// check qualifiers
-									var qualEq = true;
-									if (pStmt.qualifiers){
-										angular.forEach(eStmt.qualifiers, function(qualifierGroup, qProperty){
-											if (qProperty in pStmt.qualifiers){
-												angular.forEach(qualifierGroup, function(qStmt){
-													var eqExists = false;
-													angular.forEach(pStmt.qualifiers[qProperty], function(pqStmt){
-														if (valueIsEquivalent(qStmt.datavalue, pqStmt.datavalue)){
-															eqExists = true;
-														}
-													});
-													if (!eqExists){
-														qualEq = false;
+					if (!(property in entities.statements)){
+						entities.statements[property] = [];
+					}
+					angular.forEach(statementGroup, function(pStmt){
+						var isNew = true;
+						var newRef = true;
+						var equivalentStatements = [];
+						angular.forEach(entities.statements[property], function(eStmt){
+							if (valueIsEquivalent(eStmt.mainsnak.datavalue, pStmt.mainsnak.datavalue)){
+								
+								// check qualifiers
+								var qualEq = true;
+								if (pStmt.qualifiers){
+									angular.forEach(eStmt.qualifiers, function(qualifierGroup, qProperty){
+										if (qProperty in pStmt.qualifiers){
+											angular.forEach(qualifierGroup, function(qStmt){
+												var eqExists = false;
+												angular.forEach(pStmt.qualifiers[qProperty], function(pqStmt){
+													if (valueIsEquivalent(qStmt.datavalue, pqStmt.datavalue)){
+														eqExists = true;
 													}
-												})
-											}
-										});
-									}
-
-									if (qualEq){
-										equivalentStatements.push(eStmt);
-											isNew = false;
-									}else{
-										isNew = true;
-									}
-								}
-							});
-							
-							if (equivalentStatements.length > 0){
-								var result = hasNoneDuplicates(pStmt.references, equivalentStatements);
-								if (result.nonProposal){
-									// add proposed references to already existing Wikidata-Statement
-									// -> approve add the reference to the respective Wikidata-Statement 
-									angular.forEach(result.refStatements, function(ref){
-										if (result.nonProposal.references){
-											ref['refId'] = pStmt.id; // add primary sources id to approve or reject reference
-											ref['approve'] = function(refresh){
-												primarySources.approveReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
-											};
-											ref['reject'] = function(refresh){
-												primarySources.rejectReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
-											};
-											result.nonProposal.references.push(ref);
-										}else{
-											ref['refId'] = pStmt.id;
-											result.nonProposal.references = [ref];
+												});
+												if (!eqExists){
+													qualEq = false;
+												}
+											})
 										}
 									});
-								}else{
-									// merge proposed references to a single statement
-									// -> approve functions create new Wikidata-Statements
-									if (result.refStatements != []){
-										if (result.duplicate){
-											angular.forEach(result.refStatements, function(ref){
-												ref['refId'] = pStmt.id;
-												ref['approve'] = function(refresh){
-													primarySources.approveNewStatementsReference(id, ref.parent, pStmt.id, refresh);
-												};
-												ref['reject'] = function(refresh){
-													primarySources.rejectReference(result.duplicate.id, ref.snaks, pStmt.id, refresh);
-												};
-												mergeReferences(result.duplicate, ref);
-											})
-										}else{
-											entities.statements[property].push(pStmt);
-										}
-									}
 								}
 
-							}
-
-
-							if (isNew){
-								entities.statements[property].push(pStmt);
-							}else{
-
+								if (qualEq){
+									equivalentStatements.push(eStmt);
+										isNew = false;
+								}else{
+									isNew = true;
+								}
 							}
 						});
-					}else{
-						entities.statements[property] = statementGroup;
-					}
+						
+						if (equivalentStatements.length > 0){
+							var result = hasNoneDuplicates(pStmt.references, equivalentStatements);
+							if (result.nonProposal){
+								// add proposed references to already existing Wikidata-Statement
+								// -> approve add the reference to the respective Wikidata-Statement 
+								angular.forEach(result.refStatements, function(ref){
+									if (result.nonProposal.references){
+										ref['refId'] = pStmt.id; // add primary sources id to approve or reject reference
+										ref['approve'] = function(refresh){
+											primarySources.approveReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
+										};
+										ref['reject'] = function(refresh){
+											primarySources.rejectReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
+										};
+										result.nonProposal.references.push(ref);
+									}else{
+										ref['refId'] = pStmt.id;
+										result.nonProposal.references = [ref];
+									}
+								});
+							}else{
+								// merge proposed references to a single statement
+								// -> approve functions create new Wikidata-Statements
+								if (result.refStatements != []){
+									if (result.duplicate){
+										angular.forEach(result.refStatements, function(ref){
+											ref['refId'] = pStmt.id;
+											ref['approve'] = function(refresh){
+												primarySources.approveNewStatementsReference(id, ref.parent, pStmt.id, refresh);
+											};
+											ref['reject'] = function(refresh){
+												primarySources.rejectReference(result.duplicate.id, ref.snaks, pStmt.id, refresh);
+											};
+											mergeReferences(result.duplicate, ref);
+										})
+									}else{
+										entities.statements[property].push(pStmt);
+									}
+								}
+							}
+
+						}
+
+
+						if (isNew){
+							entities.statements[property].push(pStmt);
+						}else{
+
+						}
+					});
 					sortStatementGroup(entities.statements[property], entities.language);
 				});
 			}
@@ -618,7 +617,6 @@ SELECT DISTINCT ?p { \n\
 	}
 
 	var valueIsEquivalent = function(v1, v2){
-		
 		if (v1.type != v2.type){
 			return false;
 		}
