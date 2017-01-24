@@ -17,7 +17,9 @@ requirejs.config({
 		"ngTranslate-storage-cook": "../lib/angular-translate-storage-cookie",
 		"ngTranslate-storage-loc": "../lib/angular-translate-storage-local",
 		"ngComplete": "../lib/angucomplete-alt",
-		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2"
+		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2",
+		"openLayers": "../lib/openlayers/OpenLayers"
+	
 	},
 	shim: {
 		'jquery-ui': ['jquery'],

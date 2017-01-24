@@ -702,3 +702,8 @@ div.qualifiers {
     z-index: 100;
     min-width: 200px;
 }
+
+.olControlAttribution {
+  left: 5px;
+  bottom: 5px;
+}

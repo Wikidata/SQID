@@ -191,11 +191,13 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 	 */
 	var getStatementValueBlockHtml = function(statement, properties, missingTermsListener, showReferences, short) {
 		var statementId = statement.id;
-
 		var refTable = '';
 		var refCount = 0;
 		if (showReferences) {
 			refTable += '<div style="overflow: auto; clear: both; padding-top: 4px;" ng-if="showRows(\'' + statementId + '\')" ng-click="$event.stopPropagation()">';
+			if (statement.mainsnak.datatype == 'globe-coordinate'){
+				refTable += '<div osm-map id="' + statement.id + '" latitude="' + statement.mainsnak.datavalue.value.latitude + '" longitude="' + statement.mainsnak.datavalue.value.longitude + '"></div>';
+			}
 			if ('references' in statement) {
 				refCount = statement.references.length;
 				refTable += '<table class="reference-table">';

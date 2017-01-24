@@ -9,6 +9,7 @@ define([
 	'util/htmlCache.service',
 	'util/sqidStatementTable.directive',
 	'util/sqidCompile.directive',
+	'util/map.directive',
 	'util/primarySources.service',
 	'data/properties.service',
 	'data/classes.service',
