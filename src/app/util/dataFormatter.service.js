@@ -105,7 +105,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				} else {
 					globe = '';
 				}
-				return '(' + datavalue.value.latitude + ', ' + datavalue.value.longitude + ')' + globe;
+				return '(' + formatGlobeCoordinate(datavalue.value.latitude) + 'N , ' + formatGlobeCoordinate(datavalue.value.longitude) + 'E)' + globe;
 			case 'sqid-text':
 				return datavalue.value;
 			default:
@@ -252,6 +252,21 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		ret += refTable;
 
 		return ret;
+	}
+
+	var formatGlobeCoordinate = function(value){
+		var extract = function(value, divisor){
+			var newValue = Math.floor(value, divisor) 
+			return [newValue, value - newValue	]
+		}
+		var result = extract(value, 1)
+		degree = result[0]
+		result =  extract(result[1] * 60, 1)
+		minutes = result[0]
+		result =  extract(result[1] * 60, 1)
+		seconds = result[0]
+		var repr = String(degree) + "°" + String(minutes) + "'" + String(seconds) + "''";
+		return repr;
 	}
 
 	/**
