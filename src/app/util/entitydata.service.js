@@ -466,100 +466,112 @@ SELECT DISTINCT ?p { \n\
 		});
 	}
 
+	var addProposalInformation = function(pStatementGroup, id){
+		for (var i=0; i < pStatementGroup.length; i++){
+			if (pStatementGroup[i].references){
+				// approve function only add the bare Statement to Wikidata
+				pStatementGroup[i]['approve'] = function(refresh){
+					primarySources.approveBareStatement(id, this, refresh);
+				};
+				// reject function reject all proposals which propose the statement 
+				// Note: every reference refers to a different proposal
+				//			-- references are added to the statement by the code below
+				pStatementGroup[i]['reject'] = function(refresh){
+					var p = Promise.resolve({refs: this.references, i: 0});
+					var i;
+					for (i = 0; i < (this.references.length - 1); i++){
+						var ref = this.references[i];
+						p = p.then(function(it){
+							it.refs[it.i].reject(false);
+							it.i++;
+							return it;
+						});
+					}
+					p.then(function(it){
+						it.refs[it.i].reject(refresh);
+					});
+				};
+				angular.forEach(pStatementGroup[i].references, function(ref){
+					ref['refId'] = pStatementGroup[i].id;
+					ref['approve'] = function(refresh){
+						this.parent.references = [this];
+						primarySources.approve(id, this.parent, refresh);
+					};
+					ref['reject'] = function(refresh){
+						primarySources.rejectReference(this.refId, this.snaks, this.refId, refresh);
+					};
+					ref['parent'] = pStatementGroup[i]
+				});
+			}else{
+				pStatementGroup[i]['approve'] = function(refresh){
+					primarySources.approve(id, this, refresh);
+				};
+				pStatementGroup[i]['reject'] = function(refresh){
+					primarySources.reject(id, this, refresh);
+				};
+			}
+			pStatementGroup[i]['source'] = 'PrimarySources';
+			angular.forEach(pStatementGroup[i].references, function(ref){
+				ref['source'] = 'PrimarySources';
+			});
+		}
+	};
+
+	var determineEquivalentStatements = function(eStatementGroup, pStmt){
+		var equivalentStatements = [];
+		angular.forEach(eStatementGroup, function(eStmt){
+			if (valueIsEquivalent(eStmt.mainsnak.datavalue, pStmt.mainsnak.datavalue)){
+				
+				// check qualifiers
+				var qualEq = true;
+				if (pStmt.qualifiers){
+					angular.forEach(eStmt.qualifiers, function(qualifierGroup, qProperty){
+						if (qProperty in pStmt.qualifiers){
+							angular.forEach(qualifierGroup, function(qStmt){
+								var eqExists = false;
+								angular.forEach(pStmt.qualifiers[qProperty], function(pqStmt){
+									if (valueIsEquivalent(qStmt.datavalue, pqStmt.datavalue)){
+										eqExists = true;
+									}
+								});
+								if (!eqExists){
+									qualEq = false;
+								}
+							})
+						}
+					});
+				}
+
+				if (qualEq){
+					equivalentStatements.push(eStmt);
+						isNew = false;
+				}
+			}
+		});
+		return equivalentStatements;
+	};
+
 	var includeProposals = function(id, entities){
 		return primarySources.getStatements(id).then(function(response){
 			if ('claims' in response){
 				angular.forEach(response.claims, function(statementGroup, property) {
 					sortStatementGroup(statementGroup, entities.language);
+					
 					// add proposal information
-					for (var i=0; i < statementGroup.length; i++){
-						if (statementGroup[i].references){
-							// approve function only add the bare Statement to Wikidata
-							statementGroup[i]['approve'] = function(refresh){
-								primarySources.approveBareStatement(id, this, refresh);
-							};
-							// reject function reject all proposals which propose the statement 
-							// Note: every reference refers to a different proposal
-							//			-- references are added to the statement by the code below
-							statementGroup[i]['reject'] = function(refresh){
-								var p = Promise.resolve({refs: this.references, i: 0});
-								var i;
-								for (i = 0; i < (this.references.length - 1); i++){
-									var ref = this.references[i];
-									p = p.then(function(it){
-										it.refs[it.i].reject(false);
-										it.i++;
-										return it;
-									});
-								}
-								p.then(function(it){
-									it.refs[it.i].reject(refresh);
-								});
-							};
-							angular.forEach(statementGroup[i].references, function(ref){
-								ref['refId'] = statementGroup[i].id;
-								ref['approve'] = function(refresh){
-									this.parent.references = [this];
-									primarySources.approve(id, this.parent, refresh);
-								};
-								ref['reject'] = function(refresh){
-									primarySources.rejectReference(this.refId, this.snaks, this.refId, refresh);
-								};
-								ref['parent'] = statementGroup[i]
-							});
-						}else{
-							statementGroup[i]['approve'] = function(refresh){
-								primarySources.approve(id, this, refresh);
-							};
-							statementGroup[i]['reject'] = function(refresh){
-								primarySources.reject(id, this, refresh);
-							};
-						}
-						statementGroup[i]['source'] = 'PrimarySources';
-						angular.forEach(statementGroup[i].references, function(ref){
-							ref['source'] = 'PrimarySources';
-						});
-					}
+					addProposalInformation(statementGroup, id);
+
+					// if there is no corresponding statement group in entities
+					// -> create empty statement group
 					if (!(property in entities.statements)){
 						entities.statements[property] = [];
 					}
-					angular.forEach(statementGroup, function(pStmt){
-						var isNew = true;
-						var newRef = true;
-						var equivalentStatements = [];
-						angular.forEach(entities.statements[property], function(eStmt){
-							if (valueIsEquivalent(eStmt.mainsnak.datavalue, pStmt.mainsnak.datavalue)){
-								
-								// check qualifiers
-								var qualEq = true;
-								if (pStmt.qualifiers){
-									angular.forEach(eStmt.qualifiers, function(qualifierGroup, qProperty){
-										if (qProperty in pStmt.qualifiers){
-											angular.forEach(qualifierGroup, function(qStmt){
-												var eqExists = false;
-												angular.forEach(pStmt.qualifiers[qProperty], function(pqStmt){
-													if (valueIsEquivalent(qStmt.datavalue, pqStmt.datavalue)){
-														eqExists = true;
-													}
-												});
-												if (!eqExists){
-													qualEq = false;
-												}
-											})
-										}
-									});
-								}
 
-								if (qualEq){
-									equivalentStatements.push(eStmt);
-										isNew = false;
-								}else{
-									isNew = true;
-								}
-							}
-						});
+					// add proposals to existing statement group
+					angular.forEach(statementGroup, function(pStmt){
+						var equivalentStatements = determineEquivalentStatements(entities.statements[property], pStmt);
+						var isNew = (equivalentStatements.length == 0);
 						
-						if (equivalentStatements.length > 0){
+						if (!isNew){
 							var result = hasNoneDuplicates(pStmt.references, equivalentStatements);
 							if (result.nonProposal){
 								// add proposed references to already existing Wikidata-Statement
@@ -600,13 +612,8 @@ SELECT DISTINCT ?p { \n\
 								}
 							}
 
-						}
-
-
-						if (isNew){
-							entities.statements[property].push(pStmt);
 						}else{
-
+							entities.statements[property].push(pStmt);
 						}
 					});
 					sortStatementGroup(entities.statements[property], entities.language);
