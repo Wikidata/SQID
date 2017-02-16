@@ -35,6 +35,19 @@ angular.module('util').factory('sparql', ['util', 'i18n', function(util, i18n) {
 		return util.httpRequest(getQueryUrl(sparqlQuery));
 	};
 	
+	var getQueryForIdFromLiteral = function(propertyId, literal, limit){
+		var query = getStandardPrefixes() + 'SELECT ?id\n\
+			WHERE { \n\
+				?id wdt:' + propertyId + ' "' + literal + '" .\n\
+			}\n\
+		LIMIT ' + limit;
+		return query;
+	};
+
+	var fetchIdFromLiteral = function(propertyId, literal, limit){
+		return getQueryRequest(getQueryForIdFromLiteral(propertyId, literal, limit));
+	}
+
 	var getInnerQueryForPropertySubjects = function(resultVarName, propertyId, objectId, limit) {
 		return "SELECT DISTINCT ?" + resultVarName + " WHERE { ?" + resultVarName + " wdt:" + propertyId +  (objectId != null ? " wd:" + objectId : " _:bnode") + " . }"
 			+ (limit > 0 ? " LIMIT " + limit : "");
@@ -119,6 +132,16 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		});
 	}
 
+	var getIdFromLiteral = function(propertyId, literal){
+		return fetchIdFromLiteral(propertyId, literal, 1).then(function(data){
+			if (data.results.bindings.length == 1){
+				return data.results.bindings[0].id.value;
+			}else{
+				return null;
+			}
+		})
+	}
+
 	return {
 		getQueryUrl: getQueryUrl,
 		getQueryUiUrl: getQueryUiUrl,
@@ -128,6 +151,7 @@ SELECT (count(*) as $c) WHERE { $p wdt:" + propertyID + " wd:" + objectItemId + 
 		getInlinkCount: getInlinkCount,
 		getPropertySubjects: getPropertySubjects,
 		getPropertyObjects: getPropertyObjects,
+		getIdFromLiteral: getIdFromLiteral,
 		getIdFromUri: util.getIdFromUri // deprecated; only for b/c
 	};
 

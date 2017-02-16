@@ -30,12 +30,6 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 
 	htmlCache.reset();
 	$scope.getCachedHtml = htmlCache.getValue;
-
-	View.updateId();
-	$scope.id = View.getId();
-
-	var numId = $scope.id.substring(1);
-	$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 	
 	$scope.lang = i18n.getLanguage();
 
@@ -158,119 +152,123 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 	primarySources.setRefreshFunction(refreshContent);
 	primarySources.setAlertFunction(createAlert);
 
-	refreshContent(true);
+	View.updateId().then(function(){
+		$scope.id = View.getId();
 
-	Properties.then(function(properties){
-		if (!$scope.isItem) {
-			View.getEntityData().then(function(data) {
-				View.getValueList(data, 'P1647', properties).then( function(superProperties) {
-					$scope.superPropertyCount = superProperties.length;
-					$scope.superPropertiesHtml = View.getValueListTrustedHtml(superProperties, false);
+		var numId = $scope.id.substring(1);
+		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
+		
+		refreshContent(true);
+
+		Properties.then(function(properties){
+			if (!$scope.isItem) {
+				View.getEntityData().then(function(data) {
+					View.getValueList(data, 'P1647', properties).then( function(superProperties) {
+						$scope.superPropertyCount = superProperties.length;
+						$scope.superPropertiesHtml = View.getValueListTrustedHtml(superProperties, false);
+					});
 				});
-			});
 
-			View.formatPropertyMap(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
-				$scope.relatedProperties = formattedProperties;
-			});
-
-			$scope.propertyItemCount = properties.getItemCount(numId);
-			$scope.propertyStatementCount = properties.getStatementCount(numId);
-			$scope.propertyAverageStatements = Math.round($scope.propertyStatementCount/$scope.propertyItemCount*100)/100;
-			$scope.propertyQualifierCount = properties.getQualifierCount(numId);
-			$scope.propertyReferenceCount = properties.getReferenceCount(numId);
-			$scope.propertyDatatype = properties.getDatatype(numId);
-
-			View.formatPropertyMap(properties.getQualifiers(numId), null).then( function(formattedProperties) {
-				$scope.propertyQualifiers = formattedProperties;
-			});
-
-			if ($scope.propertyItemCount > 0) {
-				sparql.getPropertySubjects($scope.id, null, MAX_PROP_SUBJECTS + 1).then(function(result) {
-					$scope.examplePropertyItems = result;
+				View.formatPropertyMap(properties.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
+					$scope.relatedProperties = formattedProperties;
 				});
+
+				$scope.propertyItemCount = properties.getItemCount(numId);
+				$scope.propertyStatementCount = properties.getStatementCount(numId);
+				$scope.propertyAverageStatements = Math.round($scope.propertyStatementCount/$scope.propertyItemCount*100)/100;
+				$scope.propertyQualifierCount = properties.getQualifierCount(numId);
+				$scope.propertyReferenceCount = properties.getReferenceCount(numId);
+				$scope.propertyDatatype = properties.getDatatype(numId);
+
+				View.formatPropertyMap(properties.getQualifiers(numId), null).then( function(formattedProperties) {
+					$scope.propertyQualifiers = formattedProperties;
+				});
+
+				if ($scope.propertyItemCount > 0) {
+					sparql.getPropertySubjects($scope.id, null, MAX_PROP_SUBJECTS + 1).then(function(result) {
+						$scope.examplePropertyItems = result;
+					});
+				}
+				if ($scope.propertyDatatype == 'WikibaseItem' || $scope.propertyDatatype == 'WikibaseProperty') {
+					sparql.getPropertyObjects(null, $scope.id, MAX_PROP_VALUES + 1).then(function(result) {
+						$scope.examplePropertyValues = result;
+					});
+				}
 			}
-			if ($scope.propertyDatatype == 'WikibaseItem' || $scope.propertyDatatype == 'WikibaseProperty') {
-				sparql.getPropertyObjects(null, $scope.id, MAX_PROP_VALUES + 1).then(function(result) {
-					$scope.examplePropertyValues = result;
+		});
+		$scope.url = 'https://www.wikidata.org/wiki/' + 
+			( $scope.isItem ? '' : 'Property:' ) +
+			$scope.id +
+			( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage()) : '' );
+		$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id +
+			( i18n.fixedLanguage() ? ('?lang=' + i18n.getLanguage()) : '' );
+		Classes.then(function(classes){
+			if ($scope.isItem) {
+				View.formatPropertyMap(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
+					$scope.relatedProperties = formattedProperties;
 				});
+				$scope.directInstances = classes.getDirectInstanceCount(numId);
+				$scope.directSubclasses = classes.getDirectSubclassCount(numId);
+				$scope.allInstances = classes.getAllInstanceCount(numId);
+				$scope.allSubclasses = classes.getAllSubclassCount(numId);
+				$translate('SEC_INSTANCES.ALL_INSTANCES_HINT', { subclassCount : $scope.allSubclasses } ).then( function(result) {
+					$scope.translations['ALL_INSTANCES_HINT'] = result;
+				});
+
+				View.formatNonemptySubclasses(numId, classes, classes.getAllInstanceCount).then( function(subclasses) {
+					$scope.instanceSubclasses = subclasses;
+					View.formatNonemptySubclasses(numId, classes, classes.getAllSubclassCount).then( function(subclasses) {
+						$scope.subclassSubclasses = subclasses;
+						if ($scope.instanceSubclasses.length > 0) {
+							$scope.subclassActiveTab = 0;
+						} else if ($scope.subclassSubclasses.length > 0) {
+							$scope.subclassActiveTab = 1;
+						} else {
+							$scope.subclassActiveTab = 2;
+						}
+					});
+				});
+
+				if ($scope.directInstances > 0) {
+					sparql.getPropertySubjects("P31", $scope.id, MAX_EXAMPLE_INSTANCES + 1).then(function(result) {
+						$scope.exampleInstances = result;
+					});
+				}
+				if ($scope.directSubclasses > 0) {
+					sparql.getPropertySubjects("P279", $scope.id, MAX_DIRECT_SUBCLASSES + 1).then(function(result) {
+						$scope.exampleSubclasses = result;
+					});
+				}
 			}
-		}
-	});
-
-	$scope.url = 'https://www.wikidata.org/wiki/' + 
-		( $scope.isItem ? '' : 'Property:' ) +
-		$scope.id +
-		( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage()) : '' );
-	$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id +
-		( i18n.fixedLanguage() ? ('?lang=' + i18n.getLanguage()) : '' );
-
-	Classes.then(function(classes){
-		if ($scope.isItem) {
-			View.formatPropertyMap(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
-				$scope.relatedProperties = formattedProperties;
-			});
-			$scope.directInstances = classes.getDirectInstanceCount(numId);
-			$scope.directSubclasses = classes.getDirectSubclassCount(numId);
-			$scope.allInstances = classes.getAllInstanceCount(numId);
-			$scope.allSubclasses = classes.getAllSubclassCount(numId);
-			$translate('SEC_INSTANCES.ALL_INSTANCES_HINT', { subclassCount : $scope.allSubclasses } ).then( function(result) {
-				$scope.translations['ALL_INSTANCES_HINT'] = result;
-			});
-
-			View.formatNonemptySubclasses(numId, classes, classes.getAllInstanceCount).then( function(subclasses) {
-				$scope.instanceSubclasses = subclasses;
-				View.formatNonemptySubclasses(numId, classes, classes.getAllSubclassCount).then( function(subclasses) {
-					$scope.subclassSubclasses = subclasses;
-					if ($scope.instanceSubclasses.length > 0) {
-						$scope.subclassActiveTab = 0;
-					} else if ($scope.subclassSubclasses.length > 0) {
-						$scope.subclassActiveTab = 1;
-					} else {
-						$scope.subclassActiveTab = 2;
+		});
+		$scope.editLabel = function(){
+			var modalId = '#editLabelModal';
+			var newLabel = $scope.newLabel;
+			var lang = i18n.getLanguage();
+			var id = $scope.id;
+			if (newLabel){
+				var response = oauth.setLabel(id, newLabel, lang);
+				response.then(function(data){
+					if (data.data.error == "OK"){
+						// $scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
+						// $scope.modalResponseClass = "text-success";
+						$(modalId).modal('hide');
+						$scope.closeModal();
+						refreshContent(false);
+					}else{
+						
+						$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] + 
+							( (data.data.error) ? ("</br>" + String(data.data.error)) : "");
+						$scope.modalResponseClass = "text-danger";
 					}
 				});
-			});
-
-			if ($scope.directInstances > 0) {
-				sparql.getPropertySubjects("P31", $scope.id, MAX_EXAMPLE_INSTANCES + 1).then(function(result) {
-					$scope.exampleInstances = result;
-				});
-			}
-			if ($scope.directSubclasses > 0) {
-				sparql.getPropertySubjects("P279", $scope.id, MAX_DIRECT_SUBCLASSES + 1).then(function(result) {
-					$scope.exampleSubclasses = result;
-				});
+			}else{
+				$scope.modalResponse = $scope.translations['MODALS_EMPTY_FIELDS_ERROR'];
+				$scope.modalResponseClass = "text-danger";
 			}
 		}
+
 	});
-
-	$scope.editLabel = function(){
-		var modalId = '#editLabelModal';
-		var newLabel = $scope.newLabel;
-		var lang = i18n.getLanguage();
-		var id = $scope.id;
-		if (newLabel){
-			var response = oauth.setLabel(id, newLabel, lang);
-			response.then(function(data){
-				if (data.data.error == "OK"){
-					// $scope.modalResponse = $scope.translations['MODALS_EXECUTION_SUCCESSFUL'];
-					// $scope.modalResponseClass = "text-success";
-					$(modalId).modal('hide');
-					$scope.closeModal();
-					refreshContent(false);
-				}else{
-					
-					$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] + 
-						( (data.data.error) ? ("</br>" + String(data.data.error)) : "");
-					$scope.modalResponseClass = "text-danger";
-				}
-			});
-		}else{
-			$scope.modalResponse = $scope.translations['MODALS_EMPTY_FIELDS_ERROR'];
-			$scope.modalResponseClass = "text-danger";
-		}
-	}
-
 	$scope.closeModal = function(){
 		$scope.modalResponse = null;
 		$scope.modalResponseClass = null;

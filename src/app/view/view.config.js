@@ -1,6 +1,7 @@
 //////// Module Definition ////////////
 define([
 	'view/view.module',
+	'view/resolver.service',
 	'view/view.service',
 	'view/view.controller'
 ], function() {
