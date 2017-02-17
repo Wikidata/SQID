@@ -75,7 +75,7 @@ function(sparql) {
 			return null;
 		}
 		var prop = idNames[idName.toLowerCase()];
-		return getQIdFromStatement(prop, vlaue);
+		return getQIdFromStatement(prop, value);
 	};
 
 	var getQIdFromStatement = function(prop, value){

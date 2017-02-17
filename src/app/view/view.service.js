@@ -71,7 +71,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 		updateId: function() {
 			var promise;
 			if ($route.current.params.quick){
-				promise = resolver.getQId($route.current.params.quick);
+				promise = resolver.getQIdQuick($route.current.params.quick);
 			}else{
 				if (($route.current.params.prop) && ($route.current.params.value)){
 					promise = resolver.getQIdFromStatement($route.current.params.prop, $route.current.params.value);
