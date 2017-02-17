@@ -18,50 +18,50 @@ function(sparql) {
 		'aat': 'P1014',
 		'bibsys': 'P1015',
 		'bav': 'P1017',
-		'kldb-2010occupationcode': 'P1021',
-		'cno-11occupationcode': 'P1022',
-		'sbc-2010occupationcode': 'P1023',
+		'kldb2010occupationcode': 'P1021',
+		'cno11occupationcode': 'P1022',
+		'sbc2010occupationcode': 'P1023',
 		'sbfioccupationcode' : 'P1024',
 		'sudoceditions' : 'P1025',
 		'zdb' : 'P1042',
 		'ideojob' : 'P1043',
-		'SWBeditions' : 'P1044',
-		'Sycomore' : 'P1045',
-		'CatholicHierarchyperson' : 'P1047',
-		'NCL' : 'P1048',
-		'PSH' : 'P1051',
-		'PortugueseJobCodeCPP-2010' : 'P1052',
-		'Researcher' : 'P1053',
-		'NDLbib' : 'P1054',
-		'NLMUnique' : 'P1055',
-		'ERAJournal' : 'P1058',
-		'CVRnumber' : 'P1059',
-		'Thailandcentraladministrativeunitcode' : 'P1067',
-		'StatisticsDenmarksclassificationofoccupation' : 'P1069',
-		'PlantList-' : 'P1070',
-		'ICTVvirus' : 'P1076',
-		'EULeditions' : 'P1084',
-		'LibraryThingwork' : 'P1085',
-		'ATVK' : 'P1115',
-		'ELSTATgeographicalcode' : 'P1116',
-		'DGO4identifier' : 'P1133',
-		'KunstindeksDanmarkArtist' : 'P1138',
-		'EHAK' : 'P1140',
-		'BNArgentineeditions' : 'P1143',
-		'LCOCLCCN' : 'P1144',
-		'IAAF' : 'P1146',
-		'ScopusAuthor' : 'P1153',
-		'ScopusE' : 'P1154',
-		'ScopusAffiliation' : 'P1155',
-		'ScopusSource' : 'P1156',
-		'USCongressBio' : 'P1157',
-		'CODEN' : 'P1159',
-		'ISO4abbreviation' : 'P1160',
-		'USB' : 'P1167',
+		'swbeditions' : 'P1044',
+		'sycomore' : 'P1045',
+		'catholichierarchyperson' : 'P1047',
+		'ncl' : 'P1048',
+		'psh' : 'P1051',
+		'portuguesejobcodecpp2010' : 'P1052',
+		'researcher' : 'P1053',
+		'ndlbib' : 'P1054',
+		'nlmunique' : 'P1055',
+		'erajournal' : 'P1058',
+		'cvrnumber' : 'P1059',
+		'thailandcentraladministrativeunitcode' : 'P1067',
+		'statisticsdenmarksclassificationofoccupation' : 'P1069',
+		'plantlist' : 'P1070',
+		'ictvvirus' : 'P1076',
+		'euleditions' : 'P1084',
+		'librarythingwork' : 'P1085',
+		'atvk' : 'P1115',
+		'elstatgeographicalcode' : 'P1116',
+		'dgo4identifier' : 'P1133',
+		'kunstindeksdanmarkartist' : 'P1138',
+		'ehak' : 'P1140',
+		'bnargentineeditions' : 'P1143',
+		'lcoclccn' : 'P1144',
+		'iaaf' : 'P1146',
+		'scopusauthor' : 'P1153',
+		'scopuse' : 'P1154',
+		'scopusaffiliation' : 'P1155',
+		'scopussource' : 'P1156',
+		'uscongressbio' : 'P1157',
+		'coden' : 'P1159',
+		'iso4abbreviation' : 'P1160',
+		'usb' : 'P1167',
 		'municipalitycode' : 'P1168'
 	};
 
-	var getQId = function(exId){
+	var getQIdQuick = function(exId){
 		var idName, value;
 		if (exId){
 			var splits = exId.split(':');
@@ -75,6 +75,10 @@ function(sparql) {
 			return null;
 		}
 		var prop = idNames[idName.toLowerCase()];
+		return getQIdFromStatement(prop, vlaue);
+	};
+
+	var getQIdFromStatement = function(prop, value){
 		if (prop){
 			var promise = sparql.getIdFromLiteral(prop, value).then(function(uri){
 				if (uri){
@@ -89,9 +93,11 @@ function(sparql) {
 			return null;
 		}
 	};
-	// TODO implement
+
+
 	return {
-		getQId: getQId
+		getQIdQuick: getQIdQuick,
+		getQIdFromStatement: getQIdFromStatement
 	};
 }]);
 
