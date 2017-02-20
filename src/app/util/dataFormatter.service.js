@@ -105,7 +105,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				} else {
 					globe = '';
 				}
-				return '(' + datavalue.value.latitude + ', ' + datavalue.value.longitude + ')' + globe;
+				return '(' + formatGlobeCoordinate(datavalue.value.latitude,'N','S') + ' , ' + formatGlobeCoordinate(datavalue.value.longitude,'E','W') + ')' + globe;
 			case 'sqid-text':
 				return datavalue.value;
 			default:
@@ -191,11 +191,13 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 	 */
 	var getStatementValueBlockHtml = function(statement, properties, missingTermsListener, showReferences, short) {
 		var statementId = statement.id;
-
 		var refTable = '';
 		var refCount = 0;
 		if (showReferences) {
 			refTable += '<div style="overflow: auto; clear: both; padding-top: 4px;" ng-if="showRows(\'' + statementId + '\')" ng-click="$event.stopPropagation()">';
+			if (statement.mainsnak.datatype == 'globe-coordinate'){
+				refTable += '<div osm-map id="' + statement.id + '" latitude="' + statement.mainsnak.datavalue.value.latitude + '" longitude="' + statement.mainsnak.datavalue.value.longitude + '"></div>';
+			}
 			if ('references' in statement) {
 				refCount = statement.references.length;
 				refTable += '<table class="reference-table">';
@@ -250,6 +252,22 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		ret += refTable;
 
 		return ret;
+	}
+
+	var formatGlobeCoordinate = function(value,plusName,minusName){
+		var extract = function(value, divisor){
+			var newValue = Math.floor(value, divisor) 
+			return [newValue, value - newValue	]
+		}
+		var result = extract(Math.abs(value), 1)
+		degree = result[0]
+		result =  extract(result[1] * 60, 1)
+		minutes = result[0]
+		result =  extract(result[1] * 60, 1)
+		seconds = result[0]
+		var dirName = value >= 0 ? plusName : minusName;
+		var repr = String(degree) + "°" + String(minutes) + "'" + String(seconds) + "\" " + dirName;
+		return repr;
 	}
 
 	/**
