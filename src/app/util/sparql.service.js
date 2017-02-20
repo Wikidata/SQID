@@ -6,10 +6,14 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('util').factory('sparql', ['util', 'i18n', function(util, i18n) {
+angular.module('util').factory('sparql', ['util', 'i18n', '$q', function(util, i18n, $q) {
 
 	var SPARQL_SERVICE = "https://query.wikidata.org/bigdata/namespace/wdq/sparql";
 	var SPARQL_UI_PREFIX = "https://query.wikidata.org/#";
+
+	var MAX_PARALLEL_REQUESTS = 4;
+	var poolActive = new Set();
+	var poolPassive = new Set();
 
 	var getQueryUrl = function(sparqlQuery) {
 		return SPARQL_SERVICE + "?query=" + encodeURIComponent("#TOOL:SQID, http://tools.wmflabs.org/sqid/\n" + sparqlQuery);
@@ -32,7 +36,35 @@ angular.module('util').factory('sparql', ['util', 'i18n', function(util, i18n) {
 	};
 
 	var getQueryRequest = function(sparqlQuery) {
-		return util.httpRequest(getQueryUrl(sparqlQuery));
+		if (poolActive.size < MAX_PARALLEL_REQUESTS){
+			var promise = util.httpRequest(getQueryUrl(sparqlQuery));
+			poolActive.add(promise);
+			return promise.then(function(result){
+				poolActive.delete(promise);
+				if (poolPassive.size > 0){
+					var next = poolPassive.values().next().value;
+					poolActive.add(next.promise);
+					next.resolve();
+					poolPassive.delete(next);
+				}
+				return result;
+			});
+		}else{
+			var deferred = $q.defer();
+			poolPassive.add(deferred);
+			return deferred.promise.then(function(){
+				return util.httpRequest(getQueryUrl(sparqlQuery)).then(function(result){
+					poolActive.delete(deferred.promise);
+					if (poolPassive.size > 0){
+						var next = poolPassive.values().next().value;
+						poolActive.add(next.promise);
+						next.resolve();
+						poolPassive.delete(next); 
+					}
+					return result;
+				});
+			});
+		}
 	};
 	
 	var getInnerQueryForPropertySubjects = function(resultVarName, propertyId, objectId, limit) {
