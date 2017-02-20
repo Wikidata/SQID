@@ -105,7 +105,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				} else {
 					globe = '';
 				}
-				return '(' + formatGlobeCoordinate(datavalue.value.latitude) + 'N , ' + formatGlobeCoordinate(datavalue.value.longitude) + 'E)' + globe;
+				return '(' + formatGlobeCoordinate(datavalue.value.latitude,'N','S') + ' , ' + formatGlobeCoordinate(datavalue.value.longitude,'E','W') + ')' + globe;
 			case 'sqid-text':
 				return datavalue.value;
 			default:
@@ -254,18 +254,19 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		return ret;
 	}
 
-	var formatGlobeCoordinate = function(value){
+	var formatGlobeCoordinate = function(value,plusName,minusName){
 		var extract = function(value, divisor){
 			var newValue = Math.floor(value, divisor) 
 			return [newValue, value - newValue	]
 		}
-		var result = extract(value, 1)
+		var result = extract(Math.abs(value), 1)
 		degree = result[0]
 		result =  extract(result[1] * 60, 1)
 		minutes = result[0]
 		result =  extract(result[1] * 60, 1)
 		seconds = result[0]
-		var repr = String(degree) + "°" + String(minutes) + "'" + String(seconds) + "''";
+		var dirName = value >= 0 ? plusName : minusName;
+		var repr = String(degree) + "°" + String(minutes) + "'" + String(seconds) + "\" " + dirName;
 		return repr;
 	}
 
