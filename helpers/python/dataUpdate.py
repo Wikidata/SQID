@@ -208,3 +208,14 @@ def updatePropertyRecords() :
 	print("Property update complete.")
 
 #pprint.pprint(propertyStatistics)
+
+if __name__ == '__main__':
+	# ensure we are in the correct directory
+	wd = os.getcwd()
+	try:
+		os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+				      '..', '..', 'src', 'data'))
+		updateClassRecords()
+		updatePropertyRecords()
+	finally:
+		os.chdir(wd)
