@@ -1,0 +1,22 @@
+extends:
+  - eslint:recommended
+  - angular
+
+settings:
+  angular: 2
+
+rules:
+  angular/service-name: off
+  angular/controller-as: off
+  angular/angularelement: off
+  angular/di:
+    - 2
+    - array
+
+env:
+  amd: true
+  browser: true
+  jquery: true
+
+globals:
+  requirejs: true
