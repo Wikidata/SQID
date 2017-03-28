@@ -46,11 +46,15 @@ def setPropertyStatistics(propertyStatistics, propertyId, statisticType, numberS
 
 
 def storeStatistics(key, value):
-	with open('statistics.json', 'r') as outfile:
-		data = json.load(outfile)
-		data[key] = value
-		with open('statistics.json', 'w') as outfile:
-			json.dump(data, outfile)
+	try:
+		with open('statistics.json', 'r') as outfile:
+			data = json.load(outfile)
+	except OSError:
+		data = {}
+
+	data[key] = value
+	with open('statistics.json', 'w') as outfile:
+		json.dump(data, outfile)
 
 def updateClassRecords() :
 	startTime = time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -79,34 +83,38 @@ WHERE {
 
 	print("Augmenting current class data ...")
 	classesWithInstances = {}
-	with open('classes.json') as classFile:
-		data = json.load(classFile)
-		for binding in resultsClasses['results']['bindings']:
-			classUri = binding['cl']['value']
-			if classUri[0:31] == 'http://www.wikidata.org/entity/':
-				classId = classUri[32:]
-				classesWithInstances[classId] = True
-				classLabel = binding['clLabel']['value']
-				if classId in data:
-					data[classId]['l'] = classLabel
-					if "c" in binding:
-						data[classId]['i'] = int(binding['c']['value'])
+	try:
+		with open('classes.json') as classFile:
+			data = json.load(classFile)
+	except OSError:
+		data = {}
+
+	for binding in resultsClasses['results']['bindings']:
+		classUri = binding['cl']['value']
+		if classUri[0:31] == 'http://www.wikidata.org/entity/':
+			classId = classUri[32:]
+			classesWithInstances[classId] = True
+			classLabel = binding['clLabel']['value']
+			if classId in data:
+				data[classId]['l'] = classLabel
+				if "c" in binding:
+					data[classId]['i'] = int(binding['c']['value'])
+			else:
+				if "c" in binding:
+					data[classId] = {'l':classLabel, 'i':int(binding['c']['value'])}
 				else:
-					if "c" in binding:
-						data[classId] = {'l':classLabel, 'i':int(binding['c']['value'])}
-					else:
-						data[classId] = {'l':classLabel}
-		# zero instance counts for classes not found in the query:
-		for classId in data :
-			if classId not in classesWithInstances :
-				data[classId]['i'] = 0
+					data[classId] = {'l':classLabel}
+	# zero instance counts for classes not found in the query:
+	for classId in data:
+		if classId not in classesWithInstances:
+			data[classId]['i'] = 0
 
-		print("Writing json class data ...")
-		with open('classes-new.json', 'w') as outfile:
-			json.dump(data, outfile,separators=(',', ':'))
+	print("Writing json class data ...")
+	with open('classes-new.json', 'w') as outfile:
+		json.dump(data, outfile,separators=(',', ':'))
 
-		print("Replacing classes json file ...")
-		os.rename("classes-new.json","classes.json")
+	print("Replacing classes json file ...")
+	os.rename("classes-new.json","classes.json")
 
 	storeStatistics('classUpdate',startTime)
 	print("Class update complete.")
@@ -173,25 +181,28 @@ def updatePropertyRecords() :
 		#	print binding['p']['value'] + ' = ' + binding['c']['value']
 
 	print("Augmenting current property data ...")
-	with open('properties.json') as propertyFile:
-		data = json.load(propertyFile)
+	try:
+		with open('properties.json') as propertyFile:
+			data = json.load(propertyFile)
+	except OSError:
+		data = {}
 
-		for propertyId, propertyData in propertyStatistics.items():
-			if propertyId in data:
-				data[propertyId]['l'] = propertyData['l']
-				data[propertyId]['d'] = propertyData['t']
-				data[propertyId]['s'] = propertyData['s']
-				data[propertyId]['q'] = propertyData['q']
-				data[propertyId]['e'] = propertyData['r']
-			else:
-				data[propertyId] = { 'l': propertyData['l'], 'd': propertyData['t'], 's': propertyData['s'], 'q': propertyData['q'], 'e': propertyData['r']}
+	for propertyId, propertyData in propertyStatistics.items():
+		if propertyId in data:
+			data[propertyId]['l'] = propertyData['l']
+			data[propertyId]['d'] = propertyData['t']
+			data[propertyId]['s'] = propertyData['s']
+			data[propertyId]['q'] = propertyData['q']
+			data[propertyId]['e'] = propertyData['r']
+		else:
+			data[propertyId] = { 'l': propertyData['l'], 'd': propertyData['t'], 's': propertyData['s'], 'q': propertyData['q'], 'e': propertyData['r']}
 
-		print("Writing json property data ...")
-		with open('properties-new.json', 'w') as outfile:
-			json.dump(data, outfile,separators=(',', ':'))
+	print("Writing json property data ...")
+	with open('properties-new.json', 'w') as outfile:
+		json.dump(data, outfile,separators=(',', ':'))
 
-		print("Replacing properties json file ...")
-		os.rename("properties-new.json","properties.json")
+	print("Replacing properties json file ...")
+	os.rename("properties-new.json","properties.json")
 
 	storeStatistics('propertyUpdate',startTime)
 	print("Property update complete.")
