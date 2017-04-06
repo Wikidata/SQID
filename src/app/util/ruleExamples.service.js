@@ -216,16 +216,16 @@ body: { atoms : [
 			pvalue: {value:"y", type:"variable"},
 			set: {value:"S", type:"set-variable" }
 		},
-		//Just to test, makes no sense
-		{
-			type: "relational-atom",
-			entity: {value:"x", type:"variable"},
-			property:"P1038",
-			pvalue: {value:"gf", type:"variable"},
-			set: {
-				type:"set-variable" ,
-				value:"T"}
-		}
+//		//Just to test, makes no sense
+//		{
+//			type: "relational-atom",
+//			entity: {value:"x", type:"variable"},
+//			property:"P1038",
+//			pvalue: {value:"gf", type:"variable"},
+//			set: {
+//				type:"set-variable" ,
+//				value:"T"}
+//		}
 		]
 }, head: { atom : 
 	{
@@ -236,65 +236,207 @@ body: { atoms : [
 		set: {
 			type:"function-term",
 			value :[//only 1 function:
+////			          {
+////			        	  conditions:[
+////							{
+////							type: "open-specifier",
+////							variable:"S",
+////							value: [{	
+////								attribute:{value:"P580", type:"property"},
+////								qvalue:{value:"start", type:"variable"}}
+////							  ]				
+////							},
+//////				        	    //START TIME
+//////								{
+//////									type: "set-atom",
+//////									variable:"S",
+//////									
+//////										attribute:{value:"P580", type:"property"},
+//////									    qvalue:{value:"start", type:"variable"}
+//////								},
+////							//END TIME
+////							{
+////								type: "set-atom",
+////								variable:"S",
+////								
+////								attribute:{value:"P582", type:"property"},
+////							    qvalue:{value:"end", type:"variable"}
+////							},
+//////							//TEST GROUND SET ATOM typeOfKinship=Grandfather
+////							{
+////								type: "set-atom",
+////								variable:"T",
+////								
+////								attribute:{value:"P1039", type:"property"},
+////								qvalue:{value:"Q9238344", type:"item"}						
+////							},
+////							{
+////								type: "relational-atom",
+////								entity: {value:"x", type:"variable"},
+////								property:"P1038",
+////								pvalue: {value:"gf1", type:"variable"},
+////								set: {
+////									type:"set-expression" ,
+////									value:[]}
+////							}
+////							], 
+////						  insert:[
+////							{
+////								attribute:{value:"P580", type:"property"},
+////								qvalue:{value:"start", type:"variable"}
+////							}
+////							,
+////							{
+////								attribute:{value:"P582", type:"property"},
+////								qvalue:{value:"end", type:"variable"}
+////							}
+////							]
+////			          },
+			          //function 1
 			          {
 			        	  conditions:[
 							{
-							type: "open-specifier",
-							variable:"S",
-							value: [{	
+								type: "set-atom",
+								variable:"S",
+								
 								attribute:{value:"P580", type:"property"},
-								qvalue:{value:"start", type:"variable"}}
-							  ]				
-							},
-//				        	    //START TIME
-//								{
-//									type: "set-atom",
-//									variable:"S",
-//									
-//										attribute:{value:"P580", type:"property"},
-//									    qvalue:{value:"start", type:"variable"}
-//								},
-							//END TIME
+							    qvalue:{value:"start", type:"variable"}
+							}], 
+						  insert:[
+							{
+								attribute:{value:"P580", type:"property"},
+								qvalue:{value:"start", type:"variable"}
+							}
+							]
+			          },
+			          //function 2
+			          {
+			        	  conditions:[
 							{
 								type: "set-atom",
 								variable:"S",
 								
 								attribute:{value:"P582", type:"property"},
 							    qvalue:{value:"end", type:"variable"}
-							},
-//							//TEST GROUND SET ATOM typeOfKinship=Grandfather
-							{
-								type: "set-atom",
-								variable:"T",
-								
-								attribute:{value:"P1039", type:"property"},
-								qvalue:{value:"Q9238344", type:"item"}						
-							},
-							{
-								type: "relational-atom",
-								entity: {value:"x", type:"variable"},
-								property:"P1038",
-								pvalue: {value:"gf1", type:"variable"},
-								set: {
-									type:"set-expression" ,
-									value:[]}
-							}
-							], 
+							}], 
 						  insert:[
-							{
-								attribute:{value:"P580", type:"property"},
-								qvalue:{value:"start", type:"variable"}
-							}
-							,
 							{
 								attribute:{value:"P582", type:"property"},
 								qvalue:{value:"end", type:"variable"}
 							}
 							]
-			          }]
+			          },
+			        //function 3
+			          {
+			        	  conditions:[
+							{
+								type: "set-atom",
+								variable:"S",
+								
+								attribute:{value:"P2842", type:"property"},
+							    qvalue:{value:"place", type:"variable"}
+							}], 
+						  insert:[
+							{
+								attribute:{value:"P2842", type:"property"},
+								qvalue:{value:"place", type:"variable"}
+							}
+							]
+			          },
+			        //function 4
+			          {
+			        	  conditions:[
+							{
+								type: "set-atom",
+								variable:"S",
+								
+								attribute:{value:"P1534", type:"property"},
+							    qvalue:{value:"endCause", type:"variable"}
+							}], 
+						  insert:[
+							{
+								attribute:{value:"P1534", type:"property"},
+								qvalue:{value:"endCause", type:"variable"}
+							}
+							]
+			          }
+			          ]
 		}//set
 	}
 }
+},
+
+/** 
+ * TEST: FUNCTION 2
+ * 
+ *  positionheld
+ *  
+ */
+{ body: { atoms : [
+		{
+			type: "relational-atom",
+			entity: {value:"x", type:"variable"},
+			property: "P39",//positionheld
+			pvalue: {value:"y", type:"variable"},
+			set: {value:"S", type:"set-variable" }
+		},
+		{
+			type: "relational-atom",
+			entity: {value:"y", type:"variable"},
+			property:"P279",//subclassof
+			pvalue: {value:"Q48352", type:"item"},//head of state (Q48352)
+			set: {
+				type:"set-variable" ,
+				value:"T"}
+		}
+		]
+}, head: { atom : 
+	{
+		type:"relational-atom",//not necessary
+		entity: {value:"y", type:"variable"},
+		property:"P1308",//officeholder
+		pvalue: {value:"x", type:"variable"},
+		set: {
+			type:"function-term",
+			value :[
+			          //function 1
+			          {
+			        	  conditions:[
+							{
+								type: "set-atom",
+								variable:"S",
+								
+								attribute:{value:"P580", type:"property"},
+							    qvalue:{value:"start", type:"variable"}
+							}], 
+						  insert:[
+							{
+								attribute:{value:"P580", type:"property"},
+								qvalue:{value:"start", type:"variable"}
+							}
+							]
+			          },
+			          //function 2
+			          {
+			        	  conditions:[
+							{
+								type: "set-atom",
+								variable:"S",
+								
+								attribute:{value:"P582", type:"property"},
+							    qvalue:{value:"end", type:"variable"}
+							}], 
+						  insert:[
+							{
+								attribute:{value:"P582", type:"property"},
+								qvalue:{value:"end", type:"variable"}
+							}
+							]
+			          },
+			          ]
+		}//set
+	}//head atom
+}//head
 },
 
 /** 
@@ -342,7 +484,7 @@ body: { atoms : [
 
 var getRules = function() {	
 	return [//JSONRules[0],JSONRules[1],JSONRules[2],JSONRules[3],JSONRules[4],JSONRules[5],
-	        JSONRules[6]];
+	        JSONRules[6],JSONRules[7]];
 //	        JSONRules[7]]; //JSONRules;	
 //	[
 //////	 		other than p26
