@@ -123,10 +123,12 @@ var addRelTripleSPARQL = function(atom, stmtvar, sparql, itemInRule, itemId) {
 //	a relational atom, index for it, rule it occurs in, id of entity the inferred stmts are about
 var getStatementVariable = function(atom, index, itemInRule, itemId) {
 	
-	var entityIsVar = isSPARQLVar(atom.entity, itemInRule);
-	var entity = getSPARQLTerm(atom.entity, itemInRule, itemId);
+	var entityIsVar = atom.entity.type=="variable";//isSPARQLVar(atom.entity, itemInRule);
+	var entity = atom.entity.value;//getSPARQLTerm(atom.entity, itemInRule, itemId);
 	
-	return VAR_PREFIX + (entityIsVar ? entity.substring(1) : entity) + "stmt" + index;
+	return VAR_PREFIX + entity//(entityIsVar ? entity.substring(1) : entity) + "stmt" + index;
+//	entity.substring(1) 
+	+ "stmt" + index;
 
 };	
 
@@ -336,8 +338,6 @@ var getRules = function(id) {
 		var setVarAtomMap = getSetVarAtomMap(rule);
 		var qvalueAtomMap = new Object();
 		
-		var optLabels = [];
-		
 		angular.forEach(rule.body.atoms, function(atom) {
 			if(atom.type == "relational-atom"){
 				
@@ -407,11 +407,14 @@ var getRules = function(id) {
 					}
 					
 					index++;
+					
 				});	
 				
 
 				optionals += " OPTIONAL {" + sparql.where + sparql.filter + " } ";
-
+				sparql.where =  "";	
+				sparql.filter =  "";	
+				
 			});		
 		}
 		
