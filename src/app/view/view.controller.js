@@ -47,7 +47,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		$scope.translations['PROP_STATEMENTS_HINT'] = translations['SEC_PROP_USE.STATEMENTS_HINT'];
 		$scope.translations['PROP_QUALIFIERS_HINT'] = translations['SEC_PROP_USE.QUALIFIERS_HINT'];
 	});
-	$scope.test = null;
+
 	$scope.classes = null;
 	$scope.properties = null;
 	$scope.entityData = null;
@@ -114,19 +114,10 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, sparql, ut
 		});
 	});
 	
-	View.getTest().then(function(data) {
-//		$scope.test = 'test';
-		$scope.test = data;
-	});
 			
 	
-//	().then(function(data) {
-//		$scope.test = data;
-//	});
-
 	
 	View.getEntityDataInferred().then(function(data) {
-//		$scope.test = data;
 		$scope.entityDataInf = data;
 	});
 

@@ -19,7 +19,6 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 	var fetchedEntityLanguage = null;
 	var entityDataPromise = null;
 	var entityDataInfPromise = null;
-	var entityDataTestPromise = null;
 
 	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
 		var ret = [];
@@ -149,15 +148,6 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 				return this.entityDataInfPromise;
 		},
 		
-		getTest: function() { 
-				if (true) {//fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
-					this.entityDataTestPromise = entitydata.getTest(id).then(function(data) {
-						return data;
-					});
-
-				}
-				return this.entityDataTestPromise;
-		},
 
 		// Find images from statements
 		getImages: function(statements) {

@@ -8,7 +8,28 @@ define([
 'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
-
+//	NEXT TODO (for veronika) make closed specs work. and closed and open ones in conditionals
+//	
+//	we assume 
+//	- the rules to be correct syntactically (see the MARS paper)
+//	- every set variable to occur only in a single relational atom
+//	- no complex specifier terms anywhere
+//	- there are no set atoms of the form "tuple \in set expression", where the set expression does not contain variables
+//	  (such atoms are generally allowed, but I do not see any sense in them?)
+//	- no closed specifiers in conditionals - currently in general! TODO
+//	
+//  TODO open spec in function term, is regarded as open in general. 
+//	that is not correct if the conditionals do not apply. should we disallow open specs in conditionals 
+//	(they can be expressed as set atoms anyway) or fix that? 
+//	
+//  TODO how to find the correct qualifier attributes when the ful snaks have been requested?...
+//	...we do not have an id/hash for them in the sparql result
+//	
+//	the entry point: getStatementsInferred
+//	- getRules: import rules, collect info about set terms, generate sparql queries
+//	- collect ids of stmts to request and get them
+//	- create corresponding snaks
+	
 angular.module('util').factory('rules', [
 'ruleExamples','wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', 
 function(ruleExamples, wikidataapi, util, i18n, sparql, $q, $http) {
@@ -133,20 +154,20 @@ var getStatementVariable = function(atom, index, itemInRule, itemId) {
 };	
 
 
-var addRelAtomSPARQL = function(atom, index, rule, setVarMap, qvalueAtomMap, sparql, id) {
+var addRelAtomSPARQL = function(atom, index, rule, setVarQualifiersMap, qvalueRAtomMap, sparql, id) {
 	
 	var stmtVar = getStatementVariable(atom, index, rule, id);
 	
 	addRelTripleSPARQL(atom,stmtVar,sparql, rule.head.atom.entity.value,id);
 	
-	var qualifiers = atom.set.type == "set-expression" ? atom.set.value : setVarMap[atom.set.value];
+	var qualifiers = atom.set.type == "set-expression" ? atom.set.value : setVarQualifiersMap[atom.set.value];
 	var pvalue = getSPARQLTerm(atom.pvalue, rule.head.atom.entity.value, id); 
 		
 	angular.forEach(qualifiers, function(qualifier) {
 		
 		addQualifierSPARQL(qualifier,stmtVar, atom.property, sparql,rule.head.atom.entity.value,id);		
 		
-		qvalueAtomMap[qualifier.qvalue.value] = index;
+		qvalueRAtomMap[qualifier.qvalue.value] = index;
 	});	
 
 }
@@ -187,43 +208,24 @@ var getSetVarQualifiers = function(atoms) {
 
 
 //for all set variables, collect the info if an open specifier is part of its specification
-var getOpenSpecAtomMap = function(rule) {
+var getOpenSpecRAtomMap = function(rule, setVarRAtomMap) {
 	var sets = new Object();
 
 	angular.forEach(rule.body.atoms, function(atom) {
 		
 		if(atom.type == "open-specifier") {
-			
-//			atom in rule
-			var index = 0;
-			angular.forEach(rule.body.atoms, function(atom2) {
-				if(atom2.type == "relational-atom" && atom2.set.value == atom.variable) {
-
-					sets[atom.variable] = index;
-				}
-				index++;
-			});
+			sets[atom.variable] = setVarRAtomMap[atom.variable].index;
 		}
 		
 	});
-//	TODO open spec in function term, is regarded as open in general
+//	TODO open spec in function term, is regarded as open in general. 
+//	that is not correct (if conditionals do not apply). should we disallow open specs in conditionals? same can be expressed as set atoms
 	if(rule.head.atom.set.type == "function-term") {
 
 		angular.forEach(rule.head.atom.set.value, function(f) {
 			angular.forEach(f.conditions, function(atom) {
 				if(atom.type == "open-specifier") {
-					
-//					atom in rule
-					var index = 0;
-					angular.forEach(rule.body.atoms, function(atom2) {
-						if(atom2.type == "relational-atom" && atom2.set.value == atom.variable) {
-
-							sets[atom.variable] = index;
-						}
-						index++;
-					});
-					
-
+					sets[atom.variable] = setVarRAtomMap[atom.variable].index;
 				}
 				
 			});
@@ -250,7 +252,7 @@ var getOpenSpecAtomMap = function(rule) {
 //}
 
 //we currently assume each set var to occur only in one rel atom
-var getSetVarAtomMap = function(rule) {
+var getSetVarRAtomMap = function(rule) {
 	var index = 0;
 	var result = new Object();
 	
@@ -260,25 +262,7 @@ var getSetVarAtomMap = function(rule) {
 		}
 		index++;
 	});
-	
-//	something like this is probably only needed if set variables in the function conditions
-//	can refer to set variables introduced only with relational atoms in the same condition
-//	but then we need to make sure that we do not refer to relational atoms from other conditions
-//	this is not yet covered by the below code
-//	if(rule.head.atom.set.type == "function-term") {
-//
-//		angular.forEach(rule.head.atom.set.value, function(f) {
-//			angular.forEach(f.conditions, function(atom) {
-//				if(atom.type == "relational-atom") {
-//					if(atom.set.type == "set-variable")
-//						result[atom.set.value] = {atom:atom, index:index};
-//					
-//					index++;
-//				}
-//			});
-//		});
-//	}
-	
+
 	return result;
 }
 
@@ -310,16 +294,10 @@ var getAtom = function(rule, index) {
 
 	
 var getRules = function(id) {	
-//	qvalueAtomMap: maps qualifiers to relational atom it is associated to (to ease property... finding later)
-//	form: {rule: rule, qvalueatommap: qvalueAtomMap, sparql: query}
+
 	var ruleData = [];
 	
-//	import rules from external source?
-//		var promise= null;
-//		if (!promise){
-//			promise = $http.get("data/rules.json").then(function(response){
-//				var JSONRules = response.rules;
-	
+//TODO	import rules from external source?	
 	angular.forEach(ruleExamples.getRules(), function(rule) {
 //		parameters to pass by reference
 		var sparql = {
@@ -332,16 +310,15 @@ var getRules = function(id) {
 		var index = 0;
 
 		var setVarQualifiersMap = getSetVarQualifiers(rule.body.atoms);
-		var setVarOpenInfo = getOpenSpecAtomMap(rule);
-		//collect occurrences
-//		var setVarAtomMap = getSetVarAtomIndexMap(rule);
-		var setVarAtomMap = getSetVarAtomMap(rule);
-		var qvalueAtomMap = new Object();
+		var setVarRAtomMap = getSetVarRAtomMap(rule);
+		var openSpecRAtomMap = getOpenSpecRAtomMap(rule, setVarRAtomMap);
+//		qvalueRAtomMap: maps qualifiers to relational atom it is associated to (to ease property... finding later)
+		var qvalueRAtomMap = new Object();
 		
 		angular.forEach(rule.body.atoms, function(atom) {
 			if(atom.type == "relational-atom"){
 				
-				addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueAtomMap, sparql, id);
+				addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueRAtomMap, sparql, id);
 			}
 			index++;
 		});
@@ -367,29 +344,23 @@ var getRules = function(id) {
 //					we (can) assume that there are relational atoms in the body where the variable occurs in
 					if(atom.type == "set-atom"){
 						
-						var batom = setVarAtomMap[atom.variable].atom;
-						var index2 = setVarAtomMap[atom.variable].index;				
+						var batom = setVarRAtomMap[atom.variable].atom;
+						var index2 = setVarRAtomMap[atom.variable].index;				
 						var stmtVar = getStatementVariable(batom, index2, rule, id);
 						var pvalue = getSPARQLTerm(batom.pvalue, rule.head.atom.entity.value, id); 
 
 						addQualifierSPARQL(atom,stmtVar,pvalue,sparql,rule.head.atom.entity.value,id);
 						
 //						we do not want to overwrite refs to (certain) body occurrences
-						if(qvalueAtomMap[atom.qvalue.value] == null)
-							qvalueAtomMap[atom.qvalue.value] = index2;
+						if(qvalueRAtomMap[atom.qvalue.value] == null)
+							qvalueRAtomMap[atom.qvalue.value] = index2;
 						
 						if(i==0) entityTerm0 = getSPARQLTerm(batom.entity,rule.head.atom.entity.value,id);
 						
-					} else if(atom.type == "relational-atom"){
-
-						addRelAtomSPARQL(atom, index, rule, setVarQualifiersMap, qvalueAtomMap, sparql, id);
-						
-						if(i==0) entityTerm0 = getSPARQLTerm(atom.entity,rule.head.atom.entity.value,id);//getStatementVariable(atom, stmtIndex-1, rule, id);
+					} else if(atom.type == "open-specifier" || atom.type == "closed-specifier"){ //TODO closed not tested yet
 					
-					} else if(atom.type == "open-specifier") { //|| atom.type == "closed-specifier"){ closed cannot occur
-					
-						var batom = setVarAtomMap[atom.variable].atom;
-						var index2 = setVarAtomMap[atom.variable].index;
+						var batom = setVarRAtomMap[atom.variable].atom;
+						var index2 = setVarRAtomMap[atom.variable].index;
 						var stmtVar = getStatementVariable(batom, index2, rule, id);
 						var pvalue = getSPARQLTerm(batom.pvalue, rule.head.atom.entity.value, id); 
 					
@@ -398,8 +369,8 @@ var getRules = function(id) {
 							addQualifierSPARQL(atom,stmtVar,pvalue,sparql,rule.head.atom.entity.value,id);
 							
 //							we do not want to overwrite refs to (certain) body occurrences
-							if(qvalueAtomMap[atom.qvalue.value] == null)
-								qvalueAtomMap[atom.qvalue.value] = index2;
+							if(qvalueRAtomMap[atom.qvalue.value] == null)
+								qvalueRAtomMap[atom.qvalue.value] = index2;
 					
 						});
 						
@@ -437,7 +408,7 @@ var getRules = function(id) {
 		
 			
 		ruleData.push({rule: rule, 	//setvaratommap: setVarAtomMap,
-			qvalueatommap: qvalueAtomMap, setvarmap: setVarQualifiersMap, setvaropeninfo: setVarOpenInfo, 
+			qvalueratommap: qvalueRAtomMap, setvarqualifiersmap: setVarQualifiersMap, openspecratommap: openSpecRAtomMap, 
 			sparql: query});
 	
 	});
@@ -446,7 +417,7 @@ var getRules = function(id) {
 };
 
 
-var getQualifierSnaksForRule = function(itemId, qualifierset, openAtomIndex, rule, qvalueAtomMap, sparqlBindings, apiBindings, atomsToStmts) {
+var getQualifierSnaksForRule = function(itemId, qualifierset, openAtomIndex, rule, qvalueRAtomMap, sparqlBindings, apiBindings, atomsToStmts) {
 	var qualifiers = {};
 
 	angular.forEach(qualifierset, function(qualifier) {
@@ -472,12 +443,13 @@ var getQualifierSnaksForRule = function(itemId, qualifierset, openAtomIndex, rul
 					}
 			}; 
 		} else {//we assume it is a variable
-			var index = qvalueAtomMap[qualifier.qvalue.value];
+			var index = qvalueRAtomMap[qualifier.qvalue.value];
 			var stmtIndexInApiBindings = atomsToStmts[index]; 
 			
 			var atom = getAtom(rule,index);
 
-//			TODO the last [0] is not correct, but how to find the correct qualifier
+//			TODO the last [0] is not correct, but how to find the correct qualifier. we do not have an id/hash for that in the sparql result
+//			TODO the first [0] is correct, right? for a statement property, there is only one object?!
 //			we probably would have to iterate over all and compare to the simple value from the sparql result
 			snak = apiBindings[stmtIndexInApiBindings].claims[atom.property][0].qualifiers[attrId][0];
 //			for (var qsnak in apiBindings[stmtIndexInApiBindings].claims[atom.property][0].qualifiers[attrId]) {
@@ -546,49 +518,34 @@ var allSpecifierAtomVarsBound = function(atom, sparqlBindings) {
 	return true;
 };
 	
-var allRelAtomVarsBound = function(atom, sparqlBindings) { 
-
-	if(atom.entity.type == "variable" && 
-			!sparqlBindings.hasOwnProperty(atom.entity.value))
-		return false;
-	if(atom.pvalue.type == "variable" && 
-			!sparqlBindings.hasOwnProperty(atom.pvalue.value))
-		return false;
-	
-	return true;
-};
-
-//assume atom of type "function-term"
+//assume: atom of type "function-term"
+//return: qualifiers if all corresponding variables are in sparql result (conditionals were in sparql's optional)
 var getFunctionQualifiers = function(atom, sparqlBindings) { 
 	var qualifiers = [];
 	
 
 	angular.forEach(atom.set.value, function(f) {
 			
-		var conditionsSat = true;
+		var conditionalsSat = true;
 		
 		for (var i = 0; i < f.conditions.length; i++) {
 			var atom = f.conditions[i];
 			
 			if(atom.type == "set-atom") { 
 				if(!allSetAtomVarsBound(atom, sparqlBindings)) {
-					conditionsSat = false;
+					conditionalsSat = false;
 					break;
 				}				
-			} else if(atom.type == "open-specifier") {
+			} else if(atom.type == "open-specifier" || atom.type == "closed-specifier") {
 				if(!allSpecifierAtomVarsBound(atom, sparqlBindings)) {
-					conditionsSat = false;
+					conditionalsSat = false;
 					break;
 				}	
-			} else if(atom.type == "relational-atom") {
-				if(!allRelAtomVarsBound(atom, sparqlBindings)) {
-					conditionsSat = false;
-					break;
-				}	
-			} 
+			}
+//			TODO add complex specifiers
 		}
 		
-		if(conditionsSat) {
+		if(conditionalsSat) {
 			angular.forEach(f.insert, function(qualifier) {
 				qualifiers.push(qualifier);
 			});
@@ -626,10 +583,10 @@ var addInferredFromQuery = function(itemId, ruleData, allSparqlBindings, apiBind
 		}
 		
 		var qset = rule.head.atom.set.type == "set-expression" ? rule.head.atom.set.value : 
-			rule.head.atom.set.type == "set-variable" ? ruleData.setvarmap[rule.head.atom.set.value] : 
+			rule.head.atom.set.type == "set-variable" ? ruleData.setvarqualifiersmap[rule.head.atom.set.value] : 
 				rule.head.atom.set.type == "function-term" ? getFunctionQualifiers(rule.head.atom,sparqlBindings) : [];// ruleData, sparqlBindings, apiBindings, itemId) : [];//latter should never be the case?
 
-		var openAtomIndex = ruleData.setvaropeninfo[rule.head.atom.set.value];
+		var openAtomIndex = ruleData.openspecratommap[rule.head.atom.set.value];
 		
 
 		var value = { "entity-type": entityType, "numeric-id": pvalue.substring(1)};
@@ -645,7 +602,7 @@ var addInferredFromQuery = function(itemId, ruleData, allSparqlBindings, apiBind
 		var stmtId = 0;
 		var stmt = { mainsnak: snak, rank: "normal", type: "statement", 
 				id: stmtId, 
-				qualifiers: getQualifierSnaksForRule(itemId, qset, openAtomIndex, rule, ruleData.qvalueatommap, sparqlBindings, apiBindings,  atomsToStmts[i])
+				qualifiers: getQualifierSnaksForRule(itemId, qset, openAtomIndex, rule, ruleData.qvalueratommap, sparqlBindings, apiBindings,  atomsToStmts[i])
 		}; 
 		
 		statements[property].push(stmt);
@@ -672,6 +629,7 @@ var getStatementsInferred = function(id) {
 		
 //		collect the ids needed to request the qualifiers
 		var stmtIds = [];
+//		we request a stmt only once so map possibly several relational relational atoms to one stmt
 		var atomsToStmts = [];
 
 		angular.forEach(responses, function (response, i) {
@@ -700,33 +658,6 @@ var getStatementsInferred = function(id) {
 					}
 					index++;
 				});	
-				
-//TODO qualifiers in function.inserts cannot "depend on" qualifiers in function conditions
-//		ie they must match qualifier variables in rule body				
-//				if(rules[i].rule.head.atom.set.type == "function-term") {
-//					angular.forEach(rules[i].rule.head.atom.set.value, function (f) {
-//						angular.forEach(f.conditions, function (atom) {
-//							if(atom.type == "relational-atom") { 
-//								
-//								var sv = getStatementVariable(atom, index, rules[i].rule.head.atom.entity.value, id).substring(1);
-//								
-//								
-//								var stmtId = result[sv].value
-//								.substring("http://www.wikidata.org/entity/statement/".length).replace('-','$');
-//								var j = stmtIds.indexOf(stmtId);
-//								if(j == -1) {
-//									stmtIds.push(stmtId);	
-//									atomsToStmts2[index] = stmtIds.length-1;
-//								} else {
-//									atomsToStmts2[index] = j;
-//								}
-//							
-//							}
-//							index++;
-//						});
-//	
-//					});	
-//				}
 				
 				atomsToStmts1.push(atomsToStmts2);
 			});
@@ -744,124 +675,15 @@ var getStatementsInferred = function(id) {
 			}
 
 			
-			return { statements:statements, propertyids: propertyIds,itemids:itemIds};
+			return { statements:statements, propertyids:propertyIds, itemids:itemIds};
 			
 		});		
 	});
 };
-
-
-
-
-//----------------------------------------------------------------------------------------------------------------
-// ALL BELOW IS TEST CODE
-//----------------------------------------------------------------------------------------------------------------
-
-	
-var getTest = function(id) {
-
-	var rules = getRules(id);
-	var requests = [];
-	
-	angular.forEach(rules, function (rule) {
-		requests.push(sparql.getQueryRequest(rule.sparql));
-	});
-	
-	var statements = {};
-	var propertyIds = {};
-	var itemIds = {};
-	
-	return $q.all(requests).then( function(responses) {
-//		return rules;//
-//		collect the ids needed to request the qualifiers
-		var stmtIds = [];
-		var atomsToStmts = [];
-
-		angular.forEach(responses, function (response, i) {
-			var atomsToStmts1 = [];
-			
-			angular.forEach(response.results.bindings, function (result, k) {
-				
-				var atomsToStmts2 = [];
-				
-				var index = 0;			
-				angular.forEach(rules[i].rule.body.atoms, function (atom) {
-					
-					if(atom.type == "relational-atom") { 
-						var sv = getStatementVariable(atom, index, rules[i].rule.head.atom.entity.value, id).substring(1);
-						
-						var stmtId = result[sv].value
-							.substring("http://www.wikidata.org/entity/statement/".length).replace('-','$');
-						var j = stmtIds.indexOf(stmtId);
-						if(j == -1) {
-							stmtIds.push(stmtId);	
-							atomsToStmts2[index] = stmtIds.length-1;
-						} else {
-							atomsToStmts2[index] = j;
-						}
-
-					}
-					index++;
-				});	
-				
-
-//				if(rules[i].rule.head.atom.set.type == "function-term") {
-//					angular.forEach(rules[i].rule.head.atom.set.value, function (f) {
-//						angular.forEach(f.conditions, function (atom) {
-//							if(atom.type == "relational-atom") { 
-//								
-//								var sv = getStatementVariable(atom, index, rules[i].rule.head.atom.entity.value, id).substring(1);
-//								
-//								
-//								var stmtId = result[sv].value
-//								.substring("http://www.wikidata.org/entity/statement/".length).replace('-','$');
-//								var j = stmtIds.indexOf(stmtId);
-//								if(j == -1) {
-//									stmtIds.push(stmtId);	
-//									atomsToStmts2[index] = stmtIds.length-1;
-//								} else {
-//									atomsToStmts2[index] = j;
-//								}
-//							
-//							}
-//							index++;
-//						});
-//	
-//					});	
-//				}
-				
-				atomsToStmts1.push(atomsToStmts2);
-			});
-			atomsToStmts.push(atomsToStmts1);
-		});	
-
-		
-		
-//			return atomsToStmts;
-//			return responses[0].results.bindings
-			return rules[0];//
-//			return stmtIds;// atomsToStmts;
-//		return getFunctionQualifiers(rules[0].rule.head.atom,responses[0].results.bindings[0]);
-			return	wikidataapi.getClaims(stmtIds).then(function(apiBindings){
-				return apiBindings;
-				for (var i = 0; i < rules.length; i ++) {
-					addInferredFromQuery(id, rules[i], responses[i].results.bindings, 
-							apiBindings, atomsToStmts[i],
-							statements, propertyIds, itemIds );
-				}
-
-				
-				return { statements:statements, propertyids: propertyIds,itemids:itemIds};
-			
-		});		
-	});
-};
-
 
 
 return {
-		getStatementsInferred: getStatementsInferred,
-		getTest:getTest
+		getStatementsInferred: getStatementsInferred
 	};
 }]);
 
