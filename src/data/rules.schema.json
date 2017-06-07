@@ -1,10 +1,9 @@
 {
     "$id": "http://iccl.inf.tu-dresden.de/marpl/schema",
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-06/schema#",
     "title": "MARPL rules",
     "definitions": {
         "object-term": {
-            "$id": "#object-term",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
@@ -18,10 +17,9 @@
         },
 
         "set-literal": {
-            "$id": "#set-literal",
             "properties": {
                 "type": { "type": "string",
-                          "enum": ["set-term"]
+                          "const": "set-term"
                         },
                 "assignments": { "type": "array",
                                  "items": { "type": "object",
@@ -37,11 +35,10 @@
             "required": ["type", "assignments"]
         },
         "set-variable": {
-            "$id": "#set-variable",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
-                          "enum": ["set-variable"]
+                          "const": "set-variable"
                         },
                 "value": { "type": "string",
                            "minLength": 1
@@ -50,17 +47,15 @@
             "required": ["type", "value"]
         },
         "set-term": {
-            "$id": "#set-term",
             "oneOf": [ { "$ref": "#/definitions/set-literal" },
                        { "$ref": "#/definitions/set-variable" }
                      ]
         },
         "set-atom": {
-            "$id": "#set-atom",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
-                          "enum": ["set-atom"]
+                          "const": "set-atom"
                         },
                 "attribute": { "$ref": "#/definitions/object-term" },
                 "value": { "$ref": "#/definitions/object-term" },
@@ -70,11 +65,10 @@
         },
 
         "relational-atom-base": {
-            "$id": "#relational-atom",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
-                          "enum": ["relational-atom"]
+                          "const": "relational-atom"
                         },
                 "predicate": { "type": "string",
                                "minLength": 1
@@ -87,11 +81,10 @@
             "required": ["type", "predicate", "arguments", "annotation"]
         },
         "function-term": {
-            "$id": "function-term",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
-                          "enum": ["function-term"]
+                          "const": "function-term"
                         },
                 "name": { "type": "string",
                           "minLength": 1
@@ -99,7 +92,7 @@
                 "arguments": { "type": "array",
                                "items": {
                                    "oneOf": [ { "$ref": "#/definitions/object-term" },
-                                              { "#ref": "#/definitions/set-term" }
+                                              { "$ref": "#/definitions/set-term" }
                                             ]
                                }
                              }
@@ -107,7 +100,6 @@
             "required": ["type", "name", "arguments"]
         },
         "relational-atom": {
-            "$id": "#relational-atom",
             "type": "object",
             "allOf": [ { "$ref": "#/definitions/relational-atom-base" },
                        { "properties": { "annotation": { "$ref": "#/definitions/set-term" }
@@ -116,7 +108,6 @@
                      ]
         },
         "relational-atom-with-function-term": {
-            "$id": "#relational-atom-with-function-term",
             "type": "object",
             "allOf": [ { "$ref": "#/definitions/relational-atom-base" },
                        { "properties": { "annotation": { "$ref": "#/definitions/function-term" }
@@ -126,7 +117,6 @@
         },
 
         "placeholder": {
-            "$id": "#placeholder",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
@@ -136,7 +126,6 @@
             "required": ["type"]
         },
         "assignment": {
-            "$id": "#assignment",
             "type": "object",
             "properties": {
                 "attribute": { "$ref": "#/definitions/object-term" },
@@ -148,7 +137,6 @@
             "required": ["attribute", "value"]
         },
         "specifier": {
-            "$id": "#specifier",
             "type": "object",
             "properties": {
                 "type": { "type": "string",
@@ -161,7 +149,6 @@
             "required": ["type", "assignments"]
         },
         "specifier-expression": {
-            "$id": "#specifier-difference",
             "type": "object",
             "properties":  {
                 "type": { "type": "string",
@@ -175,13 +162,11 @@
             "required": ["type", "specifiers"]
         },
         "specifier-term": {
-            "$id": "#specifier-term",
             "oneOf": [ { "$ref": "#/definitions/specifier" },
                        { "$ref": "#/definitions/specifier-expression" }
                      ]
         },
         "specifier-atom": {
-            "$id": "#specifier-atom",
             "type": "object",
             "properties": {
                 "specifier": { "$ref": "#/definitions/specifier-term" },
@@ -197,7 +182,7 @@
             "type": "array",
             "items": { "oneOf": [ { "$ref": "#/definitions/relational-atom" },
                                   { "$ref": "#/definitions/set-atom" },
-                                  { "$ref": "#/definitions/specifier-atom" },
+                                  { "$ref": "#/definitions/specifier-atom" }
                                 ]
                      }
         },
