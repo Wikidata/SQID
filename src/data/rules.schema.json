@@ -16,15 +16,6 @@
             },
             "required": ["type", "value"]
         },
-        "placeholder": {
-            "type": "object",
-            "properties": {
-                "type": { "type": "string",
-                          "enum": ["star", "plus"]
-                        },
-                "required": ["type"]
-            }
-        },
 
         "set-literal": {
             "$id": "#set-literal",
@@ -32,17 +23,16 @@
                 "type": { "type": "string",
                           "enum": ["set-term"]
                         },
-                "assignments": {
-                    "type": "array",
-                    "items": { "type": "object",
-                               "properties": {
-                                   "attribute": { "$ref": "#/definitions/object-term" },
-                                   "value": { "$ref": "#/definitions/object-term" }
-                               },
-                               "required": ["attribute", "value"]
-                             },
-                    "uniqueItems": true
-                }
+                "assignments": { "type": "array",
+                                 "items": { "type": "object",
+                                            "properties": {
+                                                "attribute": { "$ref": "#/definitions/object-term" },
+                                                "value": { "$ref": "#/definitions/object-term" }
+                                            },
+                                            "required": ["attribute", "value"]
+                                          },
+                                 "uniqueItems": true
+                               }
             },
             "required": ["type", "assignments"]
         },
@@ -116,47 +106,90 @@
             },
             "required": ["type", "name", "arguments"]
         },
-        "with-annotation": {
-            "$id": "#annotation",
-            "type": "object",
-            "properties": {
-                "annotation": { "$ref": "#/definitions/set-term" }
-            }
-        },
-        "with-annotation-or-function": {
-            "$id": "#annotation",
-            "type": "object",
-            "properties": {
-                "annotation": { "oneOf": [ { "$ref": "#/definitions/set-term" },
-                                           { "$ref": "#/definitions/function-term" }
-                                         ]
-                              }
-            }
-        },
         "relational-atom": {
             "$id": "#relational-atom",
             "type": "object",
             "allOf": [ { "$ref": "#/definitions/relational-atom-base" },
-                       { "$ref": "#/definitions/with-annotation" }
+                       { "properties": { "annotation": { "$ref": "#/definitions/set-term" }
+                                       }
+                       }
                      ]
         },
         "relational-atom-with-function-term": {
             "$id": "#relational-atom-with-function-term",
             "type": "object",
             "allOf": [ { "$ref": "#/definitions/relational-atom-base" },
-                       { "$ref": "#/definitions/with-annotation-or-function" }
+                       { "properties": { "annotation": { "$ref": "#/definitions/function-term" }
+                                       }
+                       }
                      ]
         },
 
+        "placeholder": {
+            "$id": "#placeholder",
+            "type": "object",
+            "properties": {
+                "type": { "type": "string",
+                          "enum": ["star", "plus"]
+                        }
+            },
+            "required": ["type"]
+        },
+        "assignment": {
+            "$id": "#assignment",
+            "type": "object",
+            "properties": {
+                "attribute": { "$ref": "#/definitions/object-term" },
+                "value": { "oneOf": [ { "$ref": "#/definitions/object-term" },
+                                      { "$ref": "#/definitions/placeholder" }
+                                    ]
+                         }
+            },
+            "required": ["attribute", "value"]
+        },
+        "specifier": {
+            "$id": "#specifier",
+            "type": "object",
+            "properties": {
+                "type": { "type": "string",
+                          "enum": ["open-specifier", "closed-specifier"]
+                        },
+                "assigmnents": { "type": "array",
+                                 "items": { "$ref": "#/definitions/assignment" }
+                               }
+            },
+            "required": ["type", "assignments"]
+        },
+        "specifier-expression": {
+            "$id": "#specifier-difference",
+            "type": "object",
+            "properties":  {
+                "type": { "type": "string",
+                          "enum": ["union", "intersection", "difference"]
+                        },
+                "specifiers": { "type": "array",
+                                "items": { "$ref": "#/definitions/specifier-term" },
+                                "minItems": 1
+                              }
+            },
+            "required": ["type", "specifiers"]
+        },
+        "specifier-term": {
+            "$id": "#specifier-term",
+            "oneOf": [ { "$ref": "#/definitions/specifier" },
+                       { "$ref": "#/definitions/specifier-expression" }
+                     ]
+        },
         "specifier-atom": {
-            "$id": "#specifier-atom"
-        },
-        "open-specifier": {
-            "$id": "#open-specifier"
-        },
-        "closed-specifier": {
-            "$id": "#closed-specifier"
+            "$id": "#specifier-atom",
+            "type": "object",
+            "properties": {
+                "specifier": { "$ref": "#/definitions/specifier-term" },
+                "set": { "$ref": "#/definitions/set-variable" }
+            },
+            "required": ["specifier", "set"]
         }
+
     },
     "type": "object",
     "properties": {
