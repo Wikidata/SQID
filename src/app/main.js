@@ -20,7 +20,9 @@ requirejs.config({
 		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2",
 		"openLayers": "../lib/openlayers/OpenLayers",
 		"angular-loading-bar": "../lib/loading-bar.min",
-		"he": "../lib/he"
+		"he": "../lib/he",
+	    "ajv": "../lib/ajv",
+		"parsimmon": "../lib/parsimmon"
 	},
 	shim: {
 		'jquery-ui': ['jquery'],
