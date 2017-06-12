@@ -2,3 +2,7 @@ src/data/classes.json
 src/data/properties.json
 src/data/statistics.json
 node_modules
+*.pyc
+\#*\#
+*~
+.\#*
