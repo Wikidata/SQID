@@ -1,3 +1,4 @@
+/* eslint angular/module-getter: 0 */
 requirejs.config({
 	baseUrl: './app',
 	"paths": {

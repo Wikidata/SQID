@@ -4,7 +4,6 @@ define([
     'parsimmon',
     'util/util.module'
 ], function(ajv, parsimmon) {
-    console.log('module loaded');
     ///////////////////////////////////////
     angular.module('util').factory('ruleParser', ['$http', '$q', 'util',
         function($http, $q, util) {
@@ -13,7 +12,7 @@ define([
 
                 var MARPL = P.createLanguage({
                     ObjectVariable: function(r) {
-                        return P.regexp(/\?[a-z]\w*/)
+                        return P.regexp(/\?[a-zA-Z]\w*/)
                             .map(function(name) {
                                 return Object.freeze({
                                     type: "variable",
@@ -40,10 +39,10 @@ define([
                         return P.string('{}');
                     },
                     SetVariable: function(r) {
-                        return P.regexp(/\?[A-Z]\w*/)
+                        return P.regexp(/\?[a-zA-Z]\w*/)
                             .map(function(name) {
                                 return Object.freeze({
-                                    type: "set-variable",
+                                    type: "set-variable-",
                                     value: name
                                 });
                             });
