@@ -10,68 +10,90 @@ define([
             var parse = function(rule) {
                 var P = parsimmon;
 
-                function token(parser) {
-                    return parser.skip(P.regexp(/\s*/m));
-                }
-
                 function word(w) {
-                    return P.string(w).thru(token);
+                    return P.string(w).trim(P.regexp(/\s*/m));
                 }
 
                 function assignment(r, rhs) {
-                    return P.seqMap(
-                        r.ObjectTerm,
-                        r.colon,
-                        rhs,
-                        function(attribute, _, value) {
+                    return P.seqObj(['attribute', r.ObjectTerm],
+                                    r.colon,
+                                    ['value', rhs]);
+                }
+
+                function specifier(r, opening, closing, typ) {
+                    return P.seqObj(opening,
+                                    ['assignments',
+                                        P.sepBy(r.AssignmentWithPlaceholder,
+                                                r.comma)],
+                                    closing)
+                            .thru(type(typ + '-specifier'));
+                }
+
+                function specifierExpression(r, type)
+                {
+                    return P.seqMap(r.SpecifierTerm, r[type], r.SpecifierTerm,
+                                    function(lhs, _, rhs) {
                             return Object.freeze({
-                                attribute: attribute,
-                                value: value
+                                    type: type,
+                                    specifiers: [lhs, rhs]
                             });
                         });
                 }
 
-                function specifier(r, opening, closing, type) {
-                    return opening.then(
-                        P.sepBy(r.AssignmentWithPlaceholder,
-                                r.comma)
-                            .map(function(assignments) {
-                                return Object.freeze({
-                                    type: type + '-specifier',
-                                    assignments: assignments
-                                });
-                            })
-                    ).skip(closing);
+                function relationalAtom(r, setTerm) {
+                    return P.seqObj(['subject', r.ObjectTerm],
+                                    r.dot,
+                                    ['predicate', r.ObjectTerm],
+                                    r.equals,
+                                    ['object', r.ObjectTerm],
+                                    r.at,
+                                    ['annotation', setTerm])
+                        .map(function(obj) {
+                            return Object.freeze({
+                                type: 'relational-atom',
+                                predicate: obj.predicate,
+                                arguments: [obj.subject, obj.object],
+                                annotation: obj.annotation
+                            });
+                        });
+                }
+
+                function type(type) {
+                    return function(parser) {
+                        return parser.map(function(obj) {
+                            obj.type = type;
+                            return Object.freeze(obj);
+                        });
+                    };
                 }
 
                 var MARPL = P.createLanguage({
+                    at: function() { return word('@'); },
+                    dot: function() { return word('.'); },
                     comma: function() { return word(','); },
                     colon: function() { return word(':'); },
                     arrow: function() { return word('->'); },
+                    union: function() { return word('||'); },
+                    equals: function() { return word('='); },
+                    contains: function() { return word('#'); },
+                    difference: function() { return word('\\'); },
+                    intersection: function() { return word('&&'); },
                     openingBrace: function() { return word('{'); },
                     closingBrace: function() { return word('}'); },
                     openingFloor: function() { return word('|_'); },
                     closingFloor: function() { return word('_|'); },
                     openingBracket: function() { return word('['); },
                     closingBracket: function() { return word(']'); },
+                    openingParenthesis: function() { return word('('); },
+                    closingParenthesis: function() { return word(')'); },
 
                     ObjectVariable: function() {
-                        return P.regexp(/\?[a-zA-Z]\w*/)
-                            .map(function(name) {
-                                return Object.freeze({
-                                    type: "variable",
-                                    value: name
-                                });
-                            });
+                        return P.seqObj(['name', P.regexp(/\?[a-zA-Z]\w*/)])
+                                .thru(type('variable'));
                     },
                     ObjectLiteral: function() {
-                        return P.regexp(/\w+:?\w*/)
-                            .map(function(name) {
-                                return Object.freeze({
-                                    type: "literal",
-                                    value: name
-                                });
-                            });
+                        return P.seqObj(['name', P.regexp(/[PQ]\d+/)])
+                                .thru(type('literal'));
                     },
                     ObjectTerm: function(r) {
                         return P.alt(
@@ -80,24 +102,14 @@ define([
                         );
                     },
                     SetLiteral: function(r) {
-                        return r.openingBrace
-                            .then(P.sepBy(r.Assignment, r.comma))
-                            .skip(r.closingBrace)
-                            .map(function(assignments) {
-                                return Object.freeze({
-                                    type: "set-term",
-                                    assignments: assignments
-                                });
-                            });
+                        return P.seqObj(r.openingBrace,
+                                        ['assignments', P.sepBy(r.Assignment, r.comma)],
+                                        r.closingBrace)
+                                .thru(type('set-term'));
                     },
                     SetVariable: function() {
-                        return P.regexp(/\?[a-zA-Z]\w*/)
-                            .map(function(name) {
-                                return Object.freeze({
-                                    type: "set-variable-",
-                                    value: name
-                                });
-                            });
+                        return P.seqObj(['name', P.regexp(/\?[a-zA-Z]\w*/)])
+                                .thru(type('set-variable'));
                     },
                     SetTerm: function(r) {
                         return P.alt(
@@ -106,20 +118,30 @@ define([
                         );
                     },
                     SetAtom: function(r) {
-                        return r.openingParenthesis
-                            .seqMap(r.ObjectTerm,
-                                    r.comma,
-                                    r.ObjectTerm,
-                                    function(attribute, _, value) {
-
-                                    })
-                            .skip(r.closingParenthesis);
+                        return P.seqObj(r.openingParenthesis,
+                                        ['attribute', r.ObjectTerm],
+                                        r.colon,
+                                        ['value', r.ObjectTerm],
+                                        r.closingParenthesis,
+                                        r.contains,
+                                        ['set', r.SetTerm])
+                                .thru(type('set-atom'));
                     },
-                    RelationalAtomBase: function(r) {
+                    FunctionTerm: function(r) {
+                        return P.seqObj(['name', P.regexp(/[a-zA-Z]\w*/)],
+                                        r.openingParenthesis,
+                                        ['arguments',
+                                         P.sepBy(P.alt(r.ObjectTerm,
+                                                       r.SetTerm),
+                                                 r.comma)],
+                                        r.closingParenthesis)
+                                .thru(type('function-term'));
                     },
                     RelationalAtom: function(r) {
+                        return relationalAtom(r, r.SetTerm);
                     },
                     RelationalAtomWithFunctionTerm: function(r) {
+                        return relationalAtom(r, r.FunctionTerm);
                     },
                     Placeholder: function() {
                         return P.alt(
@@ -146,28 +168,31 @@ define([
                     },
                     Specifier: function(r) {
                         return P.alt(
-                            specifier(r.openingFloor, r.closingFloor, 'open'),
-                            specifier(r.openingBracket, r.closingBracket, 'closed')
+                            specifier(r, r.openingFloor, r.closingFloor, 'open'),
+                            specifier(r, r.openingBracket, r.closingBracket, 'closed')
                         );
                     },
                     SpecifierExpression: function(r) {
+                        return P.alt(
+                            specifierExpression(r, 'union'),
+                            specifierExpression(r, 'intersection'),
+                            specifierExpression(r, 'difference'));
                     },
                     SpecifierTerm: function(r) {
+                        return P.alt(r.SpecifierExpression,
+                                     r.Specifier);
                     },
                     SpecifierAtom: function(r) {
+                        return r.seqObj(['specifier', r.SpecifierTerm],
+                                        r.openingParenthesis,
+                                        ['set', r.SetVariable],
+                                        r.closingParenthesis);
                     },
 
                     Rule: function(r) {
-                        return P.seq(
-                            r.Body,
-                            r.arrow,
-                            r.Head
-                        ).map(function(body, _, head) {
-                            return Object.freeze({
-                                body: body,
-                                head: head
-                            });
-                        });
+                        return P.seqObj(['body', r.Body],
+                                        r.arrow,
+                                        ['head', r.Head]);
                     },
                     Head: function(r) {
                         return P.alt(
@@ -187,7 +212,7 @@ define([
                     }
                 });
 
-                return MARPL.SetTerm.tryParse(rule);
+                return MARPL.SpecifierTerm.tryParse(rule);
             };
 
             return {
