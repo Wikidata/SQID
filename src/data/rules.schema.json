@@ -9,11 +9,11 @@
                 "type": { "type": "string",
                           "enum": ["variable", "literal"]
                         },
-                "value": { "type": "string",
+                "name": { "type": "string",
                            "minLength": 1
                          }
             },
-            "required": ["type", "value"]
+            "required": ["type", "name"]
         },
 
         "set-literal": {
@@ -40,11 +40,11 @@
                 "type": { "type": "string",
                           "const": "set-variable"
                         },
-                "value": { "type": "string",
+                "name": { "type": "string",
                            "minLength": 1
                          }
             },
-            "required": ["type", "value"]
+            "required": ["type", "name"]
         },
         "set-term": {
             "oneOf": [ { "$ref": "#/definitions/set-literal" },
@@ -70,9 +70,7 @@
                 "type": { "type": "string",
                           "const": "relational-atom"
                         },
-                "predicate": { "type": "string",
-                               "minLength": 1
-                             },
+                "predicate": { "$ref": "#/definitions/object-term" },
                 "arguments": { "type": "array",
                                "items": { "$ref": "#/definitions/object-term" }
                              },
