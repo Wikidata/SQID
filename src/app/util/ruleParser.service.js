@@ -112,7 +112,7 @@ define([
                                 .thru(type('set-term'));
                     },
                     SetVariable: function() {
-                        return P.seqObj(['name', P.regexp(/\?[a-zA-Z]\w*/)])
+                        return P.seqObj(['name', P.regexp(/\?\?[a-zA-Z]\w*/)])
                                 .thru(type('set-variable'));
                     },
                     SetTerm: function(r) {
