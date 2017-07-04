@@ -187,7 +187,7 @@ define([
                                      r.Specifier);
                     },
                     SpecifierAtom: function(r) {
-                        return r.seqObj(['specifier', r.SpecifierTerm],
+                        return P.seqObj(['specifier', r.SpecifierTerm],
                                         r.openingParenthesis,
                                         ['set', r.SetVariable],
                                         r.closingParenthesis);
