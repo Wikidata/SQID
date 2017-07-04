@@ -5,9 +5,9 @@ define([
     'util/util.module'
 ], function(ajv, parsimmon) {
     ///////////////////////////////////////
-    angular.module('util').factory('ruleParser', ['$http', '$q', 'util',
-        function($http, $q, util) {
-            var parse = function(rule) {
+    angular.module('util').factory('ruleParser', ['$http', '$q', '$log', 'util',
+        function($http, $q, $log, util) {
+            var parse = function(rule, skipVerification) {
                 var P = parsimmon;
 
                 function word(w) {
@@ -216,7 +216,26 @@ define([
                     }
                 });
 
-                return MARPL.Rule.tryParse(rule);
+                var ast = MARPL.Rule.tryParse(rule);
+
+                if (skipVerification !== true) {
+                    $http.get('data/rules.schema.json')
+                        .then(function(response) {
+                            var schema = response.data;
+                            var validator = new ajv();
+                            var valid = validator.validate(schema, ast);
+
+                            if (!valid) {
+                                var errMsg = 'Failed to validate rule AST: ' +
+                                    validator.errors;
+
+                                $log.error(validator.errors);
+                                throw new SyntaxError(errMsg);
+                            }
+                        });
+                }
+
+                return ast;
             };
 
             return {
