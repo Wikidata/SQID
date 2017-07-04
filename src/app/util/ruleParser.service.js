@@ -31,13 +31,17 @@ define([
 
                 function specifierExpression(r, type)
                 {
-                    return P.seqMap(r.SpecifierTerm, r[type], r.SpecifierTerm,
-                                    function(lhs, _, rhs) {
-                            return Object.freeze({
+                    return P.seqObj(r.openingParenthesis,
+                                    ['lhs', r.SpecifierTerm],
+                                    r[type],
+                                    ['rhs', r.SpecifierTerm],
+                                    r.closingParenthesis)
+                            .map(function(obj) {
+                                return Object.freeze({
                                     type: type,
-                                    specifiers: [lhs, rhs]
+                                    specifiers: [obj.lhs, obj.rhs]
+                                });
                             });
-                        });
                 }
 
                 function relationalAtom(r, setTerm) {
