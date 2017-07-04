@@ -61,7 +61,7 @@
                 "value": { "$ref": "#/definitions/object-term" },
                 "set": { "$ref": "#/definitions/set-term" }
             },
-            "required": ["type", "attribute", "value", "annotation"]
+            "required": ["type", "attribute", "value", "set"]
         },
 
         "relational-atom-base": {
