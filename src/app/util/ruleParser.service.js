@@ -206,13 +206,9 @@ define([
                     },
                     Body: function(r) {
                         return P.sepBy(
-                            P.alt(
-                                r.RelationalAtom,
-                                r.SetAtom,
-                                r.SpecifierAtom
-                            ),
-                            P.string(',')
-                        );
+                            P.alt(r.RelationalAtom,
+                                  r.SetAtom,
+                                  r.SpecifierAtom), r.comma);
                     }
                 });
 
