@@ -28,11 +28,11 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			var count = null;
 			if (propertiesOrClasses !== null) {
 				var mainSnak = statement.mainsnak;
-				if (mainSnak.snaktype == 'value' && mainSnak.datavalue.type == 'wikibase-entityid') { 
+				if (mainSnak.snaktype == 'value' && mainSnak.datavalue.type == 'wikibase-entityid') {
 					count = propertiesOrClasses.getMainUsageCount(mainSnak.datavalue.value["numeric-id"]);
 				}
 			}
-			ret.push({ 
+			ret.push({
 				value : dataFormatter.getStatementMainValueHtml(statement, properties, listener, true),
 				qualifiers : dataFormatter.getStatementQualifiersHtml(statement, properties, listener, true),
 				count: count
@@ -83,7 +83,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 	var clearEntityDataCache = function(){
 		entityDataPromise = null;
 		fetchedEntityId = null;
-		fetchedEntityLanguage = null;			
+		fetchedEntityLanguage = null;
 	};
 
 	return {
@@ -165,7 +165,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 			}
 			return ret;
 		},
-		
+
 		// Find best Wikivoyage banner
 		getBanner: function(statements) {
 			if ("P948" in statements) {
@@ -184,7 +184,7 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 				return null;
 			}
 		},
-		
+
 		// Find Wikipedia article
 		getUrlWikipedia: function(sitelinks) {
 			var wikiName = i18n.getLanguage() + 'wiki';
