@@ -216,7 +216,7 @@ define([
                     }
                 });
 
-                return MARPL.SpecifierTerm.tryParse(rule);
+                return MARPL.Rule.tryParse(rule);
             };
 
             return {
