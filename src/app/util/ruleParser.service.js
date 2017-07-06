@@ -82,6 +82,7 @@ define([
                     contains: function() { return word('#'); },
                     difference: function() { return word('\\'); },
                     intersection: function() { return word('&&'); },
+                    variableName: function() { return P.regexp(/\?[a-zA-Z]\w*/); },
                     openingBrace: function() { return word('{'); },
                     closingBrace: function() { return word('}'); },
                     openingFloor: function() { return word('|_'); },
@@ -91,8 +92,13 @@ define([
                     openingParenthesis: function() { return word('('); },
                     closingParenthesis: function() { return word(')'); },
 
-                    ObjectVariable: function() {
-                        return P.seqObj(['name', P.regexp(/\?[a-zA-Z]\w*/)])
+
+                    someVariable: function(r) {
+                        return P.seqObj(['name', r.variableName])
+                                .thru(type('some-variable'));
+                    },
+                    ObjectVariable: function(r) {
+                        return P.seqObj(['name', r.variableName])
                                 .thru(type('variable'));
                     },
                     ObjectLiteral: function() {
@@ -111,8 +117,8 @@ define([
                                         r.closingBrace)
                                 .thru(type('set-term'));
                     },
-                    SetVariable: function() {
-                        return P.seqObj(['name', P.regexp(/\?\?[a-zA-Z]\w*/)])
+                    SetVariable: function(r) {
+                        return P.seqObj(['name', r.variableName])
                                 .thru(type('set-variable'));
                     },
                     SetTerm: function(r) {
@@ -135,8 +141,9 @@ define([
                         return P.seqObj(['name', P.regexp(/[a-zA-Z]\w*/)],
                                         r.openingParenthesis,
                                         ['arguments',
-                                         P.sepBy(P.alt(r.ObjectTerm,
-                                                       r.SetTerm),
+                                         P.sepBy(P.alt(r.ObjectLiteral,
+                                                       r.SetLiteral,
+                                                       r.someVariable),
                                                  r.comma)],
                                         r.closingParenthesis)
                                 .thru(type('function-term'));
@@ -190,7 +197,8 @@ define([
                         return P.seqObj(['specifier', r.SpecifierTerm],
                                         r.openingParenthesis,
                                         ['set', r.SetVariable],
-                                        r.closingParenthesis);
+                                        r.closingParenthesis)
+                                .thru(type('specifier-atom'));
                     },
 
                     Rule: function(r) {
@@ -213,6 +221,83 @@ define([
                 });
 
                 var ast = MARPL.Rule.tryParse(rule);
+
+                if (ast.head.annotation.type === 'function-term') {
+                    // disambiguate variable names in the function term
+                    var args = ast.head.annotation.arguments.length;
+                    arguments: for (var arg = 0; arg < args; ++arg) {
+                        if (ast.head.annotation.arguments[arg].type === 'some-variable') {
+                            // find a binding for this variable in the body
+                            var name = ast.head.annotation.arguments[arg].name;
+                            var atoms = ast.body.length;
+                            var v = function(type) {
+                                return Object.freeze({
+                                    type: type,
+                                    name: name
+                                });
+                            };
+
+                            for (var atom = 0; atom < atoms; ++atom) {
+                                switch (ast.body[atom].type) {
+                                case 'relational-atom':
+                                    if (ast.body[atom].annotation.type === 'set-variable' &&
+                                        ast.body[atom].annotation.name === name) {
+                                        ast.head.annotation.arguments[arg] = v('set-variable');
+                                        continue arguments;
+                                    }
+
+                                    for (var property in ['subject, predicate, object']) {
+                                        if (ast.body[atom][property].type === 'variable' &&
+                                            ast.body[atom][property].name === name) {
+                                            ast.head.annotation.arguments[arg] = v('variable');
+                                            continue arguments;
+                                        }
+                                    }
+                                    break;
+                                case 'set-atom':
+                                    if (ast.body[atom].set.type === 'set-variable' &&
+                                        ast.body[atom].set.name === name) {
+                                        ast.head.annotation.arguments[arg] = v('set-variable');
+                                        continue arguments;
+                                    }
+
+                                    if (ast.body[atom].attribute === name ||
+                                        ast.body[atom].value === name) {
+                                        ast.head.annotation.arguments[arg] = v('variable');
+                                        continue arguments;
+                                    }
+                                    break;
+                                case 'specifier-atom':
+                                    if (ast.body[atom].set === name) {
+                                        ast.head.annotation.arguments[arg] = v('set-variable');
+                                        continue arguments;
+                                    }
+
+                                    var assignments = ast.body[atom].assignments.length;
+                                    for (var i = 0; i < assignments; ++i) {
+                                        if (ast.body[atom].assignments[i].attribute === name ||
+                                            ast.body[atom].assignments[i].value === name) {
+                                            ast.head.annotation.arguments[arg] = v('variable');
+                                            continue arguments;
+                                        }
+                                    }
+                                    break;
+                                default:
+                                    // something unexpected happened, ignore it.
+                                    $log.warn("unexpected atom type `" +
+                                              ast.body[atom].type +
+                                              "'in rule body: " + ast);
+                                }
+                            }
+                        }
+
+                        if (ast.head.annotation.arguments[arg].type === 'some-variable') {
+                            // this variable does not occour within the body, as is required
+                            throw new SyntaxError("Variable `" + name +
+                                                  "' is unbound in rule: " + ast);
+                        }
+                    }
+                }
 
                 if (skipVerification !== true) {
                     $http.get('data/rules.schema.json')

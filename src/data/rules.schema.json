@@ -167,6 +167,9 @@
         "specifier-atom": {
             "type": "object",
             "properties": {
+                "type": { "type": "string",
+                          "const": "specifier-atom"
+                        },
                 "specifier": { "$ref": "#/definitions/specifier-term" },
                 "set": { "$ref": "#/definitions/set-variable" }
             },
