@@ -346,7 +346,87 @@ define([
             };
 
             var print = function(ast) {
-                return '';
+                var result = '';
+
+                if (angular.isArray(ast)) {
+                    return ast.join(', ');
+                }
+
+                switch (ast.type) {
+                case 'variable': // fallthrough
+                case 'set-variable':
+                    result = ast.name;
+                    break;
+
+                case 'rule':
+                    result = ast.body.map(print).join(', ') +
+                        ' -> ' + print(ast.head);
+                    break;
+
+                case 'relational-atom':
+                    result = '(' + print(ast.arguments[0]) +
+                        '.' + print(ast.predicate) +
+                        ' = ' + print(ast.arguments[1]) +
+                        ')@' + print(ast.annotation);
+                    break;
+
+                case 'set-term':
+                    result = '{' + ast.assignments.map(function(as) {
+                        return print(as.attribute) + ' = ' + print(as.value);
+                    }).join(', ') + '}';
+                    break;
+
+                case 'specifier-atom':
+                    result = print(ast.set) + ':' + print(ast.specifier);
+                    break;
+
+                case 'union':
+                    result = print(ast.lhs) + ' || ' + print(ast.rhs);
+                    break;
+
+                case 'intersection':
+                    result = print(ast.lhs) + ' && '  + print(ast.rhs);
+                    break;
+
+                case 'difference':
+                    result = print(ast.lhs) + ' \\ ' + print(ast.rhs);
+                    break;
+
+                case 'function-term':
+                    result = ast.name + '(' +
+                        ast.arguments.map(print).join(', ') + ')';
+                    break;
+
+                case 'open-specifier':
+                    result = '(' + ast.assignments.map(function(as) {
+                        return print(as.attribute) + ' = ' + print(as.value);
+                    }).join(', ') + ')';
+                    break;
+
+                case 'closed-specifier':
+                    result = '[' + ast.assignments.map(function(as) {
+                        return print(as.attribute) + ' = ' + print(as.value);
+                    }).join(', ') + ']';
+                    break;
+
+                case 'star':
+                    result = '*';
+                    break;
+
+                case 'plus':
+                    result = '+';
+                    break;
+
+                case 'literal':
+                    result = ast.name;
+                    break;
+
+                default:
+                    $log.debug(ast);
+                    break;
+                }
+
+                return result;
             };
 
             var variables = function(ast) {
@@ -361,7 +441,7 @@ define([
                     return collector.concat(bind(ast, variables));
                 }
 
-                switch(ast.type) {
+                switch (ast.type) {
                 case 'variable': // fall through
                 case 'set-variable':
                     collector = ast;
