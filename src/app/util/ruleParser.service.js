@@ -16,7 +16,7 @@ define([
 
                 function assignment(r, rhs) {
                     return P.seqObj(['attribute', r.ObjectTerm],
-                                    r.colon,
+                                    r.equals,
                                     ['value', rhs]);
                 }
 
@@ -37,28 +37,30 @@ define([
                                     ['rhs', r.SpecifierTerm],
                                     r.closingParenthesis)
                             .map(function(obj) {
-                                return Object.freeze({
+                                return {
                                     type: type,
                                     specifiers: [obj.lhs, obj.rhs]
-                                });
+                                };
                             });
                 }
 
                 function relationalAtom(r, setTerm) {
-                    return P.seqObj(['subject', r.ObjectTerm],
+                    return P.seqObj(r.openingParenthesis,
+                                    ['subject', r.ObjectTerm],
                                     r.dot,
                                     ['predicate', r.ObjectTerm],
                                     r.equals,
                                     ['object', r.ObjectTerm],
+                                    r.closingParenthesis,
                                     r.at,
                                     ['annotation', setTerm])
                         .map(function(obj) {
-                            return Object.freeze({
+                            return {
                                 type: 'relational-atom',
                                 predicate: obj.predicate,
                                 arguments: [obj.subject, obj.object],
                                 annotation: obj.annotation
-                            });
+                            };
                         });
                 }
 
@@ -66,7 +68,7 @@ define([
                     return function(parser) {
                         return parser.map(function(obj) {
                             obj.type = type;
-                            return Object.freeze(obj);
+                            return obj;
                         });
                     };
                 }
@@ -79,14 +81,13 @@ define([
                     arrow: function() { return word('->'); },
                     union: function() { return word('||'); },
                     equals: function() { return word('='); },
-                    contains: function() { return word('#'); },
                     difference: function() { return word('\\'); },
                     intersection: function() { return word('&&'); },
                     variableName: function() { return P.regexp(/\?[a-zA-Z]\w*/); },
                     openingBrace: function() { return word('{'); },
                     closingBrace: function() { return word('}'); },
-                    openingFloor: function() { return word('|_'); },
-                    closingFloor: function() { return word('_|'); },
+                    openingFloor: function() { return word('('); },
+                    closingFloor: function() { return word(')'); },
                     openingBracket: function() { return word('['); },
                     closingBracket: function() { return word(']'); },
                     openingParenthesis: function() { return word('('); },
@@ -124,18 +125,10 @@ define([
                     SetTerm: function(r) {
                         return P.alt(
                             r.SetLiteral,
-                            r.SetVariable
+                            r.SetVariable,
+                            specifier(r, r.openingFloor, r.closingFloor, 'open'),
+                            specifier(r, r.openingBracket, r.closingBracket, 'closed')
                         );
-                    },
-                    SetAtom: function(r) {
-                        return P.seqObj(r.openingParenthesis,
-                                        ['attribute', r.ObjectTerm],
-                                        r.colon,
-                                        ['value', r.ObjectTerm],
-                                        r.closingParenthesis,
-                                        r.contains,
-                                        ['set', r.SetTerm])
-                                .thru(type('set-atom'));
                     },
                     FunctionTerm: function(r) {
                         return P.seqObj(['name', P.regexp(/[a-zA-Z]\w*/)],
@@ -157,14 +150,14 @@ define([
                     Placeholder: function() {
                         return P.alt(
                             word('*').map(function() {
-                                return Object.freeze({
+                                return {
                                     type: "star"
-                                });
+                                };
                             }),
                             word('+').map(function() {
-                                return Object.freeze({
+                                return {
                                     type: "plus"
-                                });
+                                };
                             })
                         );
                     },
@@ -187,17 +180,17 @@ define([
                         return P.alt(
                             specifierExpression(r, 'union'),
                             specifierExpression(r, 'intersection'),
-                            specifierExpression(r, 'difference'));
+                            specifierExpression(r, 'difference')
+                        );
                     },
                     SpecifierTerm: function(r) {
                         return P.alt(r.SpecifierExpression,
                                      r.Specifier);
                     },
                     SpecifierAtom: function(r) {
-                        return P.seqObj(['specifier', r.SpecifierTerm],
-                                        r.openingParenthesis,
-                                        ['set', r.SetVariable],
-                                        r.closingParenthesis)
+                        return P.seqObj(['set', r.SetVariable],
+                                        r.colon,
+                                        ['specifier', r.SpecifierTerm])
                                 .thru(type('specifier-atom'));
                     },
 
@@ -214,15 +207,24 @@ define([
                         );
                     },
                     Body: function(r) {
-                        return P.sepBy(
-                            P.alt(r.RelationalAtom,
-                                  r.SetAtom,
-                                  r.SpecifierAtom), r.comma);
+                        return P.sepBy(P.alt(r.RelationalAtom,
+                                             r.SpecifierAtom),
+                                       r.comma);
                     }
                 });
 
                 var ast = MARPL.Rule.tryParse(rule);
 
+                ast = Object.freeze(rewrite(ast));
+
+                if (skipVerification !== true) {
+                    verify(ast);
+                }
+
+                return ast;
+            };
+
+            var rewrite = function(ast) {
                 if (ast.head.annotation.type === 'function-term') {
                     // disambiguate variable names in the function term
                     var args = ast.head.annotation.arguments.length;
@@ -231,26 +233,20 @@ define([
                             // find a binding for this variable in the body
                             var name = ast.head.annotation.arguments[arg].name;
                             var atoms = ast.body.length;
-                            var v = function(type) {
-                                return Object.freeze({
-                                    type: type,
-                                    name: name
-                                });
-                            };
 
                             for (var atom = 0; atom < atoms; ++atom) {
                                 switch (ast.body[atom].type) {
                                 case 'relational-atom':
                                     if (ast.body[atom].annotation.type === 'set-variable' &&
                                         ast.body[atom].annotation.name === name) {
-                                        ast.head.annotation.arguments[arg] = v('set-variable');
+                                        ast.head.annotation.arguments[arg].type = 'set-variable';
                                         continue arguments;
                                     }
 
                                     for (var property in ['subject, predicate, object']) {
                                         if (ast.body[atom][property].type === 'variable' &&
                                             ast.body[atom][property].name === name) {
-                                            ast.head.annotation.arguments[arg] = v('variable');
+                                            ast.head.annotation.arguments[arg].type = 'variable';
                                             continue arguments;
                                         }
                                     }
@@ -258,19 +254,19 @@ define([
                                 case 'set-atom':
                                     if (ast.body[atom].set.type === 'set-variable' &&
                                         ast.body[atom].set.name === name) {
-                                        ast.head.annotation.arguments[arg] = v('set-variable');
+                                        ast.head.annotation.arguments[arg].type = 'set-variable';
                                         continue arguments;
                                     }
 
                                     if (ast.body[atom].attribute === name ||
                                         ast.body[atom].value === name) {
-                                        ast.head.annotation.arguments[arg] = v('variable');
+                                        ast.head.annotation.arguments[arg].type = 'variable';
                                         continue arguments;
                                     }
                                     break;
                                 case 'specifier-atom':
                                     if (ast.body[atom].set === name) {
-                                        ast.head.annotation.arguments[arg] = v('set-variable');
+                                        ast.head.annotation.arguments[arg].type = 'set-variable';
                                         continue arguments;
                                     }
 
@@ -278,7 +274,7 @@ define([
                                     for (var i = 0; i < assignments; ++i) {
                                         if (ast.body[atom].assignments[i].attribute === name ||
                                             ast.body[atom].assignments[i].value === name) {
-                                            ast.head.annotation.arguments[arg] = v('variable');
+                                            ast.head.annotation.arguments[arg].type = 'variable';
                                             continue arguments;
                                         }
                                     }
@@ -300,28 +296,177 @@ define([
                     }
                 }
 
-                if (skipVerification !== true) {
-                    $http.get('data/rules.schema.json')
-                        .then(function(response) {
-                            var schema = response.data;
-                            var validator = new ajv();
-                            var valid = validator.validate(schema, ast);
+                var specifierAtom = function(name, spec) {
+                    return {type: 'specifier-atom',
+                            set: {type: 'set-variable',
+                                  name: name
+                                 },
+                            specifier: spec
+                           };
+                };
 
-                            if (!valid) {
-                                var errMsg = 'Failed to validate rule AST: ' +
-                                    validator.errors;
+                if (ast.head.annotation.type === 'closed-specifier') {
+                    // push specifier to the body
 
-                                $log.error(validator.errors);
-                                throw new SyntaxError(errMsg);
-                            }
-                        });
+                    // we don't allow `_' as the first char in variable names,
+                    // so this guarantees a fresh variable name.
+                    var variable = '?_head';
+
+                    ast.body = ast.body.concat(
+                        specifierAtom(variable, ast.head.annotation));
+                    ast.head.annotation = {type: 'set-variable',
+                                           name: variable
+                                          };
                 }
+
+                atoms = ast.body.length;
+                var newAtoms = [];
+
+                for (atom = 0; atom < atoms; ++atom) {
+                    if (ast.body[atom].type !== 'relational-atom') {
+                        continue;
+                    }
+
+                    if (ast.body[atom].annotation.type !== 'open-specifier' &&
+                        ast.body[atom].annotation.type !== 'closed-specifier') {
+                        continue;
+                    }
+
+                    variable = '?_body' + atom;
+                    newAtoms = newAtoms.concat(
+                        specifierAtom(variable, ast.body[atom].annotation));
+                    ast.body[atom].annotation = {type: 'set-variable',
+                                                 name: variable
+                                                };
+                }
+
+                ast.body = ast.body.concat(newAtoms);
 
                 return ast;
             };
 
+            var print = function(ast) {
+                return '';
+            };
+
+            var variables = function(ast) {
+                var bind = function(m, f) {
+                    return m.map(f).reduce(function(acc, elt) {
+                        return acc.concat(elt);
+                    }, []);
+                };
+                var collector = [];
+
+                if (angular.isArray(ast)) {
+                    return collector.concat(bind(ast, variables));
+                }
+
+                switch(ast.type) {
+                case 'variable': // fall through
+                case 'set-variable':
+                    collector = ast;
+                    break;
+
+                case 'rule':
+                    collector = collector.concat(
+                        bind(ast.body, variables),
+                        variables(ast.head)
+                    );
+                    break;
+
+                case 'relational-atom':
+                    collector = collector.concat(
+                        variables(ast.predicate),
+                        bind(ast.arguments, variables),
+                        variables(ast.annotation)
+                    );
+                    break;
+
+                case 'set-term':
+                    collector = collector.concat(
+                        bind(ast.assignments, variables)
+                    );
+                    break;
+
+                case 'specifier-atom':
+                    collector = collector.concat(
+                        variables(ast.set),
+                        variables(ast.specifier)
+                    );
+                    break;
+
+                case 'union': // fallthrough
+                case 'intersection': // fallthrough
+                case 'difference':
+                    collector = collector.concat(
+                        variables(ast.lhs),
+                        variables(ast.rhs)
+                    );
+                    break;
+
+                case 'function-term':
+                    collector = collector.concat(
+                        bind(ast.arguments, variables)
+                    );
+                    break;
+
+                case 'open-specifier': // fallthrough
+                case 'closed-specifier':
+                    collector = collector.concat(
+                        bind(ast.assignments, variables)
+                    );
+                    break;
+                case 'star': // fallthrough
+                case 'plus': // fallthough
+                case 'literal': // fallthrough
+                default:
+                    // something different. assume it doesn't have variables.
+                    break;
+                }
+
+               return collector;
+            };
+
+            var verify = function(ast) {
+                // verify that the AST conforms to the schema
+                $http.get('data/rules.schema.json')
+                    .then(function(response) {
+                        var schema = response.data;
+                        var validator = new ajv();
+                        var valid = validator.validate(schema, ast);
+                     if (!valid) {
+                            var errMsg = 'Failed to validate rule AST: ' +
+                                validator.errors;
+                         $log.error(validator.errors);
+                            throw new SyntaxError(errMsg);
+                        }
+                    });
+
+                // ensure rule safety
+                var variablesInHead = variables(ast.head);
+                var variablesInBody = variables(ast.body);
+
+                vars: for (var variable in variablesInHead) {
+                    for (var other in variablesInBody) {
+                        if (variable.name === other.name) {
+                            if (variable.type !== other.type) {
+                                throw new SyntaxError("Variable `" + variable +
+                                                      " occurs with different types.");
+                            }
+
+                            continue vars;
+                        }
+                    }
+
+                    throw new SyntaxError("Variable `" + variable +"' " +
+                                          "does not occur in rule body");
+                }
+            };
+
             return {
-                parse: parse
+                parse: parse,
+                verify: verify,
+                print: print
             };
         }]);
 
