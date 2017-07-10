@@ -204,7 +204,8 @@ define([
                     Rule: function(r) {
                         return P.seqObj(['body', r.Body],
                                         r.arrow,
-                                        ['head', r.Head]);
+                                        ['head', r.Head])
+                                .thru(type('rule'));
                     },
                     Head: function(r) {
                         return P.alt(

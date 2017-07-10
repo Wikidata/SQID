@@ -179,6 +179,9 @@
     },
     "type": "object",
     "properties": {
+        "type": { "type": "string",
+                  "const": "rule"
+                },
         "body": {
             "type": "array",
             "items": { "oneOf": [ { "$ref": "#/definitions/relational-atom" },
