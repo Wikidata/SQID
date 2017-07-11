@@ -1,11 +1,12 @@
 //////// Module Definition ////////////
 define([
 	'util/util.module',
-'util/ruleExamples.service',
-'util/wikidataapi.service',
-'util/util.service',
-'util/sparql.service',
-'i18n/i18n.service'
+    'util/ruleParser.service',
+    'util/rulesProvider.service',
+    'util/wikidataapi.service',
+    'util/util.service',
+    'util/sparql.service',
+    'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 //	NEXT TODO (for veronika) make closed specs work. and closed and open ones in conditionals
@@ -31,9 +32,9 @@ define([
 //	- create corresponding snaks
 	
 angular.module('util').factory('rules', [
-'ruleExamples','wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', 
-function(ruleExamples, wikidataapi, util, i18n, sparql, $q, $http) {
-	
+    'ruleParser', 'rulesProvider', 'wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http',
+    function(ruleParser, rulesProvider, wikidataapi, util, i18n, sparql, $q, $http) {
+
 var SPARQL_LIMIT = 100;
 //TODO select one
 //prefix we use for variables in SPARQL. disallow for user variables

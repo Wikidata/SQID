@@ -9,7 +9,7 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('util').factory('ruleExamples', [
+angular.module('util').factory('rulesProvider', [
     'wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', 'ruleParser',
     function(wikidataapi, util, i18n, sparql, $q, $http, ruleParser) {
 
