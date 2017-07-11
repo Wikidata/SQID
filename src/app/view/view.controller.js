@@ -11,6 +11,7 @@ define([
 	'util/sqidCompile.directive',
 	'util/map.directive',
 	'util/primarySources.service',
+    'util/rules.service',
 	'data/properties.service',
 	'data/classes.service',
 	'oauth/oauth.service',
@@ -18,9 +19,10 @@ define([
 ], function() {
 ///////////////////////////////////////
 
+/* eslint angular/di: 0 */
 angular.module('view').controller('ViewController', [
-'$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources',
-function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources){
+    '$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources', 'rules',
+    function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources, rules) {
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 10;
 	var MAX_PROP_SUBJECTS = 10;
@@ -31,7 +33,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 
 	htmlCache.reset();
 	$scope.getCachedHtml = htmlCache.getValue;
-	
+
 	$scope.lang = i18n.getLanguage();
 
 	$scope.translations = {};
@@ -109,7 +111,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 			$scope.entityInData = data;
 		});
 	});
-	
+
 	var refreshContent = function(useCache){
 		var func = useCache ? View.getEntityData : View.getEntityDataUncached;
 		func().then(function(data) {
@@ -160,7 +162,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 
 		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
-		
+
 		refreshContent(true);
 
 		Properties.then(function(properties){
@@ -199,7 +201,7 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 				}
 			}
 		});
-		$scope.url = 'https://www.wikidata.org/wiki/' + 
+		$scope.url = 'https://www.wikidata.org/wiki/' +
 			( $scope.isItem ? '' : 'Property:' ) +
 			$scope.id +
 			( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage()) : '' );
@@ -259,8 +261,8 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 						$scope.closeModal();
 						refreshContent(false);
 					}else{
-						
-						$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] + 
+
+						$scope.modalResponse = $scope.translations['MODALS_EXECUTION_ERROR'] +
 							( (data.data.error) ? ("</br>" + String(data.data.error)) : "");
 						$scope.modalResponseClass = "text-danger";
 					}
@@ -276,6 +278,8 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 		$scope.modalResponse = null;
 		$scope.modalResponseClass = null;
 	}
+
+    $scope.$watchGroup(['entityData', 'entityInData'], rules.getStatements);
 
 }]);
 
