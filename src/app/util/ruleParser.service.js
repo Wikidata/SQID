@@ -422,7 +422,7 @@ define([
                     break;
 
                 default:
-                    $log.debug(ast);
+                    $log.debug("unknown object in print(): " + ast);
                     break;
                 }
 
