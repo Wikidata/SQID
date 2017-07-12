@@ -35,7 +35,7 @@ angular.module('util').factory('rules', [
     'ruleParser', 'rulesProvider', 'wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', '$log',
     function(ruleParser, rulesProvider, wikidataapi, util, i18n, sparql, $q, $http, $log) {
 
-        var getStatements = function(newData, oldData, $scope) {
+        function getStatements(newData, oldData, $scope) {
             var entityData = newData[0];
             var entityInData = newData[1];
 
@@ -52,18 +52,54 @@ angular.module('util').factory('rules', [
 
                     var candidateRules = rulesProvider.getRules()
                         .filter(couldMatch(entityData.statements,
-                                           entityInData.statements));
+                                           entityInData.statements,
+                                           $scope));
 
                     $log.debug(candidateRules);
                 });
             });
-        };
+        }
 
-        var couldMatch = function(statements, inboundStatements) {
+        function hasMatchingStatement(statements, predicate, object) {
+            var predicates = Object.keys(statements);
+
+            if (predicate.type === 'literal') {
+                predicates = [predicate.name];
+
+                if (!(predicate.name in statements)) {
+                    return false;
+                }
+            }
+
+            if (object.type === 'variable') {
+                return true;
+            }
+
+            return predicates.some(function(pred) {
+                return statements[pred].some(function(stmt) {
+                    return (stmt.mainsnak.datavalue.value === stmt.name);
+                });
+            });
+        }
+
+        function couldMatch(data, inboundData, scope) {
             return function(rule) {
-                return rule;
+                var subject = rule.head.arguments[0];
+
+                if (subject.type === 'literal' &&
+                    subject.name != scope.id) {
+                    return false;
+                }
+
+                return rule.body.every(function(atom) {
+                    return ((atom.type !== 'relational-atom') ||
+                            (atom.arguments[0].name !== subject.name) ||
+                            hasMatchingStatement(data,
+                                                 atom.predicate,
+                                                 atom.arguments[1]));
+                });
             };
-        };
+        }
 
 var SPARQL_LIMIT = 100;
 //TODO select one
