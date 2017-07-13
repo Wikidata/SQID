@@ -565,6 +565,7 @@ define([
             parse: parse,
             verify: verify,
             print: print,
+            variables: variables,
             isObjectName: isObjectName,
             isVariableName: isVariableName
         };

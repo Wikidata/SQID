@@ -71,7 +71,8 @@ angular.module('util').factory('rules', [
                 }
             }
 
-            if (object.type === 'variable') {
+            if ((!object) ||
+                (object.type === 'variable')) {
                 return true;
             }
 
@@ -92,11 +93,24 @@ angular.module('util').factory('rules', [
                 }
 
                 return rule.body.every(function(atom) {
-                    return ((atom.type !== 'relational-atom') ||
-                            (atom.arguments[0].name !== subject.name) ||
-                            hasMatchingStatement(data,
-                                                 atom.predicate,
-                                                 atom.arguments[1]));
+                    if (atom.type !== 'relational-atom') {
+                        return true;
+                    }
+
+                    if ((atom.arguments[0].name === subject.name) &&
+                        (!hasMatchingStatement(data,
+                                               atom.predicate,
+                                               atom.arguments[1]))) {
+                        return false;
+                    }
+
+                    if ((atom.arguments[1].name === subject.name) &&
+                        (!hasMatchingStatement(inboundData,
+                                               atom.predicate))) {
+                        return false;
+                    }
+
+                    return true;
                 });
             };
         }
