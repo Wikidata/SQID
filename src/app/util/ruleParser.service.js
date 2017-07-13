@@ -330,7 +330,7 @@ define([
                     continue;
                 }
 
-                variable = '?_body' + atom;
+                variable = '?_body_spec_for_' + atom;
                 newAtoms = newAtoms.concat(
                     specifierAtom(variable, ast.body[atom].annotation));
                 ast.body[atom].annotation = {type: 'set-variable',
