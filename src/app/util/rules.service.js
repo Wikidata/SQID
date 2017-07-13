@@ -55,7 +55,22 @@ angular.module('util').factory('rules', [
                                            entityInData.statements,
                                            $scope));
 
-                    $log.debug(candidateRules);
+                    $log.debug(candidateRules.map(ruleParser.print));
+
+                    angular.forEach(candidateRules, function(rule) {
+                        var subject = rule.head.arguments[0].name;
+                        var binding = makeBinding(subject,
+                                                  id,
+                                                  entityData,
+                                                  entityInData);
+                        var instances = getBodyInstances(rule,
+                                                         binding);
+
+                        angular.forEach(instances, function(instance) {
+                            $log.debug(ruleParser.print(rule),
+                                       instance);
+                        });
+                    });
                 });
             });
         }
@@ -113,6 +128,142 @@ angular.module('util').factory('rules', [
                     return true;
                 });
             };
+        }
+
+        function makeBinding(subject, id, data, inboundData) {
+            var obj = {};
+            obj[subject] = { id: id,
+                             outbound: data,
+                             inbound: inboundData
+                           };
+
+            return obj;
+        }
+
+        function getBodyInstances(rule, bindings) {
+            var constraints = [];
+
+            if (!bindings) {
+                bindings = {};
+            }
+
+            var candidateInstances = getInstanceCandidates(rule, bindings);
+
+            return candidateInstances;
+        }
+
+        function getInstanceCandidates(rule, bindings, maxInstances) {
+            if(!isFinite(maxInstances) || maxInstances <= 0) {
+                maxInstances = 10;
+            }
+
+            var sparqlBindings = [];
+            var sparqlPatterns = [];
+
+            angular.forEach(rule.body, function(atom, key) {
+                var namespace = '?_body_' + key + '_';
+                var fragment = sparqlFragmentForAtom(atom, bindings, namespace);
+                sparqlBindings = sparqlBindings.concat(fragment.bindings);
+                sparqlPatterns = sparqlPatterns.concat(fragment.patterns);
+            });
+
+            var interestingVariables = [];
+
+            angular.forEach(ruleParser.variables(rule.head),
+                            function(variable) {
+                                if ((variable.type !== 'variable') ||
+                                    (variable.name in bindings)) {
+                                    return;
+                                }
+
+                                interestingVariables.push(variable.name);
+                            });
+
+            sparqlBindings = util.unionArrays(sparqlBindings,
+                                              interestingVariables);
+
+            $log.debug(bindings, sparqlBindings, sparqlPatterns);
+            $log.debug(sparqlQueryFromFragments(sparqlBindings,
+                                                sparqlPatterns,
+                                                maxInstances));
+        }
+
+        function sparqlFragmentForAtom(atom, variableBindings, namespace) {
+            var variables = 0;
+            var bindings = [];
+            var patterns = [];
+
+            function addPattern (subject, predicate, object) {
+                patterns.push([subject, predicate, object].join(' '));
+            }
+
+            function freshVar() {
+                return namespace + ++variables;
+            }
+
+            function maybeBinding(name, prefix) {
+                if (!prefix) {
+                    prefix = '';
+                } else if (prefix.slice !== ':') {
+                    prefix += ':';
+                }
+
+                if ('name' in name) {
+                    name = name.name;
+                }
+
+                if (name in variableBindings) {
+                    return prefix + variableBindings[name].id;
+                } else if (ruleParser.isVariableName(name)) {
+                    return name;
+                }
+
+                return prefix + name;
+            }
+
+            switch (atom.type) {
+            case 'relational-atom':
+                var subject = maybeBinding(atom.arguments[0], 'wd');
+                var predicate = maybeBinding(atom.predicate, 'p');
+                var statement = freshVar();
+                var object = maybeBinding(atom.arguments[1], 'wd');
+
+                addPattern(subject, predicate, statement);
+
+                if (predicate.startsWith('?')) {
+                    // we don't know the exact predicate (it's a variable),
+                    // so we have to query for the corresponding node
+
+                    var ps = freshVar;
+                    var property = freshVar();
+                    addPattern(property, ps, object);
+                    addPattern(property, 'wikibase:claim', predicate);
+                    addPattern(property, 'wikibase:statementProperty', ps);
+                } else {
+                    // this is the easy case, we find the corresponding
+                    // node by replacing the `p'-prefix with `ps. in
+                    // the predicate
+
+                    addPattern(statement, 'ps' + predicate.slice(1), object);
+                }
+                break;
+            default:
+                $log.debug("Unkown atom type `" + atom.type +
+                           "', don't know how to construct query fragment");
+                break;
+            }
+
+            return { bindings: bindings,
+                     patterns: patterns
+                   };
+        }
+
+        function sparqlQueryFromFragments(bindings, patterns, limit) {
+            var query = "SELECT DISTINCT " + bindings.join(" ") +
+                "\nWHERE {\n  " + patterns.join(" .\n  ") +
+                "\n} LIMIT " + limit;
+
+            return query;
         }
 
 var SPARQL_LIMIT = 100;
