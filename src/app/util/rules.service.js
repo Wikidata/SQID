@@ -55,8 +55,6 @@ angular.module('util').factory('rules', [
                                            entityInData.statements,
                                            $scope));
 
-                    $log.debug(candidateRules.map(ruleParser.print));
-
                     angular.forEach(candidateRules, function(rule) {
                         var subject = rule.head.arguments[0].name;
                         var binding = makeBinding(subject,
@@ -182,7 +180,6 @@ angular.module('util').factory('rules', [
             sparqlBindings = util.unionArrays(sparqlBindings,
                                               interestingVariables);
 
-            $log.debug(bindings, sparqlBindings, sparqlPatterns);
             $log.debug(sparqlQueryFromFragments(sparqlBindings,
                                                 sparqlPatterns,
                                                 maxInstances));
@@ -192,6 +189,7 @@ angular.module('util').factory('rules', [
             var variables = 0;
             var bindings = [];
             var patterns = [];
+            var constraints = [];
 
             function addPattern (subject, predicate, object) {
                 patterns.push([subject, predicate, object].join(' '));
@@ -247,6 +245,9 @@ angular.module('util').factory('rules', [
                     addPattern(statement, 'ps' + predicate.slice(1), object);
                 }
                 break;
+
+            case 'specifier-atom':
+
             default:
                 $log.debug("Unkown atom type `" + atom.type +
                            "', don't know how to construct query fragment");
@@ -254,7 +255,8 @@ angular.module('util').factory('rules', [
             }
 
             return { bindings: bindings,
-                     patterns: patterns
+                     patterns: patterns,
+                     constraints: constraints
                    };
         }
 
