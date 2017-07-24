@@ -304,22 +304,14 @@ define([
             }
 
             if (ast.head.annotation.type === 'closed-specifier') {
-                // push specifier to the body
-
-                // we don't allow `_' as the first char in variable names,
-                // so this guarantees a fresh variable name.
-                var variable = '?_head';
-
-                ast.body = ast.body.concat(
-                    specifierAtom(variable, ast.head.annotation));
-                ast.head.annotation = {type: 'set-variable',
-                                       name: variable
-                                      };
+                // just treat it as a set literal
+                ast.head.annotation.type = 'set-term';
             }
 
             atoms = ast.body.length;
             var newAtoms = [];
 
+            // push specifiers into specifier atoms
             for (atom = 0; atom < atoms; ++atom) {
                 if (ast.body[atom].type !== 'relational-atom') {
                     continue;
@@ -379,15 +371,18 @@ define([
                 break;
 
             case 'union':
-                result = print(ast.lhs) + ' || ' + print(ast.rhs);
+                result = ('(' + print(ast.specifiers[0]) + ' || ' +
+                          print(ast.specifiers[1]) + ')');
                 break;
 
             case 'intersection':
-                result = print(ast.lhs) + ' && '  + print(ast.rhs);
+                result = ('(' + print(ast.specifiers[0]) + ' && '  +
+                          print(ast.specifiers[1]) + ')');
                 break;
 
             case 'difference':
-                result = print(ast.lhs) + ' \\ ' + print(ast.rhs);
+                result = ('(' + print(ast.specifiers[0]) + ' \\ ' +
+                          print(ast.specifiers[1]) + ')');
                 break;
 
             case 'function-term':
@@ -477,8 +472,8 @@ define([
             case 'intersection': // fallthrough
             case 'difference':
                 collector = collector.concat(
-                    variables(ast.lhs),
-                    variables(ast.rhs)
+                    variables(ast.specifiers[0]),
+                    variables(ast.specifiers[1])
                 );
                 break;
 
