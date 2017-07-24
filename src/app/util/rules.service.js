@@ -219,6 +219,14 @@ angular.module('util').factory('rules', [
                 return prefix + name;
             }
 
+            function bindingOrFreshVarWithEquality(set) {
+
+            }
+
+            function isVar(name) {
+                return name.startsWith('?');
+            }
+
             switch (atom.type) {
             case 'relational-atom':
                 var subject = maybeBinding(atom.arguments[0], 'wd');
@@ -228,7 +236,7 @@ angular.module('util').factory('rules', [
 
                 addPattern(subject, predicate, statement);
 
-                if (predicate.startsWith('?')) {
+                if (isVar(predicate)) {
                     // we don't know the exact predicate (it's a variable),
                     // so we have to query for the corresponding node
 
@@ -244,9 +252,26 @@ angular.module('util').factory('rules', [
 
                     addPattern(statement, 'ps' + predicate.slice(1), object);
                 }
+
+                bindings = bindings.concat([subject, predicate, statement, object]
+                                           .filter(isVar));
                 break;
 
             case 'specifier-atom':
+                // first, make sure that the set variable we use is unique,
+                // but remember that we introduced that binding, since the
+                // variable might appear in another atom and we'd have to
+                // ensure that the corresponding annotations are equal—
+                // we can't reuse the variable in the query because it might
+                // correspnod to a qualifier for a different statement and
+                // thus be a different individual in the reified RDF graph.
+                //
+                // note that we cannot simply _always_ use a fresh variable,
+                // since we do want this variable to join with a relational
+                // atom.
+
+                var set = bindingOrFreshVarWithEquality(atom.set);
+                bindings.push(set);
 
             default:
                 $log.debug("Unkown atom type `" + atom.type +
