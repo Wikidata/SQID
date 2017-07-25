@@ -474,6 +474,18 @@ angular.module('util').factory('rules', [
             return result.results.bindings;
         }
 
+        function copyQualifiersFrom(qualifier) {
+            var result = [];
+            $log.debug(qualifier.id.slice(10).replace('-', '$$'));
+            wikidataapi.getClaims([qualifier.id.slice(10).replace('-', '$$')])
+                .then(function(claims) {
+                    $log.debug(claims[0].claims);
+                });
+
+            var claim = {};
+            return [];
+        }
+
         function instantiateRuleHead(query, instance) {
             var head = query.rule.head;
 
@@ -520,9 +532,8 @@ angular.module('util').factory('rules', [
 
             switch (head.annotation.type) {
             case 'set-variable':
-                // FIXME copy relevant parts of existing qualifier
-                // (may need to fetch qualifier first)
-                qualifiers = query.bindings[head.annotation.name];
+                qualifiers = copyQualifiersFrom(
+                    query.bindings[head.annotation.name]);
                 break;
 
             case 'set-term':
@@ -546,7 +557,12 @@ angular.module('util').factory('rules', [
             }
 
             // FIXME turn annotation into qualifiers
-            $log.debug('inferred head', [subject, predicate, object], qualifiers);
+            $log.debug('inferred head', [subject, predicate, object],
+                       (('map' in qualifiers)
+                        ? qualifiers.map(function(q) {
+                            return q.qualifier + ": " + q.value;
+                        })
+                        : qualifiers));
         }
 
         return {
