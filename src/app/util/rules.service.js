@@ -36,6 +36,8 @@ angular.module('util').factory('rules', [
     function(ruleParser, rulesProvider, wikidataapi, util, i18n, sparql, $q, $http, $log) {
 
         function getStatements(newData, oldData, $scope) {
+            var queries = [];
+            var requests = [];
             var entityData = newData[0];
             var entityInData = newData[1];
 
@@ -61,13 +63,19 @@ angular.module('util').factory('rules', [
                                                   id,
                                                   entityData,
                                                   entityInData);
-                        var instances = getBodyInstances(rule,
-                                                         binding);
 
-                        angular.forEach(instances, function(instance) {
-                            $log.debug(ruleParser.print(rule),
-                                       instance);
+                        queries.push(getInstanceCandidatesQuery(rule, binding));
+                    });
+
+                    angular.forEach(queries, function(query) {
+                        var request = sparql.getQueryRequest(query.query);
+                        query[request] = request;
+
+                        request.then(function(result) {
+                            $log.debug('request finished: ', result);
                         });
+
+                        requests.push(query);
                     });
                 });
             });
@@ -138,18 +146,13 @@ angular.module('util').factory('rules', [
             return obj;
         }
 
-        function getBodyInstances(rule, bindings) {
-            if (!bindings) {
+        function getInstanceCandidatesQuery(rule, bindings, maxInstances) {
+            $log.debug(ruleParser.print(rule));
+
+            if (angular.isUndefined(bindings)) {
                 bindings = {};
             }
 
-            $log.debug(ruleParser.print(rule));
-            var candidateInstances = getInstanceCandidates(rule, bindings);
-
-            return candidateInstances;
-        }
-
-        function getInstanceCandidates(rule, bindings, maxInstances) {
             if(!isFinite(maxInstances) || maxInstances <= 0) {
                 maxInstances = 10;
             }
@@ -187,12 +190,18 @@ angular.module('util').factory('rules', [
                 constraints = util.unionArrays(constraints, []);
             }
 
-            $log.debug(sparqlQueryFromFragments(sparqlBindings,
+            var query = sparqlQueryFromFragments(sparqlBindings,
                                                 sparqlPatterns,
                                                 sparqlOptionals,
-                                                maxInstances));
+                                                 maxInstances);
+
+            $log.debug(query);
             $log.debug(constraints);
             $log.debug('-- ');
+
+            return { query: query,
+                     constraints: constraints
+                   };
         }
 
         function sparqlFragmentForAtom(atom, variableBindings, namespace) {
