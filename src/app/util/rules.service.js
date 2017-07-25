@@ -354,7 +354,7 @@ angular.module('util').factory('rules', [
                             optional = true;
                             // fallthrough
                         case 'plus':
-                            value = freshVar();
+                            value = '[]'; // blank node
                             break;
                         }
 
