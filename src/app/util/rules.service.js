@@ -72,7 +72,7 @@ angular.module('util').factory('rules', [
                         query[request] = request;
 
                         request.then(function(result) {
-                            $log.debug('request finished: ', result);
+                            $log.debug('request finished: ', result, query);
                         });
 
                         requests.push(query);
