@@ -74,7 +74,9 @@ angular.module('util').factory('rules', [
                                     var instance = verifyCandidateInstance(query);
                                     if (angular.isDefined(instance)) {
                                         var statement = instantiateRuleHead(instance);
-                                        $log.debug('inferred statement:', statement);
+                                        $log.debug(ruleParser.print(instance.rule),
+                                                   'inferred statement:',
+                                                   statement, '');
                                     }
                                 });
                             });
@@ -541,10 +543,9 @@ angular.module('util').factory('rules', [
             }
 
             function copyQualifiers(qualifiers) {
+                // FIXME filter out references here
                 return qualifiers;
             }
-
-            $log.debug(ruleParser.print(query.rule));
 
             angular.forEach(ruleParser.variables(head),
                             function(variable) {
@@ -584,10 +585,6 @@ angular.module('util').factory('rules', [
             default:
                 throw new RangeError("unsupported annotation type `" +
                                      head.annation.type + "' in rule head");
-            }
-
-            if (angular.isUndefined(qualifiers)) {
-                $log.debug(query);
             }
 
             // FIXME turn annotation into qualifiers
