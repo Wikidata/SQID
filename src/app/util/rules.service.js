@@ -220,14 +220,13 @@ angular.module('util').factory('rules', [
 
                 // add remaining arguments (skip arguments[0], it is `type')
                 for (var i = 1; i < length; ++i) {
-                    if (angular.isString(arguments[i])) {
+                    if (angular.isDefined(arguments[i])) {
                         args.push(arguments[i]);
                     }
                 }
 
                 constraints.push({ type: type,
-                                   args: args,
-                                   used: false
+                                   args: args
                                  });
             }
 
@@ -330,7 +329,7 @@ angular.module('util').factory('rules', [
                     if (set === atom.set.name) {
                         // first instance of this specifier,
                         // add closure constraint
-                        addConstraint('Closure', set);
+                        addConstraint('Closure', set, spec);
                     }
 
                     // fallthrough
@@ -512,15 +511,109 @@ angular.module('util').factory('rules', [
             return bindings;
         }
 
+        function copyQualifiers(qualifiers) {
+            // FIXME filter out references here
+            return qualifiers;
+        }
+
         function verifyCandidateInstance(query) {
             // resolve constraints, if any
-            if (query.constraints.length > 0) {
-                // FIXME implement this
-                $log.debug('query has unresolved constraints; constraint solving is not implemented yet');
-                return undefined;
-            }
+            var match = true;
 
-            return query;
+            angular.forEach(query.constraints, function(constraint) {
+                if (!match) {
+                    return;
+                }
+
+                var args = constraint.args;
+                var bindings = query.bindings;
+
+                $log.debug(constraint, query);
+
+                switch (constraint.type) {
+                case 'Equality':
+                    if (!angular.equals(copyQualifiers(bindings[args[0]]),
+                                        copyQualifiers(bindings[args[1]]))) {
+                        match = false;
+                    }
+
+                    break;
+                case 'Closure':
+                    var claim = copyQualifiers(bindings[args[0]]);
+                    var set = args[1].assignments;
+                    angular.forEach(claim.qualifiers, function(qualifiers) {
+                        if (!match) {
+                            return;
+                        }
+
+                        angular.forEach(qualifiers, function(qualifier) {
+                            var found = false;
+
+                            angular.forEach(set, function(assignment) {
+                                if (qualifier.property !== assignment.attribute) {
+                                    return;
+                                }
+
+                                switch (assignment.type) {
+                                case 'literal':
+                                    if (qualifier.value === assignment.value) {
+                                        found = true;
+                                        return;
+                                    }
+
+                                    break;
+
+                                case 'variable':
+                                    // FIXME make sure this works as intended
+                                    if (qualifier.value ===
+                                        bindings[assignment.value].item) {
+                                        found = true;
+                                        return;
+                                    }
+
+                                    break;
+
+                                case 'plus':
+                                    if (qualifier.snaktype === 'novalue') {
+                                        return;
+                                    }
+
+                                    // fallthrough
+                                case 'star':
+                                    // don't need to do anything, we don't care about
+                                    // the actual value
+
+                                    found = true;
+                                    return;
+
+                                default:
+                                    throw new RangeError("unsupported value type `" +
+                                                         set[qualifier.property].type +
+                                                         "'");
+                                }
+                            });
+
+                            if (!found) {
+                                match = false;
+                                return;
+                            }
+
+                        });
+                    });
+
+                    break;
+
+                default:
+                    $log.debug("solving of `" + constraint.type +
+                               "' constraints is not implemented yet");
+
+                    break;
+                }
+            });
+
+            return ((match)
+                    ? query
+                    : undefined);
         }
 
         function instantiateRuleHead(query) {
@@ -540,11 +633,6 @@ angular.module('util').factory('rules', [
                 }
 
                 return name;
-            }
-
-            function copyQualifiers(qualifiers) {
-                // FIXME filter out references here
-                return qualifiers;
             }
 
             angular.forEach(ruleParser.variables(head),
