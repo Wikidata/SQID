@@ -45,6 +45,10 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 		}
 	}
 
+    function getClaimIdFromSPARQLResult(qualifier) {
+        return qualifier.replace('statement/', '').replace('-', '$$');
+    }
+
 	/**
 	 * Returns the parts of a Wikidata time value as a list [year,month,day,hour,minute,second].
 	 * Unspecified components (based on precision) are set to the respective entries in defaults,
@@ -162,6 +166,7 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
 		getIdFromUri: getIdFromUri,
+        getClaimIdFromSPARQLResult: getClaimIdFromSPARQLResult,
 		getTimeComponents: getTimeComponents,
 		lexicographicComparator: lexicographicComparator,
 		cloneObject: cloneObject,

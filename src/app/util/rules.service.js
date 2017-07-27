@@ -25,10 +25,6 @@ angular.module('util').factory('rules', [
             entityData.waitForPropertyLabels().then(function() {
                 entityInData.waitForPropertyLabels().then(function() {
                     var id = $scope.id;
-                    $log.debug('infer rules for ' + id);
-                    $log.debug(entityData);
-                    $log.debug(entityInData);
-
                     var candidateRules = rulesProvider.getRules()
                         .filter(couldMatch(entityData.statements,
                                            entityInData.statements,
@@ -36,10 +32,11 @@ angular.module('util').factory('rules', [
 
                     angular.forEach(candidateRules, function(rule) {
                         var subject = rule.head.arguments[0].name;
-                        var binding = makeBinding(subject,
-                                                  id,
-                                                  entityData,
-                                                  entityInData);
+                        var binding = {};
+                        binding[subject] = { id: id,
+                                             outbound: entityData,
+                                             inbound: entityInData
+                                           };
 
                         queries.push(getInstanceCandidatesQuery(rule,
                                                                 binding));
@@ -47,23 +44,44 @@ angular.module('util').factory('rules', [
 
                     angular.forEach(queries, function(query) {
                         var request = sparql.getQueryRequest(query.query);
-                        query[request] = request;
+                        query.request = request;
 
-                        request.then(function(result) {
-                            $log.debug('request finished: ', result, query);
-                            var instances = verifyCandidateInstances(result,
-                                                                     query);
-                            angular.forEach(instances, function(instance) {
-                                var statement = instantiateRuleHead(query,
-                                                                    instance);
-                                $log.debug('inferred statement:', statement);
+                        request.then(function(sparqlResults) {
+                            // iterate over result instances
+                            angular.forEach(sparqlResults.results, function(sparqlResult) {
+                                // augment bindings with results from SPARQL
+                                query.bindings = augmentBindingsWithSPARQLResult(
+                                    query.bindings,
+                                    sparqlResult
+                                );
+
+                                // find claims we need to retrieve
+                                var claims = Object.keys(query.bindings)
+                                    .filter(function(binding) {
+                                        return ((query.bindings[binding].type ===
+                                                 'set-variable') &&
+                                                'id' in query.bindings[binding]);
+                                    })
+                                    .map(function(binding) {
+                                        return query.bindings[binding].id;
+                                    });
+                                wikidataapi.getClaims(claims).then(function(apiResult) {
+                                    query.bindings = augmentBindingsWithAPIResult(
+                                        query.bindings,
+                                        apiResult
+                                    );
+
+                                    var instance = verifyCandidateInstance(query);
+                                    if (angular.isDefined(instance)) {
+                                        var statement = instantiateRuleHead(instance);
+                                        $log.debug('inferred statement:', statement);
+                                    }
+                                });
                             });
                         });
 
                         requests.push(query);
                     });
-
-
                 });
             });
         }
@@ -123,19 +141,7 @@ angular.module('util').factory('rules', [
             };
         }
 
-        function makeBinding(subject, id, data, inboundData) {
-            var obj = {};
-            obj[subject] = { id: id,
-                             outbound: data,
-                             inbound: inboundData
-                           };
-
-            return obj;
-        }
-
         function getInstanceCandidatesQuery(rule, bindings, maxInstances) {
-            $log.debug(ruleParser.print(rule));
-
             if (angular.isUndefined(bindings)) {
                 bindings = {};
             }
@@ -170,8 +176,14 @@ angular.module('util').factory('rules', [
                                 interestingVariables.push(variable.name);
                             });
 
+            // ensure that set variables in the head are always interesting
+            if ('name' in rule.head.annotation) {
+                interestingVariables.push(rule.head.annotation.name);
+            }
+
             sparqlBindings = util.unionArrays(sparqlBindings,
-                                              interestingVariables);
+                                              interestingVariables,
+                                              [rule.head.annotation.name]);
 
             if (constraints.length > 0) {
                 constraints = util.unionArrays(constraints, []);
@@ -181,10 +193,6 @@ angular.module('util').factory('rules', [
                                                 sparqlPatterns,
                                                 sparqlOptionals,
                                                  maxInstances);
-
-            $log.debug(query);
-            $log.debug(constraints);
-            $log.debug('-- ');
 
             return { rule: rule,
                      query: query,
@@ -464,29 +472,56 @@ angular.module('util').factory('rules', [
             return query;
         }
 
-        function verifyCandidateInstances(result, query) {
+        function augmentBindingsWithSPARQLResult(bindings,
+                                                 sparqlResult) {
+            angular.forEach(sparqlResult[0],
+                            function(item, name) {
+                                var varName = '?' + name;
+                                var id = util.getClaimIdFromSPARQLResult(
+                                    util.getIdFromUri(item.value));
+                                if (!(varName in bindings)) {
+                                    bindings[varName] = { name: varName };
+                                }
+
+                                bindings[varName].id = id;
+                                bindings[varName].item = item;
+                            });
+
+            return bindings;
+        }
+
+        function augmentBindingsWithAPIResult(bindings,
+                                              apiResult) {
+            angular.forEach(apiResult, function(result) {
+                var property = Object.keys(result.claims)[0]; // only a single claim
+                var claim = result.claims[property][0];
+
+                // find binding for this claim
+                angular.forEach(bindings, function(binding, idx) {
+                    if (bindings[idx].id === claim.id) {
+                        bindings[idx].qualifiers =
+                            (('qualifiers' in claim)
+                             ? claim.qualifiers
+                             : []);
+                    }
+                });
+            });
+
+            return bindings;
+        }
+
+        function verifyCandidateInstance(query) {
             // resolve constraints, if any
             if (query.constraints.length > 0) {
                 // FIXME implement this
                 $log.debug('query has unresolved constraints; constraint solving is not implemented yet');
+                return undefined;
             }
 
-            return result.results.bindings;
+            return query;
         }
 
-        function copyQualifiersFrom(qualifier) {
-            var result = [];
-            $log.debug(qualifier.id.slice(10).replace('-', '$$'));
-            wikidataapi.getClaims([qualifier.id.slice(10).replace('-', '$$')])
-                .then(function(claims) {
-                    $log.debug(claims[0].claims);
-                });
-
-            var claim = {};
-            return [];
-        }
-
-        function instantiateRuleHead(query, instance) {
+        function instantiateRuleHead(query) {
             var head = query.rule.head;
 
             function bindingOrLiteral(name) {
@@ -505,17 +540,11 @@ angular.module('util').factory('rules', [
                 return name;
             }
 
-            // incorporate bindings from body instance
-            angular.forEach(instance, function(item, name) {
-                var varName = '?' + name;
-                var id = util.getIdFromUri(item.value);
+            function copyQualifiers(qualifiers) {
+                return qualifiers;
+            }
 
-                if (!(varName in query.bindings)) {
-                    query.bindings[varName] = { name: varName };
-                }
-                query.bindings[varName].id = id;
-                query.bindings[varName].item = item;
-            });
+            $log.debug(ruleParser.print(query.rule));
 
             angular.forEach(ruleParser.variables(head),
                             function(variable) {
@@ -532,8 +561,9 @@ angular.module('util').factory('rules', [
 
             switch (head.annotation.type) {
             case 'set-variable':
-                qualifiers = copyQualifiersFrom(
-                    query.bindings[head.annotation.name]);
+                qualifiers = copyQualifiers(
+                    query.bindings[head.annotation.name].qualifiers
+                );
                 break;
 
             case 'set-term':
@@ -556,13 +586,16 @@ angular.module('util').factory('rules', [
                                      head.annation.type + "' in rule head");
             }
 
+            if (angular.isUndefined(qualifiers)) {
+                $log.debug(query);
+            }
+
             // FIXME turn annotation into qualifiers
-            $log.debug('inferred head', [subject, predicate, object],
-                       (('map' in qualifiers)
-                        ? qualifiers.map(function(q) {
-                            return q.qualifier + ": " + q.value;
-                        })
-                        : qualifiers));
+            return { subject: subject,
+                     predicate: predicate,
+                     object: object,
+                     qualifiers: qualifiers
+                   };
         }
 
         return {
