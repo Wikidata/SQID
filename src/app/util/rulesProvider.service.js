@@ -17,7 +17,7 @@ angular.module('util').factory('rulesProvider', [
             '(?x.P1696 = ?y)@?S -> (?y.P1696 = ?x)@F(?S)',
             '(?x.P1696 = ?y)@?S -> (?y.P1696 = ?x)@?S', // x inverseOf y -> y inverseOf x
             '(?x.P361 = ?y)@?S -> (?y.P527 = ?x)@?S', // x partOf y -> y hasPart x
-            '?S:(?att = ?start), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@{?att = ?start}', // x spouse y [att:start] -> y spouse x[att:start]
+//            '?S:(?att = ?start), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@{?att = ?start}', // x spouse y [att:start] -> y spouse x[att:start]
             '(?x.P26 = ?y)@(P580 = ?start), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
             '?S:(P580 = ?start), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S', // start = ?start in ?S, ?x spouse ?y: ?S -> ?y spouse ?x: ?S
             '?S:[P580 = ?start], (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S', // ?S = [start = ?start], ?x spouse ?y: ?S -> ?y spouse ?x: ?S

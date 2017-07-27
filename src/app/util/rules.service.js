@@ -96,8 +96,13 @@ angular.module('util').factory('rules', [
             });
 
             $scope.inferredData = { statements: statements,
-                                    waitForPropertyLabels: function() { return promise;
-                                                                      }
+                                    waitForPropertyLabels: function() {
+                                        return promise;
+                                    },
+                                    waitForTerms: function() {
+                                        return { then: function() {}
+                                               };
+                                    }
                                   };
         }
 
@@ -657,24 +662,38 @@ angular.module('util').factory('rules', [
             var subject = bindingOrLiteral(head.arguments[0]);
             var predicate = bindingOrLiteral(head.predicate);
             var object = bindingOrLiteral(head.arguments[1]);
-            var qualifiers = [];
+            var qualifiers = {};
 
             switch (head.annotation.type) {
             case 'set-variable':
                 qualifiers = copyQualifiers(
                     query.bindings[head.annotation.name].qualifiers
                 );
+
                 break;
 
             case 'set-term':
                 // fallthrough
             case 'closed-specifier':
-                qualifiers = head.annotation.assignments.map(
-                    function(assignment) {
-                        return { qualifier: bindingOrLiteral(assignment.attribute),
-                                 value: bindingOrLiteral(assignment.value)
-                               };
+                angular.forEach(head.annotation.assignments, function(assignment) {
+                    var property = bindingOrLiteral(assignment.attribute);
+
+                    if (!(property in qualifiers)) {
+                        qualifiers[property] = [];
+                    }
+
+                    qualifiers[property].push({
+                        snaktype: 'value',
+                        datatype: 'wikibase-item',
+                        datavalue: { value: { 'entity-type': 'item',
+                                              'numeric-id': bindingOrLiteral(assignment.value).substring(1)
+                                            },
+                                     type: 'wikibase-entityid'
+                                   },
+                        property: property
                     });
+                });
+
                 break;
 
             case 'open-specifier':
@@ -695,13 +714,12 @@ angular.module('util').factory('rules', [
                                                                         'numeric-id': object.substring(1)
                                                                       }
                                                              },
-                                                  datatype: 'wikibase-item',
-                                                  qualifiers: qualifiers
+                                                  datatype: 'wikibase-item'
                                                 },
                                       rank: 'normal',
-                                      type: 'statement'
+                                      type: 'statement',
+                                      qualifiers: qualifiers
                                     }];
-
             return statement;
         }
 
