@@ -510,45 +510,6 @@ SELECT DISTINCT ?p { \n\
 			};
 	}
 
-//	TODO fix label ids...
-	var getEntityDataInferred = function(id) {
-		return rules.getStatementsInferred(id).then(function(result){
-
-			return getEntityDataInferredRecord(i18n.getLanguage(), '', id, result.statements);});
-	};
-
-
-//		function(id) {
-////		if (this.entityDataInferredPromise == null) {
-////			var stmts = rules.getStatementsInferred(id);//getPropertyIds(this.statements);
-////			this.entityDataInferredPromise = getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);
-////		}
-////		return this.entityDataInferredPromise;
-//		if (this.entityDataInfPromise == null) {
-//			this.entityDataInfPromise = rules.getStatementsInferred(id).then(function(statements) {
-//
-//				return getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);});
-//		}
-////			var stmts = ;//getPropertyIds(this.statements);
-////			this.entityDataInferredPromise = getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);
-////		}
-//
-//		return this.entityDataInfPromise;
-//	};
-
-
-	var getTest = function(id) {
-
-		return rules.getTest(id).then(function(test) {
-
-			return test;
-	});
-		};
-//		(id).then(function(statements) {
-//
-//			return getEntityDataInferredRecord(i18n.getLanguage(), '', id, statements);});
-
-
 	var addProposalInformation = function(pStatementGroup, id){
 		for (var i=0; i < pStatementGroup.length; i++){
 			if (pStatementGroup[i].references){
@@ -818,9 +779,7 @@ SELECT DISTINCT ?p { \n\
 		getStatementValue: getStatementValue,
 		getBestStatementValue: getBestStatementValue,
 		getEntityData: getEntityData,
-		getInlinkData: getInlinkData,
-		getEntityDataInferred: getEntityDataInferred,
-		getTest:getTest
+		getInlinkData: getInlinkData
 	};
 }]);
 

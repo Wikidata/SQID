@@ -21,7 +21,7 @@
 		"POWERED_BY": "Powered by <a href=\"https://github.com/Wikidata/Wikidata-Toolkit\">Wikidata Toolkit</a> &amp; <a href=\"https://query.wikidata.org/\">Wikidata SPARQL Query</a>"
 	},
 	"EDITS": {
-		"EDIT_LABEL": "edit label"	
+		"EDIT_LABEL": "edit label"
 	},
 	"MODALS": {
 		"CLOSE": "Close",
@@ -72,7 +72,7 @@
 		"FILTER_DIRECT_INS": "Number of direct instances",
 		"FILTER_DIRECT_SUBCL": "Number of direct subclasses",
 		"RESET_FILTERS": "Reset Filters",
-		"PERMALINK": "Link with filter states"	
+		"PERMALINK": "Link with filter states"
 	},
 	"ENTITIES": "Entities",
 	"PROPTYPE": "Type",
@@ -147,6 +147,7 @@
 		"REFERENCE_USES": "Uses in references"
 	},
 	"SEC_STATEMENTS": "Statements",
+   	"SEC_INFERRED": "Inferred Statements",
 	"SEC_MEDIA": "Media",
 	"SEC_WIKIMEDIA_PAGES": "Wikimedia Categories and Portals",
 	"SEC_REFERENCE": "Reference",

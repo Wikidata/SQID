@@ -15,6 +15,7 @@ angular.module('util').factory('rules', [
         function getStatements(newData, oldData, $scope) {
             var queries = [];
             var requests = [];
+            var statements = {};
             var entityData = newData[0];
             var entityInData = newData[1];
 
@@ -22,8 +23,8 @@ angular.module('util').factory('rules', [
                 return;
             }
 
-            entityData.waitForPropertyLabels().then(function() {
-                entityInData.waitForPropertyLabels().then(function() {
+            var promise = entityData.waitForPropertyLabels().then(function() {
+                return entityInData.waitForPropertyLabels().then(function() {
                     var id = $scope.id;
                     var candidateRules = rulesProvider.getRules()
                         .filter(couldMatch(entityData.statements,
@@ -44,9 +45,7 @@ angular.module('util').factory('rules', [
 
                     angular.forEach(queries, function(query) {
                         var request = sparql.getQueryRequest(query.query);
-                        query.request = request;
-
-                        request.then(function(sparqlResults) {
+                        query.request = request.then(function(sparqlResults) {
                             // iterate over result instances
                             angular.forEach(sparqlResults.results, function(sparqlResult) {
                                 // augment bindings with results from SPARQL
@@ -74,9 +73,14 @@ angular.module('util').factory('rules', [
                                     var instance = verifyCandidateInstance(query);
                                     if (angular.isDefined(instance)) {
                                         var statement = instantiateRuleHead(instance);
-                                        $log.debug(ruleParser.print(instance.rule),
-                                                   'inferred statement:',
-                                                   statement, '');
+
+                                        angular.forEach(statement, function(snak, property) {
+                                            if (!(property in statements)) {
+                                                statements[property] = [];
+                                            }
+
+                                            statements[property] = statements[property].concat(snak);
+                                        });
                                     }
                                 });
                             });
@@ -84,8 +88,17 @@ angular.module('util').factory('rules', [
 
                         requests.push(query);
                     });
+
+                    return $q.all(requests.map(function(query) {
+                        return query.request;
+                    }));
                 });
             });
+
+            $scope.inferredData = { statements: statements,
+                                    waitForPropertyLabels: function() { return promise;
+                                                                      }
+                                  };
         }
 
         function hasMatchingStatement(statements, predicate, object) {
@@ -528,8 +541,6 @@ angular.module('util').factory('rules', [
                 var args = constraint.args;
                 var bindings = query.bindings;
 
-                $log.debug(constraint, query);
-
                 switch (constraint.type) {
                 case 'Equality':
                     if (!angular.equals(copyQualifiers(bindings[args[0]]),
@@ -676,11 +687,22 @@ angular.module('util').factory('rules', [
             }
 
             // FIXME turn annotation into qualifiers
-            return { subject: subject,
-                     predicate: predicate,
-                     object: object,
-                     qualifiers: qualifiers
-                   };
+            var statement = {};
+            statement[predicate] = [{ mainsnak: { snaktype: 'value',
+                                                  property: predicate,
+                                                  datavalue: { type: 'wikibase-entityid',
+                                                               value: { 'entity-type': 'item',
+                                                                        'numeric-id': object.substring(1)
+                                                                      }
+                                                             },
+                                                  datatype: 'wikibase-item',
+                                                  qualifiers: qualifiers
+                                                },
+                                      rank: 'normal',
+                                      type: 'statement'
+                                    }];
+
+            return statement;
         }
 
         return {

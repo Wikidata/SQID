@@ -90,6 +90,8 @@ angular.module('view').controller('ViewController', [
 
 	$scope.alertText = '';
 
+    $scope.inferredData = null;
+
 	oauth.userinfo().then(function(data){
 		if (data){
 			if (!View.hasEditRights()){

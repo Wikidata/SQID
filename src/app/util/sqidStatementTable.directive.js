@@ -10,7 +10,7 @@ define([
 ///////////////////////////////////////
 
 angular.module('util').directive('sqidStatementTable', [
-'$compile', 'properties', 'dataFormatter', 'util', 'i18n', 'primarySources', 
+'$compile', 'properties', 'dataFormatter', 'util', 'i18n', 'primarySources',
 function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 	var properties = null;
 	var outMissingTermsListener = { hasMissingTerms : false};
@@ -82,14 +82,14 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 		}
 
 		var getStatementHtmlTable = function(statements, propertyList, outlinks) {
-			var html = '<table class="table table-striped table-condensed ' + 
+			var html = '<table class="table table-striped table-condensed ' +
 				(narrowTable ? 'narrow-statements-table' : 'statements-table' ) + '"><tbody>';
 			var hasContent = false;
 			var missingTermsListener = outlinks ? outMissingTermsListener : inMissingTermsListener;
 
 			angular.forEach(propertyList, function (propId) {
 				var statementListId = propId + ( outlinks ? '-out' : '-in' );
-				var statementGroup = statements[propId]
+				var statementGroup = statements[propId];
 				var propertyLabel = i18n.getPropertyLabel(propId);
 
 				var proposedStatementsCount = 0;
@@ -135,7 +135,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 					} else { // show left-arrow for inlinks
 						html += '<td><span class=" light-grey font-tiny" style="margin-left: -2ex; margin-right: 1ex; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>';
 					}
-					
+
 					if (isProposal){
 						if (!scope.proposalRegister){
 							scope.proposalRegister = {};
@@ -161,7 +161,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 						}
 					});
 
-					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable) 
+					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable)
 						+ '</td></tr>';
 				});
 			});
@@ -169,7 +169,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 			html += '</tbody></table>';
 			return html;
 		}
-		
+
 		var updateHtml = function(element, scope) {
 			var html;
 			if ( scope.outHtml == '' && scope.inHtml == '' ) {
@@ -198,10 +198,10 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 			insertAndCompile(html, element, scope);
 		}
 
-		var preparePropertyList = function(statements) {
-			propertyScores = {};
+		function preparePropertyList(statements) {
+			var propertyScores = {};
 			// Note: class-based ranking rarely seems to help; hence using properties only
-			for (propertyId in statements) {
+			for (var propertyId in statements) {
 				angular.forEach(properties.getRelatedProperties(propertyId.substring(1)), function(relPropScore, relPropId) {
 					if (relPropId in propertyScores) {
 						propertyScores[relPropId] = propertyScores[relPropId] + relPropScore;
@@ -211,7 +211,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 				});
 			}
 
-			scoredProperties = [];
+			var scoredProperties = [];
 
 			for (propertyId in statements) {
 				var numPropId = propertyId.substring(1);
@@ -230,7 +230,7 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 				return a < b ? 1 : (a > b ? -1 : 0);
 			});
 
-			ret = [];
+			var ret = [];
 			angular.forEach(scoredProperties, function(propertyData) {
 				ret.push('P' + propertyData[0]);
 			});
