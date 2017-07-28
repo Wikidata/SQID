@@ -12,29 +12,29 @@ angular.module('util').factory('rules', [
     'ruleParser', 'rulesProvider', 'wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', '$log',
     function(ruleParser, rulesProvider, wikidataapi, util, i18n, sparql, $q, $http, $log) {
 
-        function getStatements(newData, oldData, $scope) {
+        function getStatements(entityData, entityInData, itemId) {
             var queries = [];
             var requests = [];
             var statements = {};
-            var entityData = newData[0];
-            var entityInData = newData[1];
+
+            var entityIds = [];
+            var propertyIds = [];
 
             if (!entityData || !entityInData) {
-                return;
+                return null;
             }
 
             var promise = entityData.waitForPropertyLabels().then(function() {
                 return entityInData.waitForPropertyLabels().then(function() {
-                    var id = $scope.id;
                     var candidateRules = rulesProvider.getRules()
                         .filter(couldMatch(entityData.statements,
                                            entityInData.statements,
-                                           $scope));
+                                           itemId));
 
                     angular.forEach(candidateRules, function(rule) {
                         var subject = rule.head.arguments[0].name;
                         var binding = {};
-                        binding[subject] = { id: id,
+                        binding[subject] = { id: itemId,
                                              outbound: entityData,
                                              inbound: entityInData
                                            };
@@ -91,19 +91,80 @@ angular.module('util').factory('rules', [
 
                     return $q.all(requests.map(function(query) {
                         return query.request;
-                    }));
+                    })).then(function() {
+                        angular.forEach(statements, function(statement) {
+                            angular.forEach(statement, function(snak, property) {
+                                if (!(property in propertyIds)) {
+                                    propertyIds.push(property);
+                                }
+                                $log.debug(snak.mainsnak);
+                                if ((snak.mainsnak.snaktype === 'value') &&
+                                    (snak.mainsnak.datatype === 'wikibase-item') &&
+                                    (snak.mainsnak.datavalue.type === 'wikibase-entityid')) {
+                                    if (snak.mainsnak.datavalue.value['entity-type'] === 'item') {
+                                        var id = 'Q' + snak.mainsnak.datavalue.value['numeric-id'];
+                                        if (!(id in entityIds)) {
+                                            entityIds.push(id);
+                                        }
+                                    } else {
+                                        var id = 'P' + snak.mainsnak.datavalue.value['numeric-id'];
+                                        if (!(id in propertyIds)) {
+                                            propertyIds.push(id);
+                                        }
+                                    }
+                                }
+
+                                angular.forEach(snak.qualifiers, function(qualifier, property) {
+                                    if (!(property in propertyIds)) {
+                                        $log.debug('---', property, '---')
+                                        propertyIds.push(property);
+                                    }
+
+                                    angular.forEach(qualifier, function(snak) {
+                                        if ((snak.snaktype === 'value') &&
+                                            (snak.datatype === 'wikibase-item') &&
+                                            (snak.datavalue.type === 'wikibase-entityid')) {
+                                            if (snak.datavalue.value['entity-type'] === 'item') {
+                                                var id = 'Q' + snak.datavalue.value['numeric-id'];
+                                                if (!(id in entityIds)) {
+                                                    entityIds.push(id);
+                                                }
+                                            } else {
+                                                var id = 'P' + snak.datavalue.value['numeric-id'];
+                                                if (!(id in propertyIds)) {
+                                                    propertyIds.push(id);
+                                                }
+                                            }
+                                        }
+                                    });
+                                });
+                            });
+                        });
+
+                        $log.debug(entityIds, propertyIds);
+                    });
                 });
             });
 
-            $scope.inferredData = { statements: statements,
-                                    waitForPropertyLabels: function() {
-                                        return promise;
-                                    },
-                                    waitForTerms: function() {
-                                        return { then: function() {}
-                                               };
-                                    }
-                                  };
+            $log.debug(statements, promise);
+
+            return {
+                statements: statements,
+                waitForPropertyLabels: function() {
+                    return promise.then(
+                        i18n.waitForPropertyLabels(propertyIds))
+                        .then(function() {
+                            return true;
+                        });
+                },
+                waitForTerms: function() {
+                    return promise.then(
+                        i18n.waitForTerms(entityIds))
+                        .then(function() {
+                            return true;
+                        });
+                }
+            };
         }
 
         function hasMatchingStatement(statements, predicate, object) {
@@ -129,12 +190,12 @@ angular.module('util').factory('rules', [
             });
         }
 
-        function couldMatch(data, inboundData, scope) {
+        function couldMatch(data, inboundData, itemId) {
             return function(rule) {
                 var subject = rule.head.arguments[0];
 
                 if (subject.type === 'literal' &&
-                    subject.name != scope.id) {
+                    subject.name != itemId) {
                     return false;
                 }
 
@@ -651,6 +712,7 @@ angular.module('util').factory('rules', [
                 return name;
             }
 
+            $log.info(query);
             angular.forEach(ruleParser.variables(head),
                             function(variable) {
                                 if (!(variable.name in query.bindings)) {

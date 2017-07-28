@@ -21,8 +21,8 @@ define([
 
 /* eslint angular/di: 0 */
 angular.module('view').controller('ViewController', [
-    '$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources', 'rules',
-    function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources, rules) {
+    '$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources', 'rules', '$q',
+    function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources, rules, $q){
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 10;
 	var MAX_PROP_SUBJECTS = 10;
@@ -145,6 +145,12 @@ angular.module('view').controller('ViewController', [
 					});
 				}
 			});
+
+            $q.all([$scope.entityData, $scope.entityInData]).then(function(data) {
+                $scope.inferredData = rules.getStatements(data[0],
+                                                          data[1],
+                                                          $scope.id);
+            });
 		});
 	};
 
@@ -280,9 +286,6 @@ angular.module('view').controller('ViewController', [
 		$scope.modalResponse = null;
 		$scope.modalResponseClass = null;
 	}
-
-    $scope.$watchGroup(['entityData', 'entityInData'], rules.getStatements);
-
 }]);
 
 return {};}); // module definition end
