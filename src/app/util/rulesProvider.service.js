@@ -25,8 +25,8 @@ angular.module('util').factory('rulesProvider', [
             '?S:((P580 = ?start) \\ (P582 = +)), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
             '?S:((P580 = ?start) && (P582 = *)), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
             '?S:((P580 = ?start) || (P582 = +)), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
-            '(?gf.P21 = Q6581097)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?s.P1038 = ?gf)@[P1039 = Q9238344]'
-
+            '(?gf.P21 = Q6581097)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?s.P1038 = ?gf)@[P1039 = Q9238344]',
+            '(?s.P21 = Q6581097)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?gf.P1038 = ?s)@[P1039 = Q11921506]'
         ];
 
 //TODO add rule with >1 qualifiers per pvalue

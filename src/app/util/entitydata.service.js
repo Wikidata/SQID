@@ -779,7 +779,8 @@ SELECT DISTINCT ?p { \n\
 		getStatementValue: getStatementValue,
 		getBestStatementValue: getBestStatementValue,
 		getEntityData: getEntityData,
-		getInlinkData: getInlinkData
+		getInlinkData: getInlinkData,
+        determineEquivalentStatements: determineEquivalentStatements
 	};
 }]);
 
