@@ -17,9 +17,6 @@ angular.module('util').factory('rules', [
             var requests = [];
             var statements = {};
 
-            var entityIds = [];
-            var propertyIds = [];
-
             if (!entityData || !entityInData) {
                 return null;
             }
@@ -102,31 +99,38 @@ angular.module('util').factory('rules', [
 
                     return $q.all(requests.map(function(query) {
                         return query.request;
-                    })).then(function() {
+                    })).then(function(results) {
+                        var requests = { propertyIds: [],
+                                         entityIds: [],
+                                         results: results
+                                       };
+
                         angular.forEach(statements, function(statement) {
                             angular.forEach(statement, function(snak, property) {
-                                if (!(property in propertyIds)) {
-                                    propertyIds.push(property);
+                                if (!(property in requests.propertyIds) &&
+                                    (property.length > 0) &&
+                                    (property.substring(1) === 'P')) {
+                                    requests.propertyIds.push(property);
                                 }
                                 if ((snak.mainsnak.snaktype === 'value') &&
                                     (snak.mainsnak.datatype === 'wikibase-item') &&
                                     (snak.mainsnak.datavalue.type === 'wikibase-entityid')) {
                                     if (snak.mainsnak.datavalue.value['entity-type'] === 'item') {
                                         var id = 'Q' + snak.mainsnak.datavalue.value['numeric-id'];
-                                        if (!(id in entityIds)) {
-                                            entityIds.push(id);
+                                        if (!(id in requests.entityIds)) {
+                                            requests.entityIds.push(id);
                                         }
                                     } else {
                                         var id = 'P' + snak.mainsnak.datavalue.value['numeric-id'];
-                                        if (!(id in propertyIds)) {
-                                            propertyIds.push(id);
+                                        if (!(id in requests.propertyIds)) {
+                                            requests.propertyIds.push(id);
                                         }
                                     }
                                 }
 
                                 angular.forEach(snak.qualifiers, function(qualifier, property) {
-                                    if (!(property in propertyIds)) {
-                                        propertyIds.push(property);
+                                    if (!(property in requests.propertyIds)) {
+                                        requests.propertyIds.push(property);
                                     }
 
                                     angular.forEach(qualifier, function(snak) {
@@ -135,13 +139,13 @@ angular.module('util').factory('rules', [
                                             (snak.datavalue.type === 'wikibase-entityid')) {
                                             if (snak.datavalue.value['entity-type'] === 'item') {
                                                 var id = 'Q' + snak.datavalue.value['numeric-id'];
-                                                if (!(id in entityIds)) {
-                                                    entityIds.push(id);
+                                                if (!(id in requests.entityIds)) {
+                                                    requests.entityIds.push(id);
                                                 }
                                             } else {
                                                 var id = 'P' + snak.datavalue.value['numeric-id'];
-                                                if (!(id in propertyIds)) {
-                                                    propertyIds.push(id);
+                                                if (!(id in requests.propertyIds)) {
+                                                    requests.propertyIds.push(id);
                                                 }
                                             }
                                         }
@@ -149,21 +153,25 @@ angular.module('util').factory('rules', [
                                 });
                             });
                         });
+
+                        return requests;
                     });
                 });
             });
 
-            var propertyLabels = promise.then(
-                i18n.waitForPropertyLabels(propertyIds))
-                .then(function() {
-                    return true;
-                });
+            var propertyLabels = promise.then(function(requests) {
+                return i18n.waitForPropertyLabels(util.unionArrays(
+                    requests.propertyIds,
+                    [])).then(function() {
+                        return requests;
+                    });
+            });
 
-            var terms = propertyLabels.then(
-                i18n.waitForTerms(entityIds))
-                .then(function() {
-                    return true;
-                });
+            var terms = propertyLabels.then(function(requests) {
+                return i18n.waitForTerms(util.unionArrays(
+                    requests.entityIds,
+                    []));
+            });
 
             return {
                 statements: statements,
