@@ -83,8 +83,10 @@ angular.module('util').factory('rules', [
                                                 statements[property] = [];
                                             }
 
-                                            var equivalent = entitydata.determineEquivalentStatements(statements[property],
-                                                                                                      snak[0]);
+                                            var existing = entityData.statements[property];
+                                            var equivalent = entitydata
+                                                .determineEquivalentStatements(existing,
+                                                                               snak[0]);
 
                                             if(equivalent.length === 0) {
                                                 statements[property] = statements[property].concat(snak);
