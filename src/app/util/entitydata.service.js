@@ -5,14 +5,13 @@ define([
 	'util/util.service',
 	'util/sparql.service',
 	'util/primarySources.service',
-	'util/rules.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('util').factory('entitydata', [
-'wikidataapi', 'util', 'i18n', 'sparql', 'primarySources', 'rules', '$q',
-function(wikidataapi, util, i18n, sparql, primarySources, rules, $q) {
+'wikidataapi', 'util', 'i18n', 'sparql', 'primarySources', '$q',
+function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 
 	/**
 	 * Returns the "best" value among a list of statements. This is the value of

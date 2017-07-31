@@ -9,8 +9,8 @@ define([
     'i18n/i18n.service'
 ], function() {
 angular.module('util').factory('rules', [
-    'ruleParser', 'rulesProvider', 'wikidataapi', 'util', 'i18n', 'sparql', '$q', '$http', '$log',
-    function(ruleParser, rulesProvider, wikidataapi, util, i18n, sparql, $q, $http, $log) {
+    'ruleParser', 'rulesProvider', 'wikidataapi', 'entitydata', 'util', 'i18n', 'sparql', '$q', '$http', '$log',
+    function(ruleParser, rulesProvider, wikidataapi, entitydata, util, i18n, sparql, $q, $http, $log) {
 
         function getStatements(entityData, entityInData, itemId) {
             var queries = [];
@@ -54,6 +54,10 @@ angular.module('util').factory('rules', [
                                     sparqlResult
                                 );
 
+                                if (sparqlResult.length === 0) {
+                                    return; // no results here, move along
+                                }
+
                                 // find claims we need to retrieve
                                 var claims = Object.keys(query.bindings)
                                     .filter(function(binding) {
@@ -79,7 +83,12 @@ angular.module('util').factory('rules', [
                                                 statements[property] = [];
                                             }
 
-                                            statements[property] = statements[property].concat(snak);
+                                            var equivalent = entitydata.determineEquivalentStatements(statements[property],
+                                                                                                      snak[0]);
+
+                                            if(equivalent.length === 0) {
+                                                statements[property] = statements[property].concat(snak);
+                                            }
                                         });
                                     }
                                 });
@@ -97,7 +106,6 @@ angular.module('util').factory('rules', [
                                 if (!(property in propertyIds)) {
                                     propertyIds.push(property);
                                 }
-                                $log.debug(snak.mainsnak);
                                 if ((snak.mainsnak.snaktype === 'value') &&
                                     (snak.mainsnak.datatype === 'wikibase-item') &&
                                     (snak.mainsnak.datavalue.type === 'wikibase-entityid')) {
@@ -116,7 +124,6 @@ angular.module('util').factory('rules', [
 
                                 angular.forEach(snak.qualifiers, function(qualifier, property) {
                                     if (!(property in propertyIds)) {
-                                        $log.debug('---', property, '---')
                                         propertyIds.push(property);
                                     }
 
@@ -140,13 +147,9 @@ angular.module('util').factory('rules', [
                                 });
                             });
                         });
-
-                        $log.debug(entityIds, propertyIds);
                     });
                 });
             });
-
-            $log.debug(statements, promise);
 
             var propertyLabels = promise.then(
                 i18n.waitForPropertyLabels(propertyIds))
@@ -712,7 +715,6 @@ angular.module('util').factory('rules', [
                 return name;
             }
 
-            $log.info(query);
             angular.forEach(ruleParser.variables(head),
                             function(variable) {
                                 if (!(variable.name in query.bindings)) {
