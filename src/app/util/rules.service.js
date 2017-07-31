@@ -148,22 +148,22 @@ angular.module('util').factory('rules', [
 
             $log.debug(statements, promise);
 
+            var propertyLabels = promise.then(
+                i18n.waitForPropertyLabels(propertyIds))
+                .then(function() {
+                    return true;
+                });
+
+            var terms = propertyLabels.then(
+                i18n.waitForTerms(entityIds))
+                .then(function() {
+                    return true;
+                });
+
             return {
                 statements: statements,
-                waitForPropertyLabels: function() {
-                    return promise.then(
-                        i18n.waitForPropertyLabels(propertyIds))
-                        .then(function() {
-                            return true;
-                        });
-                },
-                waitForTerms: function() {
-                    return promise.then(
-                        i18n.waitForTerms(entityIds))
-                        .then(function() {
-                            return true;
-                        });
-                }
+                waitForPropertyLabels: function() { return propertyLabels; } ,
+                waitForTerms: function() { return terms; }
             };
         }
 

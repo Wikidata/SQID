@@ -146,7 +146,7 @@ angular.module('view').controller('ViewController', [
 				}
 			});
 
-            $q.all([$scope.entityData, $scope.entityInData]).then(function(data) {
+            $q.all([func(), View.getEntityInlinks()]).then(function(data) {
                 $scope.inferredData = rules.getStatements(data[0],
                                                           data[1],
                                                           $scope.id);
