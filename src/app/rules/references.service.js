@@ -5,8 +5,21 @@ function() {
     [
     function() {
         function generateReference(query) {
+            var bindings = [];
+
+            angular.forEach(query.bindings, function(binding) {
+                if ('id' in binding) {
+                    bindings.push(binding.id);
+                }
+            });
+
+            var info = { rule: query.rule,
+                         query: query.query,
+                         bindings: bindings,
+                         constraints: query.constraints
+            };
             var url = ('#/rules/explain?inference=' +
-                       encodeURIComponent(angular.toJson(query, false)));
+                       encodeURIComponent(angular.toJson(info, false)));
             var reference = { P854: [{ datatype: 'url',
                                        datavalue: { type: 'string',
                                                     value: url
