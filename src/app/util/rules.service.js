@@ -104,9 +104,12 @@ angular.module('util').factory('rules', [
                                          entityIds: [],
                                          results: results
                                        };
+                        var num = 0;
 
-                        angular.forEach(statements, function(statement) {
+                        angular.forEach(statements, function(statement, group) {
                             angular.forEach(statement, function(snak, property) {
+                                statements[group][property].id = ('sqid-inference-' + (++num));
+
                                 if (!(property in requests.propertyIds) &&
                                     (property.length > 0) &&
                                     (property.substring(1) === 'P')) {
