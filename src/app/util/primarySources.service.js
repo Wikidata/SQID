@@ -18,7 +18,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 		wrong: 'wrong',
 		duplicate: 'duplicate',
 		blacklisted: 'blacklisted',
-		unapproved: 'unapproved'	
+		unapproved: 'unapproved'
   	};
 
 
@@ -57,17 +57,17 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 			}
 			return response.data.entities[qId];
 		},function(data){
-			return {};	
+			return {};
 		});
 
 		$http.defaults.headers.common.Accept = 'application/json';
-		
+
 		return promise;
 	};
 
 	var setRefreshFunction = function(refresh){
 		refreshFunction = refresh;
-	};	
+	};
 
 	setAlertFunction = function(alert){
 		alertFunction = alert;
@@ -109,22 +109,22 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 	};
 
 	var reject = function(qid, statement, refresh){
-		oauth.userinfo().success(function(data){
+		oauth.userinfo().then(function(data){
 			var user = data.userinfo.name;
 			var url = STATEMENT_APPROVAL_URL
 				.replace(/\{\{user\}\}/, user)
 				.replace(/\{\{state\}\}/, STATEMENT_STATES.wrong)
 				.replace(/\{\{id\}\}/, statement.id);
 
-			$http.post(url).success(function(res){
+			$http.post(url).then(function(res){
 				console.log(res);
 				if(refresh){
 					refreshFunction();
 				}
-			}).error(function(){
+			}, function(error){
 				$translate('ALERTS.REJECT_FAILED').then(function(translation){
 					alertFunction(translation);
-				});				
+				});
 			});
 		});
 	};
