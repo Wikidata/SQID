@@ -11,7 +11,7 @@ define([
 	'util/sqidCompile.directive',
 	'util/map.directive',
 	'util/primarySources.service',
-    'util/rules.service',
+	'rules/rules.service',
 	'data/properties.service',
 	'data/classes.service',
 	'oauth/oauth.service',

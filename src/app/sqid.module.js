@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////
 define([ // sqid application wrapper module
 
-	// Note: The *.config files wrap up their respective modules 
+	// Note: The *.config files wrap up their respective modules
 	// and do initial setup work, so they are convenient
 	// 'all components of that module'-dependencies
 
@@ -14,16 +14,16 @@ define([ // sqid application wrapper module
 	'view/view.config',		// wikidata entity viewer
 	'query/sparqly.config',	// sparql query generator interface
 	'entitySearch/entitySearch.config', // search field
-	'oauth/oauth.config' // login and edit function
-
+	'oauth/oauth.config', // login and edit function
+	'rules/rules.config' // MARPL rules inference module
 ], function() {
 /////////////////////////////////////////////////////////////////////////
 
 angular.module('sqid',[						// the application wrapper module
 
 	'data', 'i18n', 'util', 'layout', 'entitySearch', 'oauth',	// shared modules
-	
-	'meta', 'browse', 'view', 'sparqly'			// feature / content modules
-]); 
+
+	'meta', 'browse', 'view', 'sparqly', 'rules'			// feature / content modules
+]);
 
 return {};}); // module definition end

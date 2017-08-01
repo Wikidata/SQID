@@ -1,188 +1,11 @@
-//////// Module Definition ////////////
-define([
-	'util/util.module',
-    'util/ruleParser.service',
-    'util/rulesProvider.service',
-    'util/wikidataapi.service',
-    'util/util.service',
-    'util/sparql.service',
-    'i18n/i18n.service'
+define(['rules/rules.module',
+        'util/util.service',
+        'rules/ast.service',
+        'rules/parser.service'
 ], function() {
-angular.module('util').factory('rules', [
-    'ruleParser', 'rulesProvider', 'wikidataapi', 'entitydata', 'util', 'i18n', 'sparql', '$q', '$http', '$log',
-    function(ruleParser, rulesProvider, wikidataapi, entitydata, util, i18n, sparql, $q, $http, $log) {
-
-        function getStatements(entityData, entityInData, itemId) {
-            var queries = [];
-            var requests = [];
-            var statements = {};
-
-            if (!entityData || !entityInData) {
-                return null;
-            }
-
-            var promise = entityData.waitForPropertyLabels().then(function() {
-                return entityInData.waitForPropertyLabels().then(function() {
-                    var candidateRules = rulesProvider.getRules()
-                        .filter(couldMatch(entityData.statements,
-                                           entityInData.statements,
-                                           itemId));
-
-                    angular.forEach(candidateRules, function(rule) {
-                        var subject = rule.head.arguments[0].name;
-                        var binding = {};
-                        binding[subject] = { id: itemId,
-                                             outbound: entityData,
-                                             inbound: entityInData
-                                           };
-
-                        queries.push(getInstanceCandidatesQuery(rule,
-                                                                binding));
-                    });
-
-                    angular.forEach(queries, function(query) {
-                        var request = sparql.getQueryRequest(query.query);
-                        query.request = request.then(function(sparqlResults) {
-                            // iterate over result instances
-                            angular.forEach(sparqlResults.results, function(sparqlResult) {
-                                // augment bindings with results from SPARQL
-                                query.bindings = augmentBindingsWithSPARQLResult(
-                                    query.bindings,
-                                    sparqlResult
-                                );
-
-                                if (sparqlResult.length === 0) {
-                                    return; // no results here, move along
-                                }
-
-                                // find claims we need to retrieve
-                                var claims = Object.keys(query.bindings)
-                                    .filter(function(binding) {
-                                        return ((query.bindings[binding].type ===
-                                                 'set-variable') &&
-                                                'id' in query.bindings[binding]);
-                                    })
-                                    .map(function(binding) {
-                                        return query.bindings[binding].id;
-                                    });
-                                wikidataapi.getClaims(claims).then(function(apiResult) {
-                                    query.bindings = augmentBindingsWithAPIResult(
-                                        query.bindings,
-                                        apiResult
-                                    );
-
-                                    var instance = verifyCandidateInstance(query);
-                                    if (angular.isDefined(instance)) {
-                                        var statement = instantiateRuleHead(instance);
-
-                                        angular.forEach(statement, function(snak, property) {
-                                            if (!(property in statements)) {
-                                                statements[property] = [];
-                                            }
-
-                                            var existing = entityData.statements[property];
-                                            var equivalent = entitydata
-                                                .determineEquivalentStatements(existing,
-                                                                               snak[0]);
-
-                                            if(equivalent.length === 0) {
-                                                statements[property] = statements[property].concat(snak);
-                                            }
-                                        });
-                                    }
-                                });
-                            });
-                        });
-
-                        requests.push(query);
-                    });
-
-                    return $q.all(requests.map(function(query) {
-                        return query.request;
-                    })).then(function(results) {
-                        var requests = { propertyIds: [],
-                                         entityIds: [],
-                                         results: results
-                                       };
-                        var num = 0;
-
-                        angular.forEach(statements, function(statement, group) {
-                            angular.forEach(statement, function(snak, property) {
-                                statements[group][property].id = ('sqid-inference-' + (++num));
-
-                                if (!(property in requests.propertyIds) &&
-                                    (property.length > 0) &&
-                                    (property.substring(1) === 'P')) {
-                                    requests.propertyIds.push(property);
-                                }
-                                if ((snak.mainsnak.snaktype === 'value') &&
-                                    (snak.mainsnak.datatype === 'wikibase-item') &&
-                                    (snak.mainsnak.datavalue.type === 'wikibase-entityid')) {
-                                    if (snak.mainsnak.datavalue.value['entity-type'] === 'item') {
-                                        var id = 'Q' + snak.mainsnak.datavalue.value['numeric-id'];
-                                        if (!(id in requests.entityIds)) {
-                                            requests.entityIds.push(id);
-                                        }
-                                    } else {
-                                        var id = 'P' + snak.mainsnak.datavalue.value['numeric-id'];
-                                        if (!(id in requests.propertyIds)) {
-                                            requests.propertyIds.push(id);
-                                        }
-                                    }
-                                }
-
-                                angular.forEach(snak.qualifiers, function(qualifier, property) {
-                                    if (!(property in requests.propertyIds)) {
-                                        requests.propertyIds.push(property);
-                                    }
-
-                                    angular.forEach(qualifier, function(snak) {
-                                        if ((snak.snaktype === 'value') &&
-                                            (snak.datatype === 'wikibase-item') &&
-                                            (snak.datavalue.type === 'wikibase-entityid')) {
-                                            if (snak.datavalue.value['entity-type'] === 'item') {
-                                                var id = 'Q' + snak.datavalue.value['numeric-id'];
-                                                if (!(id in requests.entityIds)) {
-                                                    requests.entityIds.push(id);
-                                                }
-                                            } else {
-                                                var id = 'P' + snak.datavalue.value['numeric-id'];
-                                                if (!(id in requests.propertyIds)) {
-                                                    requests.propertyIds.push(id);
-                                                }
-                                            }
-                                        }
-                                    });
-                                });
-                            });
-                        });
-
-                        return requests;
-                    });
-                });
-            });
-
-            var propertyLabels = promise.then(function(requests) {
-                return i18n.waitForPropertyLabels(util.unionArrays(
-                    requests.propertyIds,
-                    [])).then(function() {
-                        return requests;
-                    });
-            });
-
-            var terms = propertyLabels.then(function(requests) {
-                return i18n.waitForTerms(util.unionArrays(
-                    requests.entityIds,
-                    []));
-            });
-
-            return {
-                statements: statements,
-                waitForPropertyLabels: function() { return propertyLabels; } ,
-                waitForTerms: function() { return terms; }
-            };
-        }
-
+    angular.module('rules').factory('matcher',
+    ['$log', 'util', 'ast', 'parser',
+    function($log, util, ast, parser) {
         function hasMatchingStatement(statements, predicate, object) {
             var predicates = Object.keys(statements);
 
@@ -204,6 +27,11 @@ angular.module('util').factory('rules', [
                     return (stmt.mainsnak.datavalue.value === stmt.name);
                 });
             });
+        }
+
+        function copyQualifiers(qualifiers) {
+            // FIXME filter out references here
+            return qualifiers;
         }
 
         function couldMatch(data, inboundData, itemId) {
@@ -263,7 +91,7 @@ angular.module('util').factory('rules', [
 
             var interestingVariables = [];
 
-            angular.forEach(ruleParser.variables(rule.head),
+            angular.forEach(ast.variables(rule.head),
                             function(variable) {
                                 if ((variable.type !== 'variable') ||
                                     (variable.name in bindings)) {
@@ -342,7 +170,7 @@ angular.module('util').factory('rules', [
 
                 if (name in variableBindings) {
                     return prefix + variableBindings[name].id;
-                } else if (ruleParser.isVariableName(name)) {
+                } else if (parser.isVariableName(name)) {
                     return name;
                 }
 
@@ -568,49 +396,6 @@ angular.module('util').factory('rules', [
             return query;
         }
 
-        function augmentBindingsWithSPARQLResult(bindings,
-                                                 sparqlResult) {
-            angular.forEach(sparqlResult[0],
-                            function(item, name) {
-                                var varName = '?' + name;
-                                var id = util.getClaimIdFromSPARQLResult(
-                                    util.getIdFromUri(item.value));
-                                if (!(varName in bindings)) {
-                                    bindings[varName] = { name: varName };
-                                }
-
-                                bindings[varName].id = id;
-                                bindings[varName].item = item;
-                            });
-
-            return bindings;
-        }
-
-        function augmentBindingsWithAPIResult(bindings,
-                                              apiResult) {
-            angular.forEach(apiResult, function(result) {
-                var property = Object.keys(result.claims)[0]; // only a single claim
-                var claim = result.claims[property][0];
-
-                // find binding for this claim
-                angular.forEach(bindings, function(binding, idx) {
-                    if (bindings[idx].id === claim.id) {
-                        bindings[idx].qualifiers =
-                            (('qualifiers' in claim)
-                             ? claim.qualifiers
-                             : []);
-                    }
-                });
-            });
-
-            return bindings;
-        }
-
-        function copyQualifiers(qualifiers) {
-            // FIXME filter out references here
-            return qualifiers;
-        }
-
         function verifyCandidateInstance(query) {
             // resolve constraints, if any
             var match = true;
@@ -709,100 +494,12 @@ angular.module('util').factory('rules', [
                     : undefined);
         }
 
-        function instantiateRuleHead(query) {
-            var head = query.rule.head;
+        return { couldMatch: couldMatch,
+                 copyQualifiers: copyQualifiers,
+                 verifyCandidateInstance: verifyCandidateInstance,
+                 getInstanceCandidatesQuery: getInstanceCandidatesQuery
+               };
+     }]);
 
-            function bindingOrLiteral(name) {
-                if (('name' in name) && ('type' in name)) {
-                    if (name.type === 'literal') {
-                        return name.name;
-                    }
-
-                    name = name.name;
-                }
-
-                if (name in query.bindings) {
-                    return query.bindings[name].id;
-                }
-
-                return name;
-            }
-
-            angular.forEach(ruleParser.variables(head),
-                            function(variable) {
-                                if (!(variable.name in query.bindings)) {
-                                    throw new RangeError("variable `" + variable.name +
-                                                         "' is not among result bindings");
-                                }
-                            });
-
-            var subject = bindingOrLiteral(head.arguments[0]);
-            var predicate = bindingOrLiteral(head.predicate);
-            var object = bindingOrLiteral(head.arguments[1]);
-            var qualifiers = {};
-
-            switch (head.annotation.type) {
-            case 'set-variable':
-                qualifiers = copyQualifiers(
-                    query.bindings[head.annotation.name].qualifiers
-                );
-
-                break;
-
-            case 'set-term':
-                // fallthrough
-            case 'closed-specifier':
-                angular.forEach(head.annotation.assignments, function(assignment) {
-                    var property = bindingOrLiteral(assignment.attribute);
-
-                    if (!(property in qualifiers)) {
-                        qualifiers[property] = [];
-                    }
-
-                    qualifiers[property].push({
-                        snaktype: 'value',
-                        datatype: 'wikibase-item',
-                        datavalue: { value: { 'entity-type': 'item',
-                                              'numeric-id': bindingOrLiteral(assignment.value).substring(1)
-                                            },
-                                     type: 'wikibase-entityid'
-                                   },
-                        property: property
-                    });
-                });
-
-                break;
-
-            case 'open-specifier':
-                // fallthrough
-            case 'function-term':
-                // fallthrough
-            default:
-                throw new RangeError("unsupported annotation type `" +
-                                     head.annation.type + "' in rule head");
-            }
-
-            // FIXME turn annotation into qualifiers
-            var statement = {};
-            statement[predicate] = [{ mainsnak: { snaktype: 'value',
-                                                  property: predicate,
-                                                  datavalue: { type: 'wikibase-entityid',
-                                                               value: { 'entity-type': 'item',
-                                                                        'numeric-id': object.substring(1)
-                                                                      }
-                                                             },
-                                                  datatype: 'wikibase-item'
-                                                },
-                                      rank: 'normal',
-                                      type: 'statement',
-                                      qualifiers: qualifiers
-                                    }];
-            return statement;
-        }
-
-        return {
-            getStatements: getStatements
-        };
-}]);
-
-return {}; }); // module definition end
+    return {};
+});
