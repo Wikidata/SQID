@@ -9,12 +9,13 @@ define([
 	'util/htmlCache.service',
 	'data/properties.service',
 	'oauth/oauth.service',
+	'view/resolver.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache', 'oauth',
-function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache, oauth) {
+angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache', 'oauth', 'resolver',
+function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache, oauth, resolver) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -68,7 +69,22 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 
 	return {
 		updateId: function() {
-			id = ($route.current.params.id) ? ($route.current.params.id) : "Q5";
+			var promise;
+			if ($route.current.params.find){
+				promise = resolver.getQIdQuick($route.current.params.find);
+			}else{
+				if (($route.current.params.prop) && ($route.current.params.value)){
+					promise = resolver.getQIdFromStatement($route.current.params.prop, $route.current.params.value);
+				}else{
+					var deferred = $q.defer();
+					deferred.resolve( ($route.current.params.id) ? ($route.current.params.id) : "Q5");
+					promise = deferred.promise;
+				}
+			}
+			promise.then(function(newId){
+				id = newId? newId : "Q0";
+			});
+			return promise;
 		},
 
 		getId: function(){
