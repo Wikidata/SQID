@@ -1,0 +1,78 @@
+<h1>Inference explanation</h1>
+<div ng-controller="ExplainController">
+  <sqid-statement-table ng-if="explanation.statement"
+                        data="explanation.statement"
+                        title="{{'SEC_INFERRED'|translate}}">
+  </sqid-statement-table>
+
+  <table class="table table-striped table-condensed">
+    <tbody>
+      <tr>
+        <td>Rule</td>
+        <td>{{ explanation.rule | formatRule }}</td>
+      </tr>
+      <tr ng-if="explanation.labels">
+        <td>Literals</td>
+        <td>
+          <table class="table table-striped table-condensed">
+            <thead>
+              <tr>
+                <th>Literal</th>
+                <th>Entity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="(literal, label) in explanation.labels">
+                <td>{{ literal }}</td>
+                <td ng-bind-html="label"></td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr ng-if="explanation.bounds">
+        <td>Bindings</td>
+        <td>
+          <table class="table table-striped table-condensed">
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Entity</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="(variable, binding) in explanation.bounds">
+                <td>{{ variable }}</td>
+                <td ng-bind-html="binding"></td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr ng-if="explanation.constraints.length">
+        <td>Constraints</td>
+        <td>
+          <table class="table table-striped table-condensed">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th colspan="2">Arguments</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="constraint in explanation.constraints">
+                <td>{{ constraint.type }}</td>
+                <td>{{ constraint.args[0] }}</td>
+                <td>{{ constraint.args[1] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>Query</td>
+        <td>{{ explanation.query }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
