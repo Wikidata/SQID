@@ -70,19 +70,19 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 	return {
 		updateId: function() {
 			var promise;
-			if ($route.current.params.quick){
-				promise = resolver.getQIdQuick($route.current.params.quick);
+			if ($route.current.params.find){
+				promise = resolver.getQIdQuick($route.current.params.find);
 			}else{
 				if (($route.current.params.prop) && ($route.current.params.value)){
 					promise = resolver.getQIdFromStatement($route.current.params.prop, $route.current.params.value);
 				}else{
-					deferred = $q.defer();
+					var deferred = $q.defer();
 					deferred.resolve( ($route.current.params.id) ? ($route.current.params.id) : "Q5");
 					promise = deferred.promise;
 				}
 			}
 			promise.then(function(newId){
-				id = newId;
+				id = newId? newId : "Q0";
 			});
 			return promise;
 		},
