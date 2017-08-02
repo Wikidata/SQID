@@ -8,9 +8,9 @@ define([
 ///////////////////////////////////////
 
 /**
- * This component provides methods for turning parts of the Wikidata 
+ * This component provides methods for turning parts of the Wikidata
  * data model into HTML for display.
- */ 
+ */
 angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, i18n) {
 
 	var getEntityTerms = function(entityId, missingTermsListener) {
@@ -93,12 +93,15 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				if (short && displayString.length > 15) {
 					displayString = displayString.substring(0,6) + "..." + displayString.substring(displayString.length-6);
 				}
-
 				var linkString = sanitize(datavalue.value, true);
 				datavalue.value = sanitize(datavalue.value);
 				displayString = sanitize(displayString);
 
-				switch (properties.getDatatype(numPropId)) {
+                if ('__sqid_display_string_override__' in datavalue) {
+                    displayString = datavalue.__sqid_display_string_override__;
+                }
+
+                switch (properties.getDatatype(numPropId)) {
 					case 'Url':
 						return '<a class="ext-link" href="' + linkString + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 					case 'CommonsMedia':
@@ -157,7 +160,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 			ret += i18n.getPropertyLink(propId) + ' : ';
 		}
 		switch (snak.snaktype) {
-			case 'value': 
+			case 'value':
 				ret += getValueHtml(snak.datavalue, propId.substring(1), properties, missingTermsListener, inline, short);
 				break;
 			case 'somevalue':
@@ -284,7 +287,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 
 	var formatGlobeCoordinate = function(value,plusName,minusName){
 		var extract = function(value, divisor){
-			var newValue = Math.floor(value, divisor) 
+			var newValue = Math.floor(value, divisor)
 			return [newValue, value - newValue	]
 		}
 		var result = extract(Math.abs(value), 1)
@@ -305,7 +308,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 	 * true if there any labels required for the HTML are unavailable in the i18n
 	 * cache. This usually means that rendering will have to wait until labels have
 	 * been fetched.
-	 * 
+	 *
 	 * FIXME This fails since html needs to be an angular expression that evaluates to an $sce escaped html string, which is something we cannot insert on this level.
 	 */
 	var getStatementValueInlineHtml = function(statement, properties, missingTermsListener) {

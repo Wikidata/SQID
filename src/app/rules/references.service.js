@@ -21,7 +21,8 @@ function() {
                        encodeURIComponent(angular.toJson(info, false)));
             var reference = { P854: [{ datatype: 'url',
                                        datavalue: { type: 'string',
-                                                    value: url
+                                                    value: url,
+                                                    __sqid_display_string_override__: '(explain inference)'
                                                   },
                                        snaktype: 'value',
                                        property: 'P854'
