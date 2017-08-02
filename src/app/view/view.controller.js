@@ -104,8 +104,10 @@ function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, spa
 		}
 	});
 
-	View.getEntityInlinks().then(function(data) {
-		$scope.entityInData = data;
+	View.updateId().then(function(){
+		View.getEntityInlinks().then(function(data) {
+			$scope.entityInData = data;
+		});
 	});
 	
 	var refreshContent = function(useCache){
