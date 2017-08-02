@@ -46,7 +46,7 @@ function() {
             return bindings;
         }
 
-        function instantiateRuleHead(query) {
+        function instantiateRuleHead(query, skipReferences) {
             var head = query.rule.head;
 
             function bindingOrLiteral(name) {
@@ -131,9 +131,14 @@ function() {
                                                 },
                                       rank: 'normal',
                                       type: 'statement',
-                                      qualifiers: qualifiers,
-                                      references: references.generateReference(query)
+                                      qualifiers: qualifiers
                                     }];
+
+            if (skipReferences === true) {
+                statement.references =
+                    references.generateReference(query);
+            }
+
             return statement;
         }
 
