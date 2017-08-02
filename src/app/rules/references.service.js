@@ -2,14 +2,23 @@ define(['rules/rules.module'
        ],
 function() {
     angular.module('rules').factory('references',
-    [
-    function() {
+    ['ast',
+    function(ast) {
         function generateReference(query) {
             var bindings = {};
 
             angular.forEach(query.bindings, function(binding) {
                 if (('id' in binding) && ('name' in binding))  {
                     bindings[binding.name] = binding.id;
+                }
+            });
+
+            angular.forEach(ast.variables(query.rule.head), function(variable) {
+                var name = variable.name;
+                bindings[name] = { id: query.bindings[name].id,
+                                   type: query.bindings[name].type,
+                                   qualifiers: query.bindings[name].qualifiers
+                                 };
             });
 
             var info = { rule: query.rule,
