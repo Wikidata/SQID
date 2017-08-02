@@ -5,12 +5,11 @@ function() {
     [
     function() {
         function generateReference(query) {
-            var bindings = [];
+            var bindings = {};
 
             angular.forEach(query.bindings, function(binding) {
-                if ('id' in binding) {
-                    bindings.push(binding.id);
-                }
+                if (('id' in binding) && ('name' in binding))  {
+                    bindings[binding.name] = binding.id;
             });
 
             var info = { rule: query.rule,

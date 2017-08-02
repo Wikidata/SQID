@@ -35,6 +35,7 @@ define([
                         var subject = rule.head.arguments[0].name;
                         var binding = {};
                         binding[subject] = { id: itemId,
+                                             name: subject,
                                              outbound: entityData,
                                              inbound: entityInData
                                            };
