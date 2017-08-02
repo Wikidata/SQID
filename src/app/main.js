@@ -19,7 +19,7 @@ requirejs.config({
 		"ngComplete": "../lib/angucomplete-alt",
 		"ui-boostrap-tpls": "../lib/ui-bootstrap-tpls-1.3.2",
 		"openLayers": "../lib/openlayers/OpenLayers",
-        "angular-loading-bar": "../lib/loading-bar.min"
+		"angular-loading-bar": "../lib/loading-bar.min"
 	},
 	shim: {
 		'jquery-ui': ['jquery'],
@@ -38,7 +38,7 @@ requirejs.config({
 		'ngTranslate-storage-cook': ['ngTranslate-core', 'ngCookies'],
 		'ngTranslate-storage-loc': ['ngTranslate-storage-cook'],
 		'ngComplete': ['angular'],
-        'angular-loading-bar': ['ngAnimate']
+		'angular-loading-bar': ['ngAnimate']
 	}
 });
 
