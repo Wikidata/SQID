@@ -17,7 +17,8 @@ define([
         function assignment(r, rhs) {
             return P.seqObj(['attribute', r.ObjectTerm],
                             r.equals,
-                            ['value', rhs]);
+                            ['value', rhs])
+                    .thru(type('assignment'));
         }
 
         function specifier(r, opening, closing, typ) {

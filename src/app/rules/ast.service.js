@@ -92,12 +92,96 @@ function(ajv) {
             return result;
         }
 
-        function variables(ast) {
-            function bind(m, f) {
-                return m.map(f).reduce(function(acc, elt) {
-                    return acc.concat(elt);
-                }, []);
+        function bind(m, f) {
+            return m.map(f).reduce(function(acc, elt) {
+                return acc.concat(elt);
+            }, []);
+        }
+
+        function literals(ast) {
+            var collector = [];
+
+            if (angular.isArray(ast)) {
+                return collector.concat(bind(ast, literals));
             }
+
+            switch (ast.type) {
+            case 'star': // fallthrough
+            case 'plus': // fallthrough
+            case 'variable': // fallthrough
+            case 'set-variable':
+                break;
+
+            case 'rule':
+                collector = collector.concat(
+                    bind(ast.body, literals),
+                    literals(ast.head)
+                );
+                break;
+
+            case 'relational-atom':
+                collector = collector.concat(
+                    literals(ast.predicate),
+                    bind(ast.arguments, literals),
+                    literals(ast.annotation)
+                );
+                break;
+
+            case 'set-term':
+                collector = collector.concat(
+                    bind(ast.assignments, literals)
+                );
+                break;
+
+            case 'specifier-atom':
+                collector = collector.concat(
+                    literals(ast.set),
+                    literals(ast.specifier)
+                );
+                break;
+
+            case 'union': // fallthrough
+            case 'intersection': // fallthrough
+            case 'difference':
+                collector = collector.concat(
+                    literals(ast.specifiers[0]),
+                    literals(ast.specifiers[1])
+                );
+                break;
+
+            case 'function-term':
+                collector = collector.concat(
+                    bind(ast.arguments, literals)
+                );
+                break;
+
+            case 'open-specifier': // fallthrough
+            case 'closed-specifier':
+                collector = collector.concat(
+                    bind(ast.assignments, literals)
+                );
+                break;
+
+            case 'assignment':
+                collector = collector.concat(
+                    literals(ast.attribute),
+                    literals(ast.value)
+                );
+                break;
+
+            case 'literal':
+                collector = ast;
+                break;
+
+            default:
+                // something different. assume it doesn't have literals.
+                break;
+            }
+
+            return collector;
+        }
+
+        function variables(ast) {
             var collector = [];
 
             if (angular.isArray(ast)) {
@@ -159,6 +243,14 @@ function(ajv) {
                     bind(ast.assignments, variables)
                 );
                 break;
+
+            case 'assignment':
+                collector = collector.concat(
+                    variables(ast.attribute),
+                    variables(ast.value)
+                );
+                break;
+
             case 'star': // fallthrough
             case 'plus': // fallthough
             case 'literal': // fallthrough
@@ -208,6 +300,7 @@ function(ajv) {
 
     return { print: print,
              verify: verify,
+             literals: literals,
              variables: variables
            };
     }]);
