@@ -5,13 +5,20 @@ define(['rules/rules.module',
         'rules/matcher.service',
         'rules/provider.service',
         'rules/references.service',
-        'rules/instantiator.service'
+        'rules/instantiator.service',
+        'rules/explain.controller'
        ],
 function() {
-    angular.module('rules').config(['$routeProvider', function($routeProvider) {
-        $routeProvider
-            .when('/rules/explain', {templateUrl: 'app/rules/explain.html'})
-            .when('/rules/browse', {templateUrl: 'app/rules/browse.html'});
+    angular.module('rules').config(
+        ['$routeProvider', '$filterProvider',
+        function($routeProvider, $filterProvider) {
+            $routeProvider
+                .when('/rules/explain', {templateUrl: 'app/rules/explain.html'})
+                .when('/rules/browse', {templateUrl: 'app/rules/browse.html'});
+            $filterProvider
+                .register('formatRule', ['ast', function(ast) {
+                    return ast.print;
+                }]);
     }]);
 
     return {};
