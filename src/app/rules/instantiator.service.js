@@ -131,13 +131,11 @@ function() {
                                                 },
                                       rank: 'normal',
                                       type: 'statement',
-                                      qualifiers: qualifiers
+                                      qualifiers: qualifiers,
+                                      references: ((skipReferences !== true)
+                                                   ? references.generateReference(query)
+                                                   : [])
                                     }];
-
-            if (skipReferences === true) {
-                statement.references =
-                    references.generateReference(query);
-            }
 
             return statement;
         }
