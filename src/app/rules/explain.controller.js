@@ -83,7 +83,7 @@ function() {
                    $scope.explanation.labels = labels;
                    $scope.explanation.bounds = bindings;
                    $scope.explanation.statement = {
-                       statements: instantiator.instantiateRuleHead(inference, true),
+                       statements: instantiator.instantiateRuleHead(inference, undefined, true),
                        waitForPropertyLabels: function() {
                            return promise;
                        },

@@ -46,7 +46,7 @@ function() {
             return bindings;
         }
 
-        function instantiateRuleHead(query, skipReferences) {
+        function instantiateRuleHead(query, linkText, skipReferences) {
             var head = query.rule.head;
 
             function bindingOrLiteral(name) {
@@ -133,7 +133,8 @@ function() {
                                       type: 'statement',
                                       qualifiers: qualifiers,
                                       references: ((skipReferences !== true)
-                                                   ? references.generateReference(query)
+                                                   ? references.generateReference(query,
+                                                                                  linkText)
                                                    : [])
                                     }];
 

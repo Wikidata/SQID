@@ -4,7 +4,7 @@ function() {
     angular.module('rules').factory('references',
     ['ast',
     function(ast) {
-        function generateReference(query) {
+        function generateReference(query, linkText) {
             var bindings = {};
 
             angular.forEach(query.bindings, function(binding) {
@@ -30,13 +30,17 @@ function() {
                        encodeURIComponent(angular.toJson(info, false)));
             var reference = { P854: [{ datatype: 'url',
                                        datavalue: { type: 'string',
-                                                    value: url,
-                                                    __sqid_display_string_override__: '(explain inference)'
+                                                    value: url
                                                   },
                                        snaktype: 'value',
                                        property: 'P854'
                                      }]
                             };
+
+            if (angular.isDefined(linkText)) {
+                reference.P854[0].datavalue
+                    .__sqid_display_string_override__ = linkText;
+            }
 
             return [{ snaks: reference,
                       'snaks-order': ['P854']

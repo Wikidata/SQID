@@ -162,5 +162,21 @@
 	"PROPOSAL_SOURCE": "Vorschlag aus",
 	"ALERTS": {
 		"REJECT_FAILED": "Fehler: Der Vorschlag konnte nicht zurückgewiesen werden."
-	}
+	},
+    "RULES": {
+        "EXPLAIN": "(Inferenz erklären)",
+        "EXPLANATION": "Inferenzerklärung",
+        "RULE": "Regel",
+        "RULE_ID": "Regel-ID",
+        "RULE_LIST": "Regelliste",
+        "LITERAL": "Literal",
+        "LITERALS": "Literale",
+        "ENTITY": "Entität",
+        "BINDING": "Variable",
+        "BINDINGS": "Zuweisung",
+        "CONSTRAINTS": "Nebenbedingungen",
+        "CONSTRAINT_TYPE": "Typ",
+        "CONSTRAINT_ARGUMENTS": "Argumente",
+        "QUERY": "Anfrage"
+    }
 }

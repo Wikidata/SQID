@@ -167,5 +167,21 @@
 	},
 	"ALERTS": {
 		"REJECT_FAILED": "Error: The proposal could not be rejected."
-	}
+	},
+    "RULES": {
+        "EXPLAIN": "(explain inference)",
+        "EXPLANATION": "Inference explanation",
+        "RULE": "Rule",
+        "RULE_ID": "Rule ID",
+        "RULE_LIST": "Rules list",
+        "LITERAL": "Literal",
+        "LITERALS": "Literals",
+        "ENTITY": "Entity",
+        "BINDING": "Variable",
+        "BINDINGS": "Bindings",
+        "CONSTRAINTS": "Constraints",
+        "CONSTRAINT_TYPE": "Type",
+        "CONSTRAINT_ARGUMENTS": "Arguments",
+        "QUERY": "Query"
+    }
 }
