@@ -6,6 +6,7 @@ define(['rules/rules.module',
         'rules/provider.service',
         'rules/references.service',
         'rules/instantiator.service',
+        'rules/browse.controller',
         'rules/explain.controller'
        ],
 function() {
