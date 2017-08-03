@@ -177,6 +177,7 @@
         "CONSTRAINTS": "Nebenbedingungen",
         "CONSTRAINT_TYPE": "Typ",
         "CONSTRAINT_ARGUMENTS": "Argumente",
-        "QUERY": "Anfrage"
+        "QUERY": "Anfrage",
+        "NAV_RULES": "Regeln"
     }
 }
