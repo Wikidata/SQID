@@ -91,8 +91,19 @@ function() {
                            return promise;
                        }
                    };
-               });
 
+                   var subject = inference.rule.head.arguments[0];
+                   var item = inference.bindings[subject.name].id;
+                   var term = i18n.getEntityTerms(item);
+                   var label = ('<a href="' + i18n.getEntityUrl(item) +
+                                '">' + term.label + '</a>');
+                   if (terms.description !== '') {
+                       label += (' <span class="smallnote">(' +
+                                 i18n.autoLinkText(term.description) +
+                                 ')</span>');
+                   }
+                   $scope.explanation.title = label;
+               });
     }]);
 
     return {};
