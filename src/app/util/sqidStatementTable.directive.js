@@ -131,13 +131,9 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 
 					if (outlinks) { // expand statement, only used for outlinks right now (may change in future)
 						html += '<td ng-click="toggleRows(\'' + statement.id + '\')" class="clickable">' +
-							'<div style="float: right; "><span class="{{getShowRowsClass(\'' + statement.id + '\')}} light-grey font-tiny clickable"></span></div>'
-					} else {
-						html += '<td>';
-					}
-
-					if (!outlinks) { // show left-arrow for inlinks
-						html += '<span class=" light-grey font-tiny" style="margin-left: -2ex; margin-right: 1ex; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>';
+							'<div style="float: right; "><span class="{{getShowRowsClass(\'' + statement.id + '\')}} light-grey font-tiny clickable"></span></div>';
+					} else { // show left-arrow for inlinks
+						html += '<td><span class=" light-grey font-tiny" style="margin-left: -2ex; margin-right: 1ex; "><span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span></span>';
 					}
 					
 					if (isProposal){

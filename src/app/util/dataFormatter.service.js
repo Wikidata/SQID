@@ -1,9 +1,10 @@
 //////// Module Definition ////////////
 define([
+	'he',
 	'util/util.module',
 	'util/util.service',
 	'i18n/i18n.service'
-], function() {
+], function(he) {
 ///////////////////////////////////////
 
 /**
@@ -30,16 +31,38 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 	 * been fetched.
 	 */
 	var getValueHtml = function(datavalue, numPropId, properties, missingTermsListener, inline, short) {
+		function sanitize(str, forURI) {
+			if (angular.isUndefined(str)) {
+				return;
+			}
+
+			if (angular.isUndefined(forURI)) {
+				forURI = false;
+			}
+
+			var decoded = he.decode(str, { isAttributeValue: forURI });
+
+			return decoded.replace(/\{\{(.*)\}\}/g, function(_, match) {
+				return (((forURI === true)
+						 ? ('%7B%7B')
+						 : '<span>{</span>{') +
+						match +
+						((forURI === true)
+						 ? ('%7D%7D')
+						 : '<span>}</span>}'));
+			});
+		}
+
 		switch (datavalue.type) {
 			case 'wikibase-entityid':
 				if (datavalue.value["entity-type"] == "item") {
 					var itemId = "Q" + datavalue.value["numeric-id"];
 					var terms = getEntityTerms(itemId, missingTermsListener);
 					if (inline) {
-						return '<a title="' + terms.description + '" href="' + i18n.getEntityUrl(itemId) + '" ng-click="$event.stopPropagation()">' + terms.label + '</a>';
+						return '<a title="' + sanitize(terms.description) + '" href="' + sanitize(i18n.getEntityUrl(itemId)) + '" ng-click="$event.stopPropagation()">' + sanitize(terms.label) + '</a>';
 					} else {
-						return '<a href="' + i18n.getEntityUrl(itemId) + '" ng-click="$event.stopPropagation()">' + terms.label + '</a>' +
-							( terms.description != '' ? ' <span class="smallnote">(' + i18n.autoLinkText(terms.description) + ')</span>' : '' );
+						return '<a href="' + sanitize(i18n.getEntityUrl(itemId)) + '" ng-click="$event.stopPropagation()">' + sanitize(terms.label) + '</a>' +
+							( terms.description != '' ? ' <span class="smallnote">(' + sanitize(i18n.autoLinkText(terms.description)) + ')</span>' : '' );
 					}
 				} else if (datavalue.value["entity-type"] == "property") {
 					return i18n.getPropertyLink('P' + datavalue.value["numeric-id"]);
@@ -70,22 +93,27 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				if (short && displayString.length > 15) {
 					displayString = displayString.substring(0,6) + "..." + displayString.substring(displayString.length-6);
 				}
+
+				var linkString = sanitize(datavalue.value, true);
+				datavalue.value = sanitize(datavalue.value);
+				displayString = sanitize(displayString);
+
 				switch (properties.getDatatype(numPropId)) {
 					case 'Url':
-						return '<a class="ext-link" href="' + datavalue.value + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
+						return '<a class="ext-link" href="' + linkString + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 					case 'CommonsMedia':
-						return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + datavalue.value.replace(' ','_') + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
+						return '<a class="ext-link" href="https://commons.wikimedia.org/wiki/File:' + linkString.replace(' ','_') + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 					//case 'String': etc.
 					default:
 						var urlPattern = properties.getUrlPattern(numPropId);
 						if (urlPattern) {
-							return '<a class="ext-link" href="' + urlPattern.replace('$1',datavalue.value) + '" target="_blank" title="' + datavalue.value + '" ng-click="$event.stopPropagation()">' + displayString + '</a>';
+							return '<a class="ext-link" href="' + urlPattern.replace('$1', linkString) + '" target="_blank" title="' + datavalue.value + '" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 						} else {
 							return '<span title="' + datavalue.value + '">' + displayString + '</span>';
 						}
 				}
 			case 'monolingualtext':
-				return i18n.autoLinkText(datavalue.value.text) + ' <span class="smallnote">[' + datavalue.value.language + ']</span>';
+				return sanitize(i18n.autoLinkText(datavalue.value.text)) + ' <span class="smallnote">[' + sanitize(datavalue.value.language) + ']</span>';
 			case 'quantity':
 				var amount = datavalue.value.amount;
 				if (amount.substring(0,1) == '+') {
@@ -93,7 +121,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				}
 				var unit = util.getIdFromUri(datavalue.value.unit);
 				if (unit !== null) {
-					unit = ' <a href="' + i18n.getEntityUrl(unit) + '">' + getEntityTerms(unit, missingTermsListener).label + '</a>';
+					unit = ' <a href="' + sanitize(i18n.getEntityUrl(unit), true) + '">' + sanitize(getEntityTerms(unit, missingTermsListener).label) + '</a>';
 				} else {
 					unit = '';
 				}
@@ -101,7 +129,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 			case 'globecoordinate':
 				var globe = util.getIdFromUri(datavalue.value.globe);
 				if (globe !== null && globe != 'Q2') {
-					globe = ' on <a href="' + i18n.getEntityUrl(globe) + '">' + getEntityTerms(globe, missingTermsListener).label + '</a>';
+					globe = ' on <a href="' + sanitize(i18n.getEntityUrl(globe), true) + '">' + sanitize(getEntityTerms(globe, missingTermsListener).label) + '</a>';
 				} else {
 					globe = '';
 				}
@@ -109,7 +137,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 			case 'sqid-text':
 				return datavalue.value;
 			default:
-				return 'value type "' + datavalue.type + '" is not supported yet.';
+				return 'value type "' + sanitize(datavalue.type) + '" is not supported yet.';
 		}
 	}
 
