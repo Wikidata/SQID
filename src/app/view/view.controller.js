@@ -147,12 +147,18 @@ angular.module('view').controller('ViewController', [
 			});
 
             $q.all([func(), View.getEntityInlinks()]).then(function(data) {
-                $scope.inferredData = rules.getStatements(data[0],
-                                                          data[1],
-                                                          $scope.id);
+                return rules.getStatements(data[0], data[1], $scope.id);
+            }).then(function(data) {
+                return data.statementsPromise.then(function(inferredData) {
+                    $scope.inferredData = {
+                        statements: inferredData.statements,
+                        waitForPropertyLabels: data.waitForPropertyLabels,
+                        waitForTerms: data.waitForTerms
+                    };
+                });
             });
-		});
-	};
+        });
+    };
 
 	var createAlert = function(message){
 		$scope.alertText = message;
