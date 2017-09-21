@@ -18,10 +18,8 @@ define([
             var promise = entityData.waitForPropertyLabels()
                 .then(function() {
                     return entityInData.waitForPropertyLabels();
-                }).then(function(linkText) {
+                }).then(function() {
                     var queries = [];
-                    var requests = [];
-
                     var candidateRules = provider.getRules()
                         .filter(matcher.couldMatch(
                             entityData.statements,
@@ -44,78 +42,19 @@ define([
 
                     return queries;
                 }).then(function(queries) {
-                    return { queries: queries,
-                             linkText: $translate('RULES.EXPLAIN')};
-                }).then(function(data) {
-                    var requests = [];
-                    var statements = [];
-                    var queries = data.queries;
-                    var linkText = data.linkText;
-
-                    angular.forEach(queries, function(query) {
-                        var request = sparql.getQueryRequest(query.query);
-                        query.request = request.then(function(sparqlResults) {
-                            // iterate over result instances
-                            angular.forEach(sparqlResults.results, function(sparqlResult) {
-                                // augment bindings with results from SPARQL
-                                query.bindings = instantiator.augmentBindingsWithSPARQLResult(
-                                    query.bindings,
-                                    sparqlResult
-                                );
-
-                                if (sparqlResult.length === 0) {
-                                    return; // no results here, move along
-                                }
-
-                                // find claims we need to retrieve
-                                var claims = Object.keys(query.bindings)
-                                    .filter(function(binding) {
-                                        return ((query.bindings[binding].type ===
-                                                 'set-variable') &&
-                                                'id' in query.bindings[binding]);
-                                    })
-                                    .map(function(binding) {
-                                        return query.bindings[binding].id;
-                                    });
-
-                                wikidataapi.getClaims(claims).then(function(apiResult) {
-                                    query.bindings = instantiator.augmentBindingsWithAPIResult(
-                                        query.bindings,
-                                        apiResult
-                                    );
-
-                                 var instance = matcher.verifyCandidateInstance(query);
-                                    if (angular.isDefined(instance)) {
-                                        var statement = instantiator.instantiateRuleHead(instance, linkText);
-
-                                        angular.forEach(statement, function(snak, property) {
-                                            if ((!(property in statements))) {
-                                                statements[property] = [];
-                                            }
-
-                                            var existing = entityData.statements[property];
-                                            var equivalent = entitydata
-                                                .determineEquivalentStatements(existing,
-                                                                               snak[0]);
-
-                                            if(equivalent.length === 0) {
-                                                statements[property] = statements[property].concat(snak);
-                                            }
-                                        });
-                                    }
-                                });
+                    return $q.all(queries.map(function(query) {
+                        return sparql.getQueryRequest(query.query)
+                            .then(function(sparqlResults) {
+                                return handleSparqlResults(query,
+                                                           sparqlResults);
                             });
-                        });
-
-                    requests.push(query);
-                });
-
-                return $q.all(requests.map(function(query) {
-                    return query.request;
-                })).then(function(results) {
+                    }));
+                }).then(function(results) {
+                    return deduplicateStatements(entityData, results);
+                }).then(function(results) {
+                    var statements = results;
                     var requests = { propertyIds: [],
-                                     entityIds: [],
-                                     results: results
+                                     entityIds: []
                                    };
                     var num = 0;
 
@@ -171,13 +110,10 @@ define([
                         });
                     });
 
-                    return requests;
-                }).then(function(requests) {
                     return { requests: requests,
                              statements: statements
                            };
                 });
-            });
 
             var propertyLabels = promise.then(function(data) {
                 return i18n.waitForPropertyLabels(util.unionArrays(
@@ -195,9 +131,88 @@ define([
 
             return {
                 statementsPromise: promise,
-                waitForPropertyLabels: function() { return propertyLabels; } ,
+                waitForPropertyLabels: function() { return propertyLabels; },
                 waitForTerms: function() { return terms; }
             };
+        }
+
+        function handleSparqlResults(query, sparqlResults) {
+            var requests = [];
+
+            angular.forEach(sparqlResults.results, function(sparqlResult) {
+                // augment bindings with results from SPARQL
+                query.bindings = instantiator.augmentBindingsWithSPARQLResult(
+                    query.bindings,
+                    sparqlResult
+                );
+
+                if (sparqlResult.length === 0) {
+                    return; // no results here, move along
+                }
+
+                // find claims we need to retrieve
+                var claims = Object.keys(query.bindings)
+                    .filter(function(binding) {
+                        return ((query.bindings[binding].type ===
+                                 'set-variable') &&
+                                'id' in query.bindings[binding]);
+                    })
+                    .map(function(binding) {
+                        return query.bindings[binding].id;
+                    });
+
+                requests.push(wikidataapi.getClaims(claims)
+                    .then(function(apiResults) {
+                        return handleApiResults(query, apiResults);
+                    }));
+            });
+
+            return $q.all(requests);
+        }
+
+        function handleApiResults(query, apiResults) {
+            query.bindings = instantiator.augmentBindingsWithAPIResult(
+                query.bindings,
+                apiResults
+            );
+
+            var instance = matcher.verifyCandidateInstance(query);
+
+            if (angular.isUndefined(instance)) {
+                return undefined;
+            }
+
+            return $translate('RULES.EXPLAIN').then(function(linkText) {
+                return instantiator.instantiateRuleHead(instance, linkText);
+            });
+        }
+
+        function deduplicateStatements(entityData, data) {
+            var statements = {};
+
+            angular.forEach(data, function(candidates) {
+                angular.forEach(candidates, function(statement) {
+                    if (angular.isUndefined(statement)) {
+                        return;
+                    }
+
+                    angular.forEach(statement, function(snak, property) {
+                        if ((!(property in statements))) {
+                            statements[property] = [];
+                        }
+
+                        var existing = entityData.statements[property];
+                        var equivalent = entitydata
+                            .determineEquivalentStatements(existing, snak[0]);
+
+                        if(equivalent.length === 0) {
+                            statements[property] = statements[property].concat(snak);
+                        }
+                    });
+                });
+            });
+
+            return statements;
         }
 
         return {
