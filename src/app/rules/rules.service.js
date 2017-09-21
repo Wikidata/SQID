@@ -52,67 +52,7 @@ define([
                 }).then(function(results) {
                     return deduplicateStatements(entityData, results);
                 }).then(function(results) {
-                    var statements = results;
-                    var requests = { propertyIds: [],
-                                     entityIds: []
-                                   };
-                    var num = 0;
-
-                    angular.forEach(statements, function(statement, group) {
-                        angular.forEach(statement, function(snak, property) {
-                            statements[group][property].id = ('sqid-inference-' + (++num));
-                            if (!(property in requests.propertyIds) &&
-                                (property.length > 0) &&
-                                (property.substring(1) === 'P')) {
-                                requests.propertyIds.push(property);
-                            }
-
-                            if (('mainsnak' in snak) &&
-                                (snak.mainsnak.snaktype === 'value') &&
-                                (snak.mainsnak.datatype === 'wikibase-item') &&
-                                (snak.mainsnak.datavalue.type === 'wikibase-entityid')) {
-                                if (snak.mainsnak.datavalue.value['entity-type'] === 'item') {
-                                    var id = 'Q' + snak.mainsnak.datavalue.value['numeric-id'];
-                                    if (!(id in requests.entityIds)) {
-                                        requests.entityIds.push(id);
-                                    }
-                                } else {
-                                    var id = 'P' + snak.mainsnak.datavalue.value['numeric-id'];
-                                    if (!(id in requests.propertyIds)) {
-                                        requests.propertyIds.push(id);
-                                    }
-                                }
-                            }
-
-                            angular.forEach(snak.qualifiers, function(qualifier, property) {
-                                if (!(property in requests.propertyIds)) {
-                                    requests.propertyIds.push(property);
-                                }
-
-                                angular.forEach(qualifier, function(snak) {
-                                    if ((snak.snaktype === 'value') &&
-                                        (snak.datatype === 'wikibase-item') &&
-                                        (snak.datavalue.type === 'wikibase-entityid')) {
-                                        if (snak.datavalue.value['entity-type'] === 'item') {
-                                            var id = 'Q' + snak.datavalue.value['numeric-id'];
-                                            if (!(id in requests.entityIds)) {
-                                                requests.entityIds.push(id);
-                                            }
-                                        } else {
-                                            var id = 'P' + snak.datavalue.value['numeric-id'];
-                                            if (!(id in requests.propertyIds)) {
-                                                requests.propertyIds.push(id);
-                                            }
-                                        }
-                                    }
-                                });
-                            });
-                        });
-                    });
-
-                    return { requests: requests,
-                             statements: statements
-                           };
+                    return injectReferences(results);
                 });
 
             var propertyLabels = promise.then(function(data) {
@@ -213,6 +153,67 @@ define([
             });
 
             return statements;
+        }
+
+        function injectReferences(results) {
+            var statements = results;
+            var requests = { propertyIds: [],
+                             entityIds: []
+                           };
+            var num = 0;
+
+            function maybeAddIdForValue(value) {
+                var id;
+
+                if (value['entity-type'] === 'item') {
+                    id = 'Q' + value['numeric-id'];
+                    if (!(id in requests.entityIds)) {
+                        requests.entityIds.push(id);
+                    }
+                } else {
+                    id = 'P' + value['numeric-id'];
+                    if (!(id in requests.propertyIds)) {
+                        requests.propertyIds.push(id);
+                    }
+                }
+            }
+
+            angular.forEach(statements, function(statement, group) {
+                angular.forEach(statement, function(snak, property) {
+                    statements[group][property].id = ('sqid-inference-' + (++num));
+                    if (!(property in requests.propertyIds) &&
+                        (property.length > 0) &&
+                        (property.substring(1) === 'P')) {
+                        requests.propertyIds.push(property);
+                    }
+
+
+                    if (('mainsnak' in snak) &&
+                        (snak.mainsnak.snaktype === 'value') &&
+                        (snak.mainsnak.datatype === 'wikibase-item') &&
+                        (snak.mainsnak.datavalue.type === 'wikibase-entityid')) {
+                        maybeAddIdForValue(snak.mainsnak.datavalue.value);
+
+                        angular.forEach(snak.qualifiers, function(qualifier, property) {
+                            if (!(property in requests.propertyIds)) {
+                                requests.propertyIds.push(property);
+                            }
+
+                            angular.forEach(qualifier, function(snak) {
+                                if ((snak.snaktype === 'value') &&
+                                    (snak.datatype === 'wikibase-item') &&
+                                    (snak.datavalue.type === 'wikibase-entityid')) {
+                                    maybeAddIdForValue(snak.datavalue.value);
+                                }
+                            });
+                        });
+                    }
+                });
+            });
+
+            return { requests: requests,
+                     statements: statements
+                   };
         }
 
         return {
