@@ -15,40 +15,14 @@ define([
      function($q, $log, $translate, sparql, i18n, util, entitydata, wikidataapi,
              matcher, provider, instantiator) {
         function getStatements(entityData, entityInData, itemId) {
-            var promise = entityData.waitForPropertyLabels()
+            var promise = $q.all([entityData.waitForPropertyLabels(),
+                                  entityInData.waitForPropertyLabels()
+                                 ])
                 .then(function() {
-                    return entityInData.waitForPropertyLabels();
-                }).then(function() {
-                    var queries = [];
-                    var candidateRules = provider.getRules()
-                        .filter(matcher.couldMatch(
-                            entityData.statements,
-                            entityInData.statements,
-                            itemId));
-
-                    angular.forEach(candidateRules, function(rule) {
-                        var subject = rule.head.arguments[0].name;
-                        var binding = {};
-                        binding[subject] = { id: itemId,
-                                             name: subject,
-                                             outbound: entityData,
-                                             inbound: entityInData
-                                           };
-
-                        queries.push(matcher.getInstanceCandidatesQuery(
-                            rule,
-                            binding));
-                    });
-
-                    return queries;
-                }).then(function(queries) {
-                    return $q.all(queries.map(function(query) {
-                        return sparql.getQueryRequest(query.query)
-                            .then(function(sparqlResults) {
-                                return handleSparqlResults(query,
-                                                           sparqlResults);
-                            });
-                    }));
+                    return $q.all(checkCandidateRules(entityData,
+                                                      entityInData,
+                                                      itemId)
+                    );
                 }).then(function(results) {
                     return deduplicateStatements(entityData, results);
                 }).then(function(results) {
@@ -74,6 +48,30 @@ define([
                 waitForPropertyLabels: function() { return propertyLabels; },
                 waitForTerms: function() { return terms; }
             };
+        }
+
+        function checkCandidateRules(entityData, entityInData, itemId) {
+            return provider.getRules()
+                .filter(matcher.couldMatch(
+                    entityData.statements,
+                    entityInData.statements,
+                    itemId))
+                .map(function(rule) {
+                    var subject = rule.head.arguments[0].name;
+                    var binding = {};
+                    binding[subject] = { id: itemId,
+                                         name: subject,
+                                         outbound: entityData,
+                                         inbound: entityInData
+                                       };
+
+                    var query = matcher.getInstanceCandidatesQuery(rule, binding);
+
+                    return sparql.getQueryRequest(query.query)
+                        .then(function(sparqlResults) {
+                            return handleSparqlResults(query, sparqlResults);
+                        });
+                });
         }
 
         function handleSparqlResults(query, sparqlResults) {
