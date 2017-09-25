@@ -14,8 +14,8 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache', 'oauth', 'resolver',
-function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache, oauth, resolver) {
+angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entitydata', 'i18n', 'util', 'dataFormatter', 'properties', 'htmlCache', 'oauth', 'resolver', 'primarySources', 'rules',
+  function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Properties, htmlCache, oauth, resolver, primarySources, rules) {
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
@@ -67,10 +67,23 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 		if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
 			entityDataPromise = oauth.userinfo().then(function(userdata){
 				var showProposals = false;
+                var providers = [
+                    function(id) {
+                        return primarySources.getStatements(id);
+                    },
+                    function(id, entities) {
+                        return entitydata.getInlinkData().then(function(data) {
+                            return rules.getStatements(entities, data, id);
+                        });
+                    }];
+
+                console.log(userdata)
 				if (userdata){
 					showProposals = true;
 				}
-				return entitydata.getEntityData(id, showProposals).then(function(data) {
+				return entitydata.getEntityData(
+                    id, providers, showProposals
+                ).then(function(data) {
 					return data;
 				});
 			});
@@ -141,9 +154,9 @@ function($route, $q, $sce, sparql, entitydata, i18n, util, dataFormatter, Proper
 
 		clearEntityDataCache: clearEntityDataCache,
 
-		getEntityDataUncached: function() {
+		getEntityDataUncached: function(providers) {
 			clearEntityDataCache();
-			return getEntityData();
+			return getEntityData(providers);
 		},
 
 		hasEditRights: function(){

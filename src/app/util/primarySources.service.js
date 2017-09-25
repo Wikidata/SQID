@@ -69,7 +69,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 		refreshFunction = refresh;
 	};
 
-	setAlertFunction = function(alert){
+	var setAlertFunction = function(alert){
 		alertFunction = alert;
 	}
 
@@ -89,7 +89,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 				delete ref.reject;
 			});
 		}
-		statementJSON = JSON.stringify(stmt);
+		var statementJSON = angular.toJSON(stmt);
 		return oauth.addStatement(qid, statementJSON).then(function(){
 			oauth.userinfo().then(function(data){
 				var user = data.userinfo.name;

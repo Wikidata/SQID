@@ -15,9 +15,9 @@ define([
      function($q, $log, $translate, sparql, i18n, util, entitydata, wikidataapi,
              matcher, provider, instantiator) {
         function getStatements(entityData, entityInData, itemId) {
-            var promise = $q.all([entityData.waitForPropertyLabels(),
-                                  entityInData.waitForPropertyLabels()
-                                 ])
+            return $q.all([entityData.waitForPropertyLabels(),
+                           entityInData.waitForPropertyLabels()
+                          ])
                 .then(function() {
                     return $q.all(checkCandidateRules(entityData,
                                                       entityInData,
@@ -27,27 +27,21 @@ define([
                     return deduplicateStatements(entityData, results);
                 }).then(function(results) {
                     return injectReferences(results);
+                }).then(function(results) {
+                    return i18n.waitForPropertyLabels(util.unionArrays(
+                        results.requests.propertyIds,
+                        [])).then(function() {
+                            return results;
+                        });
+                }).then(function(results) {
+                    return i18n.waitForTerms(util.unionArrays(
+                        results.requests.entityIds,
+                        [])).then(function() {
+                            return results;
+                        });
+                }).then(function(results) {
+                    return { claims: results.statements };
                 });
-
-            var propertyLabels = promise.then(function(data) {
-                return i18n.waitForPropertyLabels(util.unionArrays(
-                    data.requests.propertyIds,
-                    [])).then(function() {
-                        return data;
-                    });
-            });
-
-            var terms = propertyLabels.then(function(data) {
-                return i18n.waitForTerms(util.unionArrays(
-                    data.requests.entityIds,
-                    []));
-            });
-
-            return {
-                statementsPromise: promise,
-                waitForPropertyLabels: function() { return propertyLabels; },
-                waitForTerms: function() { return terms; }
-            };
         }
 
         function checkCandidateRules(entityData, entityInData, itemId) {

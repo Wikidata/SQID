@@ -145,18 +145,6 @@ angular.module('view').controller('ViewController', [
 					});
 				}
 			});
-
-            $q.all([func(), View.getEntityInlinks()]).then(function(data) {
-                return rules.getStatements(data[0], data[1], $scope.id);
-            }).then(function(data) {
-                return data.statementsPromise.then(function(inferredData) {
-                    $scope.inferredData = {
-                        statements: inferredData.statements,
-                        waitForPropertyLabels: data.waitForPropertyLabels,
-                        waitForTerms: data.waitForTerms
-                    };
-                });
-            });
         });
     };
 

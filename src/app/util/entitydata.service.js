@@ -245,7 +245,7 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 		});
 	}
 
-	var getEntityData = function(id, withProposals) {
+	var getEntityData = function(id, providers, withProposals) {
 		var language = i18n.getLanguage();
 		return wikidataapi.getEntityData(id, language, true).then(function(response) {
 			var ret = {
@@ -314,7 +314,7 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 
 
 			if (withProposals == true){
-				ret = includeProposals(id, ret);
+				ret = includeProposals(id, providers, ret);
 				// ret = includeProposals(id, ret).then(function(data){
 				// 	return data.waitForPropertyLabels().then(function(response){
 				// 		return data;
@@ -467,48 +467,6 @@ SELECT DISTINCT ?p { \n\
 		});
 	}
 
-//TODO propertyIds, itemIds have to be returned by rule service
-	var getEntityDataInferredRecord = function(language, label, id, statements) {//propertyIds, itemIds);
-		return {
-				language: language, // this is fixed for this result!
-				label: label,//TODO what's that problem?
-				labelorid: id,//TODO what's that problem? eid id? check stmt tab what it does
-//					description: '',
-//					aliases: [],
-				statements: statements,
-//					sitelinks: {},
-				missing: false,
-				termsPromise: null,
-				propLabelPromise: null,
-//				waitForPropertyLabels: function() {
-//					if (this.propLabelPromise == null) {
-//						this.propLabelPromise = i18n.waitForPropertyLabels(Object.keys(propertyIds), language);
-//					}
-//					return this.propLabelPromise;
-//				},
-//				waitForTerms: function() {
-//					if (this.termsPromise == null) {
-//						this.termsPromise = i18n.waitForTerms(Object.keys(itemIds), language);
-//					}
-//					return this.termsPromise;
-//				}
-				waitForPropertyLabels: function() {
-					if (this.propLabelPromise == null) {
-						var propIdList = getPropertyIds(this.statements);
-						this.propLabelPromise = i18n.waitForPropertyLabels(propIdList, language);
-					}
-					return this.propLabelPromise;
-				},
-				waitForTerms: function() {
-					if (this.termsPromise == null) {
-						var termIdList = getEntityIds(this.statements);
-						this.termsPromise = i18n.waitForTerms(termIdList, language);
-					}
-					return this.termsPromise;
-				}
-			};
-	}
-
 	var addProposalInformation = function(pStatementGroup, id){
 		for (var i=0; i < pStatementGroup.length; i++){
 			if (pStatementGroup[i].references){
@@ -594,8 +552,22 @@ SELECT DISTINCT ?p { \n\
 		return equivalentStatements;
 	};
 
-	var includeProposals = function(id, entities){
-		return primarySources.getStatements(id).then(function(response){
+	var includeProposals = function(id, providers, entities){
+        return $q.all(providers.map(function(provider) {
+            return provider(id, entities);
+        })).then(function(responses){
+            var response = {};
+
+            angular.forEach(responses, function(res) {
+                angular.forEach(res, function(value, key) {
+                    if (!(key in response)) {
+                        response[key] = value;
+                    } else {
+                        response[key] = Object.assign(response[key], value);
+                    }
+                });
+            });
+
 			if ('claims' in response){
 				angular.forEach(response.claims, function(statementGroup, property) {
 					sortStatementGroup(statementGroup, entities.language);
