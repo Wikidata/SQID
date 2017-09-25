@@ -16,19 +16,11 @@ angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$wi
 
 	// TODO: if login=dev -> userinfo fake einsetzen
 
-	var checkDummy = function(){
-		if ($route.current.params.dummy){
-			if ((String($route.current.params.dummy) == 'true') || 
-				(String($route.current.params.dummy) == '1')){
-				oauth.setDummyLogin();
-			$scope.dummy=true;
-			}else{
-				oauth.unsetDummyLogin();
-			}
-		}else{
-			oauth.unsetDummyLogin();
-		}
-	}
+    function checkDummy() {
+        if (oauth.isDummy()) {
+            $scope.dummy = true;
+        }
+    }
 
 	var requestUserInfo = function(){
 		oauth.userinfo().then(function(data){
@@ -38,7 +30,7 @@ angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$wi
 			}else{
 				$scope.showLogin = true;
 			}
-		});	
+		});
 	}
 
 	$scope.logout = function(){
@@ -50,7 +42,7 @@ angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$wi
 
 	$scope.refresh = function(){
 		oauth.refreshUserInfo().then(function(data){
-			requestUserInfo();		
+			requestUserInfo();
 		});
 		$window.location.href = '#/';
 		checkDummy();

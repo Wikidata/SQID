@@ -16,8 +16,23 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 		dummyLogin = false;
 	}
 
+    var checkDummy = function(){
+		if ($route.current.params.dummy){
+			if ((String($route.current.params.dummy) == 'true') ||
+				(String($route.current.params.dummy) == '1')){
+				setDummyLogin();
+			}else{
+				unsetDummyLogin();
+			}
+		}else{
+			unsetDummyLogin();
+		}
+	}
+
 
 	var getUserInfo = function(){
+        checkDummy();
+
 		if (dummyLogin){
 			return Promise.resolve({"userinfo": {"name": "Dummy"}});
 		}
@@ -35,10 +50,10 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 	};
 
 	var setLabel = function(id, label, lang){
-		var result = $http.get($location.protocol() 
-				+ '://tools.wmflabs.org/widar/index.php?action=set_label&q=' 
-				+ id + '&lang=' 
-				+ lang + '&label=' 
+		var result = $http.get($location.protocol()
+				+ '://tools.wmflabs.org/widar/index.php?action=set_label&q='
+				+ id + '&lang='
+				+ lang + '&label='
 				+ encodeURIComponent(label) + '&botmode=1').then(function(response){
 			if (response){
 				return response;
@@ -84,7 +99,7 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 	var addStatement = function(qid, statement){
 		var data = '"{\\\"claims\\\":[' + statement.replace(/"/g, '\\\"') + ']}"';
 		var jsonArg = '{"action": "wbeditentity", "id":"' + qid  +'", "data": ' + data + '}';
-		var genericQueryString = $location.protocol() 
+		var genericQueryString = $location.protocol()
 			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=generic&json=' + encodeURIComponent(jsonArg);
 		var resp = $http.get(genericQueryString).then(function(response){
 			if (response.data.error){
@@ -97,7 +112,7 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 	var addSource = function(snaks, stmtId){
 		var jsonArg = JSON.stringify(snaks);
 		var url = $location.protocol()
-			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=add_source&statement=' 
+			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=add_source&statement='
 			+ stmtId + '&snaks=' + jsonArg;
 		var resp = $http.get(url).then(function(response){
 			if (response.data.error){
@@ -130,7 +145,12 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 		addSource: addSource,
 		logout: logout,
 		setDummyLogin: setDummyLogin,
-		unsetDummyLogin: unsetDummyLogin
+		unsetDummyLogin: unsetDummyLogin,
+        isDummy: function() {
+            checkDummy();
+
+            return (dummyLogin === true);
+        }
 	};
 }]);
 
