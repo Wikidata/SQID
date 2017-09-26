@@ -21,7 +21,11 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 		unapproved: 'unapproved'
   	};
 
-
+    function getProvider() {
+        return { getStatements: getStatements,
+                 addProposalInformation: addProposalInformation
+               };
+    }
 
 	var getStatements = function(qId){
 		var url = baseUrl + 'entities/' + qId + '?callback=JSON_CALLBACK';
@@ -226,8 +230,60 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 
 	var alertFunction = function(message){};
 
+	function addProposalInformation(pStatementGroup, id) {
+		for (var i=0; i < pStatementGroup.length; i++){
+			if (pStatementGroup[i].references){
+				// approve function only add the bare Statement to Wikidata
+				pStatementGroup[i]['approve'] = function(refresh){
+					approveBareStatement(id, this, refresh);
+				};
+				// reject function reject all proposals which propose the statement
+				// Note: every reference refers to a different proposal
+				//			-- references are added to the statement by the code below
+				pStatementGroup[i]['reject'] = function(refresh){
+					var p = Promise.resolve({refs: this.references, i: 0});
+					var i;
+					for (i = 0; i < (this.references.length - 1); i++){
+						var ref = this.references[i];
+						p = p.then(function(it){
+							it.refs[it.i].reject(false);
+							it.i++;
+							return it;
+						});
+					}
+					p.then(function(it){
+						it.refs[it.i].reject(refresh);
+					});
+				};
+				angular.forEach(pStatementGroup[i].references, function(ref){
+					ref['refId'] = pStatementGroup[i].id;
+					ref['approve'] = function(refresh){
+						this.parent.references = [this];
+						approve(id, this.parent, refresh);
+					};
+					ref['reject'] = function(refresh){
+						rejectReference(this.refId, this.snaks, this.refId, refresh);
+					};
+					ref['parent'] = pStatementGroup[i];
+				});
+			}else{
+				pStatementGroup[i]['approve'] = function(refresh){
+					approve(id, this, refresh);
+				};
+				pStatementGroup[i]['reject'] = function(refresh){
+					reject(id, this, refresh);
+				};
+			}
+			pStatementGroup[i]['source'] = 'PrimarySources';
+			angular.forEach(pStatementGroup[i].references, function(ref){
+				ref['source'] = 'PrimarySources';
+			});
+		}
+	}
+
 	return {
 		getStatements: getStatements,
+        getProvider: getProvider,
 		setRefreshFunction: setRefreshFunction,
 		setAlertFunction : setAlertFunction,
 		approve: approve,

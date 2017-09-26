@@ -14,6 +14,18 @@ define([
     'matcher', 'provider', 'instantiator',
      function($q, $log, $translate, sparql, i18n, util, entitydata, wikidataapi,
              matcher, provider, instantiator) {
+
+         function getProvider(entityInData) {
+             return {
+                 getStatements: function(id, entities) {
+                     return entityInData.then(function(data) {
+                         return getStatements(entities, data, id);
+                     });
+                 },
+                 addProposalInformation: addProposalInformation
+             };
+         }
+
         function getStatements(entityData, entityInData, itemId) {
             return $q.all([entityData.waitForPropertyLabels(),
                            entityInData.waitForPropertyLabels()
@@ -208,8 +220,18 @@ define([
                    };
         }
 
+         function addProposalInformation(statements, id) {
+             var length = statements.length;
+             for (var i = 0; i < length; ++i) {
+                 statements[i]['source'] = 'MARS';
+             }
+
+             return statements;
+         }
+
         return {
-            getStatements: getStatements
+            getStatements: getStatements,
+            getProvider: getProvider
         };
 }]);
 

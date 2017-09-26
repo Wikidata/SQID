@@ -467,57 +467,6 @@ SELECT DISTINCT ?p { \n\
 		});
 	}
 
-	var addProposalInformation = function(pStatementGroup, id){
-		for (var i=0; i < pStatementGroup.length; i++){
-			if (pStatementGroup[i].references){
-				// approve function only add the bare Statement to Wikidata
-				pStatementGroup[i]['approve'] = function(refresh){
-					primarySources.approveBareStatement(id, this, refresh);
-				};
-				// reject function reject all proposals which propose the statement
-				// Note: every reference refers to a different proposal
-				//			-- references are added to the statement by the code below
-				pStatementGroup[i]['reject'] = function(refresh){
-					var p = Promise.resolve({refs: this.references, i: 0});
-					var i;
-					for (i = 0; i < (this.references.length - 1); i++){
-						var ref = this.references[i];
-						p = p.then(function(it){
-							it.refs[it.i].reject(false);
-							it.i++;
-							return it;
-						});
-					}
-					p.then(function(it){
-						it.refs[it.i].reject(refresh);
-					});
-				};
-				angular.forEach(pStatementGroup[i].references, function(ref){
-					ref['refId'] = pStatementGroup[i].id;
-					ref['approve'] = function(refresh){
-						this.parent.references = [this];
-						primarySources.approve(id, this.parent, refresh);
-					};
-					ref['reject'] = function(refresh){
-						primarySources.rejectReference(this.refId, this.snaks, this.refId, refresh);
-					};
-					ref['parent'] = pStatementGroup[i]
-				});
-			}else{
-				pStatementGroup[i]['approve'] = function(refresh){
-					primarySources.approve(id, this, refresh);
-				};
-				pStatementGroup[i]['reject'] = function(refresh){
-					primarySources.reject(id, this, refresh);
-				};
-			}
-			pStatementGroup[i]['source'] = 'PrimarySources';
-			angular.forEach(pStatementGroup[i].references, function(ref){
-				ref['source'] = 'PrimarySources';
-			});
-		}
-	};
-
 	var determineEquivalentStatements = function(eStatementGroup, pStmt){
 		var equivalentStatements = [];
 		angular.forEach(eStatementGroup, function(eStmt){
@@ -554,12 +503,22 @@ SELECT DISTINCT ?p { \n\
 
 	var includeProposals = function(id, providers, entities){
         return $q.all(providers.map(function(provider) {
-            return provider(id, entities);
+            return provider.getStatements(id, entities).then(function(data) {
+                return {
+                    response: data,
+                    addProposalInformation: provider.addProposalInformation
+                };
+            });
         })).then(function(responses){
             var response = {};
-
             angular.forEach(responses, function(res) {
-                angular.forEach(res, function(value, key) {
+                if ('claims' in res.response) {
+                    angular.forEach(res.response.claims, function(statements) {
+                        res.addProposalInformation(statements, id);
+                    });
+                }
+
+                angular.forEach(res.response, function(value, key) {
                     if (!(key in response)) {
                         response[key] = value;
                     } else {
@@ -572,8 +531,8 @@ SELECT DISTINCT ?p { \n\
 				angular.forEach(response.claims, function(statementGroup, property) {
 					sortStatementGroup(statementGroup, entities.language);
 
-					// add proposal information
-					addProposalInformation(statementGroup, id);
+					// // add proposal information
+					// res.addProposalInformation(statementGroup, id);
 
 					// if there is no corresponding statement group in entities
 					// -> create empty statement group

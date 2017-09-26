@@ -78,29 +78,27 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 		if (!haveValidCachedData() || !entityDataPromise) {
 			entityDataPromise = getEntityInData()
                 .then(oauth.userinfo())
-                .then(function(userdata){
-				var showProposals = false;
-                var providers = [
-                    function(id) {
-                        return primarySources.getStatements(id);
-                    },
-                    function(id, entities) {
-                        return getEntityInData().then(function(data) {
-                            return rules.getStatements(entities, data, id);
-                        });
-                    }];
+                .then(function(userdata) {
+                    var showProposals = false;
+                    var providers = [
+                        primarySources.getProvider(),
+                        rules.getProvider(getEntityInData())
+                    ];
 
-				if (userdata){
-					showProposals = true;
-				}
-				return entitydata.getEntityData(
-                    id, providers, showProposals
-                ).then(function(data) {
-					return data;
-				});
-			});
+                    if (userdata) {
+                        showProposals = true;
+                    }
+
+                    return entitydata.getEntityData(
+                        id, providers, showProposals
+                    ).then(function(data) {
+                        return data;
+                    });
+                });
+
             updateCacheMetadata();
 		}
+
 		return entityDataPromise;
 	}
 
