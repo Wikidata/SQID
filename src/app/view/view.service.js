@@ -19,7 +19,8 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
-	var entityDataPromise = null;
+    var entityDataPromise = null;
+    var entityInDataPromise = null;
 	var hasEditRights = false;
 
 	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
@@ -61,23 +62,34 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 		return promise;
 	}
 
+    function haveValidCachedData() {
+        return ((fetchedEntityId === id) &&
+                (fetchedEntityLanguage === i18n.getLanguage()));
+    }
+
+    function updateCacheMetadata() {
+        fetchedEntityId = id;
+		fetchedEntityLanguage = i18n.getLanguage();
+    }
+
 	// Get a promise for the entity data.
 	// It is cached since the controller needs it in several places.
-	var getEntityData = function() {
-		if (fetchedEntityId != id || fetchedEntityLanguage != i18n.getLanguage()) {
-			entityDataPromise = oauth.userinfo().then(function(userdata){
+	function getEntityData() {
+		if (!haveValidCachedData() || !entityDataPromise) {
+			entityDataPromise = getEntityInData()
+                .then(oauth.userinfo())
+                .then(function(userdata){
 				var showProposals = false;
                 var providers = [
                     function(id) {
                         return primarySources.getStatements(id);
                     },
                     function(id, entities) {
-                        return entitydata.getInlinkData().then(function(data) {
+                        return getEntityInData().then(function(data) {
                             return rules.getStatements(entities, data, id);
                         });
                     }];
 
-                console.log(userdata)
 				if (userdata){
 					showProposals = true;
 				}
@@ -87,14 +99,24 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 					return data;
 				});
 			});
-			fetchedEntityId = id;
-			fetchedEntityLanguage = i18n.getLanguage();
+            updateCacheMetadata();
 		}
 		return entityDataPromise;
-	};
+	}
 
-	var clearEntityDataCache = function(){
+    // cache this as well, since we need it to compute inferred statements
+      function getEntityInData() {
+        if (!haveValidCachedData() || !entityInDataPromise) {
+            entityInDataPromise = entitydata.getInlinkData(id);
+            updateCacheMetadata();
+        }
+
+        return entityInDataPromise;
+    }
+
+	  var clearEntityDataCache = function(){
 		entityDataPromise = null;
+        entityInDataPromise = null;
 		fetchedEntityId = null;
 		fetchedEntityLanguage = null;
 	};
@@ -208,11 +230,7 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 			}
 		},
 
-
-		getEntityInlinks: function() {
-			// Not chached. Should only be asked for in one place in the controller (alternatively add caching)
-			return entitydata.getInlinkData(id);
-		},
+		getEntityInlinks: getEntityInData,
 
 		/**
 		 * Formats a map numericPropertyId => someNumericValue as a list of
