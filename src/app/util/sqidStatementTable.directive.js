@@ -142,8 +142,8 @@ function($compile, Properties, dataFormatter, util, i18n, primarySources) {
 						}
 						scope.proposalRegister[statement.id] = statement;
 						html += '<div class="proposal-ctrl"><span translate="PROPOSAL"></span>'
-							+ '<i class="fa fa-times-circle proposal-reject" ng-click="reject(\'' + statement.id + '\');$event.stopPropagation()"></i>'
-							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approve(\'' + statement.id + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-times-circle proposal-reject" ng-if="proposalRegister[statement.id].reject !== undefined" ng-click="reject(\'' + statement.id + '\');$event.stopPropagation()"></i>'
+							+ '<i class="fa fa-check-circle proposal-accept" ng-if="proposalRegister[statement.id].approve !== undefined" ng-click="approve(\'' + statement.id + '\');$event.stopPropagation()"></i>'
 							+ '<span style="display: block"><span translate="SOURCE"></span>: ' + statement.source + ' </span></div>';
 					}
 
