@@ -15,7 +15,8 @@ define([ // sqid application wrapper module
 	'query/sparqly.config',	// sparql query generator interface
 	'entitySearch/entitySearch.config', // search field
 	'oauth/oauth.config', // login and edit function
-	'rules/rules.config' // MARPL rules inference module
+	'rules/rules.config', // MARPL rules inference module
+	'proposals/proposals.config' // statement/reference proposal engines
 ], function() {
 /////////////////////////////////////////////////////////////////////////
 
@@ -23,7 +24,7 @@ angular.module('sqid',[						// the application wrapper module
 
 	'data', 'i18n', 'util', 'layout', 'entitySearch', 'oauth',	// shared modules
 
-	'meta', 'browse', 'view', 'sparqly', 'rules'			// feature / content modules
+	'meta', 'browse', 'view', 'sparqly', 'rules', 'proposals'  // feature / content modules
 ]);
 
 return {};}); // module definition end

@@ -3,15 +3,14 @@ define([
 	'util/util.module',
 	'util/util.service',
 	'util/dataFormatter.service',
-	'util/primarySources.service',
 	'i18n/i18n.service',
 	'data/properties.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('util').directive('sqidStatementTable', [
-'$compile', 'properties', 'dataFormatter', 'util', 'i18n', 'primarySources',
-function($compile, Properties, dataFormatter, util, i18n, primarySources) {
+'$compile', 'properties', 'dataFormatter', 'util', 'i18n',
+function($compile, Properties, dataFormatter, util, i18n) {
 	var properties = null;
 	var outMissingTermsListener = { hasMissingTerms : false};
 	var inMissingTermsListener = { hasMissingTerms : false};

@@ -16,11 +16,11 @@ angular.module('util').controller('Login', ['oauth', '$scope', '$location', '$wi
 
 	// TODO: if login=dev -> userinfo fake einsetzen
 
-    function checkDummy() {
-        if (oauth.isDummy()) {
-            $scope.dummy = true;
-        }
-    }
+	function checkDummy() {
+		if (oauth.isDummy()) {
+			$scope.dummy = true;
+		}
+	}
 
 	var requestUserInfo = function(){
 		oauth.userinfo().then(function(data){

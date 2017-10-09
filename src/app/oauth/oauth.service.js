@@ -16,7 +16,7 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 		dummyLogin = false;
 	}
 
-    var checkDummy = function(){
+	var checkDummy = function(){
 		if ($route.current.params.dummy){
 			if ((String($route.current.params.dummy) == 'true') ||
 				(String($route.current.params.dummy) == '1')){
@@ -31,7 +31,7 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 
 
 	var getUserInfo = function(){
-        checkDummy();
+		checkDummy();
 
 		if (dummyLogin){
 			return Promise.resolve({"userinfo": {"name": "Dummy"}});
@@ -98,7 +98,7 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 
 	var addStatement = function(qid, statement){
 		var data = '"{\\\"claims\\\":[' + statement.replace(/"/g, '\\\"') + ']}"';
-		var jsonArg = '{"action": "wbeditentity", "id":"' + qid  +'", "data": ' + data + '}';
+		var jsonArg = '{"action": "wbeditentity", "id":"' + qid	 +'", "data": ' + data + '}';
 		var genericQueryString = $location.protocol()
 			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=generic&json=' + encodeURIComponent(jsonArg);
 		var resp = $http.get(genericQueryString).then(function(response){
@@ -146,11 +146,11 @@ angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route'
 		logout: logout,
 		setDummyLogin: setDummyLogin,
 		unsetDummyLogin: unsetDummyLogin,
-        isDummy: function() {
-            checkDummy();
+		isDummy: function() {
+			checkDummy();
 
-            return (dummyLogin === true);
-        }
+			return (dummyLogin === true);
+		}
 	};
 }]);
 

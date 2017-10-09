@@ -1,12 +1,12 @@
 define(['angular',
-        'ngRoute',
-        'util/util.module'
-       ],
+		'ngRoute',
+		'util/util.module'
+	   ],
 function() {
-    angular.module('rules', ['ngRoute',
-                             'util',
-                             'i18n'
-                            ]);
+	angular.module('rules', ['ngRoute',
+							 'util',
+							 'i18n'
+							]);
 
-    return {};
+	return {};
 });

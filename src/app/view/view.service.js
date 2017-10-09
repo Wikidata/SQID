@@ -19,11 +19,11 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 	var id;
 	var fetchedEntityId = null;
 	var fetchedEntityLanguage = null;
-    var entityDataPromise = null;
-    var entityInDataPromise = null;
+	var entityDataPromise = null;
+	var entityInDataPromise = null;
 	var hasEditRights = false;
 
-	var getValueListData = function(statementGroup, properties, listener, propertiesOrClasses) {
+	function getValueListData(statementGroup, properties, listener, propertiesOrClasses) {
 		var ret = [];
 		angular.forEach(statementGroup, function(statement) {
 			var count = null;
@@ -43,7 +43,7 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 		return ret;
 	}
 
-	var updateId = function() {
+	function updateId() {
 		var promise;
 		if ($route.current.params.find){
 			promise = resolver.getQIdQuick($route.current.params.find);
@@ -62,62 +62,43 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 		return promise;
 	}
 
-    function haveValidCachedData() {
-        return ((fetchedEntityId === id) &&
-                (fetchedEntityLanguage === i18n.getLanguage()));
-    }
+	function haveValidCachedData() {
+		return ((fetchedEntityId === id) &&
+				(fetchedEntityLanguage === i18n.getLanguage()));
+	}
 
-    function updateCacheMetadata() {
-        fetchedEntityId = id;
+	function updateCacheMetadata() {
+		fetchedEntityId = id;
 		fetchedEntityLanguage = i18n.getLanguage();
-    }
+	}
 
 	// Get a promise for the entity data.
 	// It is cached since the controller needs it in several places.
 	function getEntityData() {
 		if (!haveValidCachedData() || !entityDataPromise) {
-			entityDataPromise = getEntityInData()
-                .then(oauth.userinfo())
-                .then(function(userdata) {
-                    var showProposals = false;
-                    var providers = [
-                        primarySources.getProvider(),
-                        rules.getProvider(getEntityInData())
-                    ];
-
-                    if (userdata) {
-                        showProposals = true;
-                    }
-
-                    return entitydata.getEntityData(
-                        id, providers, showProposals
-                    ).then(function(data) {
-                        return data;
-                    });
-                });
-
-            updateCacheMetadata();
+			entityDataPromise = entitydata.getEntityData(id);
+			updateCacheMetadata();
 		}
 
 		return entityDataPromise;
 	}
 
-    // cache this as well, since we need it to compute inferred statements
-      function getEntityInData() {
-        if (!haveValidCachedData() || !entityInDataPromise) {
-            entityInDataPromise = entitydata.getInlinkData(id);
-            updateCacheMetadata();
-        }
+	// cache this as well, since we need it to compute inferred statements
+	function getEntityInData() {
+		if (!haveValidCachedData() || !entityInDataPromise) {
+			entityInDataPromise = entitydata.getInlinkData(id);
+			updateCacheMetadata();
+		}
 
-        return entityInDataPromise;
-    }
+		return entityInDataPromise;
+	}
 
-	  var clearEntityDataCache = function(){
+	function clearEntityDataCache(){
 		entityDataPromise = null;
-        entityInDataPromise = null;
+		entityInDataPromise = null;
 		fetchedEntityId = null;
 		fetchedEntityLanguage = null;
-	};
+	}
 
 	return {
 		updateId: updateId,
@@ -222,7 +203,7 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 		getUrlWikipedia: function(sitelinks) {
 			var wikiName = i18n.getLanguage() + 'wiki';
 			if (i18n.getLanguage() != null && wikiName in sitelinks) {
-				return  'https://' + i18n.getLanguage() + '.wikipedia.org/wiki/' + sitelinks[wikiName].replace(" ","_");
+				return	'https://' + i18n.getLanguage() + '.wikipedia.org/wiki/' + sitelinks[wikiName].replace(" ","_");
 			} else {
 				return null;
 			}

@@ -10,6 +10,9 @@ plugins:
   - requirejs
 
 rules:
+  no-mixed-spaces-and-tabs:
+    - error
+    - smart-tabs
   angular/service-name: off
   angular/controller-as: off
   angular/angularelement: off
@@ -24,3 +27,7 @@ env:
 
 globals:
   requirejs: true
+
+# Local Variables:
+# indent-tabs-mode: nil
+# End:

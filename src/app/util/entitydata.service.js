@@ -4,7 +4,7 @@ define([
 	'util/wikidataapi.service',
 	'util/util.service',
 	'util/sparql.service',
-	'util/primarySources.service',
+	'proposals/primarySources.service',
 	'i18n/i18n.service'
 ], function() {
 ///////////////////////////////////////
@@ -245,7 +245,7 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 		});
 	}
 
-	var getEntityData = function(id, providers, withProposals) {
+	var getEntityData = function(id) {
 		var language = i18n.getLanguage();
 		return wikidataapi.getEntityData(id, language, true).then(function(response) {
 			var ret = {
@@ -312,15 +312,6 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 				}
 			}
 
-
-			if (withProposals == true){
-				ret = includeProposals(id, providers, ret);
-				// ret = includeProposals(id, ret).then(function(data){
-				// 	return data.waitForPropertyLabels().then(function(response){
-				// 		return data;
-				// 	});
-				// });
-			}
 			return ret;
 		});
 	};
@@ -448,7 +439,7 @@ SELECT DISTINCT ?p { \n\
 				addInlinksFromQuery(instanceJson, statements, propertyIds, itemIds, id);
 				return getInlinkRecord(language, statements, propertyIds, itemIds);
 			} else {
-				return  sparql.getQueryRequest(getSparqlQueryForInProps(id)).then(function(propData){
+				return	sparql.getQueryRequest(getSparqlQueryForInProps(id)).then(function(propData){
 					var requests = [];
 					var propIds = [];
 					angular.forEach(propData.results.bindings, function (binding) {
@@ -500,102 +491,6 @@ SELECT DISTINCT ?p { \n\
 		});
 		return equivalentStatements;
 	};
-
-	var includeProposals = function(id, providers, entities){
-        return $q.all(providers.map(function(provider) {
-            return provider.getStatements(id, entities).then(function(data) {
-                return {
-                    response: data,
-                    addProposalInformation: provider.addProposalInformation
-                };
-            });
-        })).then(function(responses){
-            var response = {};
-            angular.forEach(responses, function(res) {
-                if ('claims' in res.response) {
-                    angular.forEach(res.response.claims, function(statements) {
-                        res.addProposalInformation(statements, id);
-                    });
-                }
-
-                angular.forEach(res.response, function(value, key) {
-                    if (!(key in response)) {
-                        response[key] = value;
-                    } else {
-                        response[key] = Object.assign(response[key], value);
-                    }
-                });
-            });
-
-			if ('claims' in response){
-				angular.forEach(response.claims, function(statementGroup, property) {
-					sortStatementGroup(statementGroup, entities.language);
-
-					// // add proposal information
-					// res.addProposalInformation(statementGroup, id);
-
-					// if there is no corresponding statement group in entities
-					// -> create empty statement group
-					if (!(property in entities.statements)){
-						entities.statements[property] = [];
-					}
-
-					// add proposals to existing statement group
-					angular.forEach(statementGroup, function(pStmt){
-						var equivalentStatements = determineEquivalentStatements(entities.statements[property], pStmt);
-						var isNew = (equivalentStatements.length == 0);
-
-						if (!isNew){
-							var result = hasNoneDuplicates(pStmt.references, equivalentStatements);
-							if (result.nonProposal){
-								// add proposed references to already existing Wikidata-Statement
-								// -> approve add the reference to the respective Wikidata-Statement
-								angular.forEach(result.refStatements, function(ref){
-									if (result.nonProposal.references){
-										ref['refId'] = pStmt.id; // add primary sources id to approve or reject reference
-										ref['approve'] = function(refresh){
-											primarySources.approveReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
-										};
-										ref['reject'] = function(refresh){
-											primarySources.rejectReference(result.nonProposal.id, ref.snaks, pStmt.id, refresh);
-										};
-										result.nonProposal.references.push(ref);
-									}else{
-										ref['refId'] = pStmt.id;
-										result.nonProposal.references = [ref];
-									}
-								});
-							}else{
-								// merge proposed references to a single statement
-								// -> approve functions create new Wikidata-Statements
-								if (result.refStatements != []){
-									if (result.duplicate){
-										angular.forEach(result.refStatements, function(ref){
-											ref['refId'] = pStmt.id;
-											ref['approve'] = function(refresh){
-												primarySources.approveNewStatementsReference(id, ref.parent, pStmt.id, refresh);
-											};
-											ref['reject'] = function(refresh){
-												primarySources.rejectReference(result.duplicate.id, ref.snaks, pStmt.id, refresh);
-											};
-											mergeReferences(result.duplicate, ref);
-										})
-									}else{
-										entities.statements[property].push(pStmt);
-									}
-								}
-							}
-
-						}else{
-							entities.statements[property].push(pStmt);
-						}
-					});
-					sortStatementGroup(entities.statements[property], entities.language);
-				});
-			}
-			return entities;
-		});
-	}
 
 	var valueIsEquivalent = function(v1, v2){
 		if (v1.type != v2.type){
@@ -701,7 +596,7 @@ SELECT DISTINCT ?p { \n\
 	}
 
 	var mergeReferences = function(statement, reference){
-		reference.parent = statement
+		reference.parent = statement;
 		statement.references.push(reference);
 	}
 
@@ -710,7 +605,10 @@ SELECT DISTINCT ?p { \n\
 		getBestStatementValue: getBestStatementValue,
 		getEntityData: getEntityData,
 		getInlinkData: getInlinkData,
-        determineEquivalentStatements: determineEquivalentStatements
+		determineEquivalentStatements: determineEquivalentStatements,
+		sortStatementGroup: sortStatementGroup,
+		hasNoneDuplicates: hasNoneDuplicates,
+		mergeReferences: mergeReferences
 	};
 }]);
 

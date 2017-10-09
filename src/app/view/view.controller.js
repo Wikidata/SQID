@@ -10,7 +10,8 @@ define([
 	'util/sqidStatementTable.directive',
 	'util/sqidCompile.directive',
 	'util/map.directive',
-	'util/primarySources.service',
+	'proposals/proposals.service',
+	'proposals/primarySources.service',
 	'rules/rules.service',
 	'data/properties.service',
 	'data/classes.service',
@@ -21,8 +22,8 @@ define([
 
 /* eslint angular/di: 0 */
 angular.module('view').controller('ViewController', [
-    '$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'primarySources', 'rules', '$q',
-    function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, primarySources, rules, $q){
+    '$scope', '$route', '$sce', '$translate', 'view', 'classes', 'properties', 'oauth', 'sparql', 'util', 'i18n', 'htmlCache', 'proposals', 'primarySources', 'rules', '$q',
+    function($scope, $route, $sce, $translate, View, Classes, Properties, oauth, sparql, util, i18n, htmlCache, proposals, primarySources, rules, $q){
 	var MAX_EXAMPLE_INSTANCES = 20;
 	var MAX_DIRECT_SUBCLASSES = 10;
 	var MAX_PROP_SUBJECTS = 10;
@@ -108,10 +109,21 @@ angular.module('view').controller('ViewController', [
 		}
 	});
 
-	View.updateId().then(function(){
-		View.getEntityInlinks().then(function(data) {
-			$scope.entityInData = data;
-		});
+	View.updateId().then(function() {
+		return $q.all([View.getEntityData(),
+					   View.getEntityInlinks()]);
+	}).then(function(data) {
+		console.log($scope.entityData, data)
+		$scope.entityInData = data[1];
+		var props = proposals.collectProposals(
+			View.getId(),
+			data[1]
+		);
+
+		return props;
+	}).then(function(data) {
+		console.log(data)
+		$scope.entityData = data;
 	});
 
 	var refreshContent = function(useCache){

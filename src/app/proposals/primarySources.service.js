@@ -1,13 +1,12 @@
 //////// Module Definition ////////////
 define([
-	'util/util.module',
-	'util/util.service',
+	'proposals/proposals.module',
 	'i18n/translate.config',
 	'oauth/oauth.service'
 ], function() {
 ///////////////////////////////////////
 
-angular.module('util').factory('primarySources', ['util', '$http', '$templateCache', '$location', '$translate', 'oauth', function(util, $http, $templateCache, $location, $translate, oauth) {
+angular.module('proposals').factory('primarySources', ['$http', '$templateCache', '$location', '$translate', 'oauth', function($http, $templateCache, $location, $translate, oauth) {
 	var baseUrl = $location.protocol() + '://tools.wmflabs.org/wikidata-primary-sources/';
 
 	var STATEMENT_APPROVAL_URL = 'https://tools.wmflabs.org/wikidata-primary-sources/statements/{{id}}' +
@@ -19,13 +18,13 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 		duplicate: 'duplicate',
 		blacklisted: 'blacklisted',
 		unapproved: 'unapproved'
-  	};
+	};
 
-    function getProvider() {
-        return { getStatements: getStatements,
-                 addProposalInformation: addProposalInformation
-               };
-    }
+	function getProvider() {
+		return { getStatements: getStatements,
+				 addProposalInformation: addProposalInformation
+			   };
+	}
 
 	var getStatements = function(qId){
 		var url = baseUrl + 'entities/' + qId + '?callback=JSON_CALLBACK';
@@ -283,7 +282,7 @@ angular.module('util').factory('primarySources', ['util', '$http', '$templateCac
 
 	return {
 		getStatements: getStatements,
-        getProvider: getProvider,
+		getProvider: getProvider,
 		setRefreshFunction: setRefreshFunction,
 		setAlertFunction : setAlertFunction,
 		approve: approve,
