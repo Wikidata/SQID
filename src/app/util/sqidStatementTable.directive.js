@@ -285,6 +285,7 @@ function($compile, Properties, dataFormatter, util, i18n) {
 		scope.outHtml = '';
 
 		scope.$watch(attrs.data, function(itemData){
+			if (!itemData) return;
 			itemData.waitForPropertyLabels().then(function() {
 				Properties.then(function(propertyData){
 					properties = propertyData;
