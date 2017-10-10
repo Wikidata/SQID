@@ -91,7 +91,9 @@ angular.module('view').controller('ViewController', [
 
 	$scope.alertText = '';
 
-    $scope.inferredData = null;
+	$scope.inferredData = null;
+	$scope.proposalsWatcher = null;
+	$scope.proposalsPromises = [];
 
 	oauth.userinfo().then(function(data){
 		if (data){
@@ -110,20 +112,9 @@ angular.module('view').controller('ViewController', [
 	});
 
 	View.updateId().then(function() {
-		return $q.all([View.getEntityData(),
-					   View.getEntityInlinks()]);
+		return View.getEntityInlinks();
 	}).then(function(data) {
-		console.log($scope.entityData, data)
-		$scope.entityInData = data[1];
-		var props = proposals.collectProposals(
-			View.getId(),
-			data[1]
-		);
-
-		return props;
-	}).then(function(data) {
-		console.log(data)
-		$scope.entityData = data;
+		$scope.entityInData = data;
 	});
 
 	var refreshContent = function(useCache){
@@ -176,6 +167,17 @@ angular.module('view').controller('ViewController', [
 
 		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
+
+		// unregister old proposal watcher
+		if (angular.isFunction($scope.proposalsWatcher)) {
+			$scope.proposalsWatcher();
+		}
+
+		// register a watcher that updates proposals when statements and inlinks arrive
+		$scope.proposalsWatcher = $scope.$watchGroup([
+			'entityData',
+			'entityInData'
+		], proposals.getEntityDataListener($scope.id));
 
 		refreshContent(true);
 
