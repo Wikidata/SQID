@@ -26,7 +26,7 @@ define(['proposals/proposals.module',
 				 if (haveEntityData) {
 					 // add providers that only need statements
 					 providers = providers.concat(
-						 primarySources.getProvider()
+					 	 primarySources.getProvider()
 					 );
 				 }
 
@@ -42,33 +42,15 @@ define(['proposals/proposals.module',
 				 }
 
 				 if (providers.length > 0) {
-					 scope.proposalsPromises = scope.proposalsPromises.concat(
-						 includeProposals(id, providers, newData[0])
-					 );
-
-					 scope.proposalsPromises.map(function(promise) {
-						 return promise.then(function (entities) {
-							 if (!('claims' in entities)) {
-								 return;
-							 }
-
-							 angular.forEach(entities.claims, function(statementGroup,
-																	   property) {
-								 if (!(property in scope.entityData.claims)) {
-									 scope.entityData.claims[property] = [];
-								 }
-
-								 var current = scope.entityData.claims[property];
-								 angular.forEach(statementGroup[property], function(statement) {
-									 if (!(statement in current)) {
-										 scope.entityData.claims[property] = current.concat(
-											 statement
-										 );
-									 }
-								 });
-							 });
+					 includeProposals(
+						 id,
+						 providers,
+						 newData[0]
+					 ).map(function (promise) {
+						 return promise.then(function(entities) {
+							 scope.entityData = entitydata.mergeStatements(scope.entityData, entities);
 						 });
-					});
+					 });
 				 }
 			 };
 		 }
@@ -98,6 +80,8 @@ define(['proposals/proposals.module',
 							 }
 						 });
 					 });
+
+					 entities = angular.copy(entities);
 
 					 if ('claims' in response){
 						 angular.forEach(response.claims, function(statementGroup, property) {

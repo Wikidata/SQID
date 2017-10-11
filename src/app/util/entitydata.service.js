@@ -600,6 +600,59 @@ SELECT DISTINCT ?p { \n\
 		statement.references.push(reference);
 	}
 
+	function mergeStatements(into, from) {
+		var modified = false;
+
+		if (!('statements' in from)) {
+			// nothing to see here, move along
+			return into;
+		}
+
+		if (!('statements' in into)) {
+			into.statements = {};
+		}
+
+		angular.forEach(from.statements, function(statementGroup, property) {
+			if (!(property in into.statements)) {
+				into.statements[property] = [];
+			}
+
+			angular.forEach(statementGroup, function(statement) {
+				var isNew = true;
+				var statements = into.statements[property].length;
+
+				for (var i = 0; i < statements; ++i) {
+					var otherStatement = into.statements[property][i];
+
+					if ((otherStatement.source !== 'Wikidata') &&
+						(otherStatement.source != statement.source)) {
+						// never consider statements equal between
+						// sources, unless the original statement is
+						// from Wikidata itself
+						continue;
+					}
+
+					// TODO this is probably not as robust as it should be.
+					if ((angular.equals(otherStatement.claims, statement.claims)) &&
+						(angular.equals(otherStatement.qualifiers, statement.qualifiers))) {
+							isNew = false;
+							break;
+						}
+				}
+
+				if (isNew) {
+					into.statements[property] = into.statements[property].concat([statement]);
+					modified = true;
+				}
+			});
+		});
+
+		// If we modified something, return a copy so that watchers will get notified
+		return ((modified)
+				? angular.copy(into)
+				: into);
+	}
+
 	return {
 		getStatementValue: getStatementValue,
 		getBestStatementValue: getBestStatementValue,
@@ -608,7 +661,8 @@ SELECT DISTINCT ?p { \n\
 		determineEquivalentStatements: determineEquivalentStatements,
 		sortStatementGroup: sortStatementGroup,
 		hasNoneDuplicates: hasNoneDuplicates,
-		mergeReferences: mergeReferences
+		mergeReferences: mergeReferences,
+		mergeStatements: mergeStatements
 	};
 }]);
 
