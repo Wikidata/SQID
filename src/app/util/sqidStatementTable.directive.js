@@ -300,7 +300,7 @@ function($compile, Properties, dataFormatter, util, i18n) {
 							updateHtml(element, scope);
 						});
 					}
-				})
+				});
 			});
 		});
 

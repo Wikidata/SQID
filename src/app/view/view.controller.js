@@ -91,7 +91,6 @@ angular.module('view').controller('ViewController', [
 
 	$scope.alertText = '';
 
-	$scope.inferredData = null;
 	$scope.proposalsWatcher = null;
 	$scope.proposalsPromises = [];
 
