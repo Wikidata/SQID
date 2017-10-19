@@ -2,28 +2,28 @@ define(['proposals/proposals.module'
 ], function() {
 	angular.module('proposals').factory('actions',
 	['$http', '$location', '$translate', function($http, $location, $translate) {
-		function approveStatement(group, statement, context) {
+		function approveStatement(context) {
 			// todo: do something
 		}
 
 		function approveStatementAndReference(group, statement, context) {
-			approveStatement(group, statement, context);
+			approveStatement(context);
 			approveReference(group, statement, context);
 		}
 
-		function approveStatementAndMaybeReference(group, statement, context) {
+		function approveStatementAndMaybeReference(context) {
 			// todo: do something
 		}
 
-		function approveReference(group, statement, context) {
+		function approveReference(context) {
 			// todo: do something
 		}
 
-		function deprecateStatement(grop, statement, context) {
+		function deprecateStatement(context) {
 			// todo: do something
 		}
 
-		function doNothing(group, statement, context) {
+		function doNothing(context) {
 			return true;
 		}
 

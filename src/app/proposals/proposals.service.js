@@ -107,6 +107,9 @@ define(['proposals/proposals.module',
 
 								if (!isNew){
 									var result = entitydata.hasNoneDuplicates(pStmt.references, equivalentStatements);
+
+									// determine default action
+
 									if (result.nonProposal) {
 										// add proposed references to already existing Wikidata-Statement
 										// -> approve add the reference to the respective Wikidata-Statement
