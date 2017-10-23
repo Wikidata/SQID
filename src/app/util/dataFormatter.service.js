@@ -197,6 +197,8 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		var ret = '';
 		if (angular.isUndefined(proposalStyle)) {
 			proposalStyle = 'proposal';
+		} else {
+			isProposal = true;
 		}
 
 		angular.forEach(snaks, function (snakList) {
@@ -253,9 +255,6 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 					var proposalStyle = 'proposal';
 					if (('proposalType' in statement) &&
 						(statement.proposalType === 'informational')) {
-						console.log('---', statement);
-
-
 						showControls = false;
 						proposalStyle = 'proposal-informational';
 					}

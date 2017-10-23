@@ -226,14 +226,15 @@ define([
 				angular.forEach(statements[i].references, function(ref) {
 					ref.source = 'MARS Inference';
 					ref.actions = {
-						approve: actions.approveReference,
-						reject: actions.deprecateReference
+						approve: actions.approveReference
+						// reject: actions.deprecateReference
 					};
 				});
 
 				statements[i].actions = {
 					approve: actions.approveStatementAndMaybeReference,
 					reject: actions.deprecateStatement
+
 				};
 			}
 

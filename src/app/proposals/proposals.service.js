@@ -109,6 +109,16 @@ define(['proposals/proposals.module',
 									var result = entitydata.hasNoneDuplicates(pStmt.references, equivalentStatements);
 
 									// determine default action
+									// $log.debug(pStmt.actions, result.refStatements.map(function(stmnt) { return stmnt.actions; }));
+
+									if (false && result.nonProposal || true) {
+										// only propose a new reference for an existing statement.
+
+									} else {
+										// need to add a new statement.
+										result.actions = pStmt.actions;
+									}
+
 
 									if (result.nonProposal) {
 										// add proposed references to already existing Wikidata-Statement

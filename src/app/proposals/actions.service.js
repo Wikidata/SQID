@@ -1,18 +1,50 @@
-define(['proposals/proposals.module'
+define(['proposals/proposals.module',
+		'oauth/oauth.service'
 ], function() {
 	angular.module('proposals').factory('actions',
-	['$http', '$location', '$translate', function($http, $location, $translate) {
+	['$http', '$location', '$translate', '$log', 'oauth', function($http, $location, $translate, $log, oauth) {
 		function approveStatement(context) {
-			// todo: do something
+			return approveStatementAndReference(stripReferences(context));
 		}
 
-		function approveStatementAndReference(group, statement, context) {
+		function stripReferences(statement) {
+			var stmt = {};
+			angular.forEach(statement, function(value, key) {
+				if (key != 'references') {
+					stmt[key] = value;
+				}
+			});
+
+			return stmt;
+		}
+
+		function approveStatementAndReference(context) {
+			var statement = context;
+			var stmt = {};
+
+			delete stmt.id;
+			delete stmt.source;
+			delete stmt.approve;
+			delete stmt.reject;
+			delete stmt.proposalType;
+			delete stmt.actions;
+
+			stmt.type = 'statement';
+
+			return oauth.addStatement(context.qid,
+									  JSON.stringify(stmt)
+									 );
+
 			approveStatement(context);
 			approveReference(group, statement, context);
 		}
 
 		function approveStatementAndMaybeReference(context) {
-			// todo: do something
+			if (context.references && context.references.length > 1) {
+				return approveStatement(context);
+			} else {
+				return approveStatementAndReference(context);
+			}
 		}
 
 		function approveReference(context) {

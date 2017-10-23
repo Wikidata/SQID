@@ -280,7 +280,11 @@ function($compile, Properties, dataFormatter, util, i18n) {
 			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
 		}
 		scope.approve = function(statement){
-			scope.proposalRegister[statement].approve(true);
+			if (scope.proposalRegister[statement].source == 'MARS') {
+				scope.proposalRegister[statement].approve(scope.proposalRegister[statement]);
+			} else {
+				scope.proposalRegister[statement].approve(true);
+			}
 		}
 		scope.reject = function(statement){
 			scope.proposalRegister[statement].reject(true);
@@ -294,7 +298,9 @@ function($compile, Properties, dataFormatter, util, i18n) {
 
         scope.handles = function(statement, action) {
             return ((action in scope.proposalRegister[statement]) &&
-                    (angular.isDefined(scope.proposalRegister[statement][action])));
+                    (angular.isDefined(scope.proposalRegister[statement][action])) &&
+					((!('proposalType' in scope.proposalRegister[statement])) ||
+					 scope.proposalRegister[statement].proposalType !== 'informational'));
         };
 
 		scope.inHtml = '';
