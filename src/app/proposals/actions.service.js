@@ -34,9 +34,6 @@ define(['proposals/proposals.module',
 			return oauth.addStatement(context.qid,
 									  JSON.stringify(stmt)
 									 );
-
-			approveStatement(context);
-			approveReference(group, statement, context);
 		}
 
 		function approveStatementAndMaybeReference(context) {
@@ -48,11 +45,14 @@ define(['proposals/proposals.module',
 		}
 
 		function approveReference(context) {
-			// todo: do something
+			$log.debug(context);
 		}
 
 		function deprecateStatement(context) {
-			// todo: do something
+			var stmt = stripReferences(context);
+			stmt.rank = 'deprecated';
+
+			return approveStatement(stmt);
 		}
 
 		function doNothing(context) {

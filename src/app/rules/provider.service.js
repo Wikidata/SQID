@@ -19,23 +19,23 @@ angular.module('rules').factory('provider', [
 				kind: 'materialise'
 			},
 			{ // x spouse y -> y spouse x
-				rule: '?S:(), (?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
+				rule: '(?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
 				kind: 'materialise'
 			},
 			{ // grandfather
-				rule: '(?gf.P21 = Q6581097)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?s.P1038 = ?gf)@[P1039 = Q9238344]',
+				rule: '(?grandfather.P21 = Q6581097)@?X, (?grandfather.P40 = ?parent)@?Y, (?parent.P40 = ?child)@?Z -> (?child.P1038 = ?grandfather)@[P1039 = Q9238344]',
 				kind: 'informational'
 			},
 			{ // grandson
-				rule: '(?s.P21 = Q6581097)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?gf.P1038 = ?s)@[P1039 = Q11921506]',
+				rule: '(?son.P21 = Q6581097)@?X, (?grandparent.P40 = ?parent)@?Y, (?parent.P40 = ?son)@?Z -> (?grandparent.P1038 = ?son)@[P1039 = Q11921506]',
 				kind: 'informational'
 			},
 			{ // grandmother
-				rule: '(?gm.P21 = Q6581072)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?s.P1038 = ?gm)@[P1039 = Q9235758]',
+				rule: '(?grandmother.P21 = Q6581072)@?X, (?grandmother.P40 = ?parent)@?Y, (?parent.P40 = ?child)@?Z -> (?child.P1038 = ?grandmother)@[P1039 = Q9235758]',
 				kind: 'informational'
 			},
 			{ // granddaughter
-				rule: '(?d.P21 = Q6581072)@?X, (?gf.P40 = ?f)@?Y, (?f.P40 = ?s)@?Z -> (?gf.P1038 = ?s)@[P1039 = Q19756330]',
+				rule: '(?daughter.P21 = Q6581072)@?X, (?grandparent.P40 = ?parent)@?Y, (?parent.P40 = ?daughter)@?Z -> (?grandparent.P1038 = ?daughter)@[P1039 = Q19756330]',
 				kind: 'informational'
 			}
 		];

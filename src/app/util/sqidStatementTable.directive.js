@@ -163,7 +163,7 @@ function($compile, Properties, dataFormatter, util, i18n) {
 					}
 
 					// add reference proposal to proposal register
-					angular.forEach(statement.references, function(reference){
+					angular.forEach(statement.references, function(reference, rId){
 						if ('source' in reference){
 							if (reference.source != 'Wikidata'){
 								if ('refId' in reference){
@@ -255,7 +255,7 @@ function($compile, Properties, dataFormatter, util, i18n) {
 		var insertAndCompile = function(html, element, scope) {
 			element.html(html);
 			$compile(element.contents())(scope);
-		}
+		};
 
 		// Register additional functions to toggle the display for longer lists of statements:
 		scope.showRows = function(id) {
@@ -265,36 +265,49 @@ function($compile, Properties, dataFormatter, util, i18n) {
 			} else {
 				return false;
 			}
-		}
+		};
 		scope.toggleRows = function(id) {
 			var field = 'show' + id;
 			scope[field] = !scope.showRows(id);
-		}
+		};
 		scope.getRowSpan = function(id,length) {
 			return scope.showRows(id) ? length : hideStatementsThreshold;
-		}
+		};
 		scope.getShowRowsMessage = function(id) {
 			return scope.showRows(id) ? 'STATEMENTS.LESS_STATEMENTS' : 'STATEMENTS.MORE_STATEMENTS';
-		}
+		};
 		scope.getShowRowsClass = function(id) {
 			return (scope.showRows(id) ? 'expand-open' : 'expand-closed' );
-		}
+		};
 		scope.approve = function(statement){
 			if (scope.proposalRegister[statement].source == 'MARS') {
 				scope.proposalRegister[statement].approve(scope.proposalRegister[statement]);
 			} else {
 				scope.proposalRegister[statement].approve(true);
 			}
-		}
+		};
 		scope.reject = function(statement){
-			scope.proposalRegister[statement].reject(true);
-		}
+			if (scope.proposalRegister[statement].source == 'MARS') {
+				scope.proposalRegister[statement].reject(scope.proposalRegister[statement]);
+			} else {
+				scope.proposalRegister[statement].reject(true);
+			}
+		};
 		scope.approveReference = function(referenceId){
-			scope.proposalRegister[referenceId].approve(true);
-		}
+			console.log(scope.proposalRegister[referenceId]);
+			if (scope.proposalRegister[referenceId].source == 'MARS Inference') {
+				scope.proposalRegister[referenceId].approve(scope.proposalRegister[referenceId]);
+			} else {
+				scope.proposalRegister[referenceId].accept(true);
+			}
+		};
 		scope.rejectReference = function(referenceId){
-			scope.proposalRegister[referenceId].reject(true);
-		}
+			if (scope.proposalRegister[referenceId].source == 'MARS Inference') {
+				scope.proposalRegister[referenceId].reject(scope.proposalRegister[referenceId]);
+			} else {
+				scope.proposalRegister[referenceId].reject(true);
+			}
+		};
 
         scope.handles = function(statement, action) {
             return ((action in scope.proposalRegister[statement]) &&

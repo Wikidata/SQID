@@ -223,7 +223,8 @@ define([
 			var length = statements.length;
 			for (var i = 0; i < length; ++i) {
 				statements[i]['source'] = 'MARS';
-				angular.forEach(statements[i].references, function(ref) {
+				angular.forEach(statements[i].references, function(ref, j) {
+					ref.refId = statements[i].id + '-ref-' + j;
 					ref.source = 'MARS Inference';
 					ref.actions = {
 						approve: actions.approveReference
