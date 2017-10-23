@@ -5,15 +5,16 @@ define([
 	'rules/matcher.service',
 	'rules/provider.service',
 	'rules/instantiator.service',
+	'proposals/actions.service',
 	'util/util.service',
 	'util/sparql.service',
 	'i18n/i18n.service'
 ], function() {
 	angular.module('rules').factory('rules',
 	['$q', '$log', '$translate', 'sparql', 'i18n', 'util', 'entitydata', 'wikidataapi',
-	'matcher', 'provider', 'instantiator',
+	 'matcher', 'provider', 'instantiator', 'actions',
 	 function($q, $log, $translate, sparql, i18n, util, entitydata, wikidataapi,
-			 matcher, provider, instantiator) {
+			  matcher, provider, instantiator, actions) {
 
 		 function getProvider(entityInData) {
 			 return {
@@ -223,15 +224,19 @@ define([
 			for (var i = 0; i < length; ++i) {
 				statements[i]['source'] = 'MARS';
 				angular.forEach(statements[i].references, function(ref) {
-					ref['source'] = 'MARS Inference';
+					ref.source = 'MARS Inference';
+					ref.actions = {
+						approve: actions.approveReference,
+						reject: actions.deprecateReference
+					};
 				});
-				// statements[i]['approve'] = function() {
-				//	   $log.debug('approval not implemented');
-				// };
-				// statements[i]['reject'] = function() {
-				//	   $log.debug('reject not implemented');
-				// };
+
+				statements[i].actions = {
+					approve: actions.approveStatementAndMaybeReference,
+					reject: actions.deprecateStatement
+				};
 			}
+
 			return statements;
 		}
 

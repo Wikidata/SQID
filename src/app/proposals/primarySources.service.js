@@ -2,11 +2,12 @@
 define([
 	'proposals/proposals.module',
 	'i18n/translate.config',
-	'oauth/oauth.service'
+	'oauth/oauth.service',
+	'proposals/actions.service',
 ], function() {
 ///////////////////////////////////////
 
-angular.module('proposals').factory('primarySources', ['$http', '$templateCache', '$location', '$translate', 'oauth', function($http, $templateCache, $location, $translate, oauth) {
+angular.module('proposals').factory('primarySources', ['$http', '$templateCache', '$location', '$translate', 'oauth', 'actions', function($http, $templateCache, $location, $translate, oauth, actions) {
 	var baseUrl = $location.protocol() + '://tools.wmflabs.org/wikidata-primary-sources/';
 
 	var STATEMENT_APPROVAL_URL = 'https://tools.wmflabs.org/wikidata-primary-sources/statements/{{id}}' +
@@ -229,9 +230,21 @@ angular.module('proposals').factory('primarySources', ['$http', '$templateCache'
 
 	var alertFunction = function(message){};
 
+	function rejectReferencesProposingThis(context) {
+		// todo: do something
+	}
+
 	function addProposalInformation(pStatementGroup, id) {
 		for (var i=0; i < pStatementGroup.length; i++){
-			if (pStatementGroup[i].references){
+			pStatementGroup[i].actions = {
+				approve: approve,
+				reject: reject
+			};
+
+			if (pStatementGroup[i].references) {
+				pStatementGroup[i].actions.approve = actions.approveStament;
+				pStatementGroup[i].actions.reject = rejectReferencesProposingThis;
+
 				// approve function only add the bare Statement to Wikidata
 				pStatementGroup[i]['approve'] = function(refresh){
 					approveBareStatement(id, this, refresh);
@@ -264,6 +277,10 @@ angular.module('proposals').factory('primarySources', ['$http', '$templateCache'
 						rejectReference(this.refId, this.snaks, this.refId, refresh);
 					};
 					ref['parent'] = pStatementGroup[i];
+					ref.actions = {
+						approve: approve,
+						reject: rejectReference
+					};
 				});
 			}else{
 				pStatementGroup[i]['approve'] = function(refresh){
