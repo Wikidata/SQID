@@ -135,7 +135,8 @@ function() {
 									  references: ((skipReferences !== true)
 												   ? references.generateReference(query,
 																				  linkText)
-												   : [])
+												   : []),
+									  proposalType: query.rule.kind
 									}];
 
 			return statement;

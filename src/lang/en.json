@@ -182,6 +182,10 @@
         "CONSTRAINT_TYPE": "Type",
         "CONSTRAINT_ARGUMENTS": "Arguments",
         "QUERY": "Query",
-        "NAV_RULES": "Rules"
+        "NAV_RULES": "Rules",
+		"KIND": "Kind",
+		"MATERIALISE": "materialise",
+		"INFORMATIONAL": "informational",
+		"CONSTRAINT": "constraint"
     }
 }

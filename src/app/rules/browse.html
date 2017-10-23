@@ -5,12 +5,14 @@
 	  <tr>
 		<td translate="RULES.RULE_ID"></td>
 		<td translate="RULES.RULE"></td>
+		<td translate="RULES.KIND"></td>
 	  </tr>
 	</thead>
 	<tbody>
 	  <tr ng-repeat="(rid, rule) in rules">
 		<td>{{ rid }}</td>
 		<td>{{ rule | formatRule }}</td>
+		<<td>{{ 'RULES.' + rule.kind | uppercase | translate }}</td>
 	  </tr>
 	</tbody>
   </table>

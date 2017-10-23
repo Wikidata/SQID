@@ -28,7 +28,7 @@ define(['proposals/proposals.module'
 		}
 
 		return {
-			approveStament: approveStament,
+			approveStament: approveStatement,
 			approveStatementAndMaybeReference: approveStatementAndMaybeReference,
 			approveReference: approveReference,
 			deprecateStatement: deprecateStatement,

@@ -112,10 +112,21 @@ function($compile, Properties, dataFormatter, util, i18n) {
 				angular.forEach(statementGroup, function (statement, index) {
 					hasContent = true;
 					var isProposal = (statement.source && statement.source != 'Wikidata');
+					var isInformational = (isProposal && statement.proposalType && statement.proposalType === 'informational');
+
+					var proposalStyle = '';
+					if (isProposal) {
+						if (isInformational) {
+							proposalStyle = 'class="proposal-informational"';
+						} else {
+							proposalStyle = 'class="proposal"';
+						}
+					}
+
 					if (hideSomeStatements && index >= hideStatementsThreshold) {
-						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '"' + (isProposal ? ' class="proposal"' : "") + '>';
+						html += '<tr ng-if="showRows(\'' + statementListId + '\')" title="' + propertyLabel + '"' + proposalStyle + '>';
 					} else {
-						html += '<tr title="' + propertyLabel + '"' + (isProposal ? ' class="proposal"' : "") + '>';
+						html += '<tr title="' + propertyLabel + '"' + proposalStyle + '>';
 					}
 					if (index == 0) {
 						html += '<th valign="top" class="statements-table-left" rowspan="'
@@ -140,7 +151,12 @@ function($compile, Properties, dataFormatter, util, i18n) {
 							scope.proposalRegister = {};
 						}
 						scope.proposalRegister[statement.id] = statement;
-						html += '<div class="proposal-ctrl"><span translate="PROPOSAL"></span>'
+
+						if ('actions' in statement) {
+							scope.proposalRegister[statement.id].approve = statement.actions.approve;
+							scope.proposalRegister[statement.id].reject = statement.actions.reject;
+						}
+						html += '<div class="proposal-ctrl"><span translate="' + ((isInformational) ? 'RULES.INFORMATIONAL' : 'PROPOSAL') + '"></span>'
 							+ '<i class="fa fa-times-circle proposal-reject" ng-if="handles(\'' + statement.id + '\', \'reject\')" ng-click="reject(\'' + statement.id + '\');$event.stopPropagation()"></i>'
 							+ '<i class="fa fa-check-circle proposal-accept" ng-if="handles(\'' + statement.id + '\', \'approve\')" ng-click="approve(\'' + statement.id + '\');$event.stopPropagation()"></i>'
 							+ '<span style="display: block"><span translate="SOURCE"></span>: ' + statement.source + ' </span></div>';

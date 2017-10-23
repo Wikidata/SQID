@@ -177,6 +177,10 @@
         "CONSTRAINT_TYPE": "Typ",
         "CONSTRAINT_ARGUMENTS": "Argumente",
         "QUERY": "Anfrage",
-        "NAV_RULES": "Regeln"
+        "NAV_RULES": "Regeln",
+		"KIND": "Art",
+		"MATERIALISE": "materialisieren",
+		"INFORMATIONAL": "nur anzeigen",
+		"CONSTRAINT": "Nutzungseinschränkung"
     }
 }

@@ -193,12 +193,16 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		return ret;
 	}
 
-	var getSnaksTableHtml = function(snaks, properties, missingTermsListener, inline, isProposal) {
+	var getSnaksTableHtml = function(snaks, properties, missingTermsListener, inline, isProposal, proposalStyle) {
 		var ret = '';
+		if (angular.isUndefined(proposalStyle)) {
+			proposalStyle = 'proposal';
+		}
+
 		angular.forEach(snaks, function (snakList) {
 			var first = true;
 			angular.forEach(snakList, function(snak) {
-				ret += '<tr' + (isProposal ? ' class="proposal"' : '') + '>';
+				ret += '<tr' + (isProposal ? ' class="' + proposalStyle + '"' : '') + '>';
 				if (first) {
 					first = false;
 					ret += '<td valign="top" rowspan="' + snakList.length + '">' +
@@ -245,6 +249,17 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 							showControls = true;
 						}
 					}
+
+					var proposalStyle = 'proposal';
+					if (('proposalType' in statement) &&
+						(statement.proposalType === 'informational')) {
+						console.log('---', statement);
+
+
+						showControls = false;
+						proposalStyle = 'proposal-informational';
+					}
+
 					var proposalControls = '';
 					if (showControls){
 						proposalControls = '<th><div class="proposal-ctrl">'
@@ -252,12 +267,12 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 							+ '<i class="fa fa-check-circle proposal-accept" ng-click="approveReference(\'' + 'ref' + reference.refId + '\');$event.stopPropagation()"></i>'
 							+ '</div></th>';
 					}
-					refTable += '<tr' + (isProposal ? ' class="proposal"' : '') + '><th colspan="2">{{\'SEC_REFERENCE\'|translate}}' + (isProposal ? ' {{ \'PROPOSAL\' | translate }}' : '') + '</th>'
+					refTable += '<tr' + (isProposal ? ' class="' + proposalStyle + '"' : '') + '><th colspan="2">{{\'SEC_REFERENCE\'|translate}}' + (isProposal ? ' {{ \'PROPOSAL\' | translate }}' : '') + '</th>'
 						+ proposalControls
 						+ '</tr>'
-						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, isProposal);
+						+ getSnaksTableHtml(reference.snaks, properties, missingTermsListener, false, isProposal, proposalStyle);
 					if (isProposal){
-						refTable += '<tr class="proposal"><td class="proposal-font-format"><span translate="PROPOSAL_SOURCE"></span></td><td colspan="2" class="proposal-font-format">' + reference.source + '</td></tr>';
+						refTable += '<tr class="' + proposalStyle + '"><td class="proposal-font-format"><span translate="PROPOSAL_SOURCE"></span></td><td colspann="2" class="proposal-font-format">' + reference.source + '</td></tr>';
 					}
 				});
 				refTable += '</table>';

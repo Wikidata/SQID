@@ -652,6 +652,14 @@ div.qualifiers {
 	background: #d9edf7;
 }
 
+.table-striped > tbody > tr:nth-of-type(odd).proposal-informational{
+	background: #c3edd0;
+}
+
+.proposal-informational{
+	background: #dff0d8;
+}
+
 .proposal-ctrl{
 	float: right;
 	margin-right: 20px;
