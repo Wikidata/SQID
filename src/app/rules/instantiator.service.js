@@ -10,20 +10,20 @@ function() {
 	function(util, ast, matcher, references) {
 		function augmentBindingsWithSPARQLResult(bindings,
 												 sparqlResult) {
-			angular.forEach(sparqlResult[0],
-							function(item, name) {
-								var varName = '?' + name;
-								var id = util.getClaimIdFromSPARQLResult(
-									util.getIdFromUri(item.value));
-								if (!(varName in bindings)) {
-									bindings[varName] = { name: varName };
-								}
+			var binds = angular.copy(bindings);
+			angular.forEach(sparqlResult, function(item, name) {
+				var varName = '?' + name;
+				var id = util.getClaimIdFromSPARQLResult(
+					util.getIdFromUri(item.value));
+				if (!(varName in binds)) {
+					binds[varName] = { name: varName };
+				}
 
-								bindings[varName].id = id;
-								bindings[varName].item = item;
-							});
+				binds[varName].id = id;
+				binds[varName].item = item;
+			});
 
-			return bindings;
+			return binds;
 		}
 
 		function augmentBindingsWithAPIResult(bindings,

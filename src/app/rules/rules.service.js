@@ -81,10 +81,10 @@ define([
 
 		function handleSparqlResults(query, sparqlResults) {
 			var requests = [];
-
-			angular.forEach(sparqlResults.results, function(sparqlResult) {
+			angular.forEach(sparqlResults.results.bindings, function(sparqlResult) {
+				var qry = angular.copy(query);
 				// augment bindings with results from SPARQL
-				query.bindings = instantiator.augmentBindingsWithSPARQLResult(
+				qry.bindings = instantiator.augmentBindingsWithSPARQLResult(
 					query.bindings,
 					sparqlResult
 				);
@@ -94,19 +94,19 @@ define([
 				}
 
 				// find claims we need to retrieve
-				var claims = Object.keys(query.bindings)
+				var claims = Object.keys(qry.bindings)
 					.filter(function(binding) {
-						return ((query.bindings[binding].type ===
+						return ((qry.bindings[binding].type ===
 								 'set-variable') &&
-								'id' in query.bindings[binding]);
+								'id' in qry.bindings[binding]);
 					})
 					.map(function(binding) {
-						return query.bindings[binding].id;
+						return qry.bindings[binding].id;
 					});
 
 				requests.push(wikidataapi.getClaims(claims)
 					.then(function(apiResults) {
-						return handleApiResults(query, apiResults);
+						return handleApiResults(qry, apiResults);
 					}));
 			});
 
@@ -244,7 +244,10 @@ define([
 
 		return {
 			getStatements: getStatements,
-			getProvider: getProvider
+			getProvider: getProvider,
+			handleSparqlResults: handleSparqlResults,
+			injectReferences: injectReferences,
+			deduplicateStatements: deduplicateStatements
 		};
 }]);
 

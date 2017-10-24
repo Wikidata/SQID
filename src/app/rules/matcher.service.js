@@ -79,6 +79,7 @@ define(['rules/rules.module',
 			var sparqlBindings = [];
 			var sparqlPatterns = [];
 			var sparqlOptionals = [];
+			var sparqlNotExists = [];
 
 			angular.forEach(rule.body, function(atom, key) {
 				var namespace = '?_body_' + key + '_';
@@ -88,6 +89,31 @@ define(['rules/rules.module',
 				sparqlOptionals = sparqlOptionals.concat(fragment.optionals);
 				constraints = constraints.concat(fragment.constraints);
 			});
+
+			// if the head predicat's subject is unbound, add a
+			// pattern to weed out matching heads
+			if ((rule.head.arguments[0].type == 'variable') &&
+				!(rule.head.arguments[0].name in bindings)) {
+				var atom = rule.head;
+
+				if (atom.annotation.type === 'variable') {
+					// make sure we use a fresh name here
+					atom.annotation.name = '?_head_filter_annotation';
+				}
+
+				var fragment = sparqlFragmentForAtom(
+					rule.head,
+					bindings,
+					'?_head_filter_');
+
+				sparqlNotExists = sparqlNotExists.concat(
+					sparqlFragmentForAtom(
+						rule.head,
+						bindings,
+						'?_head_filter_'
+					).patterns
+				);
+			}
 
 			var interestingVariables = [];
 
@@ -115,8 +141,9 @@ define(['rules/rules.module',
 			}
 
 			var query = sparqlQueryFromFragments(sparqlBindings,
-												sparqlPatterns,
-												sparqlOptionals,
+												 sparqlPatterns,
+												 sparqlOptionals,
+												 sparqlNotExists,
 												 maxInstances);
 
 			return { rule: rule,
@@ -387,10 +414,11 @@ define(['rules/rules.module',
 				   };
 		}
 
-		function sparqlQueryFromFragments(bindings, patterns, optionals, limit) {
+		function sparqlQueryFromFragments(bindings, patterns, optionals, notExists, limit) {
 			var query = "SELECT DISTINCT " + bindings.join(" ") +
 				"\nWHERE {\n  " + patterns.join(" .\n  ") +
 				((optionals.length) ? "\n  " + optionals.join(" .\n	 ") : '') +
+				((notExists.length) ? "\n  FILTER NOT EXISTS {\n    " + notExists.join(" .\n    ") + "\n  }": '') +
 				"\n} LIMIT " + limit;
 
 			return query;
