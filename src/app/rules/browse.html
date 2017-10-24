@@ -11,8 +11,8 @@
 	<tbody>
 	  <tr ng-repeat="(rid, rule) in rules">
 		<td>{{ rid }}</td>
-		<td>{{ rule | formatRule }}</td>
-		<<td>{{ 'RULES.' + rule.kind | uppercase | translate }}</td>
+		<td><code ng-bind-html="rule | formatRule"></code></td>
+		<td>{{ 'RULES.' + rule.kind | uppercase | translate }}</td>
 	  </tr>
 	</tbody>
   </table>

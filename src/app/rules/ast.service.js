@@ -3,89 +3,132 @@ define(['ajv',
 	   ],
 function(ajv) {
 	angular.module('rules').factory('ast',
-	['$http', '$log',
-	function($http, $log) {
-		function print(ast) {
+	['$http', '$log', '$sce', 'i18n',
+	 function($http, $log, $sce, i18n) {
+		function print(ast, opts) {
+			if (angular.isUndefined(opts)) {
+				opts = {};
+			}
+
+			opts.prettify = opts.prettify || false;
+			opts.dropUnusedBodyVariables = opts.dropUnusedBodyVariables || false;
+
+			return _print(ast, opts);
+		}
+
+		function _print(ast, opts) {
 			var result = '';
+
+			function bold(str) {
+				return ((opts.prettify)
+						? '<strong class="text-muted">' + str + '</strong>'
+						: str);
+			}
+
+			function classify(str, cls) {
+				return ((opts.prettify)
+						? '<span class="' + cls + '">' + str + '</span>'
+						: str);
+			}
 
 			if (angular.isArray(ast)) {
 				return ast.join(', ');
 			}
 
 			switch (ast.type) {
-			case 'variable': // fallthrough
+			case 'variable':
+				result = classify(ast.name, 'text-primary');
+				break;
 			case 'set-variable':
-				result = ast.name;
+				result = classify(ast.name, 'text-info');
 				break;
 
 			case 'rule':
-				result = ast.body.map(print).join(', ') +
-					' -> ' + print(ast.head);
+				var bodyPrinter = function(body) {
+					return _print(body,
+								  angular.extend(opts, {
+									  variablesInHead: variables(ast.head),
+									  variablesInBody: variables(ast.body)
+								  }));
+				};
+
+				result = ast.body.map(bodyPrinter).join(', ') +
+					bold(' -> ') +
+					_print(ast.head,
+						   angular.extend(opts, {
+							   dropUnusedBodyVariables : false
+						   }));
 				break;
 
 			case 'relational-atom':
-				result = '(' + print(ast.arguments[0]) +
-					'.' + print(ast.predicate) +
-					' = ' + print(ast.arguments[1]) +
-					')@' + print(ast.annotation);
+				result = bold('(') + _print(ast.arguments[0], opts) +
+					bold('.') + _print(ast.predicate, opts) +
+					bold(' = ') + _print(ast.arguments[1], opts) +
+					bold(')@') + _print(ast.annotation, opts);
 				break;
 
 			case 'set-term':
 				result = '{' + ast.assignments.map(function(as) {
-					return print(as.attribute) + ' = ' + print(as.value);
+					return _print(as.attribute, opts) + bold(' = ') + _print(as.value, opts);
 				}).join(', ') + '}';
 				break;
 
 			case 'specifier-atom':
-				result = print(ast.set) + ':' + print(ast.specifier);
+				result = _print(ast.set, opts) + bold(':') + _print(ast.specifier, opts);
 				break;
 
 			case 'union':
-				result = ('(' + print(ast.specifiers[0]) + ' || ' +
-						  print(ast.specifiers[1]) + ')');
+				result = ('(' + _print(ast.specifiers[0], opts) + bold(' || ') +
+						  _print(ast.specifiers[1], opts) + ')');
 				break;
 
 			case 'intersection':
-				result = ('(' + print(ast.specifiers[0]) + ' && '  +
-						  print(ast.specifiers[1]) + ')');
+				result = ('(' + _print(ast.specifiers[0], opts) + bold(' && ')  +
+						  _print(ast.specifiers[1], opts) + ')');
 				break;
 
 			case 'difference':
-				result = ('(' + print(ast.specifiers[0]) + ' \\ ' +
-						  print(ast.specifiers[1]) + ')');
+				result = ('(' + _print(ast.specifiers[0], opts) + bold(' \\ ') +
+						  _print(ast.specifiers[1], opts) + ')');
 				break;
 
 			case 'function-term':
 				result = ast.name + '(' +
-					ast.arguments.map(print).join(', ') + ')';
+					ast.arguments.map(function(elt) {
+						return _print(elt, opts);
+					}).join(', ') + ')';
 				break;
 
 			case 'open-specifier':
-				result = '(' + ast.assignments.map(function(as) {
-					return print(as.attribute) + ' = ' + print(as.value);
-				}).join(', ') + ')';
+				result = bold('(') + ast.assignments.map(function(as) {
+					return _print(as.attribute, opts) + bold(' = ') + _print(as.value, opts);
+				}).join(', ') + bold(')');
 				break;
 
 			case 'closed-specifier':
-				result = '[' + ast.assignments.map(function(as) {
-					return print(as.attribute) + ' = ' + print(as.value);
-				}).join(', ') + ']';
+				result = bold('[') + ast.assignments.map(function(as) {
+					return _print(as.attribute, opts) + bold(' = ') + _print(as.value, opts);
+				}).join(', ') + bold(']');
 				break;
 
 			case 'star':
-				result = '*';
+				result = bold('*');
 				break;
 
 			case 'plus':
-				result = '+';
+				result = bold('+');
 				break;
 
 			case 'literal':
-				result = ast.name;
+				result = ((opts.prettify)
+						  ? ('<span class="text-success" title="' +
+							 $sce.trustAsHtml(i18n.getEntityLabel(ast.name)) +
+							 '">' + ast.name + '</span>')
+						  : ast.name);
 				break;
 
 			default:
-				$log.debug("unknown object in print(): " + ast);
+				$log.debug("unknown object in _print(): " + ast);
 				break;
 			}
 

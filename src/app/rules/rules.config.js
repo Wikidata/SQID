@@ -17,8 +17,13 @@ function() {
 				.when('/rules/explain', {templateUrl: 'app/rules/explain.html'})
 				.when('/rules/browse', {templateUrl: 'app/rules/browse.html'});
 			$filterProvider
-				.register('formatRule', ['ast', function(ast) {
-					return ast.print;
+				.register('formatRule', ['$sce', 'i18n', 'ast', function($sce, i18n, ast) {
+					return function(rule) {
+						return $sce.trustAsHtml(
+							ast.print(rule, {
+								prettify: true
+							}));
+					};
 				}]);
 	}]);
 

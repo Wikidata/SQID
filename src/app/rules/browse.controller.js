@@ -3,15 +3,39 @@ define(['rules/rules.module',
 	   ],
 function() {
 	angular.module('rules').controller('BrowseController',
-	['$scope', '$translate',
-	'provider',
-	function($scope, $translate, provider) {
+	['$scope', '$translate', '$q',
+	'i18n', 'ast', 'provider',
+	function($scope, $translate, $q, i18n, ast, provider) {
 		$scope.translation = {};
-		$scope.rules = provider
-			.getRules()
-			.map(function(rule) {
-				return angular.extend({}, rule);
-			});
+
+		$q.all(provider
+			   .getRules()
+			   .map(function(rule) {
+				   var literals = ast
+					   .literals(rule)
+					   .map(function (literal) {
+						   return literal.name;
+					   });
+				   var terms = literals.filter(function(id) {
+					   return id.substr(0, 1) === 'Q';
+				   });
+				   var properties = literals.filter(function(id) {
+					   return id.substr(0, 1) === 'P';
+				   });
+
+				   return $q.all([
+					   i18n.waitForTerms(terms),
+					   i18n.waitForPropertyLabels(properties)
+				   ]);
+			   })
+			  ).then(function() {
+				  $scope.rules = provider
+					  .getRules()
+					  .map(function(rule) {
+						  // thaw rule
+						  return angular.extend({}, rule);
+					  });
+			  });
 	}]);
 
 	return {};

@@ -9,7 +9,7 @@
 	<tbody>
 	  <tr>
 		<td translate="RULES.RULE"></td>
-		<td>{{ explanation.rule | formatRule }}</td>
+		<td><code ng-bind-html="explanation.rule | formatRule"></code></td>
 	  </tr>
 	  <tr ng-if="explanation.labels">
 		<td translate="RULES.LITERALS"</td>
