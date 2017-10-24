@@ -181,6 +181,7 @@
 		"KIND": "Art",
 		"MATERIALISE": "materialisieren",
 		"INFORMATIONAL": "nur anzeigen",
-		"CONSTRAINT": "Nutzungseinschränkung"
+		"CONSTRAINT": "Nutzungseinschränkung",
+		"CONSEQUENCES": "Folgerungen"
     }
 }

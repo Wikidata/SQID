@@ -1,0 +1,8 @@
+<h1 translate="RULES.CONSEQUENCES"></h1>
+<div ng-controller="ConsequencesController">
+  <pre ng-bind="query.query"></pre>
+  <sqid-statement-table ng-if="statements !== null"
+						data="statements"
+						title="{{ statements.claims.title }}">
+  </sqid-statement-table>
+</div>

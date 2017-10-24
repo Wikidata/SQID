@@ -85,7 +85,6 @@ function($compile, Properties, dataFormatter, util, i18n) {
 				(narrowTable ? 'narrow-statements-table' : 'statements-table' ) + '"><tbody>';
 			var hasContent = false;
 			var missingTermsListener = outlinks ? outMissingTermsListener : inMissingTermsListener;
-
 			angular.forEach(propertyList, function (propId) {
 				var statementListId = propId + ( outlinks ? '-out' : '-in' );
 				var statementGroup = statements[propId];
@@ -294,7 +293,6 @@ function($compile, Properties, dataFormatter, util, i18n) {
 			}
 		};
 		scope.approveReference = function(referenceId){
-			console.log(scope.proposalRegister[referenceId]);
 			if (scope.proposalRegister[referenceId].source == 'MARS Inference') {
 				scope.proposalRegister[referenceId].approve(scope.proposalRegister[referenceId]);
 			} else {

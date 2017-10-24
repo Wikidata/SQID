@@ -186,6 +186,7 @@
 		"KIND": "Kind",
 		"MATERIALISE": "materialise",
 		"INFORMATIONAL": "informational",
-		"CONSTRAINT": "constraint"
+		"CONSTRAINT": "constraint",
+		"CONSEQUENCES": "consequences"
     }
 }
