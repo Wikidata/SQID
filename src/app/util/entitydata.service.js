@@ -633,7 +633,7 @@ SELECT DISTINCT ?p { \n\
 					}
 
 					// TODO this is probably not as robust as it should be.
-					if ((angular.equals(otherStatement.claims, statement.claims)) &&
+					if ((angular.equals(otherStatement.mainsnak, statement.mainsnak)) &&
 						(angular.equals(otherStatement.qualifiers, statement.qualifiers))) {
 							isNew = false;
 							break;
