@@ -123,7 +123,9 @@ function() {
 			statement[predicate] = [{ mainsnak: { snaktype: 'value',
 												  property: predicate,
 												  datavalue: { type: 'wikibase-entityid',
-															   value: { 'entity-type': 'item',
+															   value: { 'entity-type': ((object.substring(0, 1) === 'Q')
+																						? 'item'
+																						: 'property'),
 																		'numeric-id': object.substring(1)
 																	  }
 															 },
@@ -136,7 +138,8 @@ function() {
 												   ? references.generateReference(query,
 																				  linkText)
 												   : []),
-									  proposalType: query.rule.kind
+									  proposalType: query.rule.kind,
+									  proposalFor: bindingOrLiteral(head.arguments[0])
 									}];
 
 			return statement;

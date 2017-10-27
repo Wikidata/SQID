@@ -6,6 +6,7 @@
 		<td translate="RULES.RULE_ID"></td>
 		<td translate="RULES.RULE"></td>
 		<td translate="RULES.KIND"></td>
+		<td></td>
 	  </tr>
 	</thead>
 	<tbody>
@@ -13,6 +14,7 @@
 		<td>{{ rid }}</td>
 		<td><code ng-bind-html="rule | formatRule"></code></td>
 		<td>{{ 'RULES.' + rule.kind | uppercase | translate }}</td>
+		<td><a ng-href="{{ rule | linkToRule }}" translate=RULES.CONSEQUENCES/></td>
 	  </tr>
 	</tbody>
   </table>
