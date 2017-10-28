@@ -666,7 +666,7 @@ angular.module('rules').factory('provider', [
 						kind: rule.kind,
 						desc: rule.desc,
 					},
-					parser.parse(rule.rule)
+					parser.parse(rule.rule, true)
 				);
 			});
 		};
