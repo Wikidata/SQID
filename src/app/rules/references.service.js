@@ -8,7 +8,9 @@ function() {
 			var bindings = {};
 
 			angular.forEach(query.bindings, function(binding) {
-				if (('id' in binding) && ('name' in binding))  {
+				if (('id' in binding) &&
+					('name' in binding) &&
+					(!('type' in binding) || (binding.type !== 'set-variable')))  {
 					bindings[binding.name] = binding.id;
 				}
 			});
@@ -17,7 +19,9 @@ function() {
 				var name = variable.name;
 				bindings[name] = { id: query.bindings[name].id,
 								   type: query.bindings[name].type,
-								   qualifiers: query.bindings[name].qualifiers
+								   qualifiers: query.bindings[name].qualifiers,
+								   fromSpecifier: query.bindings[name].fromSpecifier,
+								   item: query.bindings[name].item
 								 };
 			});
 

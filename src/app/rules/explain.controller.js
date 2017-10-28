@@ -1,11 +1,19 @@
-define(['rules/rules.module'
+define(['rules/rules.module',
+		'i18n/i18n.service',
+		'util/dataFormatter.service',
+		'rules/ast.service',
+		'rules/instantiator.service'
 	   ],
 function() {
 	angular.module('rules').controller('ExplainController',
 	['$scope', '$route', '$sce', '$translate', '$q',
-	'i18n', 'ast', 'instantiator',
-	function($scope, $route, $sce, $translate, $q, i18n, ast, instantiator) {
+	'i18n', 'dataFormatter', 'ast', 'instantiator',
+	function($scope, $route, $sce, $translate, $q, i18n, dataFormatter, ast, instantiator) {
 		function labelForLiteral(literal) {
+			if (angular.isUndefined(literal)) {
+				return $sce.trustAsHtml('(undefined value in labelForLiteral)');
+			}
+
 			var label = '';
 			if (literal.startsWith('P')) {
 				label = i18n.getPropertyLink(literal);
@@ -51,11 +59,15 @@ function() {
 		var bounds = [];
 		angular.forEach(inference.bindings, function(binding) {
 			if (angular.isObject(binding)) {
-				bounds.push(binding.id);
+				if ('id' in binding) {
+					bounds.push(binding.id.split('$', 1)[0]);
+				} else {
+				}
 			} else {
-				bounds.push(binding);
+				bounds.push(binding.split('$', 1)[0]);
 			}
 		});
+
 		var properties = literals.concat(bounds)
 			.filter(function(literal) {
 				return literal.startsWith('P');
@@ -74,10 +86,20 @@ function() {
 					   labels[literal] = labelForLiteral(literal);
 				   });
 				   angular.forEach(inference.bindings, function(binding, variable) {
-					   bindings[variable] = labelForLiteral(
-						   ((angular.isObject(binding))
-							? binding.id
-							: binding));
+					   if (angular.isObject(binding)) {
+						   if (('id' in binding) &&
+							   (!('type' in binding) || (binding.type !== 'set-variable'))) {
+							   bindings[variable] = labelForLiteral(binding.id);
+						   } else if ('item' in binding) {
+							   bindings[variable] = $sce.trustAsHtml(
+								   binding.item.map(function(value) {
+									   return dataFormatter.getSnakHtml(value);
+								   }).join('<br>')
+							   );
+						   }
+					   } else {
+						   bindings[variable] = labelForLiteral(binding);
+					   }
 				   });
 
 				   $scope.explanation.labels = labels;
