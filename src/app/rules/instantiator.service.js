@@ -101,10 +101,14 @@ function() {
 				return name;
 			}
 
-			var variablesInHeadAnnotation = ast.variables(head.annotation)
-				.map(function(variable) {
+			var variablesInHeadAnnotation = ast.variables(head.annotation);
+
+			if (variablesInHeadAnnotation.length > 0) {
+				variablesInHeadAnnotation =
+					variablesInHeadAnnotation.map(function(variable) {
 					return variable.name;
-				});
+					});
+			}
 
 			angular.forEach(ast.variables(head),
 							function(variable) {
