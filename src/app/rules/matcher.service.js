@@ -187,7 +187,7 @@ define(['rules/rules.module',
 				return namespace + (++variables);
 			}
 
-			function maybeBinding(name, prefix) {
+			function maybeBinding(name, prefix, handle) {
 				if (!prefix) {
 					prefix = '';
 				} else if (prefix.slice !== ':') {
@@ -199,6 +199,10 @@ define(['rules/rules.module',
 				}
 
 				if (name in variableBindings) {
+					if (angular.isDefined(handle)) {
+						variableBindings[name].fromSpecifier = handle;
+					}
+
 					return prefix + variableBindings[name].id;
 				} else if (parser.isVariableName(name)) {
 					return name;
@@ -237,7 +241,7 @@ define(['rules/rules.module',
 			   return name.startsWith('?');
 			}
 
-			function patternsForSpecifier(atom, indent) {
+			function patternsForSpecifier(atom, indent, handle) {
 				if (!isFinite(indent)) {
 					indent = 0;
 				}
@@ -299,7 +303,7 @@ define(['rules/rules.module',
 						case 'literal':
 							// fallthrough
 						case 'variable':
-							value = maybeBinding(assignment.value, 'pqv');
+							value = maybeBinding(assignment.value, 'pqv', handle);
 							break;
 						case 'star':
 							optional = true;
@@ -319,24 +323,24 @@ define(['rules/rules.module',
 					break;
 
 				case 'union':
-					var lhs = patternsForSpecifier(spec.specifiers[0], indent);
-					var rhs = patternsForSpecifier(spec.specifiers[1], indent);
+					var lhs = patternsForSpecifier(spec.specifiers[0], indent, handle);
+					var rhs = patternsForSpecifier(spec.specifiers[1], indent, handle);
 					optionals = optionals.concat(lhs.optionals, rhs.optionals);
 
 					addGroup(lhs.patterns, 'UNION', rhs.patterns);
 					break;
 
 				case 'intersection':
-					lhs = patternsForSpecifier(spec.specifiers[0], indent);
-					rhs = patternsForSpecifier(spec.specifiers[1], indent);
+					lhs = patternsForSpecifier(spec.specifiers[0], indent, handle);
+					rhs = patternsForSpecifier(spec.specifiers[1], indent, handle);
 					optionals = optionals.concat(lhs.optionals, rhs.optionals);
 
 					addGroup(lhs.patterns, '.', rhs.patterns);
 					break;
 
 				case 'difference':
-					lhs = patternsForSpecifier(spec.specifiers[0], indent);
-					rhs = patternsForSpecifier(spec.specifiers[1], indent);
+					lhs = patternsForSpecifier(spec.specifiers[0], indent, handle);
+					rhs = patternsForSpecifier(spec.specifiers[1], indent, handle);
 					optionals = optionals.concat(lhs.optionals, rhs.optionals);
 
 					addGroup(lhs.patterns, 'MINUS', rhs.patterns);
@@ -398,7 +402,7 @@ define(['rules/rules.module',
 
 				var set = bindingOrFreshVarWithEquality(atom.set);
 				bindings.push(set);
-				var result = patternsForSpecifier(atom);
+				var result = patternsForSpecifier(atom, 0, set);
 				patterns = patterns.concat(result.patterns);
 				optionals = optionals.concat(result.optionals);
 

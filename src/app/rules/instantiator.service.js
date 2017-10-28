@@ -13,14 +13,24 @@ function() {
 			var binds = angular.copy(bindings);
 			angular.forEach(sparqlResult, function(item, name) {
 				var varName = '?' + name;
-				var id = util.getClaimIdFromSPARQLResult(
-					util.getIdFromUri(item.value));
+
 				if (!(varName in binds)) {
 					binds[varName] = { name: varName };
 				}
 
-				binds[varName].id = id;
-				binds[varName].item = item;
+				if (item.type === 'uri') {
+					var id = util.getClaimIdFromSPARQLResult(
+						util.getIdFromUri(item.value));
+
+					binds[varName].id = id;
+					binds[varName].item = item;
+				} else {
+					binds[varName].item = item;
+
+					if (item.type === 'literal') {
+						binds[varName].item.type = 'literal';
+					}
+				}
 			});
 
 			return binds;
@@ -60,7 +70,11 @@ function() {
 				}
 
 				if (name in query.bindings) {
-					return query.bindings[name].id;
+					if ('id' in query.bindings[name]) {
+						return query.bindings[name].id;
+					} else {
+						return query.bindings[name].item;
+					}
 				}
 
 				return name;
@@ -96,7 +110,13 @@ function() {
 						qualifiers[property] = [];
 					}
 
-					qualifiers[property].push({
+					switch(assignment.value.type) {
+					case 'variable':
+						qualifiers[property].push(assignment.value.item);
+						break;
+
+					default:
+						qualifiers[property].push({
 						snaktype: 'value',
 						datatype: 'wikibase-item',
 						datavalue: { value: { 'entity-type': 'item',
@@ -105,7 +125,9 @@ function() {
 									 type: 'wikibase-entityid'
 								   },
 						property: property
-					});
+						});
+						break;
+					}
 				});
 
 				break;

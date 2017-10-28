@@ -37,6 +37,10 @@ angular.module('rules').factory('provider', [
 			{ // granddaughter
 				rule: '(?daughter.P21 = Q6581072)@?X, (?grandparent.P40 = ?parent)@?Y, (?parent.P40 = ?daughter)@?Z -> (?grandparent.P1038 = ?daughter)@[P1039 = Q19756330]',
 				kind: 'informational'
+			},
+			{
+				rule: '?X:(P580=?startdate), (?headOfState.P39 = ?headOffice)@?X, (?country.P1906 = ?headOffice)@?Y -> (?country.P35 = ?headOfState)@[P580=?startdate]',
+				kind: 'materialise'
 			}
 		];
 

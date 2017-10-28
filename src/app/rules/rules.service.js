@@ -104,6 +104,17 @@ define([
 						return qry.bindings[binding].id;
 					});
 
+				// also retrieve literals via API, so we don't have to
+				// do conversion from SPARQL
+				angular.forEach(qry.bindings, function(item, binding) {
+					if ((item.type === 'set-variable') &&
+						'id' in item) {
+						claims.push(item.id);
+					} else if ('fromSpecifier' in item) {
+						claims.push(item.fromSpecifier);
+					}
+				});
+
 				requests.push(wikidataapi.getClaims(claims)
 					.then(function(apiResults) {
 						return handleApiResults(qry, apiResults);
