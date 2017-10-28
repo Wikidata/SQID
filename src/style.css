@@ -723,5 +723,5 @@ div.qualifiers {
 
 .table-striped > tbody > tr:nth-of-type(even) > td > code {
 	font-size: 125% !important;
-	background-color: ffffff !important;
+	background-color: #ffffff !important;
 }

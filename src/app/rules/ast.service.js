@@ -66,15 +66,15 @@ function(ajv) {
 				break;
 
 			case 'relational-atom':
-				result = bold('(') + _print(ast.arguments[0], opts) +
-								 bold('.') + _print(ast.predicate, opts) +
-								 bold(' = ') + _print(ast.arguments[1], opts) +
-								 bold(')@') + _print(ast.annotation, opts);
+				result = bold('(') + nobreak(_print(ast.arguments[0], opts)) +
+					bold('.') + nobreak(_print(ast.predicate, opts)) +
+					bold(' = ') + nobreak(_print(ast.arguments[1], opts)) +
+					bold(')@') + _print(ast.annotation, opts);
 				break;
 
 			case 'set-term':
 				result = '{' + ast.assignments.map(function(as) {
-					return nobreak(_print(as.attribute, opts) + bold(' = ') + _print(as.value, opts));
+					return nobreak(_print(as.attribute, opts)) + bold(' = ') + nobreak(_print(as.value, opts));
 				}).join(', ') + '}';
 				break;
 
