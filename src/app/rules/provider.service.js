@@ -65,9 +65,13 @@ angular.module('rules').factory('provider', [
 
 		var getRules = function() {
 			return rules.map(function(rule) {
-				return angular.extend({ kind: rule.kind },
-									  parser.parse(rule.rule)
-									 );
+				return angular.extend(
+					{
+						kind: rule.kind,
+						desc: rule.desc,
+					},
+					parser.parse(rule.rule)
+				);
 			});
 		};
 
