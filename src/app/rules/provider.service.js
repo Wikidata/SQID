@@ -157,16 +157,16 @@ angular.module('rules').factory('provider', [
 								rule: '(?x.P767 = ?y)@?S -> (?y.P3919 = ?x)@?S',
 				kind: 'materialise'
 			},
-			{ // generated inverse rule for P40/P22
-				desc: 'child is inverse of father',
-				rule: '(?x.P40 = ?y)@?S -> (?y.P22 = ?x)@?S',
-				kind: 'materialise'
-			},
-			{ // generated inverse rule for P40/P25
-				desc: 'child is inverse of mother',
-				rule: '(?x.P40 = ?y)@?S -> (?y.P25 = ?x)@?S',
-				kind: 'materialise'
-			},
+// 			{ // generated inverse rule for P40/P22
+// 				desc: 'child is inverse of father',
+// 				rule: '(?x.P40 = ?y)@?S -> (?y.P22 = ?x)@?S',
+// 				kind: 'materialise'
+// 			},
+// 			{ // generated inverse rule for P40/P25
+// 				desc: 'child is inverse of mother',
+// 				rule: '(?x.P40 = ?y)@?S -> (?y.P25 = ?x)@?S',
+// 				kind: 'materialise'
+// 			},
 			{ // generated inverse rule for P1376/P36
 				desc: 'capital of is inverse of capital',
 				rule: '(?x.P1376 = ?y)@?S -> (?y.P36 = ?x)@?S',
