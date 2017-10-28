@@ -1,10 +1,9 @@
 <h1 translate="RULES.CONSEQUENCES"></h1>
 <div ng-controller="ConsequencesController">
-  <pre ng-bind="query.query"></pre>
   <table ng-if="statements !== null" class="table table-striped">
 	<thead>
 	  <tr>
-		<th>proposal for</th>
+		<th>subject</th>
 		<th>property</th>
 		<th>value</th>
 	  </tr>
@@ -12,13 +11,11 @@
 	<tbody ng-repeat="(property, claims) in statements.statements">
 	  <tr ng-repeat="claim in claims">
 		<td><a ng-href="#/view?id={{ claim.proposalFor }}">{{ claim.proposalFor }}</a></td>
-		<td>{{ property }}</td>
-		<td>{{ claim.mainsnak.datavalue.value }}</td>
+		<td><a ng-href="#/view?id={{ property }}">{{ property }}</a></td>
+		<td><a ng-href="#/view?id={{ claim.mainsnak.datavalue.value | linkToEntity }}">
+			{{ claim.mainsnak.datavalue.value | linkToEntity }}
+		</a></td>
 	  </tr>
 	</tbody>
   </table>
-  <sqid-statement-table ng-if="statements !== null"
-						data="statements"
-						title="{{ statements.claims.title }}">
-  </sqid-statement-table>
 </div>

@@ -35,6 +35,15 @@ function() {
 							encodeURIComponent(JSON.stringify(rule)));
 					};
 				}]);
+			$filterProvider
+				.register('linkToEntity', [function() {
+					return function(entity) {
+						return (((entity['entity-type'] === 'item')
+								? 'Q'
+								: 'P') +
+								entity['numeric-id']);
+					};
+				}]);
 	}]);
 
 	return {};
