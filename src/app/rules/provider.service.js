@@ -212,11 +212,11 @@ angular.module('rules').factory('provider', [
 				rule: '(?x.P121 = ?y)@?S -> (?y.P137 = ?x)@?S',
 				kind: 'materialise'
 			},
-			{ // generated inverse rule for P131/P150
-				desc: 'located in the administrative territorial entity is inverse of contains administrative territorial entity',
-				rule: '(?x.P131 = ?y)@?S -> (?y.P150 = ?x)@?S',
-				kind: 'materialise'
-			},
+// 			{ // generated inverse rule for P131/P150
+// 				desc: 'located in the administrative territorial entity is inverse of contains administrative territorial entity',
+// 				rule: '(?x.P131 = ?y)@?S -> (?y.P150 = ?x)@?S',
+// 				kind: 'materialise'
+// 			},
 			{ // generated inverse rule for P156/P155
 				desc: 'followed by is inverse of follows',
 				rule: '(?x.P156 = ?y)@?S -> (?y.P155 = ?x)@?S',
