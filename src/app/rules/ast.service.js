@@ -19,6 +19,12 @@ function(ajv) {
 		function _print(ast, opts) {
 			var result = '';
 
+			function nobreak(str) {
+				return ((opts.prettify)
+						? '<span style="white-space: nowrap;">' + str + '</span>'
+						:str);
+			}
+
 			function bold(str) {
 				return ((opts.prettify)
 						? '<strong class="text-muted">' + str + '</strong>'
@@ -52,7 +58,7 @@ function(ajv) {
 								  }));
 				};
 
-				result = ast.body.map(bodyPrinter).join(', ') + ' -> ' +
+				result = ast.body.map(bodyPrinter).join(',<br>') + '<br> ⟶ ' +
 					_print(ast.head,
 						   angular.extend(opts, {
 							   dropUnusedBodyVariables : false
@@ -61,14 +67,14 @@ function(ajv) {
 
 			case 'relational-atom':
 				result = bold('(') + _print(ast.arguments[0], opts) +
-					bold('.') + _print(ast.predicate, opts) +
-					bold(' = ') + _print(ast.arguments[1], opts) +
-					bold(')@') + _print(ast.annotation, opts);
+								 bold('.') + _print(ast.predicate, opts) +
+								 bold(' = ') + _print(ast.arguments[1], opts) +
+								 bold(')@') + _print(ast.annotation, opts);
 				break;
 
 			case 'set-term':
 				result = '{' + ast.assignments.map(function(as) {
-					return _print(as.attribute, opts) + bold(' = ') + _print(as.value, opts);
+					return nobreak(_print(as.attribute, opts) + bold(' = ') + _print(as.value, opts));
 				}).join(', ') + '}';
 				break;
 
@@ -120,9 +126,13 @@ function(ajv) {
 
 			case 'literal':
 				result = ((opts.prettify)
-						  ? ('<span class="text-success" title="' +
-							 $sce.trustAsHtml(i18n.getEntityLabel(ast.name)) +
-							 '">' + ast.name + '</span>')
+						  ? (['<span class="text-success" title="',
+							  ast.name,
+							  '">',
+							  $sce.trustAsHtml(i18n.getEntityLabel(ast.name)),
+							  '</span><sup>',
+							  ast.name,
+							  '</sup>'].join(''))
 						  : ast.name);
 				break;
 
