@@ -38,8 +38,22 @@ angular.module('rules').factory('provider', [
 				rule: '(?daughter.P21 = Q6581072)@?X, (?grandparent.P40 = ?parent)@?Y, (?parent.P40 = ?daughter)@?Z -> (?grandparent.P1038 = ?daughter)@[P1039 = Q19756330]',
 				kind: 'informational'
 			},
-			{
-				rule: '?X:(P580=?startdate), (?headOfState.P39 = ?headOffice)@?X, (?country.P1906 = ?headOffice)@?Y -> (?country.P35 = ?headOfState)@[P580=?startdate]',
+			{ // country's head of state holds this position
+				rule: '(?country.P35 = ?headOfState)@?X, (?country.P1906 = ?headOffice)@?Y -> (?headOfState.P39 = ?headOffice)@[]',
+				kind: 'materialise'
+			},
+			{ // anyone holding a country's head of state position is its head of state
+				desc: 'anyone holding a country\'s head of state position is its head of state',
+				rule: '?X:(P580=?startdate, P582=?enddate), (?headOfState.P39 = ?headOffice)@?X, (?country.P1906 = ?headOffice)@?Y -> (?country.P35 = ?headOfState)@[P580=?startdate,P582=?enddate]',
+				kind: 'materialise'
+			},
+			{ // head of government
+				rule: '(?country.P6 = ?headOfGov)@?X, (?country.P1313 = ?headOffice)@?Y -> (?headOfGov.P39 = ?headOffice)@[]',
+				kind: 'materialise'
+			},
+			{ // currency is inverse of cound
+				desc: 'currencies that have a country are the currency of that country',
+				rule: '(?currency.P31 = Q8142)@[], (?currency.P17 = ?country)@[] -> (?country.P38 = ?currency)@[]',
 				kind: 'materialise'
 			}
 		];
