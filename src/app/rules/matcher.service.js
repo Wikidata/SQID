@@ -24,7 +24,11 @@ define(['rules/rules.module',
 
 			return predicates.some(function(pred) {
 				return statements[pred].some(function(stmt) {
-					return (stmt.mainsnak.datavalue.value === stmt.name);
+					return (((stmt.mainsnak.datavalue.type === 'value') &&
+							 (stmt.mainsnak.datavalue.value === object.name)) ||
+							((stmt.mainsnak.datavalue.type === 'wikibase-entityid') &&
+							 ('id' in stmt.mainsnak.datavalue.value) &&
+							 (stmt.mainsnak.datavalue.value.id === object.name)));
 				});
 			});
 		}
@@ -74,7 +78,7 @@ define(['rules/rules.module',
 			if(!isNaN(maxInstances) && !isFinite(maxInstances) && (maxInstances > 0)) {
 				maxInstances = Infinity;
 			} else if(!isFinite(maxInstances) || maxInstances <= 0) {
-				maxInstances = 10;
+				maxInstances = 101; // what is a sane default here?
 			}
 
 			var constraints = [];
