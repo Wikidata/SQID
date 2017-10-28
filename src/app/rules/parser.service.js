@@ -161,7 +161,7 @@ define([
 							predicate: obj.predicate,
 							arguments: [obj.subject, obj.object],
 							annotation: {
-								type: 'set-term',
+								type: 'closed-specifier',
 								assignments: []
 							}
 						};
