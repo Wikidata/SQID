@@ -23,9 +23,11 @@ function() {
 		 }).then(
 			 rules.injectReferences
 		 ).then(function(results) {
-			 return i18n.waitForPropertyLabels(util.unionArrays(
-					 results.requests.propertyIds,
-				 [])).then(function() {
+			 var properties = [];
+
+			 return i18n.waitForPropertyLabels(
+				 properties
+			 ).then(function() {
 					 return results;
 				 });
 		 }).then(function(results) {
@@ -72,7 +74,10 @@ function() {
 						 return;
 					 }
 
-					 var claimFor = claim.claims[property][0].id.split('$', 1)[0];
+					 var claimFor = claim.claims[property][0]
+						 .id.split('$', 1)[0]
+						 .toUpperCase();
+
 					 if (!(claimFor in claims)) {
 						 claims[claimFor] = {};
 						 claims[claimFor][property] = [];
@@ -85,7 +90,8 @@ function() {
 				 });
 
 				 angular.forEach(results.statements, function(proposal) {
-						 var proposalFor = proposal[property][0].proposalFor;
+					 var proposalFor = proposal[property][0].proposalFor
+						 .toUpperCase();
 
 						 if (!(proposalFor in proposals)) {
 							 proposals[proposalFor] = {};
@@ -94,26 +100,48 @@ function() {
 
 						 proposals[proposalFor][property] =
 							 proposals[proposalFor][property].concat(
-								 proposal[property]
+								 proposal
 							 );
 				 });
 
-				 console.log(proposals, claims)
+				 var statements = {};
 
-				 return rules.deduplicateStatements(
-					 { statements: entities },
-					 results
-				 );
+				 angular.forEach(proposals, function(proposal, subject) {
+					 if (!(subject in statements)) {
+						 statements[subject] = [];
+					 }
+
+					 if (!(subject in claims)) {
+						 claims[subject] = [];
+					 }
+
+					 var stmts = rules.deduplicateStatements(
+						 { statements: claims[subject] },
+						 [{ statements: proposal[property][0] }]
+					 );
+
+					 if (Object.keys(stmts).length > 0) {
+						 statements[subject] = statements[subject].concat(
+							 proposal[property]
+						 );
+					 }
+
+				 });
+
+				 var result = {};
+				 result[property] = [];
+
+				 angular.forEach(statements, function(stmt) {
+					 angular.forEach(stmt[0], function(snak, prop) {
+						 result[property] = result[property].concat(snak);
+					 });
+				 });
+
+				 return result;
 			 });
 		 }).then(function(results) {
 			 $scope.statements = {
-				 statements: results,
-				 waitForPropertyLabels: function() {
-					 return $q.resolve(true);
-				 },
-				 waitForTerms: function() {
-					 return $q.resolve(true);
-				 }
+				 statements: results
 			 };
 		 });
 
