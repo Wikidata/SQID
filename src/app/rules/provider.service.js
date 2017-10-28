@@ -55,6 +55,11 @@ angular.module('rules').factory('provider', [
 				desc: 'currencies that have a country are the currency of that country',
 				rule: '(?currency.P31 = Q8142)@[], (?currency.P17 = ?country)@[] -> (?country.P38 = ?currency)@[]',
 				kind: 'materialise'
+			},
+			{
+				desc: 'A body of water whose mouth of watercourse is another river, is a tributary',
+				rule: '(?tributary.P403 = ?river)@[], (?river.P31 = Q4022)@[] -> (?river.P974 = ?tributary)@[]',
+				kind: 'materialise'
 			}
 		];
 
