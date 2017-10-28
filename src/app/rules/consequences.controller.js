@@ -13,10 +13,9 @@ function() {
 	'i18n', 'rules', 'ast', 'matcher', 'sparql', 'util', 'wikidataapi',
 	 function($scope, $translate, $q, $routeParams,
 			  i18n, rules, ast, matcher, sparql, util, wikidataapi) {
-		 var rule = JSON.parse($routeParams.rule);
-
+		 $scope.rule = JSON.parse($routeParams.rule);
 		 $scope.statements = null;
-		 $scope.query = matcher.getInstanceCandidatesQuery(rule, [], 100);
+		 $scope.query = matcher.getInstanceCandidatesQuery($scope.rule, [], 100);
 		 sparql.getQueryRequest(
 			 $scope.query.query
 		 ).then(function(results) {
