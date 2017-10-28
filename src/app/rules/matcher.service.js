@@ -126,7 +126,8 @@ define(['rules/rules.module',
 
 			angular.forEach(ast.variables(rule.head),
 							function(variable) {
-								if ((variable.type !== 'variable')) {
+								if ((variable.type !== 'variable') ||
+									(variable.name in bindings)) {
 									return;
 								}
 
