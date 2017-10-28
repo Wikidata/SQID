@@ -61,21 +61,26 @@ function(ajv) {
 				result = ast.body.map(bodyPrinter).join(',<br>') + '<br> ⟶ ' +
 					_print(ast.head,
 						   angular.extend(opts, {
-							   dropUnusedBodyVariables : false
+							   dropUnusedBodyVariables: false
 						   }));
 				break;
 
 			case 'relational-atom':
+				var annotation = _print(ast.annotation, opts);
 				result = bold('(') + nobreak(_print(ast.arguments[0], opts)) +
 					bold('.') + nobreak(_print(ast.predicate, opts)) +
 					bold(' = ') + nobreak(_print(ast.arguments[1], opts)) +
-					bold(')@') + _print(ast.annotation, opts);
+					bold(')') + ((annotation.length > 0)
+								 ? (bold('@') + annotation)
+								 : '');
 				break;
 
 			case 'set-term':
-				result = '{' + ast.assignments.map(function(as) {
-					return nobreak(_print(as.attribute, opts)) + bold(' = ') + nobreak(_print(as.value, opts));
-				}).join(', ') + '}';
+				result = ((!opts.prettify || (ast.assignments.length > 0))
+						  ? ('{' + ast.assignments.map(function(as) {
+							  return nobreak(_print(as.attribute, opts)) + bold(' = ') + nobreak(_print(as.value, opts));
+						  }).join(', ') + '}')
+						  : (''));
 				break;
 
 			case 'specifier-atom':

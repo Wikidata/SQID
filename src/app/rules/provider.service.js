@@ -11,7 +11,7 @@ angular.module('rules').factory('provider', [
 
 		var rules = [
 			{ // x inverseOf y -> y inverseOf x
-				rule: '(?x.P1696 = ?y)@?S -> (?y.P1696 = ?x)@?S',
+				rule: '(?x.P1696 = ?y) -> (?y.P1696 = ?x)',
 				kind: 'materialise'
 			},
 			{ // x partOf y -> y hasPart x

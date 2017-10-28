@@ -147,6 +147,26 @@ define([
 			RelationalAtomWithFunctionTerm: function(r) {
 				return relationalAtom(r, r.FunctionTerm);
 			},
+			SimpleRelationalAtom: function(r) {
+				return P.seqObj(r.openingParenthesis,
+								['subject', r.ObjectTerm],
+								r.dot,
+								['predicate', r.ObjectTerm],
+								r.equals,
+								['object', r.ObjectTerm],
+								r.closingParenthesis)
+					.map(function(obj) {
+						return {
+							type: 'relational-atom',
+							predicate: obj.predicate,
+							arguments: [obj.subject, obj.object],
+							annotation: {
+								type: 'set-term',
+								assignments: []
+							}
+						};
+					});
+			},
 			Placeholder: function() {
 				return P.alt(
 					word('*').map(function() {
@@ -202,13 +222,17 @@ define([
 			Head: function(r) {
 				return P.alt(
 					r.RelationalAtom,
+					r.SimpleRelationalAtom,
 					r.RelationalAtomWithFunctionTerm
 				);
 			},
 			Body: function(r) {
-				return P.sepBy(P.alt(r.RelationalAtom,
-										 r.SpecifierAtom),
-								   r.comma);
+				return P.sepBy(
+					P.alt(
+						r.RelationalAtom,
+						r.SimpleRelationalAtom,
+						r.SpecifierAtom),
+					r.comma);
 			}
 		});
 
