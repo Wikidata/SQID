@@ -71,7 +71,9 @@ define(['rules/rules.module',
 				bindings = {};
 			}
 
-			if(!isFinite(maxInstances) || maxInstances <= 0) {
+			if(!isNaN(maxInstances) && !isFinite(maxInstances) && (maxInstances > 0)) {
+				maxInstances = Infinity;
+			} else if(!isFinite(maxInstances) || maxInstances <= 0) {
 				maxInstances = 10;
 			}
 
@@ -92,7 +94,8 @@ define(['rules/rules.module',
 
 			// if the head predicat's subject is unbound, add a
 			// pattern to weed out matching heads
-			if ((rule.head.arguments[0].type == 'variable') &&
+			if (false && // doesn't currently work correctly.
+				(rule.head.arguments[0].type == 'variable') &&
 				!(rule.head.arguments[0].name in bindings)) {
 				var atom = rule.head;
 
@@ -419,7 +422,9 @@ define(['rules/rules.module',
 				"\nWHERE {\n  " + patterns.join(" .\n  ") +
 				((optionals.length) ? "\n  " + optionals.join(" .\n	 ") : '') +
 				((notExists.length) ? "\n  FILTER NOT EXISTS {\n    " + notExists.join(" .\n    ") + "\n  }": '') +
-				"\n} LIMIT " + limit;
+				"\n} " + ((isFinite(limit))
+						  ? ("LIMIT " + limit)
+						  : "");
 
 			return query;
 		}
@@ -427,6 +432,16 @@ define(['rules/rules.module',
 		function verifyCandidateInstance(query) {
 			// resolve constraints, if any
 			var match = true;
+
+			angular.forEach(query.bindings, function(binding) {
+				if (binding.rank === 'deprecated') {
+					match = false;
+				}
+			});
+
+			if (!match) {
+				return;
+			}
 
 			angular.forEach(query.constraints, function(constraint) {
 				if (!match) {

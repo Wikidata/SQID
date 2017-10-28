@@ -39,6 +39,7 @@ function() {
 							(('qualifiers' in claim)
 							 ? claim.qualifiers
 							 : []);
+						bindings[idx].rank = claim.rank;
 					}
 				});
 			});
