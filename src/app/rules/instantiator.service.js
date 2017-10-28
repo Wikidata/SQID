@@ -101,9 +101,15 @@ function() {
 				return name;
 			}
 
+			var variablesInHeadAnnotation = ast.variables(head.annotation)
+				.map(function(variable) {
+					return variable.name;
+				});
+
 			angular.forEach(ast.variables(head),
 							function(variable) {
-								if (!(variable.name in query.bindings)) {
+								if (!(variable.name in query.bindings) &&
+									!(variablesInHeadAnnotation.indexOf(variable.name) != -1)) {
 									throw new RangeError("variable `" + variable.name +
 														 "' is not among result bindings");
 								}

@@ -17,6 +17,9 @@ function() {
 
 			angular.forEach(ast.variables(query.rule.head), function(variable) {
 				var name = variable.name;
+				if (!(name in bindings)) {
+					return;
+				}
 				bindings[name] = { id: query.bindings[name].id,
 								   type: query.bindings[name].type,
 								   qualifiers: query.bindings[name].qualifiers,
