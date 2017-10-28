@@ -292,11 +292,11 @@ angular.module('rules').factory('provider', [
 				rule: '(?x.P1029 = ?y)@?S -> (?y.P450 = ?x)@?S',
 				kind: 'materialise'
 			},
-			{ // generated inverse rule for P159/P466
-				desc: 'headquarters location is inverse of occupant',
-				rule: '(?x.P159 = ?y)@?S -> (?y.P466 = ?x)@?S',
-				kind: 'materialise'
-			},
+// 			{ // generated inverse rule for P159/P466
+// 				desc: 'headquarters location is inverse of occupant',
+// 				rule: '(?x.P159 = ?y)@?S -> (?y.P466 = ?x)@?S',
+// 				kind: 'materialise'
+// 			},
 			{ // generated inverse rule for P361/P527
 				desc: 'part of is inverse of has part',
 				rule: '(?x.P361 = ?y)@?S -> (?y.P527 = ?x)@?S',
