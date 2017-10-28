@@ -108,10 +108,15 @@ define([
 				// do conversion from SPARQL
 				angular.forEach(qry.bindings, function(item, binding) {
 					if ((item.type === 'set-variable') &&
-						'id' in item) {
+						('id' in item) &&
+						!(item.id in claims)) {
 						claims.push(item.id);
 					} else if ('fromSpecifier' in item) {
-						claims.push(item.fromSpecifier);
+						var id = qry.bindings[item.fromSpecifier].id;
+
+						if (!(id in claims)) {
+							claims.push(id);
+						}
 					}
 				});
 

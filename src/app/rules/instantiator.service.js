@@ -44,12 +44,33 @@ function() {
 
 				// find binding for this claim
 				angular.forEach(bindings, function(binding, idx) {
-					if (bindings[idx].id === claim.id) {
+					if (('id' in bindings[idx]) &&
+						(bindings[idx].id === claim.id)) {
 						bindings[idx].qualifiers =
 							(('qualifiers' in claim)
 							 ? claim.qualifiers
 							 : []);
 						bindings[idx].rank = claim.rank;
+					}
+				});
+			});
+
+			angular.forEach(apiResult, function(result) {
+				var property = Object.keys(result.claims)[0]; // only a single claim
+				var claim = result.claims[property][0];
+
+				// find binding for this claim
+				angular.forEach(bindings, function(binding, idx) {
+					if (('fromSpecifier' in bindings[idx]) &&
+						!('rank' in bindings[idx])) {
+						var spec = bindings[bindings[idx].fromSpecifier];
+
+						if (claim.id === spec.id) {
+							// todo: support variables in attribute positions
+							var prop = bindings[idx].item.attribute.name;
+							bindings[idx].item = spec.qualifiers[prop];
+							bindings[idx].rank = spec.rank;
+						}
 					}
 				});
 			});
@@ -112,7 +133,7 @@ function() {
 
 					switch(assignment.value.type) {
 					case 'variable':
-						qualifiers[property].push(assignment.value.item);
+						qualifiers[property] = bindingOrLiteral(assignment.value);
 						break;
 
 					default:

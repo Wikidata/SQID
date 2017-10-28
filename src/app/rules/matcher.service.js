@@ -187,7 +187,7 @@ define(['rules/rules.module',
 				return namespace + (++variables);
 			}
 
-			function maybeBinding(name, prefix, handle) {
+			function maybeBinding(name, prefix, handle, assignment) {
 				if (!prefix) {
 					prefix = '';
 				} else if (prefix.slice !== ':') {
@@ -205,6 +205,13 @@ define(['rules/rules.module',
 
 					return prefix + variableBindings[name].id;
 				} else if (parser.isVariableName(name)) {
+					if (angular.isDefined(handle)) {
+						variableBindings[name] = {
+							fromSpecifier: handle,
+							item: assignment
+						};
+					}
+
 					return name;
 				}
 
@@ -303,7 +310,7 @@ define(['rules/rules.module',
 						case 'literal':
 							// fallthrough
 						case 'variable':
-							value = maybeBinding(assignment.value, 'pqv', handle);
+							value = maybeBinding(assignment.value, 'pqv', handle, assignment);
 							break;
 						case 'star':
 							optional = true;
