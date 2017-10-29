@@ -10,31 +10,47 @@ angular.module('rules').factory('provider', [
 	function(parser) {
 
 		var rules = [
-			{ // x inverseOf y -> y inverseOf x
-				rule: '(?x.P1696 = ?y) -> (?y.P1696 = ?x)',
-				kind: 'materialise'
-			},
-			{ // x spouse y -> y spouse x
+// 			{ // x inverseOf y -> y inverseOf x
+// 				rule: '(?x.P1696 = ?y) -> (?y.P1696 = ?x)',
+// 				kind: 'materialise'
+// 			},
+			{
+				desc: 'spouse is symmetric',
 				rule: '(?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
 				kind: 'materialise'
 			},
+			{
+				desc: 'A male parent is a father',
+				rule: '(?father.P40 = ?child)@?X, (?father.P21 = Q6581097)@?Y -> (?child.P22 = ?father)@[]',
+				kind: 'materialise'
+			},
+			{
+				desc: 'A female parent is a mother',
+				rule: '(?mother.P40 = ?child)@?X, (?mother.P21 = Q6581072)@?Y -> (?child.P25 = ?mother)@[]',
+				kind: 'materialise'
+			},
 			{ // grandfather
+				desc: 'a male parent of a parent is a grandfather',
 				rule: '(?grandfather.P21 = Q6581097)@?X, (?grandfather.P40 = ?parent)@?Y, (?parent.P40 = ?child)@?Z -> (?child.P1038 = ?grandfather)@[P1039 = Q9238344]',
 				kind: 'informational'
 			},
 			{ // grandson
+				desc: 'a male child of a child is a grandson',
 				rule: '(?son.P21 = Q6581097)@?X, (?grandparent.P40 = ?parent)@?Y, (?parent.P40 = ?son)@?Z -> (?grandparent.P1038 = ?son)@[P1039 = Q11921506]',
 				kind: 'informational'
 			},
 			{ // grandmother
+				desc: 'a female parent of a parent is a grandmother',
 				rule: '(?grandmother.P21 = Q6581072)@?X, (?grandmother.P40 = ?parent)@?Y, (?parent.P40 = ?child)@?Z -> (?child.P1038 = ?grandmother)@[P1039 = Q9235758]',
 				kind: 'informational'
 			},
 			{ // granddaughter
+				desc: 'a female child of a child is a granddaughter',
 				rule: '(?daughter.P21 = Q6581072)@?X, (?grandparent.P40 = ?parent)@?Y, (?parent.P40 = ?daughter)@?Z -> (?grandparent.P1038 = ?daughter)@[P1039 = Q19756330]',
 				kind: 'informational'
 			},
 			{ // country's head of state holds this position
+				desc: 'a country\'s head of state holds this position',
 				rule: '(?country.P35 = ?headOfState)@?X, (?country.P1906 = ?headOffice)@?Y -> (?headOfState.P39 = ?headOffice)@[]',
 				kind: 'materialise'
 			},
@@ -49,12 +65,12 @@ angular.module('rules').factory('provider', [
 			},
 			{ // currency is inverse of cound
 				desc: 'currencies that have a country are the currency of that country',
-				rule: '(?currency.P31 = Q8142)@[], (?currency.P17 = ?country)@[] -> (?country.P38 = ?currency)@[]',
+				rule: '(?currency.P31 = Q8142)@?X, (?currency.P17 = ?country)@?Y -> (?country.P38 = ?currency)@[]',
 				kind: 'materialise'
 			},
 			{
 				desc: 'A body of water whose mouth of watercourse is another river, is a tributary',
-				rule: '(?tributary.P403 = ?river)@[], (?river.P31 = Q4022)@[] -> (?river.P974 = ?tributary)@[]',
+				rule: '(?tributary.P403 = ?river)@?X, (?river.P31 = Q4022)@?Y -> (?river.P974 = ?tributary)@[]',
 				kind: 'materialise'
 			},
 			{ // generated inverse rule for P3148/P2568
