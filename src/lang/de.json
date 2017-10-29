@@ -182,6 +182,7 @@
 		"MATERIALISE": "materialisieren",
 		"INFORMATIONAL": "nur anzeigen",
 		"CONSTRAINT": "Nutzungseinschränkung",
-		"CONSEQUENCES": "Folgerungen"
+		"CONSEQUENCES": "Folgerungen",
+		"COUNT": "Anzahl"
     }
 }

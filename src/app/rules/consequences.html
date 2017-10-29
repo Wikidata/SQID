@@ -26,6 +26,10 @@
 			{{ claim.mainsnak.datavalue.value | linkToEntity | labelEntity }}
 		</a></td>
 	  </tr>
+	  <tr>
+		<td colspan="2" translate="RULES.COUNT"></td>
+		<td ng-bind="numStatements"></td>
+	  </tr>
 	</tbody>
   </table>
 </div>

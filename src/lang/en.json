@@ -187,6 +187,7 @@
 		"MATERIALISE": "materialise",
 		"INFORMATIONAL": "informational",
 		"CONSTRAINT": "constraint",
-		"CONSEQUENCES": "consequences"
+		"CONSEQUENCES": "consequences",
+		"COUNT": "count"
     }
 }

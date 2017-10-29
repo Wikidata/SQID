@@ -176,6 +176,8 @@ function() {
 					 });
 				 });
 
+				 $scope.numStatements = result[property].length;
+
 				 return result;
 			 });
 		 }).then(function(results) {
