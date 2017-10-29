@@ -461,6 +461,11 @@ SELECT DISTINCT ?p { \n\
 	var determineEquivalentStatements = function(eStatementGroup, pStmt){
 		var equivalentStatements = [];
 		angular.forEach(eStatementGroup, function(eStmt){
+			if (angular.isUndefined(eStmt.mainsnak.datavalue) ||
+				angular.isUndefined(pStmt.mainsnak.datavalue)) {
+				return;
+			}
+
 			if (valueIsEquivalent(eStmt.mainsnak.datavalue, pStmt.mainsnak.datavalue)){
 
 				// check qualifiers

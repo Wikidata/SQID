@@ -137,16 +137,34 @@ function() {
 				angular.forEach(head.annotation.assignments, function(assignment) {
 					var property = bindingOrLiteral(assignment.attribute);
 
-					if (!(property in qualifiers)) {
-						qualifiers[property] = [];
-					}
-
 					switch(assignment.value.type) {
 					case 'variable':
+						if (!(property in qualifiers)) {
+							qualifiers[property] = [];
+						}
+
 						qualifiers[property] = bindingOrLiteral(assignment.value);
 						break;
 
+					case 'dot':
+						var sourceClaim = bindingOrLiteral(assignment.value.fromSpecifier);
+
+						angular.forEach(query.bindings, function(binding) {
+							if ((angular.isObject(binding)) &&
+								('id' in binding) &&
+								(binding.id === sourceClaim) &&
+								(assignment.value.item.name in binding.qualifiers)) {
+								qualifiers[property] = binding.qualifiers[assignment.value.item.name];
+							}
+						});
+
+						break;
+
 					default:
+						if (!(property in qualifiers)) {
+							qualifiers[property] = [];
+						}
+
 						qualifiers[property].push({
 						snaktype: 'value',
 						datatype: 'wikibase-item',

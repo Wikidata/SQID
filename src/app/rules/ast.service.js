@@ -129,6 +129,10 @@ function(ajv) {
 				result = bold('+');
 				break;
 
+			case 'dot':
+				result = _print(ast.fromSpecifier, opts) + bold('.') + _print(ast.item, opts);
+				break;
+
 			case 'literal':
 				result = ((opts.prettify)
 						  ? (['<span class="text-success" title="',
@@ -226,6 +230,13 @@ function(ajv) {
 				);
 				break;
 
+			case 'dot':
+				collector = collector.concat(
+					literals(ast.fromSpecifier),
+					literals(ast.item)
+				);
+				break;
+
 			case 'literal':
 				collector = ast;
 				break;
@@ -305,6 +316,13 @@ function(ajv) {
 				collector = collector.concat(
 					variables(ast.attribute),
 					variables(ast.value)
+				);
+				break;
+
+			case 'dot':
+				collector = collector.concat(
+					variables(ast.fromSpecifier),
+					variables(ast.item)
 				);
 				break;
 

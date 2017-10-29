@@ -130,6 +130,18 @@ define([
 					specifier(r, r.openingBracket, r.closingBracket, 'closed')
 				);
 			},
+			DottedSetTerm: function(r) {
+				return P.alt(
+					P.seqObj(r.openingBrace,
+							 ['assignments', P.sepBy(r.DottedAssignment, r.comma)],
+							 r.closingBrace)
+						.thru(type('set-term')),
+					P.seqObj(r.openingBracket,
+							 ['assignments', P.sepBy(r.DottedAssignment, r.comma)],
+							 r.closingBracket)
+						.thru(type('closed-specifier'))
+				);
+			},
 			FunctionTerm: function(r) {
 				return P.seqObj(['name', P.regexp(/[a-zA-Z]\w*/)],
 								r.openingParenthesis,
@@ -146,6 +158,9 @@ define([
 			},
 			RelationalAtomWithFunctionTerm: function(r) {
 				return relationalAtom(r, r.FunctionTerm);
+			},
+			RelationalAtomWithDots: function(r) {
+				return relationalAtom(r, r.DottedSetTerm);
 			},
 			SimpleRelationalAtom: function(r) {
 				return P.seqObj(r.openingParenthesis,
@@ -167,6 +182,12 @@ define([
 						};
 					});
 			},
+			Dot: function(r) {
+				return P.seqObj(['fromSpecifier', r.ObjectVariable],
+								r.dot,
+								['item', r.ObjectLiteral])
+					.thru(type("dot"));
+			},
 			Placeholder: function() {
 				return P.alt(
 					word('*').map(function() {
@@ -186,6 +207,13 @@ define([
 			},
 			AssignmentWithPlaceholder: function(r) {
 				return assignment(r, P.alt(
+					r.ObjectTerm,
+					r.Placeholder
+				));
+			},
+			DottedAssignment: function(r) {
+				return assignment(r, P.alt(
+					r.Dot,
 					r.ObjectTerm,
 					r.Placeholder
 				));
@@ -221,6 +249,7 @@ define([
 			},
 			Head: function(r) {
 				return P.alt(
+					r.RelationalAtomWithDots,
 					r.RelationalAtom,
 					r.SimpleRelationalAtom,
 					r.RelationalAtomWithFunctionTerm
