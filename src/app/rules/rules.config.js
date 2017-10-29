@@ -45,6 +45,14 @@ function() {
 								entity['numeric-id']);
 					};
 				}]);
+			$filterProvider
+				.register('labelEntity', ['$sce', 'i18n', function($sce, i18n) {
+					return function(entity) {
+						return $sce.trustAsHtml(
+							i18n.getEntityLabel(entity)
+						);
+					};
+				}]);
 	}]);
 
 	return {};

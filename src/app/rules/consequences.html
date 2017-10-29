@@ -20,10 +20,10 @@
 	</thead>
 	<tbody ng-repeat="(property, claims) in statements.statements">
 	  <tr ng-repeat="claim in claims">
-		<td><a ng-href="#/view?id={{ claim.proposalFor }}">{{ claim.proposalFor }}</a></td>
-		<td><a ng-href="#/view?id={{ property }}">{{ property }}</a></td>
+		<td><a ng-href="#/view?id={{ claim.proposalFor }}">{{ claim.proposalFor | labelEntity }}</a></td>
+		<td><a ng-href="#/view?id={{ property }}">{{ property | labelEntity }}</a></td>
 		<td><a ng-href="#/view?id={{ claim.mainsnak.datavalue.value | linkToEntity }}">
-			{{ claim.mainsnak.datavalue.value | linkToEntity }}
+			{{ claim.mainsnak.datavalue.value | linkToEntity | labelEntity }}
 		</a></td>
 	  </tr>
 	</tbody>

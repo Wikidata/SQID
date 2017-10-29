@@ -16,6 +16,21 @@ function() {
 		 $scope.rule = JSON.parse($routeParams.rule);
 		 $scope.statements = null;
 		 $scope.query = matcher.getInstanceCandidatesQuery($scope.rule, [], 101);
+
+		 var property = undefined;
+		 var head = $scope.query.rule.head;
+
+		 if (('name' in head.predicate) &&
+			 ('type' in head.predicate)) {
+			 property = head.predicate.name;
+		 } else if (head.predicate.name in $scope.query.bindings) {
+			 property = $scope.query.bindings[head.predicate.name];
+		 } else {
+			 property = head.predicate;
+		 }
+
+		 $scope.query.property = property;
+
 		 sparql.getQueryRequest(
 			 $scope.query.query
 		 ).then(function(results) {
@@ -23,7 +38,23 @@ function() {
 		 }).then(
 			 rules.injectReferences
 		 ).then(function(results) {
-			 var properties = [];
+			 var properties = [$scope.query.property];
+
+			 angular.forEach(results.statements, function(result) {
+				 if (('proposalFor' in result[property][0]) &&
+				 	 (result[property][0].proposalFor.substr(0, 1) === 'P') &&
+				 	 !(result[property][0].proposalFor in properties)) {
+				 	 properties.push(result[property][0].proposalFor);
+				 }
+
+				 var obj = result[property][0].mainsnak.datavalue;
+
+				 if ((obj.type === 'wikibase-entityid') &&
+					 (obj.value['entity-type'] === 'property') &&
+					 !(('P' + obj.value['numeric-id']) in properties)) {
+					 properties.push(('P' + obj.value['numeric-id']));
+				 }
+			 });
 
 			 return i18n.waitForPropertyLabels(
 				 properties
@@ -31,26 +62,34 @@ function() {
 					 return results;
 				 });
 		 }).then(function(results) {
+			 var terms = [];
+
+			 angular.forEach(results.statements, function(result) {
+				 if (('proposalFor' in result[property][0]) &&
+				 	 (result[property][0].proposalFor.substr(0, 1) === 'Q') &&
+				 	 !(result[property][0].proposalFor in terms)) {
+				 	 terms.push(result[property][0].proposalFor);
+				 }
+
+				 var obj = result[property][0].mainsnak.datavalue;
+
+				 if ((obj.type === 'wikibase-entityid') &&
+					 (obj.value['entity-type'] === 'item') &&
+					 !(('Q' + obj.value['numeric-id']) in terms)) {
+					 terms.push(('Q' + obj.value['numeric-id']));
+				 } else if ((obj.type === 'wikibase-itemid') &&
+					 !(('Q' + obj.value['numeric-id']) in terms)) {
+					 terms.push(('Q' + obj.value['numeric-id']));
+				 }
+			 });
+
 			 return i18n.waitForTerms(util.unionArrays(
-				 results.requests.entityIds,
+				 terms,
 				 [])).then(function() {
 					 return results;
 				 });
 		 }).then(function(results) {
 			 var claims = [];
-			 var property = undefined;
-			 var head = $scope.query.rule.head;
-
-			 if (('name' in head.predicate) &&
-				 ('type' in head.predicate)) {
-				 property = head.predicate.name;
-			 } else if (head.predicate.name in $scope.query.bindings) {
-				 property = $scope.query.bindings[head.predicate.name];
-			 } else {
-				 property = head.predicate;
-			 }
-
-			 $scope.query.property = property;
 
 			 angular.forEach(results.statements, function(claim) {
 				 var subject = claim[property][0].proposalFor;
