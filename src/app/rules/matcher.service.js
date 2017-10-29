@@ -134,6 +134,27 @@ define(['rules/rules.module',
 								interestingVariables.push(variable.name);
 							});
 
+			if (constraints.length > 0) {
+				constraints = util.unionArrays(constraints, []);
+			}
+
+			// TODO: handle dots
+			angular.forEach(rule.head.annotation.assignments, function(assignment) {
+				if (assignment.value.type === 'dot') {
+					if (!(assignment.value.fromSpecifier.name in interestingVariables)) {
+						interestingVariables.push(assignment.value.fromSpecifier.name);
+					}
+
+					sparqlOptionals.push('OPTIONAL { ' +
+										 [
+											 assignment.value.fromSpecifier.name,
+											 'pq:' + assignment.value.item.name,
+											 '[]'
+										 ].join(' ') + ' }'
+										);
+				}
+			});
+
 			// ensure that set variables in the head are always interesting
 			if ('name' in rule.head.annotation) {
 				interestingVariables.push(rule.head.annotation.name);
@@ -142,10 +163,6 @@ define(['rules/rules.module',
 			sparqlBindings = util.unionArrays(sparqlBindings,
 											  interestingVariables,
 											  [rule.head.annotation.name]);
-
-			if (constraints.length > 0) {
-				constraints = util.unionArrays(constraints, []);
-			}
 
 			var query = sparqlQueryFromFragments(sparqlBindings,
 												 sparqlPatterns,

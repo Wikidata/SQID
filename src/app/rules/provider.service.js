@@ -56,7 +56,7 @@ angular.module('rules').factory('provider', [
 			},
 			{ // anyone holding a country's head of state position is its head of state
 				desc: 'anyone holding a country\'s head of state position is its head of state',
-				rule: '?X:(P580=?startdate, P582=?enddate), (?headOfState.P39 = ?headOffice)@?X, (?country.P1906 = ?headOffice)@?Y -> (?country.P35 = ?headOfState)@[P580=?X.P580, P582=?X.P582]',
+				rule: '(?headOfState.P39 = ?headOffice)@?X, (?country.P1906 = ?headOffice)@?Y -> (?country.P35 = ?headOfState)@[P580=?X.P580, P582=?X.P582]',
 				kind: 'materialise'
 			},
 			{ // head of government
