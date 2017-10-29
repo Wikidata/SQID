@@ -377,11 +377,11 @@ angular.module('rules').factory('provider', [
 				rule: '(?x.P925 = ?y)@?S -> (?y.P926 = ?x)@?S',
 				kind: 'materialise'
 			},
-			{ // generated inverse rule for P403/P974
-				desc: 'mouth of the watercourse is inverse of tributary',
-				rule: '(?x.P403 = ?y)@?S -> (?y.P974 = ?x)@?S',
-				kind: 'materialise'
-			},
+// 			{ // generated inverse rule for P403/P974
+// 				desc: 'mouth of the watercourse is inverse of tributary',
+// 				rule: '(?x.P403 = ?y)@?S -> (?y.P974 = ?x)@?S',
+// 				kind: 'materialise'
+// 			},
 			{ // generated inverse rule for P1011/P1012
 				desc: 'excluding is inverse of including',
 				rule: '(?x.P1011 = ?y)@?S -> (?y.P1012 = ?x)@?S',
