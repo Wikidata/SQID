@@ -159,7 +159,7 @@ function() {
 						 [{ statements: proposal[property][0] }]
 					 );
 
-					 if (Object.keys(stmts).length > 0) {
+					 if (Object.keys(stmts[property]).length > 0) {
 						 statements[subject] = statements[subject].concat(
 							 proposal[property]
 						 );
