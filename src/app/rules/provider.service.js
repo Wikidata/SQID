@@ -675,16 +675,20 @@ angular.module('rules').factory('provider', [
 			}
 		];
 
-		var getRules = function() {
-			return rules.map(function(rule) {
-				return angular.extend(
-					{
-						kind: rule.kind,
-						desc: rule.desc,
-					},
-					parser.parse(rule.rule, true)
-				);
-			});
+		var getRules = function(haveEditingRights) {
+			return rules
+				.filter(function(rule) {
+					return (haveEditingRights ||
+							rule.kind === 'informational');
+				}).map(function(rule) {
+					return angular.extend(
+						{
+							kind: rule.kind,
+							desc: rule.desc
+						},
+						parser.parse(rule.rule, true)
+					);
+				});
 		};
 
 return {

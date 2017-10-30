@@ -17,6 +17,7 @@ define(['proposals/proposals.module',
 				}
 
 				var providers = [];
+				var haveEditingRights = scope.hasEditRights;
 				var haveEntityData = (angular.isObject(newData[0]) &&
 									  !angular.isObject(oldData[0]));
 				var haveEntityInData = (angular.isObject(newData[1]) &&
@@ -24,7 +25,7 @@ define(['proposals/proposals.module',
 				var haveBothData = ((haveEntityData && angular.isObject(newData[1])) ||
 									(haveEntityInData && angular.isObject(newData[0])));
 
-				if (haveEntityData) {
+				if (haveEntityData && haveEditingRights) {
 					// add providers that only need statements
 					providers = providers.concat(
 						primarySources.getProvider()
@@ -38,7 +39,7 @@ define(['proposals/proposals.module',
 				if (haveBothData) {
 					// add providers that depend on statements and inlinks
 					providers = providers.concat(
-						rules.getProvider(newData[1])
+						rules.getProvider(newData[1], haveEditingRights)
 					);
 				}
 

@@ -16,24 +16,26 @@ define([
 	 function($q, $log, $translate, sparql, i18n, util, entitydata, wikidataapi,
 			  matcher, provider, instantiator, actions) {
 
-		 function getProvider(entityInData) {
+		 function getProvider(entityInData, haveEditingRights) {
 			 return {
 				 getStatements: function(id, entities) {
-					 return getStatements(entities, entityInData, id);
+					 return getStatements(entities, entityInData, id, haveEditingRights);
 				 },
 				 addProposalInformation: addProposalInformation
 			 };
 		 }
 
-		function getStatements(entityData, entityInData, itemId) {
+		 function getStatements(entityData, entityInData, itemId, haveEditingRights) {
 			return $q.all([entityData.waitForPropertyLabels(),
 						   entityInData.waitForPropertyLabels()
 						  ])
 				.then(function() {
-					return $q.all(checkCandidateRules(entityData,
-													  entityInData,
-													  itemId)
-					);
+					return $q.all(checkCandidateRules(
+						entityData,
+						entityInData,
+						itemId,
+						haveEditingRights
+					));
 				}).then(function(results) {
 					return deduplicateStatements(entityData, results);
 				}).then(function(results) {
@@ -55,8 +57,8 @@ define([
 				});
 		}
 
-		function checkCandidateRules(entityData, entityInData, itemId) {
-			return provider.getRules()
+		function checkCandidateRules(entityData, entityInData, itemId, haveEditingRights) {
+			return provider.getRules(haveEditingRights)
 				.filter(matcher.couldMatch(
 					entityData.statements,
 					entityInData.statements,
