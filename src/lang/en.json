@@ -184,7 +184,7 @@
         "QUERY": "Query",
         "NAV_RULES": "Rules",
 		"KIND": "Kind",
-		"MATERIALISE": "materialise",
+		"MATERIALISABLE": "materialisable",
 		"INFORMATIONAL": "informational",
 		"CONSTRAINT": "constraint",
 		"CONSEQUENCES": "consequences",

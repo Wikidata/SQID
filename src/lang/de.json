@@ -179,7 +179,7 @@
         "QUERY": "Anfrage",
         "NAV_RULES": "Regeln",
 		"KIND": "Art",
-		"MATERIALISE": "materialisieren",
+		"MATERIALISABLE": "materialisieren",
 		"INFORMATIONAL": "nur anzeigen",
 		"CONSTRAINT": "Nutzungseinschränkung",
 		"CONSEQUENCES": "Folgerungen",
