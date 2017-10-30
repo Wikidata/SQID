@@ -307,12 +307,12 @@ function($compile, Properties, dataFormatter, util, i18n) {
 			}
 		};
 
-        scope.handles = function(statement, action) {
-            return ((action in scope.proposalRegister[statement]) &&
-                    (angular.isDefined(scope.proposalRegister[statement][action])) &&
+		scope.handles = function(statement, action) {
+			return ((action in scope.proposalRegister[statement]) &&
+					(angular.isDefined(scope.proposalRegister[statement][action])) &&
 					((!('proposalType' in scope.proposalRegister[statement])) ||
 					 scope.proposalRegister[statement].proposalType !== 'informational'));
-        };
+		};
 
 		scope.inHtml = '';
 		scope.outHtml = '';
