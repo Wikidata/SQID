@@ -105,7 +105,7 @@ angular.module('view').controller('ViewController', [
 			if (View.hasEditRights){
 				View.clearEntityDataCache();
 			}
-			$scope.hasEditRights = true;
+			$scope.hasEditRights = false;
 			View.setEditRights(false);
 		}
 	});
