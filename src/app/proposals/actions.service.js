@@ -7,6 +7,26 @@ define(['proposals/proposals.module',
 			return approveStatementAndReference(stripReferences(context));
 		}
 
+		var STATEMENT_KEY_WHITELIST = [
+			'mainsnak',
+			'type',
+			'rank',
+			'qualifiers',
+			'references'
+		];
+
+		function copyWhitelistedKeys(from, whitelist) {
+			var to = {};
+
+			angular.forEach(from, function(value, key) {
+				if (whitelist.indexOf(key) !== -1) {
+					to[key] = value;
+				}
+			});
+
+			return to;
+		}
+
 		function stripReferences(statement) {
 			var stmt = {};
 			angular.forEach(statement, function(value, key) {
@@ -19,21 +39,17 @@ define(['proposals/proposals.module',
 		}
 
 		function approveStatementAndReference(context) {
-			var statement = context;
-			var stmt = {};
-
-			delete stmt.id;
-			delete stmt.source;
-			delete stmt.approve;
-			delete stmt.reject;
-			delete stmt.proposalType;
-			delete stmt.actions;
+			var stmt = copyWhitelistedKeys(
+				context,
+				STATEMENT_KEY_WHITELIST
+			);
 
 			stmt.type = 'statement';
 
-			return oauth.addStatement(context.qid,
-									  JSON.stringify(stmt)
-									 );
+			return oauth.addStatement(
+				context.proposalFor,
+				angular.toJson(stmt)
+			);
 		}
 
 		function approveStatementAndMaybeReference(context) {

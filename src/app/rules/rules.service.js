@@ -252,7 +252,7 @@ define([
 
 				statements[i].actions = {
 					approve: actions.approveStatementAndMaybeReference,
-					reject: actions.deprecateStatement
+					//reject: actions.deprecateStatement
 
 				};
 			}
