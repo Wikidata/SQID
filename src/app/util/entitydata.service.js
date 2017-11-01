@@ -667,7 +667,9 @@ SELECT DISTINCT ?p { \n\
 		sortStatementGroup: sortStatementGroup,
 		hasNoneDuplicates: hasNoneDuplicates,
 		mergeReferences: mergeReferences,
-		mergeStatements: mergeStatements
+		mergeStatements: mergeStatements,
+		getPropertyIds: getPropertyIds,
+		getEntityIds: getEntityIds
 	};
 }]);
 

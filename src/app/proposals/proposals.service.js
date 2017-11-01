@@ -6,8 +6,8 @@ define(['proposals/proposals.module',
 		'util/entitydata.service'
 ], function() {
 	angular.module('proposals').factory('proposals',
-	['$q', '$log', 'util', 'entitydata', 'rules', 'primarySources',
-	 function($q, $log, util, entitydata, rules, primarySources) {
+	['$q', '$log', 'util', 'entitydata', 'rules', 'primarySources', 'i18n',
+	function($q, $log, util, entitydata, rules, primarySources, i18n) {
 
 		function getEntityDataListener(id) {
 			return function(newData, oldData, scope) {
@@ -64,6 +64,26 @@ define(['proposals/proposals.module',
 						response: data,
 						addProposalInformation: provider.addProposalInformation
 					};
+				}).then(function(result) {
+					var entities = [];
+					var properties = [];
+
+					if (!('claims' in result.response)) {
+						return result;
+					}
+
+					entities = entities.concat(entitydata.getEntityIds(result.response.claims));
+					properties = properties.concat(entitydata.getPropertyIds(result.response.claims));
+
+					return i18n.waitForPropertyLabels(
+						util.unionArrays(properties, [])
+					).then(function() {
+						return i18n.waitForTerms(
+							util.unionArrays(entities, [])
+						);
+					}).then(function() {
+						return result;
+					});
 				}).then(function(responses) {
 					var response = {};
 

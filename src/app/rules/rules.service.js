@@ -41,18 +41,6 @@ define([
 				}).then(function(results) {
 					return injectReferences(results);
 				}).then(function(results) {
-					return i18n.waitForPropertyLabels(util.unionArrays(
-						results.requests.propertyIds,
-						[])).then(function() {
-							return results;
-						});
-				}).then(function(results) {
-					return i18n.waitForTerms(util.unionArrays(
-						results.requests.entityIds,
-						[])).then(function() {
-							return results;
-						});
-				}).then(function(results) {
 					return { claims: results.statements };
 				});
 		}
