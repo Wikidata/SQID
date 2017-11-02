@@ -350,10 +350,10 @@ function(ajv) {
 					var schema = response.data;
 					var validator = new ajv();
 					var valid = validator.validate(schema, ast);
-				 if (!valid) {
-						var errMsg = 'Failed to validate rule AST: ' +
-							validator.errors;
-					 $log.error(validator.errors);
+
+					if (!valid) {
+						var errMsg = ('Failed to validate rule AST: ');
+						$log.error(errMsg, validator.errors, ast);
 						throw new SyntaxError(errMsg);
 					}
 				});
