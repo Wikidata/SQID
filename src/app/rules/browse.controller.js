@@ -8,9 +8,9 @@ function() {
 	function($scope, $translate, $q, i18n, ast, provider) {
 		$scope.translation = {};
 
-		$q.all(provider
-			   .getRules()
-			   .map(function(rule) {
+		var rules = provider.getRules(true);
+
+		$q.all(rules.map(function(rule) {
 				   var literals = ast
 					   .literals(rule)
 					   .map(function (literal) {
@@ -29,9 +29,7 @@ function() {
 				   ]);
 			   })
 			  ).then(function() {
-				  $scope.rules = provider
-					  .getRules()
-					  .map(function(rule) {
+				  $scope.rules = rules.map(function(rule) {
 						  // thaw rule
 						  return angular.extend({}, rule);
 					  });
