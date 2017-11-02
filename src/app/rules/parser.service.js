@@ -183,7 +183,7 @@ define([
 					});
 			},
 			Dot: function(r) {
-				return P.seqObj(['fromSpecifier', r.ObjectVariable],
+				return P.seqObj(['fromSpecifier', r.SetVariable],
 								r.dot,
 								['item', r.ObjectLiteral])
 					.thru(type("dot"));
