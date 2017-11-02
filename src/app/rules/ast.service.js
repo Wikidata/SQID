@@ -58,7 +58,13 @@ function(ajv) {
 								  }));
 				};
 
-				result = ast.body.map(bodyPrinter).join(',<br>') + '<br> ⟶ ' +
+				result = ast.body.map(bodyPrinter).join(
+					((opts.prettify)
+					 ? ',<br>'
+					 : ', ')
+				) + ((opts.prettify)
+					 ? '<br> ⟶ '
+					 : ' -> ') +
 					_print(ast.head,
 						   angular.extend(opts, {
 							   dropUnusedBodyVariables: false
