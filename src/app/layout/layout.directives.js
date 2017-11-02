@@ -26,17 +26,20 @@ angular.module('layout').directive('sqidApp', [function() {
 	function link(scope, element, attrs) {
 
 		$rootScope.$on('$routeChangeStart', function(e, next, current) {
-			var page,
+			var page = false,
 				suffix = ' - SQID';
 
-			switch(next.$$route.originalPath.substr(1)) {
-				case '':       page = 'PAGE_TITLE.START'; break;
-				case 'about':  page = 'PAGE_TITLE.ABOUT'; break;
-				case 'browse': browseTitle(); break;
-				case 'view' :  viewTitle(); break;
-				case 'query':  page = 'PAGE_TITLE.QUERY'; break;
-				default:       page = false;
+			if (angular.isDefined(next.$$route)) {
+				switch(next.$$route.originalPath.substr(1)) {
+					case '':       page = 'PAGE_TITLE.START'; break;
+					case 'about':  page = 'PAGE_TITLE.ABOUT'; break;
+					case 'browse': browseTitle(); break;
+					case 'view' :  viewTitle(); break;
+					case 'query':  page = 'PAGE_TITLE.QUERY'; break;
+					default:       page = false;
+				}
 			}
+
 			if(page) {
 				(function translatePageName() {
 					if(!$translate.isReady()) { setTimeout(translatePageName,100); }
@@ -86,7 +89,7 @@ angular.module('layout').directive('sqidApp', [function() {
 			});
 		});
 	};
-	
+
 	return {
 		restrict: 'E',
 		link: link
@@ -103,7 +106,7 @@ angular.module('layout').directive('sqidApp', [function() {
 			$compile(element.contents())(scope);
 		});
 	};
-	
+
 	return {
 		restrict: 'E',
 		link: link
