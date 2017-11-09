@@ -157,10 +157,7 @@ angular.module('view').controller('ViewController', [
 
 	View.updateId().then(function() {
 		$scope.id = View.getId();
-
-		console.log('updateId')
 		refreshContent(false);
-		console.log('after refresh')
 
 		return View.getEntityInlinks();
 	}).then(function(data) {
