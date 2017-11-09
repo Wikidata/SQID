@@ -110,13 +110,6 @@ angular.module('view').controller('ViewController', [
 		}
 	});
 
-	View.updateId().then(function() {
-		console.log('updated id')
-		return View.getEntityInlinks();
-	}).then(function(data) {
-		$scope.entityInData = data;
-	});
-
 	var refreshContent = function(useCache){
 		var func = useCache ? View.getEntityData : View.getEntityDataUncached;
 		func().then(function(data) {
@@ -162,7 +155,12 @@ angular.module('view').controller('ViewController', [
 	primarySources.setRefreshFunction(refreshContent);
 	primarySources.setAlertFunction(createAlert);
 
-	View.updateId().then(function(){
+	View.updateId().then(function() {
+		//View.clearEntityDataCache();
+		return View.getEntityInlinks();
+	}).then(function(data) {
+		$scope.entityInData = data;
+	}).then(function() {
 		$scope.id = View.getId();
 		console.log('updateId')
 		refreshContent(true);
