@@ -156,15 +156,15 @@ angular.module('view').controller('ViewController', [
 	primarySources.setAlertFunction(createAlert);
 
 	View.updateId().then(function() {
-		//View.clearEntityDataCache();
+		$scope.id = View.getId();
+
+		console.log('updateId')
+		refreshContent(false);
+		console.log('after refresh')
+
 		return View.getEntityInlinks();
 	}).then(function(data) {
 		$scope.entityInData = data;
-	}).then(function() {
-		$scope.id = View.getId();
-		console.log('updateId')
-		refreshContent(true);
-		console.log('after refresh')
 
 		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
