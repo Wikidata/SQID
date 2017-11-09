@@ -95,7 +95,6 @@ angular.module('view').controller('ViewController', [
 	$scope.proposalsPromises = [];
 
 	oauth.userinfo().then(function(data){
-		console.log('oauth.userinfo', data, View.hasEditRights());
 		if (data){
 			if (!View.hasEditRights()){
 				View.clearEntityDataCache();
@@ -112,6 +111,7 @@ angular.module('view').controller('ViewController', [
 	});
 
 	View.updateId().then(function() {
+		console.log('updated id')
 		return View.getEntityInlinks();
 	}).then(function(data) {
 		$scope.entityInData = data;
