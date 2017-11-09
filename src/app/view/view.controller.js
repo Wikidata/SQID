@@ -95,7 +95,7 @@ angular.module('view').controller('ViewController', [
 	$scope.proposalsPromises = [];
 
 	oauth.userinfo().then(function(data){
-		console.log('oauth.userinfo', data, View.hasEditRight());
+		console.log('oauth.userinfo', data, View.hasEditRights());
 		if (data){
 			if (!View.hasEditRights()){
 				View.clearEntityDataCache();
