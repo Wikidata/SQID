@@ -94,6 +94,7 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 	}
 
 	function clearEntityDataCache(){
+		  console.log('clearEntityDataCache')
 		entityDataPromise = null;
 		entityInDataPromise = null;
 		fetchedEntityId = null;

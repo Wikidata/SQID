@@ -13,7 +13,7 @@ function() {
 	'i18n', 'rules', 'ast', 'matcher', 'sparql', 'util', 'wikidataapi',
 	 function($scope, $translate, $q, $routeParams,
 			  i18n, rules, ast, matcher, sparql, util, wikidataapi) {
-		 $scope.rule = JSON.parse($routeParams.rule);
+		 $scope.rule = angular.fromJson($routeParams.rule);
 		 $scope.statements = null;
 		 $scope.query = matcher.getInstanceCandidatesQuery($scope.rule, [], 101);
 

@@ -38,6 +38,8 @@ angular.module('layout').directive('sqidApp', [function() {
 					case 'query':  page = 'PAGE_TITLE.QUERY'; break;
 					default:       page = false;
 				}
+			} else {
+				console.log('next.$$route is undefined', e, next, current)
 			}
 
 			if(page) {

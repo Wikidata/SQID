@@ -4,7 +4,9 @@ define(['proposals/proposals.module',
 	angular.module('proposals').factory('actions',
 	['$http', '$location', '$translate', '$log', 'oauth', function($http, $location, $translate, $log, oauth) {
 		function approveStatement(context) {
-			return approveStatementAndReference(stripReferences(context));
+			return approveStatementAndReference(
+				stripReferences(context)
+			);
 		}
 
 		var STATEMENT_KEY_WHITELIST = [

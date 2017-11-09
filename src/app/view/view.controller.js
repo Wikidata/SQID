@@ -95,6 +95,7 @@ angular.module('view').controller('ViewController', [
 	$scope.proposalsPromises = [];
 
 	oauth.userinfo().then(function(data){
+		console.log('oauth.userinfo', data, View.hasEditRight());
 		if (data){
 			if (!View.hasEditRights()){
 				View.clearEntityDataCache();
@@ -163,6 +164,9 @@ angular.module('view').controller('ViewController', [
 
 	View.updateId().then(function(){
 		$scope.id = View.getId();
+		console.log('updateId')
+		refreshContent(true);
+		console.log('after refresh')
 
 		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
@@ -177,8 +181,6 @@ angular.module('view').controller('ViewController', [
 			'entityData',
 			'entityInData'
 		], proposals.getEntityDataListener($scope.id));
-
-		refreshContent(true);
 
 		Properties.then(function(properties){
 			if (!$scope.isItem) {
