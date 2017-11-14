@@ -64,7 +64,7 @@ define(['rules/rules.module',
 											   atom.predicate))) {
 						return false;
 					}
-
+					console.log(rule)
 					return true;
 				});
 			};
