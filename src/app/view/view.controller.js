@@ -155,8 +155,8 @@ angular.module('view').controller('ViewController', [
 	primarySources.setRefreshFunction(refreshContent);
 	primarySources.setAlertFunction(createAlert);
 
-	View.updateId().then(function() {
-		$scope.id = View.getId();
+	View.updateId().then(function(id) {
+		$scope.id = id;
 		refreshContent(false);
 
 		return View.getEntityInlinks();

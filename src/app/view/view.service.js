@@ -58,6 +58,8 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 		}
 		promise.then(function(newId){
 			id = newId? newId : "Q0";
+
+			return id;
 		});
 		return promise;
 	}
