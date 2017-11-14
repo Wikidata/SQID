@@ -27,9 +27,22 @@
 			},
 			"required": ["type", "name"]
 		},
+		"literal-expression": {
+			"type": "object",
+			"properties": {
+				"type": { "type": "string",
+						  "const": "literal-expression"
+						},
+				"name": { "type": "string",
+						  "minLength": 1
+						}
+			},
+			"required": ["type", "name"]
+		},
 		"object-term": {
 			"oneOf": [ { "$ref": "#/definitions/object-variable" },
-					   { "$ref": "#/definitions/object-literal" }
+					   { "$ref": "#/definitions/object-literal" },
+					   { "$ref": "#/definitions/literal-expression" }
 					 ]
 		},
 		"set-literal": {
