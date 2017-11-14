@@ -62,10 +62,15 @@ define([
 
 					var query = matcher.getInstanceCandidatesQuery(rule, binding);
 
-					return sparql.getQueryRequest(query.query)
-						.then(function(sparqlResults) {
-							return handleSparqlResults(query, sparqlResults);
-						});
+					if (rule.body.length !== 0) {
+						return sparql.getQueryRequest(query.query)
+							.then(function(sparqlResults) {
+								return handleSparqlResults(query, sparqlResults);
+							});
+					} else {
+						// this rule always matches
+						return [handleApiResults(query, [])];
+					}
 				});
 		}
 
