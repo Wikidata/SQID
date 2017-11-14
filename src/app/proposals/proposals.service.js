@@ -11,19 +11,11 @@ define(['proposals/proposals.module',
 
 		function getEntityDataListener(id) {
 			return function(newData, oldData, scope) {
-				if (newData === oldData) {
-					// called for initialisation
-					return;
-				}
-
 				var providers = [];
 				var haveEditingRights = scope.hasEditRights;
-				var haveEntityData = (angular.isObject(newData[0]) &&
-									  !angular.isObject(oldData[0]));
-				var haveEntityInData = (angular.isObject(newData[1]) &&
-										!angular.isObject(oldData[1]));
-				var haveBothData = ((haveEntityData && angular.isObject(newData[1])) ||
-									(haveEntityInData && angular.isObject(newData[0])));
+				var haveEntityData = angular.isObject(newData[0]);
+				var haveEntityInData = angular.isObject(newData[1]);
+				var haveBothData = haveEntityData && haveEntityInData;
 
 				if (haveEntityData && haveEditingRights) {
 					// add providers that only need statements
