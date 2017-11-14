@@ -151,8 +151,12 @@ function(ajv) {
 						  : ast.name);
 				break;
 
+			case 'literal-expression':
+				result = ast.name;
+				break;
+
 			default:
-				$log.debug("unknown object in _print(): " + ast);
+				$log.debug("unknown object in _print()", ast);
 				break;
 			}
 

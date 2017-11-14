@@ -51,7 +51,7 @@ define([
 							r.dot,
 							['predicate', r.ObjectTerm],
 							r.equals,
-							['object', r.ObjectTerm],
+							['object', r.ObjectTermOrLiteral],
 							r.closingParenthesis,
 							r.at,
 							['annotation', setTerm])
@@ -85,6 +85,7 @@ define([
 			difference: function() { return word('\\'); },
 			intersection: function() { return word('&&'); },
 			objectName: function() { return P.regexp(/[PQ]\d+/); },
+			literalExpression: function() { return P.regexp(/"[^"]*"/); },
 			variableName: function() { return P.regexp(/\?[a-zA-Z]\w*/); },
 			openingBrace: function() { return word('{'); },
 			closingBrace: function() { return word('}'); },
@@ -106,10 +107,20 @@ define([
 				return P.seqObj(['name', r.objectName])
 						.thru(type('literal'));
 			},
+			LiteralExpression: function(r) {
+				return P.seqObj(['name', r.literalExpression])
+					.thru(type('literal-expression'));
+			},
 			ObjectTerm: function(r) {
 				return P.alt(
 					r.ObjectVariable,
 					r.ObjectLiteral
+				);
+			},
+			ObjectTermOrLiteral: function(r) {
+				return P.alt(
+					r.LiteralExpression,
+					r.ObjectTerm
 				);
 			},
 			SetLiteral: function(r) {
@@ -168,7 +179,7 @@ define([
 								r.dot,
 								['predicate', r.ObjectTerm],
 								r.equals,
-								['object', r.ObjectTerm],
+								['object', r.ObjectTermOrLiteral],
 								r.closingParenthesis)
 					.map(function(obj) {
 						return {
