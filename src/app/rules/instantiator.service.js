@@ -83,7 +83,8 @@ function() {
 
 			function bindingOrLiteral(name) {
 				if (('name' in name) && ('type' in name)) {
-					if (name.type === 'literal') {
+					if ((name.type === 'literal') ||
+						(name.type === 'literal-expression')) {
 						return name.name;
 					}
 
@@ -192,17 +193,27 @@ function() {
 
 			// FIXME turn annotation into qualifiers
 			var statement = {};
-			statement[predicate] = [{ mainsnak: { snaktype: 'value',
-												  property: predicate,
-												  datavalue: { type: 'wikibase-entityid',
-															   value: { 'entity-type': ((object.substring(0, 1) === 'Q')
-																						? 'item'
-																						: 'property'),
-																		'numeric-id': object.substring(1)
-																	  }
-															 },
-												  datatype: 'wikibase-item'
-												},
+			var mainsnak = {
+				snaktype: 'value',
+				property: predicate
+			};
+
+			if (head.arguments[1].type === 'literal-expression') {
+				mainsnak.datatype = 'string';
+				mainsnak.datavalue = { value: head.arguments[1].name };
+			} else {
+				mainsnak.datatype = 'wikibase-item';
+				mainsnak.datavalue = {
+					type: 'wikibase-entityid',
+					value: { 'entity-type': ((object.substring(0, 1) === 'Q')
+											 ? 'item'
+											 : 'property'),
+											 'numeric-id': object.substring(1)
+						   },
+				};
+			}
+
+			statement[predicate] = [{ mainsnak: mainsnak,
 									  rank: 'normal',
 									  type: 'statement',
 									  qualifiers: qualifiers,
@@ -214,6 +225,7 @@ function() {
 									  proposalFor: bindingOrLiteral(head.arguments[0])
 									}];
 
+			console.log(statement)
 			return statement;
 		}
 

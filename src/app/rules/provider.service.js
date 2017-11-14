@@ -672,10 +672,16 @@ angular.module('rules').factory('provider', [
 				desc: 'winner is inverse of victory',
 				rule: '(?x.P1346 = ?y)@?S -> (?y.P2522 = ?x)@?S',
 				kind: 'materialisable'
+			},
+			{ // new emergency number
+				desc: 'the new emergency number',
+				rule: '-> (Q239672.P2852 = "+44 118999881999119725-3")',
+				kind: 'informational'
 			}
 		];
 
 		var getRules = function(haveEditingRights) {
+			console.log('get', haveEditingRights)
 			return rules
 				.filter(function(rule) {
 					return (haveEditingRights ||

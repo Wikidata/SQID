@@ -64,6 +64,7 @@ define(['proposals/proposals.module',
 						return result;
 					}
 
+					$log.debug('foo', result.response.claims)
 					entities = entities.concat(entitydata.getEntityIds(result.response.claims));
 					properties = properties.concat(entitydata.getPropertyIds(result.response.claims));
 
