@@ -161,8 +161,6 @@ angular.module('view').controller('ViewController', [
 
 		return View.getEntityInlinks();
 	}).then(function(data) {
-		$scope.entityInData = data;
-
 		var numId = $scope.id.substring(1);
 		$scope.isItem = ( $scope.id.substring(0,1) != 'P' );
 
@@ -176,6 +174,8 @@ angular.module('view').controller('ViewController', [
 			'entityData',
 			'entityInData'
 		], proposals.getEntityDataListener($scope.id));
+
+		$scope.entityInData = data;
 
 		Properties.then(function(properties){
 			if (!$scope.isItem) {
