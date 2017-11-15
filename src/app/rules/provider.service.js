@@ -681,7 +681,6 @@ angular.module('rules').factory('provider', [
 		];
 
 		var getRules = function(haveEditingRights) {
-			console.log('get', haveEditingRights)
 			return rules
 				.filter(function(rule) {
 					return (haveEditingRights ||

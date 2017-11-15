@@ -86,7 +86,6 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 		var result = {};
 		angular.forEach(statements, function(statementGroup) {
 			angular.forEach(statementGroup, function (statement) {
-//				console.log('stmt', statement)
 				addEntityIdsFromSnak(statement.mainsnak, result);
 				if ('qualifiers' in statement) {
 					addEntityIdsFromSnaks(statement.qualifiers, result);

@@ -178,6 +178,7 @@ function($compile, Properties, dataFormatter, util, i18n) {
 					html += dataFormatter.getStatementValueBlockHtml(statement, properties, missingTermsListener, outlinks, narrowTable)
 						+ '</td></tr>';
 				});
+
 			});
 			if (!hasContent) return '';
 			html += '</tbody></table>';
@@ -320,16 +321,23 @@ function($compile, Properties, dataFormatter, util, i18n) {
 		scope.$watch(attrs.data, function(itemData){
 			if (!itemData) return;
 			itemData.waitForPropertyLabels().then(function() {
-				Properties.then(function(propertyData){
+				Properties.then(function(propertyData) {
 					properties = propertyData;
 					var propertyList = preparePropertyList(itemData.statements);
 
 					scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+
 					updateHtml(element, scope);
 					if (outMissingTermsListener.hasMissingTerms) {
-						itemData.waitForTerms().then( function() {
+						itemData.waitForTerms().then(function() {
 							outMissingTermsListener.hasMissingTerms = false;
+
+							// generate the list again, because for
+							// some strange reason the proposals are
+							// missing otherwise.
+							propertyList = preparePropertyList(itemData.statements);
 							scope.outHtml = getStatementHtmlTable(itemData.statements, propertyList, true);
+
 							updateHtml(element, scope);
 						});
 					}

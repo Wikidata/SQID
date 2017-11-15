@@ -69,7 +69,7 @@ define([
 							});
 					} else {
 						// this rule always matches
-						return [handleApiResults(query, [])];
+						return $q.all([handleApiResults(query, [])]);
 					}
 				});
 		}
@@ -151,15 +151,28 @@ define([
 					}
 
 					angular.forEach(statement, function(snak, property) {
-						if ((!(property in statements))) {
-							statements[property] = [];
+						var isNew = false;
+
+						if (!(property in entityData.statements)) {
+							isNew = true;
+						} else {
+							var existing = entityData.statements[property]
+								.filter(function (stmt) {
+									// filter out own proposals
+									return (('source' in stmt.mainsnak) &&
+											stmt.mainsnak.source !== 'MARS');
+								});
+							var equivalent = entitydata
+								.determineEquivalentStatements(existing, snak[0]);
+
+							isNew = (equivalent.length === 0);
 						}
 
-						var existing = entityData.statements[property];
-						var equivalent = entitydata
-							.determineEquivalentStatements(existing, snak[0]);
+						if (isNew) {
+							if ((!(property in statements))) {
+								statements[property] = [];
+							}
 
-						if(equivalent.length === 0) {
 							statements[property] = statements[property].concat(snak);
 						}
 					});
