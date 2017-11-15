@@ -33,6 +33,16 @@ define(['proposals/proposals.module',
 					providers = providers.concat(
 						rules.getProvider(newData[1], haveEditingRights)
 					);
+
+					// make sure we don't try to generate proposals for this item again
+					if (angular.isObject(scope.proposalState) &&
+						scope.proposalState.id === id) {
+						return;
+					} else {
+						scope.proposalState = {
+							id: id,
+						};
+					}
 				}
 
 				if (providers.length > 0) {
@@ -64,7 +74,6 @@ define(['proposals/proposals.module',
 						return result;
 					}
 
-					$log.debug('foo', result.response.claims)
 					entities = entities.concat(entitydata.getEntityIds(result.response.claims));
 					properties = properties.concat(entitydata.getPropertyIds(result.response.claims));
 

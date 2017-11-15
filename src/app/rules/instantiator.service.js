@@ -200,7 +200,10 @@ function() {
 
 			if (head.arguments[1].type === 'literal-expression') {
 				mainsnak.datatype = 'string';
-				mainsnak.datavalue = { value: head.arguments[1].name };
+				mainsnak.datavalue = {
+					type: 'string',
+					value: head.arguments[1].name
+				};
 			} else {
 				mainsnak.datatype = 'wikibase-item';
 				mainsnak.datavalue = {
@@ -225,7 +228,6 @@ function() {
 									  proposalFor: bindingOrLiteral(head.arguments[0])
 									}];
 
-			console.log(statement)
 			return statement;
 		}
 
