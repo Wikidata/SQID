@@ -81,11 +81,12 @@ define([
 			colon: function() { return word(':'); },
 			arrow: function() { return word('->'); },
 			union: function() { return word('||'); },
+			quote: function() { return word('"'); },
 			equals: function() { return word('='); },
 			difference: function() { return word('\\'); },
 			intersection: function() { return word('&&'); },
 			objectName: function() { return P.regexp(/[PQ]\d+/); },
-			literalExpression: function() { return P.regexp(/"[^"]*"/); },
+			literalExpression: function() { return P.regexp(/[^"]*/); },
 			variableName: function() { return P.regexp(/\?[a-zA-Z]\w*/); },
 			openingBrace: function() { return word('{'); },
 			closingBrace: function() { return word('}'); },
@@ -108,7 +109,9 @@ define([
 						.thru(type('literal'));
 			},
 			LiteralExpression: function(r) {
-				return P.seqObj(['name', r.literalExpression])
+				return P.seqObj(r.quote,
+								['name', r.literalExpression],
+								r.quote)
 					.thru(type('literal-expression'));
 			},
 			ObjectTerm: function(r) {
