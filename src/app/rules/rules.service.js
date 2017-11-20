@@ -46,7 +46,7 @@ define([
 		}
 
 		function checkCandidateRules(entityData, entityInData, itemId, haveEditingRights) {
-			return provider.getRules(haveEditingRights)
+			return provider.getRules({ canEdit: haveEditingRights })
 				.filter(matcher.couldMatch(
 					entityData.statements,
 					entityInData.statements,

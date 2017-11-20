@@ -675,21 +675,81 @@ angular.module('rules').factory('provider', [
 			}
 		];
 
-		var getRules = function(haveEditingRights) {
+		function filter(opts) {
+			return function(rule) {
+				return (opts.canEdit || (rule.kind === 'informational'));
+			};
+		}
+
+		function process() {
+			return function(rule) {
+				return angular.extend({
+					kind: rule.kind,
+					desc: rule.desc
+				}, parser.parse(rule.rule, true));
+			};
+		}
+
+		function compareIdOrVariable(lhs, rhs) {
+			var ap = lhs[0];
+			var bp = rhs[0];
+			var as = lhs.slice(1);
+			var bs = rhs.slice(1);
+
+			if (ap !== bp) {
+				// different types
+
+				return ((ap < bp)
+						? -1
+						: 1);
+			}
+
+			if (Number.isFinite(Number.parseInt(as)) &&
+				Number.isFinite(Number.parseInt(bs))) {
+				// both numeric, compare as numbers
+
+				return as - bs;
+			}
+
+			if (as < bs) {
+				return -1;
+			} else if (as > bs) {
+				return 1;
+			}
+
+			return 0;
+		}
+
+		function compare() {
+			return function(lhs, rhs) {
+				var result = compareIdOrVariable(
+					lhs.head.predicate.name,
+					rhs.head.predicate.name
+				);
+
+				if (result === 0) {
+					// for the same head predicate, prefer short premises
+					return lhs.body.length - rhs.body.length;
+				}
+
+				return result;
+			};
+		}
+
+		function getRules(opts) {
+			opts = angular.extend({
+				canEdit: false
+			}, opts);
+
 			return rules
-				.filter(function(rule) {
-					return (haveEditingRights ||
-							rule.kind === 'informational');
-				}).map(function(rule) {
-					return angular.extend(
-						{
-							kind: rule.kind,
-							desc: rule.desc
-						},
-						parser.parse(rule.rule, true)
-					);
-				});
-		};
+				.filter(
+					filter(opts)
+				).map(
+					process(opts)
+				).sort(
+					compare(opts)
+				);
+		}
 
 return {
 		getRules: getRules

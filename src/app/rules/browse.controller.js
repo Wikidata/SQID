@@ -8,7 +8,7 @@ function() {
 	function($scope, $translate, $q, i18n, ast, provider) {
 		$scope.translation = {};
 
-		var rules = provider.getRules(true);
+		var rules = provider.getRules({ canEdit: true });
 
 		$q.all(rules.map(function(rule) {
 				   var literals = ast
