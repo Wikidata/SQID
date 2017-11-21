@@ -2,6 +2,7 @@ define(['rules/rules.module',
 		'rules/ast.service',
 		'rules/rules.service',
 		'rules/parser.service',
+		'rules/filters.service',
 		'rules/matcher.service',
 		'rules/provider.service',
 		'rules/references.service',
@@ -20,38 +21,20 @@ function() {
 				.when('/rules/browse', {templateUrl: 'app/rules/browse.html'})
 				.when('/rules/consequences', {templateUrl: 'app/rules/consequences.html'});
 			$filterProvider
-				.register('formatRule', ['$sce', 'i18n', 'ast', function($sce, i18n, ast) {
-					return function(rule) {
-						return $sce.trustAsHtml(
-							ast.print(rule, {
-								prettify: true
-							}));
-					};
+				.register('formatRule', ['filters', function(filters) {
+					return filters.formatRule;
 				}]);
 			$filterProvider
-				.register('linkToRule', [function() {
-					return function(rule) {
-						return ('#/rules/consequences?rule=' +
-							encodeURIComponent(JSON.stringify(rule)));
-					};
+				.register('linkToRule', ['filters', function(filters) {
+					return filters.linkToRule;
 				}]);
 			$filterProvider
-				.register('linkToEntity', [function() {
-					return function(entity) {
-						return (((('entity-type' in entity) &&
-								  (entity['entity-type'] === 'item'))
-								 ? 'Q'
-								 : 'P') +
-								entity['numeric-id']);
-					};
+				.register('linkToEntity', ['filters', function(filters) {
+					return filters.linkToEntity;
 				}]);
 			$filterProvider
-				.register('labelEntity', ['$sce', 'i18n', function($sce, i18n) {
-					return function(entity) {
-						return $sce.trustAsHtml(
-							i18n.getEntityLabel(entity)
-						);
-					};
+				.register('labelEntity', ['filters', function(filters) {
+					return filters.labelEntity;
 				}]);
 	}]);
 

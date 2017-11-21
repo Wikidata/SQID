@@ -9,13 +9,14 @@ define([
 	'i18n/i18n.service',
 	'i18n/translate.config',
 	'data/classes.service',
-	'data/properties.service'
+	'data/properties.service',
+	'rules/rules.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('browse').controller('TableController', [
-'$scope', '$translate', 'i18n', 'arguments', 'classes', 'properties', 'util',
-function($scope, $translate, i18n, Arguments, Classes, Properties, util){
+'$scope', '$translate', 'i18n', 'arguments', 'classes', 'properties', 'util', 'rules',
+function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules){
 
 	var tableContent = [];
 
@@ -51,13 +52,13 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	var getClassFromId = function(id, data){
 	  var label = data.getLabel(id);
 	  label = label ? label + ' (Q' + id + ')': 'Q' + id;
-	  return { 
+	  return {
         content: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">' + label + '</a>', '<div class="text-right">' + data.getDirectInstanceCount(id).toString() + '</div>', '<div class="text-right">' + data.getDirectSubclassCount(id).toString()  + '</div>'],
         id: 'Q' + String(id),
         template: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">', ' (Q' + id + ')</a>']
       };
    	};
-	
+
 	var getPropertyFromId = function(id, data){
 	  var label = data.getLabel(id);
 	  label = label ? label + ' (P' + id + ')': 'P' + id;
@@ -67,14 +68,14 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
         template: ['<a href="' + data.getUrl(id, i18n.getLanguage()) + '">', ' (P' + id + ')</a>']
       };
   	};
-	
+
 	var refreshTableContent = function(args, idArray, content, entityConstructor){
 	  tableContent = [];
 	  for (var i = 0; i < idArray.length; i++){
 		tableContent.push(entityConstructor(idArray[i], content));
 	  }
 	};
-	
+
 	var entityFilters = {
 	  labelFilter: function(entry, data, data2){
 		var filter;
@@ -110,7 +111,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		if (status.entityType == "classes"){
 		  return true;
 		}else{
-		  filter = status.propertiesFilter.datatypes.name; 
+		  filter = status.propertiesFilter.datatypes.name;
 		}
 		if (!filter){
 		  return true;
@@ -201,16 +202,16 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  if (!(((dic >= filter.instances[0])&&(dic <= filter.instances[1]))||((!dic) && (filter.instances[0] == 0)))){
 			return false;
 		  }
-		  
+
 		  if (!(((dsc >= filter.subclasses[0])&&(dsc <= filter.subclasses[1]))||((!dsc) && (filter.subclasses[0] == 0)))){
 			return false;
 		  }
 		  return true;
-		}else{
+		} else if (status.entityType == "properties") {
 		  var filter = status.propertiesFilter;
 			sc = data.getStatementCount(entry),
 			qc = data.getQualifierCount(entry),
-			rc = data.getReferenceCount(entry); 
+			rc = data.getReferenceCount(entry);
 		  if (!(((sc >= filter.statements[0])&&(sc <= filter.statements[1]))||((!sc) && (filter.statements[0] == 0)))){
 			return false;
 		  }
@@ -260,7 +261,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	};
 
 	var initPropertyIndex = function(){
-	  var result = []; 
+	  var result = [];
 	  Properties.then(function(data){
 		$scope.suggestFilters.classes.relatedProperty = "";
 		var idArray = data.getIdArray();
@@ -300,7 +301,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 			id: idArray[i].toString()
 		  }
 		  result.push(elem);
-		  
+
 		  if (idArray[i].toString() == status.classesFilter.superclass.toString()){
 			$scope.suggestFilters.classes.superclass = elem;
 		  }
@@ -348,7 +349,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 			if (a.name.toLowerCase() > b.name.toLowerCase()){
 			  return 1;
 			}else{
-			  return -1;  
+			  return -1;
 			}
 		  });
 		  propertyClassIndexInitialized = true;
@@ -360,13 +361,13 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
 	var initClassesSlider = function(){
 	  $scope.slider = [ // TODO replace numbers with constants
-		{name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0, 
+		{name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0,
 		  to: 5000000,
-		  startVal: status.classesFilter.instances[0], 
+		  startVal: status.classesFilter.instances[0],
 		  endVal: status.classesFilter.instances[1]},
 		{name: "FILTER_MENUE.FILTER_DIRECT_SUBCL", from: 0,
 		  to: 1000000,
-		  startVal: status.classesFilter.subclasses[0], 
+		  startVal: status.classesFilter.subclasses[0],
 		  endVal: status.classesFilter.subclasses[1]}];
 	};
 
@@ -383,7 +384,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		{name: "FILTER_MENUE.FILTER_USE_REFS", from: 0,
 		  to: 30000000,
 		  startVal: status.propertiesFilter.references[0],
-		  endVal: status.propertiesFilter.references[1]}]; 
+		  endVal: status.propertiesFilter.references[1]}];
 	};
 
 	var updateTable = function(){
@@ -409,6 +410,17 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 		  	});
 		  });
 	  }
+		if (args.type == 'rules') {
+			rules.getRules()
+				.then(function(data) {
+				var rulesArray = data;
+					refreshTableContent(args, rulesArray, data, function(item) {
+						return item;
+					});
+				$scope.content = tableContent;
+				$scope.pagination.setIndex($scope.content, null);
+			});
+		}
 	};
 
 	var updateTableLazy = function(){
@@ -445,11 +457,11 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	Arguments.refreshArgs();
 	var args = Arguments.getArgs();
 	var status = Arguments.getStatus();
-	
+
 	var propertyIndexInitialized = false;
 	var classIndexInitialized = false;
 	var propertyClassIndexInitialized = false;
-	
+
 	var timeoutIsSet = false;
 
 
@@ -476,13 +488,14 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  selected: status.propertiesFilter.directInstanceOf
 	}
 
-
 	$scope.tableSize = tableSize;
 	$scope.args=args;
 	if (status.entityType == "classes"){
 	  $scope.filterLabels = status.classesFilter.label;
-	}else{
+	} else if (status.entityType == "properties") {
 	  $scope.filterLabels = status.propertiesFilter.label;
+	} else if (status.entityType == "rules") {
+		$scope.filterLabels = status.rulesFilter.label;
 	}
 	initPaginations();
 
@@ -503,8 +516,8 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
 	$scope.translations = {};
 
-	$translate(['TABLE_HEADER.LABEL', 'TABLE_HEADER.DATATYPE', 'TABLE_HEADER.USES_IN_STMTS', 
-		'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES', 
+	$translate(['TABLE_HEADER.LABEL', 'TABLE_HEADER.DATATYPE', 'TABLE_HEADER.USES_IN_STMTS',
+		'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES',
 		'TABLE_HEADER.SUBCLASSES']).then(function(translations){
 	  translations.LABEL = translations['TABLE_HEADER.LABEL'];
 	  translations.DATATYPE = translations['TABLE_HEADER.DATATYPE'];
@@ -518,14 +531,16 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
 	$scope.filterPermalink =Arguments.getUrl();
 	if (!$scope.filterText) {$scope.filterText = ""};
-	
+
 	updateTable();
 
 	$scope.searchFilter = function(){
 	  if (status.entityType == "classes"){
 		status.classesFilter.label = $scope.filterLabels;
-	  }else{
+	  } else if (status.entityType == "properties") {
 		status.propertiesFilter.label = $scope.filterLabels;
+	  } else if (status.entityType == "rules") {
+		status.rulesFilter.label = $scope.filterLabels;
 	  }
 	  updateTableLazy();
 	}
@@ -569,7 +584,7 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  $scope.filterPermalink =Arguments.getUrl();
 	  updateTableLazy();
 	}
-	
+
 	$scope.copyToClipboard = function(){
 	  var textField = document.getElementById("permalink");
 	  var oSelectionStart = textField.SelectionStart;
@@ -625,13 +640,13 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	$scope.suggestSelectFunctions = {
 	  classes:{
 		relatedProperty : function(selected){
-		  var result = selectElementForSuggestFilter(selected, 
+		  var result = selectElementForSuggestFilter(selected,
 		  status.classesFilter.relatedProperty, $scope.suggestFilters.classes.relatedProperty);
 		  status.classesFilter.relatedProperty = result[0];
 		  $scope.suggestFilters.classes.relatedProperty = result[1];
 		},
 		superclass : function(selected){
-		  var result = selectElementForSuggestFilter(selected, 
+		  var result = selectElementForSuggestFilter(selected,
 		  status.classesFilter.superclass, $scope.suggestFilters.classes.superclass);
 		  status.classesFilter.superclass = result[0];
 		  $scope.suggestFilters.classes.superclass = result[1];
@@ -639,19 +654,19 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	  },
 	  properties: {
 		relatedProperty : function(selected){
-		  var result = selectElementForSuggestFilter(selected, 
+		  var result = selectElementForSuggestFilter(selected,
 		  status.propertiesFilter.relatedProperty, $scope.suggestFilters.properties.relatedProperty);
 		  status.propertiesFilter.relatedProperty = result[0];
 		  $scope.suggestFilters.properties.relatedProperty = result[1];
 		},
 		relatedQualifier : function(selected){
-		  var result = selectElementForSuggestFilter(selected, 
+		  var result = selectElementForSuggestFilter(selected,
 		  status.propertiesFilter.relatedQualifier, $scope.suggestFilters.properties.relatedQualifier);
 		  status.propertiesFilter.relatedQualifier = result[0];
 		  $scope.suggestFilters.properties.relatedQualifier = result[1];
 		},
 		usedForClass : function(selected){
-		  var result = selectElementForSuggestFilter(selected, 
+		  var result = selectElementForSuggestFilter(selected,
 		  status.propertiesFilter.usedForClass, $scope.suggestFilters.properties.usedForClass);
 		  status.propertiesFilter.usedForClass = result[0];
 		  $scope.suggestFilters.properties.usedForClass = result[1];
@@ -713,5 +728,5 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 
 
   }]);
-  
+
 return {}; }); // module definition end

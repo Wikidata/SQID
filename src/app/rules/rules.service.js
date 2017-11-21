@@ -1,7 +1,9 @@
 //////// Module Definition ////////////
 define([
 	'rules/rules.module',
+	'rules/ast.service',
 	'rules/parser.service',
+	'rules/filters.service',
 	'rules/matcher.service',
 	'rules/provider.service',
 	'rules/instantiator.service',
@@ -12,9 +14,9 @@ define([
 ], function() {
 	angular.module('rules').factory('rules',
 	['$q', '$log', '$translate', 'sparql', 'i18n', 'util', 'entitydata', 'wikidataapi',
-	 'matcher', 'provider', 'instantiator', 'actions',
+	 'ast', 'filters', 'matcher', 'provider', 'instantiator', 'actions',
 	 function($q, $log, $translate, sparql, i18n, util, entitydata, wikidataapi,
-			  matcher, provider, instantiator, actions) {
+			  ast, filters, matcher, provider, instantiator, actions) {
 
 		 function getProvider(entityInData, haveEditingRights) {
 			 return {
@@ -266,7 +268,43 @@ define([
 			return statements;
 		}
 
+		function getRules() {
+			var terms = [];
+			var properties = [];
+
+			var rules = provider
+				.getRules({ canEdit: true })
+				.map(function(rule) {
+					ast.literals(rule)
+						.map(function(literal) {
+							var prefix = literal.name.substr(0, 1);
+
+							if (prefix === 'Q') {
+								terms.push(literal.name);
+							} else if (prefix === 'Q') {
+								properties.push(literal.name);
+							}
+						});
+
+					return angular.extend({}, rule);
+				});
+
+			return $q.all([
+				i18n.waitForTerms(terms),
+				i18n.waitForPropertyLabels(properties)
+			]).then(function() {
+				return rules.map(function(rule) {
+					rule.content = ['<emph>' + rule.desc + '</emph><br>' +
+									'<code>' + filters.formatRule(rule) + '</code>',
+									rule.kind
+								   ];
+					return rule;
+				});
+			});
+		}
+
 		return {
+			getRules: getRules,
 			getStatements: getStatements,
 			getProvider: getProvider,
 			handleSparqlResults: handleSparqlResults,
