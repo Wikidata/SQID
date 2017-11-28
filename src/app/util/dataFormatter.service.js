@@ -40,6 +40,10 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				forURI = false;
 			}
 
+			if (!forURI) {
+				return util.escapeHtml(str);
+			}
+
 			var decoded = he.decode(str, { isAttributeValue: forURI });
 
 			return decoded.replace(/\{\{(.*)\}\}/g, function(_, match) {
@@ -97,11 +101,11 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				datavalue.value = sanitize(datavalue.value);
 				displayString = sanitize(displayString);
 
-                if ('__sqid_display_string_override__' in datavalue) {
-                    displayString = datavalue.__sqid_display_string_override__;
-                }
+				if ('__sqid_display_string_override__' in datavalue) {
+					displayString = datavalue.__sqid_display_string_override__;
+				}
 
-                switch (properties.getDatatype(numPropId)) {
+				switch (properties.getDatatype(numPropId)) {
 					case 'Url':
 						return '<a class="ext-link" href="' + linkString + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
 					case 'CommonsMedia':
@@ -211,7 +215,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 						i18n.getPropertyLink(snak.property) +
 						'</td>';
 				}
-				ret += '<td' + (isProposal ? ' colspan="2"' : '') +  '>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
+				ret += '<td' + (isProposal ? ' colspan="2"' : '') +	 '>' + getSnakHtml(snak, false, properties, missingTermsListener, inline) + '</td>';
 				ret += '</tr>';
 			});
 		});
@@ -285,9 +289,9 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 		var ret = getStatementMainValueHtml(statement, properties, missingTermsListener, false, short);
 
 		// Showing this everywhere seems too obstrusive. We should have a way to toggle such information.
-// 		if (showReferences && refCount == 0) {
-// 			ret += '<span title="{{\'NO_REFERENCES_HINT\'|translate}}"  class="unsourced light-grey"></span>';
-// 		}
+//		if (showReferences && refCount == 0) {
+//			ret += '<span title="{{\'NO_REFERENCES_HINT\'|translate}}"	class="unsourced light-grey"></span>';
+//		}
 
 		if ('qualifiers' in statement) {
 			ret += '<div class="qualifiers" ng-click="$event.stopPropagation()">'

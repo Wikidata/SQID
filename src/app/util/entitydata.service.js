@@ -283,16 +283,16 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 			var entityData = response.entities[id];
 
 			if ("labels" in entityData && ret.language in entityData.labels) {
-				ret.label = entityData.labels[ret.language].value;
-				ret.labelorid = entityData.labels[ret.language].value;
+				ret.label = util.escapeHtml(entityData.labels[ret.language].value);
+				ret.labelorid = util.escapeHtml(entityData.labels[ret.language].value);
 			}
 			if ("descriptions" in entityData && ret.language in entityData.descriptions) {
-				ret.description = entityData.descriptions[ret.language].value;
+				ret.description = util.escapeHtml(entityData.descriptions[ret.language].value);
 			}
 			if ("aliases" in entityData && ret.language in entityData.aliases) {
 				var aliasesData = entityData.aliases[ret.language];
 				for (var i in aliasesData){
-					ret.aliases.push(aliasesData[i].value);
+					ret.aliases.push(util.escapeHtml(aliasesData[i].value));
 				}
 			}
 			if ("claims" in entityData) {

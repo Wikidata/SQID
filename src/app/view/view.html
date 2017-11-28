@@ -14,7 +14,7 @@
 		<div ng-if="hasEditRights" class="edit-label">
 			<a  class="edit-link" data-toggle="modal" data-target="#editLabelModal">{{ 'EDITS.EDIT_LABEL' | translate }}</a>
 		</div>
-		<h1>{{entityData.label}} <small>(<a href="{{url}}" target="_blank">{{id}}</a>)</small></h1>
+		<h1><span ng-bind-html="entityData.label | to_trusted"></span> <small>(<a href="{{url}}" target="_blank">{{id}}</a>)</small></h1>
 		<div ng-if="entityData.aliases.length > 0" class="aliases">
 			<ul class="list-inline pipe-separated">
 				<li ng-repeat="alias in entityData.aliases">{{alias}}</li>

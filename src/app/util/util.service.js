@@ -162,6 +162,17 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 		return newarray;
 	}
 
+	function escapeHtml(html) {
+		return html
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#039;")
+			.replace(/\{/g, "<span>{></span>")
+			.replace(/\}/g, "<span>}></span>");
+	}
+
 	return {
 		httpRequest: httpRequest,
 		jsonpRequest: jsonpRequest,
@@ -174,7 +185,8 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 		sortByField: sortByField,
 		createIdArray: createIdArray,
 		getSortComparator: getSortComparator,
-		reverseDeepCopy: reverseDeepCopy
+		reverseDeepCopy: reverseDeepCopy,
+		escapeHtml: escapeHtml
 	};
 
 }]);
