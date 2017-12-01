@@ -169,8 +169,8 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 			.replace(/>/g, "&gt;")
 			.replace(/"/g, "&quot;")
 			.replace(/'/g, "&#039;")
-			.replace(/\{/g, "<span>{></span>")
-			.replace(/\}/g, "<span>}></span>");
+			.replace(/\{/g, "<span>{</span>")
+			.replace(/\}/g, "<span>}</span>");
 	}
 
 	return {
