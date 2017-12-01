@@ -66,7 +66,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 						return '<a title="' + sanitize(terms.description) + '" href="' + sanitize(i18n.getEntityUrl(itemId)) + '" ng-click="$event.stopPropagation()">' + sanitize(terms.label) + '</a>';
 					} else {
 						return '<a href="' + sanitize(i18n.getEntityUrl(itemId)) + '" ng-click="$event.stopPropagation()">' + sanitize(terms.label) + '</a>' +
-							( terms.description != '' ? ' <span class="smallnote">(' + sanitize(i18n.autoLinkText(terms.description)) + ')</span>' : '' );
+							( terms.description != '' ? ' <span class="smallnote">(' + i18n.autoLinkText(sanitize(terms.description)) + ')</span>' : '' );
 					}
 				} else if (datavalue.value["entity-type"] == "property") {
 					return i18n.getPropertyLink('P' + datavalue.value["numeric-id"]);
@@ -120,7 +120,7 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 						}
 				}
 			case 'monolingualtext':
-				return sanitize(i18n.autoLinkText(datavalue.value.text)) + ' <span class="smallnote">[' + sanitize(datavalue.value.language) + ']</span>';
+			return i18n.autoLinkText(sanitize(datavalue.value.text)) + ' <span class="smallnote">[' + sanitize(datavalue.value.language) + ']</span>';
 			case 'quantity':
 				var amount = datavalue.value.amount;
 				if (amount.substring(0,1) == '+') {
