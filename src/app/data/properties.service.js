@@ -15,6 +15,7 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 		label: [],
 		datatype: [],
 		statements: [],
+		qualifiers: [],
 		references: []
 	};
 	var sorting = {
