@@ -128,10 +128,9 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 		return ret;
 	}
 
-	// Return a sort comparator suitable for dealing with the json
-	// data for classes & properties.
-	function getSortComparator(data, criterion) {
-		console.log('-', data, criterion)
+	// Return a sort comparator suitable for sorting idArrays of the
+	// json data for classes & properties.
+	function getSortComparator(data, criterion, direction) {
 		return function (lhs, rhs) {
 			if (data[lhs][criterion] == data[rhs][criterion]) {
 				return 0;
@@ -139,12 +138,12 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 
 			if (angular.isUndefined(data[rhs][criterion]) ||
 				(data[lhs][criterion] > data[rhs][criterion])) {
-				return 1;
+				return (direction * 1);
 			}
 
 			if (angular.isUndefined(data[lhs][criterion]) ||
-				(data[lhs][criterion] > data[rhs][criterion])) {
-				return -1;
+				(data[lhs][criterion] < data[rhs][criterion])) {
+				return (direction * -1);
 			}
 
 			return 0;

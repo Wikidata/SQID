@@ -54,17 +54,20 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 		// sort on first use
 		if (idArray === null) {
 			idArray = Object.keys(classes);
-			var criteria = sortCriteria.length;
+		}
 
-			for (var i = 0; i < criteria; ++i) {
-				var key = sortCriteria[i][2];
-				sortedIdArrays[key] = angular.copy(idArray);
-				sortedIdArrays[key].sort(sortComparators[key]);
-			}
+		if (sortedIdArrays[sorting.category].length === 0) {
+			sortedIdArrays[sorting.category] = angular.copy(idArray);
+			sortedIdArrays[sorting.category].sort(sortComparators[sorting.category]);
 		}
 
 		var array = sortedIdArrays[sorting.category];
-		return ((sorting.direction === 1)
+
+
+
+		return (sorting.direction === ((sorting.category === 'label')
+									   ? 1
+									   : -1)
 				? array
 				: util.reverseDeepCopy(array));
 	}
@@ -89,9 +92,9 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 		promise = $http.get("data/classes.json").then(function(response){
 			classes = response.data;
 			sortComparators = {
-				label: util.getSortComparator(classes, 'l'),
-				instances: util.getSortComparator(classes, 'i'),
-				subclasses: util.getSortComparator(classes, 's')
+				label: util.getSortComparator(classes, 'l', 1),
+				instances: util.getSortComparator(classes, 'i', -1),
+				subclasses: util.getSortComparator(classes, 's', -1)
 			};
 
 			var getClassesHeader = function(status){

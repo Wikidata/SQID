@@ -60,17 +60,19 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 	function getSortedIdArray() {
 		if (idArray === null) {
 			idArray = Object.keys(properties);
+		}
 
-			var criteria = sortCriteria.length;
-			for (var i = 0; i < criteria; ++i) {
-				var key = sortCriteria[i][2];
-				sortedIdArrays[key] = angular.copy(idArray);
-				sortedIdArrays[key].sort(sortComparators[key]);
-			}
+		if (sortedIdArrays[sorting.category].length === 0) {
+			sortedIdArrays[sorting.category] = angular.copy(idArray);
+			sortedIdArrays[sorting.category].sort(sortComparators[sorting.category]);
 		}
 
 		var array = sortedIdArrays[sorting.category];
-		return ((sorting.direction === 1)
+		return (sorting.direction === (((sorting.category === 'label') ||
+										(sorting.category === 'datatype')
+									   )
+									   ? 1
+									   : -1)
 				? array
 				: util.reverseDeepCopy(array));
 	}
@@ -99,11 +101,11 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 			properties = response.data;
 
 			sortComparators = {
-				label: util.getSortComparator(properties, 'l'),
-				datatype: util.getSortComparator(properties, 'd'),
-				statements: util.getSortComparator(properties, 's'),
-				qualifiers: util.getSortComparator(properties, 'q'),
-				references: util.getSortComparator(properties, 'e')
+				label: util.getSortComparator(properties, 'l', 1),
+				datatype: util.getSortComparator(properties, 'd', 1),
+				statements: util.getSortComparator(properties, 's', -1),
+				qualifiers: util.getSortComparator(properties, 'q', -1),
+				references: util.getSortComparator(properties, 'e', -1)
 			};
 
 			var getPropertiesHeader = function(status){
