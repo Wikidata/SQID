@@ -128,28 +128,27 @@ angular.module('util').factory('util', ['$http', '$q', function($http, $q) {
 		return ret;
 	}
 
-	// FIXME This is a rather weird function, which overwrites its
-	// parameters and introduces unused local variables x and y instead.
-	// It also lacks documentation.
-	var getSortComparator = function(criteria, direction){
-		return function(data){
-			return function(a, b){
-				var x = a;
-				var y = b;
-				var a = data[a][criteria];
-				var b = data[b][criteria];
-				if (a == b){
-					return 0;
-				}
-				if ((b == undefined) || (a > b)){
-					return 1 * direction;
-				}
-				if ((a == undefined) || (a < b)){
-					return (-1) * direction;
-				}
+	// Return a sort comparator suitable for dealing with the json
+	// data for classes & properties.
+	function getSortComparator(data, criterion) {
+		console.log('-', data, criterion)
+		return function (lhs, rhs) {
+			if (data[lhs][criterion] == data[rhs][criterion]) {
 				return 0;
-			};
-		}
+			}
+
+			if (angular.isUndefined(data[rhs][criterion]) ||
+				(data[lhs][criterion] > data[rhs][criterion])) {
+				return 1;
+			}
+
+			if (angular.isUndefined(data[lhs][criterion]) ||
+				(data[lhs][criterion] > data[rhs][criterion])) {
+				return -1;
+			}
+
+			return 0;
+		};
 	}
 
 	var reverseDeepCopy = function(array){

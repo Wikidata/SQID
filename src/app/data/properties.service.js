@@ -9,7 +9,7 @@ define([
 angular.module('data').factory('properties', ['$http', '$route', 'util', function($http, $route, util){
 	var promise;
 	var properties;
-	var idArray;
+	var idArray = null;
 
 	var sortedIdArrays = {
 		label: [],
@@ -22,11 +22,14 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 		direction: -1
 	};
 
-	var sortCriteria = [[null, "l", "label"], 
-			[null, "d", "datatype"], 
-			[null, "s", "statements"], 
-			[null, "q", "qualifiers"],
-			[null, "e", "references"]];
+	var sortCriteria = [[null, "l", "label"],
+						[null, "d", "datatype"],
+						[null, "s", "statements"],
+						[null, "q", "qualifiers"],
+						[null, "e", "references"]
+					   ];
+
+	var sortComparators;
 
 	var getData = function(id, key, defaultValue) {
 		try {
@@ -38,7 +41,7 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 			// fall through
 		}
 		return defaultValue;
-	}
+	};
 
 	var getLabel = function(id) { return getData(id, 'l', null); };
 	var getLabelOrId = function(id) { return getData(id, 'l', 'P' + id); };
@@ -54,13 +57,22 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 
 	var getStatementCount = function(id){ return getData(id, 's', 0); };
 
-	var getSortedIdArray = function(){
-		var array = sortedIdArrays[sorting.category];
-		if (sorting.direction == 1){
-			return array;
-		}else{
-			return util.reverseDeepCopy(array);
+	function getSortedIdArray() {
+		if (idArray === null) {
+			idArray = Object.keys(properties);
+
+			var criteria = sortCriteria.length;
+			for (var i = 0; i < criteria; ++i) {
+				var key = sortCriteria[i][2];
+				sortedIdArrays[key] = angular.copy(idArray);
+				sortedIdArrays[key].sort(sortComparators[key]);
+			}
 		}
+
+		var array = sortedIdArrays[sorting.category];
+		return ((sorting.direction === 1)
+				? array
+				: util.reverseDeepCopy(array));
 	}
 
 	var getSortCriteria = function(status){
@@ -85,27 +97,25 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 	if (!promise) {
 		promise = $http.get("data/properties.json").then(function(response){
 			properties = response.data;
-			idArray = util.createIdArray(properties);
 
-			var sortIdArray = function(comparator, category){
-				sortedIdArrays[category] = util.cloneObject(idArray);
-				sortedIdArrays[category].sort(comparator(properties));
+			sortComparators = {
+				label: util.getSortComparator(properties, 'l'),
+				datatype: util.getSortComparator(properties, 'd'),
+				statements: util.getSortComparator(properties, 's'),
+				qualifiers: util.getSortComparator(properties, 'q'),
+				references: util.getSortComparator(properties, 'e')
 			};
 
 			var getPropertiesHeader = function(status){
 				var sortCriteria = getSortCriteria(status);
 				updateSorting(sortCriteria);
 
-				return [["TABLE_HEADER.LABEL", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}], 
-					["TABLE_HEADER.DATATYPE", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}], 
-					["TABLE_HEADER.USES_IN_STMTS", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}], 
-					["TABLE_HEADER.USES_IN_QUALS", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}], 
+				return [["TABLE_HEADER.LABEL", "col-xs-5", sortCriteria[0][0], function(status, value){status.sortCriteria.properties.label = value}],
+					["TABLE_HEADER.DATATYPE", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.properties.datatype = value}],
+					["TABLE_HEADER.USES_IN_STMTS", "col-xs-2", sortCriteria[2][0], function(status, value){status.sortCriteria.properties.statements = value}],
+					["TABLE_HEADER.USES_IN_QUALS", "col-xs-2", sortCriteria[3][0], function(status, value){status.sortCriteria.properties.qualifiers = value}],
 					["TABLE_HEADER.USES_IN_REFS", "col-xs-2", sortCriteria[4][0], function(status, value){status.sortCriteria.properties.references = value}]];
-			}
-
-			for (var i=0; i < sortCriteria.length; i++){
-				sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
-			}
+			};
 
 			return {
 				getPropertiesHeader: getPropertiesHeader,

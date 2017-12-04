@@ -9,7 +9,7 @@ define([
 angular.module('data').factory('classes', ['$http', '$route', 'util', function($http, $route, util) {
 	var promise;
 	var classes;
-	var idArray;
+	var idArray = null;
 
 	var sortedIdArrays = {
 		label: [],
@@ -21,9 +21,12 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 		direction: -1
 	};
 
-	var sortCriteria = [[null, "l", "label"], 
-			[null, "i", "instances"], 
-			[null, "s", "subclasses"]];
+	var sortCriteria = [[null, "l", "label"],
+						[null, "i", "instances"],
+						[null, "s", "subclasses"]
+					   ];
+
+	var sortComparators;
 
 	var getData = function(id, key, defaultValue) {
 		try {
@@ -47,13 +50,23 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 	};
 	var getAllInstanceCount = function(id){ return getData(id, 'ai', 0); };
 
-	var getSortedIdArray = function(){
-		var array = sortedIdArrays[sorting.category];
-		if (sorting.direction == 1){
-			return array;
-		}else{
-			return util.reverseDeepCopy(array);
+	function getSortedIdArray() {
+		// sort on first use
+		if (idArray === null) {
+			idArray = Object.keys(classes);
+			var criteria = sortCriteria.length;
+
+			for (var i = 0; i < criteria; ++i) {
+				var key = sortCriteria[i][2];
+				sortedIdArrays[key] = angular.copy(idArray);
+				sortedIdArrays[key].sort(sortComparators[key]);
+			}
 		}
+
+		var array = sortedIdArrays[sorting.category];
+		return ((sorting.direction === 1)
+				? array
+				: util.reverseDeepCopy(array));
 	}
 
 	var getSortCriteria = function(status){
@@ -75,11 +88,10 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 	if (!promise){
 		promise = $http.get("data/classes.json").then(function(response){
 			classes = response.data;
-			idArray = util.createIdArray(classes);
-
-			var sortIdArray = function(comparator, category){
-				sortedIdArrays[category] = util.cloneObject(idArray);
-				sortedIdArrays[category].sort(comparator(classes));
+			sortComparators = {
+				label: util.getSortComparator(classes, 'l'),
+				instances: util.getSortComparator(classes, 'i'),
+				subclasses: util.getSortComparator(classes, 's')
 			};
 
 			var getClassesHeader = function(status){
@@ -87,13 +99,9 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 				updateSorting(sortCriteria);
 
 				return [["TABLE_HEADER.LABEL", "col-xs-9", sortCriteria[0][0], function(status, value){status.sortCriteria.classes.label = value}],
-					["TABLE_HEADER.INSTATNCES", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}], 
+					["TABLE_HEADER.INSTATNCES", "col-xs-1", sortCriteria[1][0], function(status, value){status.sortCriteria.classes.instances = value}],
 					["TABLE_HEADER.SUBCLASSES", "col-xs-1", sortCriteria[2][0], function(status, value){status.sortCriteria.classes.subclasses = value}]];
-			}
-
-			for (var i=0; i < sortCriteria.length; i++){
-				sortIdArray(util.getSortComparator(sortCriteria[i][1], 1), sortCriteria[i][2]);
-			}
+			};
 
 			return {
 				getClassesHeader: getClassesHeader,
