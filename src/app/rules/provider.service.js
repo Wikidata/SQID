@@ -685,9 +685,15 @@ angular.module('rules').factory('provider', [
 			return function(rule) {
 				return angular.extend({
 					kind: rule.kind,
-					desc: rule.desc
+					desc: capitaliseFirstLetter(rule.desc)
 				}, parser.parse(rule.rule, true));
 			};
+		}
+
+		function capitaliseFirstLetter(str) {
+			if (angular.isDefined(str)) {
+				return (str.charAt(0).toUpperCase() + str.slice(1));
+			}
 		}
 
 		function compareIdOrVariable(lhs, rhs) {
