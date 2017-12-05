@@ -293,10 +293,17 @@ define([
 				i18n.waitForTerms(terms),
 				i18n.waitForPropertyLabels(properties)
 			]).then(function() {
+				return $translate(['RULES.CONSEQUENCES',
+								   'RULES.MATERIALISABLE',
+								   'RULES.INFORMATIONAL'
+								  ]);
+			}).then(function(translations) {
 				return rules.map(function(rule) {
 					rule.content = ['<emph>' + rule.desc + '</emph><br>' +
 									'<code>' + filters.formatRule(rule) + '</code>',
-									rule.kind
+									(translations['RULES.' + rule.kind.toUpperCase()] + '<br>' +
+									 '<a href="' + filters.linkToRule(rule) + '">' +
+									 translations['RULES.CONSEQUENCES'] + '</a>')
 								   ];
 					return rule;
 				});
