@@ -10,13 +10,14 @@ define([
 	'i18n/translate.config',
 	'data/classes.service',
 	'data/properties.service',
-	'rules/rules.service'
+	'rules/rules.service',
+	'rules/ast.service'
 ], function() {
 ///////////////////////////////////////
 
 angular.module('browse').controller('TableController', [
-'$scope', '$translate', 'i18n', 'arguments', 'classes', 'properties', 'util', 'rules',
-function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules){
+'$scope', '$translate', 'i18n', 'arguments', 'classes', 'properties', 'util', 'rules', 'ast',
+function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, ast){
 
 	var tableContent = [];
 
@@ -413,7 +414,25 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules){
 		if (args.type == 'rules') {
 			rules.getRules()
 				.then(function(data) {
-				var rulesArray = data;
+					var rulesArray = data.filter(function(rule) {
+						var needle = status.rulesFilter.label.toLowerCase();
+
+						if (angular.isUndefined(needle) ||
+							(needle === '')) {
+							return true;
+						}
+						if (('desc' in rule) &&
+							angular.isDefined(rule.desc) &&
+							(rule.desc.toLowerCase().includes(needle))) {
+							return true;
+						}
+
+						return ast.literals(rule).some(function(literal) {
+							return i18n.getEntityLabel(literal.name)
+								.toLowerCase()
+								.includes(needle);
+						});
+					});
 					refreshTableContent(args, rulesArray, data, function(item) {
 						return item;
 					});

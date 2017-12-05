@@ -8,7 +8,7 @@ define([
 ///////////////////////////////////////
 
 angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n', function($http, $route, util, i18n){
-	  var args = {}; 
+	  var args = {};
 	  var statusStartValues = {
 		entityType: "classes",
 		activePage: 1,
@@ -25,7 +25,10 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 			statements: "fa fa-sort-desc",
 			qualifiers: "fa fa-sort",
 			references: "fa fa-sort"
-		  }
+		  },
+			rules: {
+				label: "fa fa-sort"
+			}
 		},
 		classesFilter: {
 		  label: "",
@@ -45,7 +48,10 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  references: [0, 10000000],
 		  datatypes: {id: 1, name: "Any property type"}
 
-		}
+		},
+		  rulesFilter: {
+			  label: ""
+		  }
 	  };
 
 	  var serializeDatatype = function(type){
@@ -129,7 +135,7 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  return util.cloneObject(statusStartValues);
 		},
 		getUrl: function(){
-		  var result =  location.origin + location.pathname + "#/browse" 
+		  var result =	location.origin + location.pathname + "#/browse"
 			+ "?activepage=" + status.activePage
 			+ "&type=" + status.entityType
 			+ "&lang=" + status.lang;
@@ -144,9 +150,9 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 			  + (status.sortCriteria.classes.label != "fa fa-sort" ? "&sortclasslabel=" + status.sortCriteria.classes.label : "")
 			  + (status.sortCriteria.classes.instances != "fa fa-sort-desc" ? "&sortclassinstances=" + status.sortCriteria.classes.instances : "")
 			  + (status.sortCriteria.classes.subclasses != "fa fa-sort" ? "&sortclasssubclasses=" + status.sortCriteria.classes.subclasses : "")
-			
+
 		  }else{
-			result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "") 
+			result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "")
 			  + (status.propertiesFilter.relatedProperty ? "&rppfilter=" + status.propertiesFilter.relatedProperty : "")
 			  + (status.propertiesFilter.relatedQualifier ? "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier : "")
 			  + (status.propertiesFilter.usedForClass ? "&usedforclassfilter=" + status.propertiesFilter.usedForClass : "")
@@ -156,7 +162,7 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 			  + (status.propertiesFilter.qualifiers[0] != 0 ? "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0] : "")
 			  + (status.propertiesFilter.qualifiers[1] != 10000000 ? "&qualifiersend=" + status.propertiesFilter.qualifiers[1] : "")
 			  + (status.propertiesFilter.references[0] != 0 ? "&referencesbegin=" + status.propertiesFilter.references[0] : "")
-			  + (status.propertiesFilter.references[1] != 10000000   ? "&referencesend=" + status.propertiesFilter.references[1] : "")
+			  + (status.propertiesFilter.references[1] != 10000000	 ? "&referencesend=" + status.propertiesFilter.references[1] : "")
 			  + (status.propertiesFilter.datatypes.id != 1 ? "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes) : "")
 			  + (status.sortCriteria.properties.label != "fa fa-sort" ? "&sortpropertylabel=" + status.sortCriteria.properties.label : "")
 			  + (status.sortCriteria.properties.datatype != "fa fa-sort" ? "&sortpropertydatatype=" + status.sortCriteria.properties.datatype : "")
@@ -170,5 +176,5 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
   }]);
 
 
-  
+
 return {}; }); // module definition end
