@@ -418,8 +418,8 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 						var needle = status.rulesFilter.label.toLowerCase();
 
 						if (angular.isDefined(status.rulesFilter.kinds) &&
-							(status.rulesFilter.kinds.name !== 'Any rule kind')) {
-							if (rule.kind !== status.rulesFilter.kinds.name) {
+							(status.rulesFilter.kinds.type !== 'any')) {
+							if (rule.kind !== status.rulesFilter.kinds.type) {
 								return false;
 							}
 						}
@@ -547,9 +547,9 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 
 	$scope.ruleKindSelector = {
 		options: [
-			{id: 1, name: "Any rule kind"},
-			{id: 2, name: "materialisable"},
-			{id: 3, name: "informational"}
+			{id: 1, type: "any"},
+			{id: 2, type: "materialisable"},
+			{id: 3, type: "informational"}
 		],
 		selected: status.rulesFilter.kinds
 	};
@@ -557,16 +557,16 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 	$scope.translations = {};
 
 	$translate(['TABLE_HEADER.LABEL', 'TABLE_HEADER.DATATYPE', 'TABLE_HEADER.USES_IN_STMTS',
-		'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES',
-		'TABLE_HEADER.SUBCLASSES']).then(function(translations){
-	  translations.LABEL = translations['TABLE_HEADER.LABEL'];
-	  translations.DATATYPE = translations['TABLE_HEADER.DATATYPE'];
-	  translations.USES_IN_STMTS = translations['TABLE_HEADER.USES_IN_STMTS'];
-	  translations.USES_IN_QUALS = translations['TABLE_HEADER.USES_IN_QUALS'];
-	  translations.USES_IN_REFS = translations['TABLE_HEADER.USES_IN_REFS'];
-	  translations.INSTATNCES = translations['TABLE_HEADER.INSTATNCES'];
-	  translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
-
+				'TABLE_HEADER.USES_IN_QUALS', 'TABLE_HEADER.USES_IN_REFS', 'TABLE_HEADER.INSTATNCES',
+				'TABLE_HEADER.SUBCLASSES'
+			   ]).then(function(translations) {
+				   translations.LABEL = translations['TABLE_HEADER.LABEL'];
+				   translations.DATATYPE = translations['TABLE_HEADER.DATATYPE'];
+				   translations.USES_IN_STMTS = translations['TABLE_HEADER.USES_IN_STMTS'];
+				   translations.USES_IN_QUALS = translations['TABLE_HEADER.USES_IN_QUALS'];
+				   translations.USES_IN_REFS = translations['TABLE_HEADER.USES_IN_REFS'];
+				   translations.INSTATNCES = translations['TABLE_HEADER.INSTATNCES'];
+				   translations.SUBCLASSES = translations['TABLE_HEADER.SUBCLASSES'];
 	});
 
 	$scope.filterPermalink =Arguments.getUrl();

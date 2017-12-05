@@ -50,7 +50,7 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  },
 		  rulesFilter: {
 			  label: "",
-			  kinds: {id: 1, name: "Any rule kind"}
+			  kinds: {id: 1, name: "Any rule kind", type: "any"}
 		  }
 	  };
 
@@ -182,8 +182,8 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 			  result += (((status.rulesFilter.label
 						   ? ("&ruleslabelfilter=" + status.rulesFilter.label)
 						   : ""))
-						 + ((status.rulesFilter.kinds.name !== 'Any rule kind')
-							? ("&ruleskindfilter=" + status.rulesFilter.kinds.name)
+						 + ((status.rulesFilter.kinds.type !== 'any')
+							? ("&ruleskindfilter=" + status.rulesFilter.kinds.type)
 							: ""));
 		  }
 

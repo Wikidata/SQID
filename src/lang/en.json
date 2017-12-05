@@ -189,6 +189,7 @@
 		"INFORMATIONAL": "informational",
 		"CONSTRAINT": "constraint",
 		"CONSEQUENCES": "consequences",
-		"COUNT": "count"
+		"COUNT": "count",
+		"ANY": "Any rule kind"
     }
 }

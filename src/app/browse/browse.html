@@ -49,7 +49,7 @@
 				<div ng-if='args.type == "rules"' class="ng-scope">
 				  <p><strong>{{ 'FILTER_MENUE.FILTER_RULE_KIND' | translate }}:</strong></p>
 				  <select class="form-control"
-						  data-ng-options="rk.name for rk in ruleKindSelector.options track by rk.id"
+						  data-ng-options="('RULES.' + rk.type) | uppercase | translate for rk in ruleKindSelector.options track by rk.id"
 						  ng-model="ruleKindSelector.selected"
 						  ng-change="setRuleKindFilter(ruleKindSelector.selected)">
 				  </select>

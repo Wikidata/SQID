@@ -184,6 +184,7 @@
 		"INFORMATIONAL": "nur anzeigen",
 		"CONSTRAINT": "Nutzungseinschränkung",
 		"CONSEQUENCES": "Folgerungen",
-		"COUNT": "Anzahl"
+		"COUNT": "Anzahl",
+		"ANY": "alle Regelarten"
     }
 }
