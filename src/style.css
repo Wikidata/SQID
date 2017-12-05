@@ -716,6 +716,11 @@ div.qualifiers {
   bottom: 5px;
 }
 
+.table-condensed > tbody > tr > td > code {
+	font-size: 125% !important;
+	background-color: #ffffff !important;
+}
+
 .table-striped > tbody > tr:nth-of-type(odd) > td > code {
 	font-size: 125% !important;
 	background: #f9f9f9 !important;
