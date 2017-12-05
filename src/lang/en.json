@@ -71,6 +71,7 @@
 		"FILTER_DIRECT_CLASS": "Class (only direct)",
 		"FILTER_DIRECT_INS": "Number of direct instances",
 		"FILTER_DIRECT_SUBCL": "Number of direct subclasses",
+		"FILTER_RULE_KIND": "Rule kind",
 		"RESET_FILTERS": "Reset Filters",
 		"PERMALINK": "Link with filter states"
 	},

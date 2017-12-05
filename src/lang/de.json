@@ -74,6 +74,7 @@
 		"FILTER_DIRECT_CLASS": "Klasse (nur direkte Klassenbeziehung)",
 		"FILTER_DIRECT_INS": "Anzahl direkter Instanzen",
 		"FILTER_DIRECT_SUBCL": "Anzahl direkter Unterklassen",
+		"FILTER_RULE_KIND": "Art der Regeln",
 		"RESET_FILTERS": "Filter zurücksetzen",
 		"PERMALINK": "Permanentlink (inkl. Filter Positionen)"
 	},
