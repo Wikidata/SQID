@@ -46,6 +46,15 @@
 				<div class="form-group">
 					<input type="text" class="form-control input-md" placeholder="{{ 'FILTER_MENUE.LABEL_PLACEHOLDER' | translate }}" ng-model="filterLabels" ng-change="searchFilter()" />
 				</div>
+				<div ng-if='args.type == "rules"' class="ng-scope">
+				  <p><strong>{{ 'FILTER_MENUE.FILTER_RULE_KIND' | translate }}:</strong></p>
+				  <select class="form-control"
+						  data-ng-options="rk.name for rk in ruleKindSelector.options track by rk.id"
+						  ng-model="ruleKindSelector.selected"
+						  ng-change="setRuleKindFilter(ruleKindSelector.selected)">
+				  </select>
+				  <br/>
+				</div>
 				<!--<div ng-slider id="slider-range" someattr="{{slider[0].from}}" index="slider[0].from" begin="0" end="1000">-->
 				<div ng-if='args.type == "properties"' class="ng-scope">
 					<p><strong>{{ 'FILTER_MENUE.FILTER_DATATYPE' | translate }}:</strong></p>

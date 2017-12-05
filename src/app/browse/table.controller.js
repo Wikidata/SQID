@@ -417,10 +417,18 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 					var rulesArray = data.filter(function(rule) {
 						var needle = status.rulesFilter.label.toLowerCase();
 
+						if (angular.isDefined(status.rulesFilter.kinds) &&
+							(status.rulesFilter.kinds.name !== 'Any rule kind')) {
+							if (rule.kind !== status.rulesFilter.kinds.name) {
+								return false;
+							}
+						}
+
 						if (angular.isUndefined(needle) ||
 							(needle === '')) {
 							return true;
 						}
+
 						if (('desc' in rule) &&
 							angular.isDefined(rule.desc) &&
 							(rule.desc.toLowerCase().includes(needle))) {
@@ -531,7 +539,16 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 	  {id: 10, name: "Quantity"},
 	  {id: 11, name: "Monolingualtext"}],
 	  selected: status.propertiesFilter.datatypes
-	}
+	};
+
+	$scope.ruleKindSelector = {
+		options: [
+			{id: 1, name: "Any rule kind"},
+			{id: 2, name: "materialisable"},
+			{id: 3, name: "informational"}
+		],
+		selected: status.rulesFilter.kinds
+	};
 
 	$scope.translations = {};
 
@@ -576,15 +593,23 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 	  updateTable();
 	}
 
-	$scope.resetFilters = function(){
-	  status.classesFilter = Arguments.getStatusStartValues().classesFilter;
-	  status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
-	  $scope.$broadcast('angucomplete-alt:clearInput');
-	  $scope.datatypeSelector.selected = status.propertiesFilter.datatypes;
-	  $scope.propertyClassFilter.selected = status.propertiesFilter.directInstanceOf;
-	  $scope.filterLabels = "";
-	  updateTable();
-	}
+	$scope.setRuleKindFilter = function(data) {
+		status.rulesFilter.kinds = data;
+		$scope.filterPermalink = Arguments.getUrl();
+		updateTable();
+	};
+
+	$scope.resetFilters = function() {
+		status.classesFilter = Arguments.getStatusStartValues().classesFilter;
+		status.propertiesFilter = Arguments.getStatusStartValues().propertiesFilter;
+		status.rulesFilter = Arguments.getStatusStartValues().rulesFilter;
+		$scope.$broadcast('angucomplete-alt:clearInput');
+		$scope.datatypeSelector.selected = status.propertiesFilter.datatypes;
+		$scope.propertyClassFilter.selected = status.propertiesFilter.directInstanceOf;
+		$scope.ruleKindSelector.selected = status.rulesFilter.kinds;
+		$scope.filterLabels = "";
+		updateTable();
+	};
 
 	$scope.updateStatus = function(){
 	  if (status.entityType == "classes"){
