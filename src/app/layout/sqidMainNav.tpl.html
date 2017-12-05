@@ -1,7 +1,7 @@
 <!--<div sqid-main-nav class="collapse navbar-collapse" id="main-navbar">-->
 <ul class="nav navbar-nav navbar-right">
 	<li class="nav-element">
-		<form class="form-horizontal ng-pristine ng-valid" role="form" id="search-form">		
+		<form class="form-horizontal ng-pristine ng-valid" role="form" id="search-form">
 				<div ng-controller="entitySearchField" class="search-field">
 					<div class="right-inner-addon">
 						<angucomplete-alt id="item-search"
@@ -19,11 +19,11 @@
 					</div>
 				</div>
 		</form>
-	</li> 
+	</li>
 	<li class="nav-link"><a href="#/"><span translate="NAV.START"></span></a></li>
 	<li class="nav-link"><a href="#/browse?type=properties"><span translate="NAV.PROPERTIES"></span></a></li>
 	<li class="nav-link"><a href="#/browse?type=classes"><span translate="NAV.CLASSES"></span></a></li>
-    <li class="nav-link"><a href="#/rules/browse"><span translate="RULES.NAV_RULES"></span></a></li>
+    <li class="nav-link"><a href="#/browse?type=rules"><span translate="RULES.NAV_RULES"></span></a></li>
 	<li class="nav-link"><a href="#/about"><span translate="NAV.ABOUT"></span></a></li>
 	<li class="nav-element">
 		<div ng-controller="Login" class="login-bar">
@@ -65,7 +65,7 @@
 					</div>
 					<div class="form-group">
 						<a target="_blank" href="{{ authorizationLink }}"><button type="button" class="btn btn-primary"><i class="fa fa-arrow-circle-o-right" aria-hidden="true"></i> {{ 'MODALS.CONNECT' | translate }}</button></a>
-					</div>     
+					</div>
 			      </div>
 			      <div class="modal-footer">
 			        <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="closeModal()">{{ 'MODALS.CLOSE' | translate }}</button>
@@ -75,13 +75,13 @@
 			  </div>
 			</div>
 		</div>
-	</li>	
+	</li>
 </ul>
 
 	<!-- Dropdown example: -->
 	<!--<li class="dropdown">
 		<a href="#" class="dropdown-toggle" data-toggle="dropdown">About ICCL <b class="caret"></b></a>
-		
+
 		<ul class="dropdown-menu p-About ICCL" id="p-About ICCL">
 				<li id="n-News-.26-Dates"><a href="/web/News/en">News &amp; Dates</a></li>
 				<li id="n-Profile"><a href="/web/Profil/en">Profile</a></li>
