@@ -436,9 +436,13 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util, rules, 
 						}
 
 						return ast.literals(rule).some(function(literal) {
-							return i18n.getEntityLabel(literal.name)
-								.toLowerCase()
-								.includes(needle);
+							return ((literal.name.toLowerCase() === needle) ||
+									i18n.getEntityLabel(
+										literal.name
+									).toLowerCase(
+									).includes(
+										needle
+									));
 						});
 					});
 					refreshTableContent(args, rulesArray, data, function(item) {
