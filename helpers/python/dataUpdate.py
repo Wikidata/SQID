@@ -17,7 +17,113 @@ import os
 import time
 #import pprint
 
+MAX_REQUESTS = 12
+API_URL = 'https://www.wikidata.org/w/api.php'
+RULES_ANCHOR = 'User:Akorenchkin/Rules list'
 SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
+
+def doApiQuery(query):
+	def doRequest(request):
+
+		reqs = 0
+		done = False
+		while not done:
+			response = requests.get(API_URL,
+						params=request,
+						headers={'user-agent': 'SQID Python Helper/1.0.0'})
+			data = json.loads(response.text)
+
+			if 'error' in data:
+				if 'Retry-After' in response.headers:
+					reqs += 1
+					timeout = int(response.headers['Retry-After'])
+					if reqs < MAX_REQUESTS:
+						print("Maxlag is too high, waiting for {}".format(timeout))
+						time.sleep(timeout)
+					else:
+						print("Maxlag is too high, gave up waiting after {} request".format(reqs))
+						return data
+			else:
+				done = True
+
+		return data
+
+	def doRequests(request):
+		responses = []
+		cont = {}
+
+		while cont is not None:
+			response = doRequest(request)
+			responses.append(response)
+
+			if 'continue' in response:
+				cont = response['continue']
+				request.update(cont)
+			else:
+				cont = None
+
+		return responses
+
+	query.update({
+		'maxlag': 5,
+	})
+
+	return doRequests(query)
+
+def parseRules(result):
+	def parseRule(text):
+		parts = text[:-2].split('|')
+		rule = {'rule': parts[1]}
+
+		for i in range(2, len(parts)):
+			key, value = parts[i].split('=')
+
+			if key == 'type':
+				key = 'kind'
+
+			rule[key] = value
+
+		if 'kind' not in rule:
+			rule['kind'] = 'materialisable'
+
+		return rule
+
+	rules = []
+	left = 0
+	right = 0
+	length = len(result)
+
+	while 0 <= left <= length >= right >= 0:
+		left = result.find('{{User:Akorenchkin/Rule|', left)
+		right = result.find('}}', left)
+
+		if 0 <= left <= right:
+			rules.append(parseRule(result[left:right + 2]))
+		left = right + 3
+
+	return rules
+
+def updateRules():
+	rules = []
+	results = doApiQuery({
+		'action': 'query',
+		'format': 'json',
+		'prop': 'revisions',
+		'rvprop': 'content',
+		'generator': 'embeddedin',
+		'geititle': RULES_ANCHOR,
+		'geifilterredir': 'nonredirects',
+		'geilimit': 500,
+	})
+
+	for result in results:
+		if 'error' in result:
+			continue
+		for page in result['query']['pages'].values():
+			rules.extend(parseRules(page['revisions'][0]['*']))
+
+	print(json.dumps(rules))
+
 
 def doSparqlQuery(query):
 	r = requests.get(SPARQL_SERVICE_URL, params={'query': "#TOOL:SQID Python Helper\n" + query, 'format': 'json'});
