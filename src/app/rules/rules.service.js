@@ -272,9 +272,10 @@ define([
 			var terms = [];
 			var properties = [];
 
-			var rules = provider
-				.getRules({ canEdit: true })
-				.map(function(rule) {
+			return provider.getRules({
+				canEdit: true
+			}).then(function(rules) {
+				return rules.map(function(rule) {
 					ast.literals(rule)
 						.map(function(literal) {
 							var prefix = literal.name.substr(0, 1);
@@ -288,24 +289,28 @@ define([
 
 					return angular.extend({}, rule);
 				});
-
-			return $q.all([
-				i18n.waitForTerms(terms),
-				i18n.waitForPropertyLabels(properties)
-			]).then(function() {
-				return $translate(['RULES.CONSEQUENCES',
-								   'RULES.MATERIALISABLE',
-								   'RULES.INFORMATIONAL'
-								  ]);
-			}).then(function(translations) {
-				return rules.map(function(rule) {
-					rule.content = ['<emph>' + rule.desc + '</emph><br>' +
-									'<code>' + filters.formatRule(rule) + '</code>',
-									(translations['RULES.' + rule.kind.toUpperCase()] + '<br>' +
-									 '<a href="' + filters.linkToRule(rule) + '">' +
-									 translations['RULES.CONSEQUENCES'] + '</a>')
-								   ];
-					return rule;
+			}).then(function (rules) {
+				return $q.all([
+					i18n.waitForTerms(terms),
+					i18n.waitForPropertyLabels(properties)
+				]).then(function() {
+					return $translate(['RULES.CONSEQUENCES',
+									   'RULES.MATERIALISABLE',
+									   'RULES.INFORMATIONAL',
+									   'RULES.STATIC',
+									   'RULES.DYNAMIC'
+									  ]).then(function(translations) {
+										  return rules.map(function(rule) {
+											  rule.content = ['<emph>' + rule.desc + '</emph><br>' +
+															  '<code>' + filters.formatRule(rule) + '</code>',
+															  (translations['RULES.' + rule.kind.toUpperCase()] + '<br>' +
+															   translations['RULES.' + rule.source] + '<br>' +
+															   '<a href="' + filters.linkToRule(rule) + '">' +
+															   translations['RULES.CONSEQUENCES'] + '</a>')
+															 ];
+											  return rule;
+										  });
+									  });
 				});
 			});
 		}

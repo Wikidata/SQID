@@ -1,24 +1,24 @@
 //////// Module Definition ////////////
 define([
 'rules/rules.module',
-'rules/parser.service'
+'rules/parser.service',
 ], function() {
 ///////////////////////////////////////
 
 angular.module('rules').factory('provider', [
-	'parser',
-	function(parser) {
+	'$http', 'parser',
+	function($http, parser) {
 
 		var rules = [
 // 			{ // x inverseOf y -> y inverseOf x
 // 				rule: '(?x.P1696 = ?y) -> (?y.P1696 = ?x)',
 // 				kind: 'materialisable'
 // 			},
-			{
-				desc: 'spouse is symmetric',
-				rule: '(?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
-				kind: 'materialisable'
-			},
+			// {
+			// 	desc: 'spouse is symmetric',
+			// 	rule: '(?x.P26 = ?y)@?S -> (?y.P26 = ?x)@?S',
+			// 	kind: 'materialisable'
+			// },
 			{
 				desc: 'A male parent is a father',
 				rule: '(?father.P40 = ?child)@?X, (?father.P21 = Q6581097)@?Y -> (?child.P22 = ?father)@[]',
@@ -683,17 +683,31 @@ angular.module('rules').factory('provider', [
 
 		function process() {
 			return function(rule) {
-				return angular.extend({
-					kind: rule.kind,
-					desc: capitaliseFirstLetter(rule.desc)
-				}, parser.parse(rule.rule, true));
+				try {
+					return angular.extend({
+						kind: rule.kind,
+						desc: capitaliseFirstLetter(rule.desc),
+						source: (('source' in rule)
+								 ? rule.source
+								 : 'STATIC'
+								)
+					}, parser.parse(rule.rule, true));
+				} catch(err) {
+					return {
+						kind: rule.kind,
+						desc: capitaliseFirstLetter(rule.desc),
+						error: err
+					};
+				}
 			};
 		}
 
 		function capitaliseFirstLetter(str) {
-			if (angular.isDefined(str)) {
-				return (str.charAt(0).toUpperCase() + str.slice(1));
+			if (angular.isUndefined(str)) {
+				return undefined;
 			}
+
+			return (str.charAt(0).toUpperCase() + str.slice(1));
 		}
 
 		function compareIdOrVariable(lhs, rhs) {
@@ -747,14 +761,29 @@ angular.module('rules').factory('provider', [
 				canEdit: false
 			}, opts);
 
-			return rules
-				.filter(
-					filter(opts)
-				).map(
-					process(opts)
-				).sort(
-					compare(opts)
-				);
+			return $http.get("data/rules.json")
+				.then(function(response) {
+					return response.data.map(function(rule) {
+						return angular.extend({
+							source: 'DYNAMIC'
+						}, rule);
+					});
+				}).then(function(data) {
+					return rules
+						.concat(
+							data
+						).filter(
+							filter(opts)
+						).map(
+							process(opts)
+						).filter(
+							function(rule) {
+								return !('error' in rule);
+							}
+						).sort(
+							compare(opts)
+						);
+				});
 		}
 
 return {

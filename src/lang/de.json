@@ -185,6 +185,8 @@
 		"CONSTRAINT": "Nutzungseinschränkung",
 		"CONSEQUENCES": "Folgerungen",
 		"COUNT": "Anzahl",
-		"ANY": "alle Regelarten"
+		"ANY": "alle Regelarten",
+		"STATIC": "statisch",
+		"DYNAMIC": "dynamisch"
     }
 }

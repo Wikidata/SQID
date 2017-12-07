@@ -190,6 +190,8 @@
 		"CONSTRAINT": "constraint",
 		"CONSEQUENCES": "consequences",
 		"COUNT": "count",
-		"ANY": "Any rule kind"
+		"ANY": "Any rule kind",
+		"STATIC": "static",
+		"DYNAMIC": "dynamic"
     }
 }

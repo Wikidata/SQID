@@ -73,13 +73,15 @@ def doApiQuery(query):
 def parseRules(result):
 	def parseRule(text):
 		parts = text[:-2].split('|')
-		rule = {'rule': parts[1]}
+		rule = {}
 
-		for i in range(2, len(parts)):
-			key, value = parts[i].split('=')
+		for i in range(1, len(parts)):
+			key, value = parts[i].split('=', 1)
 
 			if key == 'type':
 				key = 'kind'
+			elif key == 'description':
+				key = 'desc'
 
 			rule[key] = value
 
