@@ -122,7 +122,8 @@ def updateRules():
 		for page in result['query']['pages'].values():
 			rules.extend(parseRules(page['revisions'][0]['*']))
 
-	print(json.dumps(rules))
+	with open('rules.json', 'w') as outfile:
+		json.dump(rules, outfile)
 
 
 def doSparqlQuery(query):
@@ -321,7 +322,8 @@ if __name__ == '__main__':
 	try:
 		os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),
 				      '..', '..', 'src', 'data'))
-		updateClassRecords()
 		updatePropertyRecords()
+		updateRules()
+		updateClassRecords()
 	finally:
 		os.chdir(wd)
