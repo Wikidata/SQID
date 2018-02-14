@@ -35,6 +35,10 @@ angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate
 	}
 
 	function mapLanguageCodeToApi(languageCode) {
+		if (angular.isUndefined(languageCode)) {
+			return;
+		}
+
 		var fixes = {
 			'nl-nl': 'nl'
 		};
