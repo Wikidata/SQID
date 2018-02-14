@@ -24,15 +24,37 @@ angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate
 		idTermsSize = 0;
 	}
 
-	var getLanguage = function() {
-		return language || $translate.use();
+	function getLanguage(forWikiDataApiOrSparqlQueryService) {
+		var lang = language || $translate.use();
+
+		if (forWikiDataApiOrSparqlQueryService) {
+			return mapLanguageCodeToApi(lang);
+		}
+
+		return lang;
+	}
+
+	function mapLanguageCodeToApi(languageCode) {
+		var fixes = {
+			'nl-nl': 'nl'
+		};
+
+		var processed = languageCode
+			.toLowerCase()
+			.replace('_', '-');
+
+		angular.forEach(fixes, function(repair, needle) {
+			processed = processed.replace(needle, repair);
+		});
+
+		return processed;
 	}
 
 	// Check if an explicit lanuage was set.
 	// If not, rather omit the parameter entirely.
 	var fixedLanguage = function() {
 		return (language != null);
-	} 
+	}
 
 	var setLanguage = function(newLang) {
 		if (getLanguage() != newLang) {
@@ -101,7 +123,7 @@ angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate
 				missingEntities.push(entities[i]);
 			}
 		}
-		return wikidataapi.getEntityTerms(missingEntities, getLanguage()).then(function(entityTerms) {
+		return wikidataapi.getEntityTerms(missingEntities, getLanguage(true)).then(function(entityTerms) {
 			angular.extend(idTerms, entityTerms);
 			idTermsSize = Object.keys(idTerms).length;
 			return true;
@@ -132,7 +154,7 @@ angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate
 				missingPropertyIds.push('P1647');
 			}
 
-			return wikidataapi.getEntityLabels(missingPropertyIds, getLanguage()).then(function(entityLabels) {
+			return wikidataapi.getEntityLabels(missingPropertyIds, getLanguage(true)).then(function(entityLabels) {
 				angular.extend(propertyLabels, entityLabels);
 				return true;
 			});
