@@ -15,7 +15,7 @@ function($scope, $translate, $window, wikidataapi, i18n, util){
 			$window.location.href = i18n.getEntityUrl(entity.originalObject.idName);
 		}
 	};
-	var lang = i18n.getLanguage();
+	var lang = i18n.getLanguage(true);
 
 	$scope.localSearch = function(str, timeoutPromise){
 		var kMaxSize = 20;
@@ -43,7 +43,7 @@ function($scope, $translate, $window, wikidataapi, i18n, util){
 	};
 
 	var updateLanguage = function(){
-		lang = i18n.getLanguage();
+		lang = i18n.getLanguage(true);
 	}
 
   }]);
