@@ -246,7 +246,7 @@ function(wikidataapi, util, i18n, sparql, primarySources, $q) {
 	}
 
 	var getEntityData = function(id) {
-		var language = i18n.getLanguage();
+		var language = i18n.getLanguage(true);
 		return wikidataapi.getEntityData(id, language, true).then(function(response) {
 			var ret = {
 				language: language, // this is fixed for this result!
@@ -427,7 +427,7 @@ SELECT DISTINCT ?p { \n\
 	}
 
 	var getInlinkData = function(id) {
-		var language = i18n.getLanguage();
+		var language = i18n.getLanguage(true);
 		return sparql.getQueryRequest(getSparqlQueryForInlinks(id,101)).then(function(data){
 			var instanceJson = data.results.bindings;
 			var element;

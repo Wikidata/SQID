@@ -216,9 +216,9 @@ angular.module('view').controller('ViewController', [
 		$scope.url = 'https://www.wikidata.org/wiki/' +
 			( $scope.isItem ? '' : 'Property:' ) +
 			$scope.id +
-			( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage()) : '' );
+			( i18n.fixedLanguage() ? ('?uselang=' + i18n.getLanguage(true)) : '' );
 		$scope.urlReasonator = 'https://tools.wmflabs.org/reasonator/?q=' + $scope.id +
-			( i18n.fixedLanguage() ? ('?lang=' + i18n.getLanguage()) : '' );
+			( i18n.fixedLanguage() ? ('?lang=' + i18n.getLanguage(true)) : '' );
 		Classes.then(function(classes){
 			if ($scope.isItem) {
 				View.formatPropertyMap(classes.getRelatedProperties(numId), RELATED_PROPERTIES_THRESHOLD).then( function(formattedProperties) {
@@ -261,7 +261,7 @@ angular.module('view').controller('ViewController', [
 		$scope.editLabel = function(){
 			var modalId = '#editLabelModal';
 			var newLabel = $scope.newLabel;
-			var lang = i18n.getLanguage();
+			var lang = i18n.getLanguage(true);
 			var id = $scope.id;
 			if (newLabel){
 				var response = oauth.setLabel(id, newLabel, lang);

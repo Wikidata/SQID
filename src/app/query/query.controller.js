@@ -14,7 +14,7 @@ define([
 
 
 angular.module('sparqly').controller('QueryController', [
-'$scope', '$routeParams', 'spinner', 'classes', 'properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState', 
+'$scope', '$routeParams', 'spinner', 'classes', 'properties', 'i18n', 'sparql', 'wikidataapi', 'queryInterfaceState',
 function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikidataapi, qisService) {
 
 	var qis; // query interface state (usually points to qisService)
@@ -22,7 +22,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 
 	if(!$scope.resultListMode) { qis = qisService; } // just point to the persisted state object
 	else { qis = qisService.getFreshStateInstance(); } // minimalist interface, dont mess with persisted state
-	
+
 	$scope.qui = qis;
 	$scope.pagination = {
 		autoBoot: true,
@@ -47,7 +47,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 	$scope.classSelectHandler = function(selected) {
 		if(arguments.length) {
 			classSelectInputVal = selected;
-			if(selected !== null && typeof selected === 'object' && qis.classData[selected.qid.substr(1)] !== undefined ) { 
+			if(selected !== null && typeof selected === 'object' && qis.classData[selected.qid.substr(1)] !== undefined ) {
 				qis.selectedClass = selected;
 				$scope.buildSparql();
 			}
@@ -60,7 +60,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 		//console.log(selected);
 		if(arguments.length) {
 			propAddInputVal = selected;
-			if(selected !== null && typeof selected === 'object' && qis.propertyData[selected.id] !== undefined ) { 
+			if(selected !== null && typeof selected === 'object' && qis.propertyData[selected.id] !== undefined ) {
 				qis.selectedProperties.add(selected);
 				$scope.buildSparql();
 				propAddInputVal = undefined;
@@ -69,15 +69,15 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 		else { return propAddInputVal; }
 	};
 
-	// searching classes in lokal data by id or labels (case insensitive) 
+	// searching classes in lokal data by id or labels (case insensitive)
 	$scope.classSearch = function(str) {
-		var i = qis.classIndex.length, matches = [], 
+		var i = qis.classIndex.length, matches = [],
 			classId, classLabel, newMatch;
 		str = str.toString().toLowerCase();
 		while(i--) {
 			classId = qis.classIndex[i];
 			classLabel = qis.classData[classId].l;
-			if( (classLabel !== undefined && classLabel !== null && classLabel.toLowerCase().indexOf(str) > -1) 
+			if( (classLabel !== undefined && classLabel !== null && classLabel.toLowerCase().indexOf(str) > -1)
 			||( ('q'+classId).indexOf(str) > -1) ) {
 				newmatch = qis.classData[qis.classIndex[i]];
 				newmatch.qid = 'Q' + qis.classIndex[i];
@@ -114,9 +114,9 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 			i = keys.length, p;
 		str = str.toString().toLowerCase();
 		while(i--) {
-			if( (p = qis.propertyData[keys[i]]) && ( 
+			if( (p = qis.propertyData[keys[i]]) && (
 				(p.l !== undefined && p.l.toLowerCase().indexOf(str) > -1) ||
-				(("p" + keys[i]).indexOf(str) > -1)								
+				(("p" + keys[i]).indexOf(str) > -1)
 		  	)){
 				rProps.push({id: keys[i], score: qis.selectedClass.r[keys[i]]});
 			}
@@ -130,7 +130,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 
 		// ? localizing after searching in english labels? (related to issue #43)
 		var fetchThose = []; i = rProps.length;
-		while(i--) { fetchThose.push('P' + rProps[i].id); } 
+		while(i--) { fetchThose.push('P' + rProps[i].id); }
 		return i18n.waitForPropertyLabels(fetchThose).then(function() {
 			i = rProps.length;
 			while(i--) {
@@ -141,7 +141,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 			return rProps;
 		});
 
-		
+
 	}
 
 	function estimateResponseSize() {
@@ -155,7 +155,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 		if(!qis.selectedClass) { qis.sparqlQuery = null; } else {
 
 			estimateResponseSize();
-			
+
 			var obj = "wd:" + qis.selectedClass.qid,
 				ins = "?" + qis.queryParms.RESULT_VAR,
 				tab = "    ";
@@ -174,13 +174,13 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 
 			var body;
 			switch(qis.offspring) {
-				case 'i': 	body = ins + " wdt:P31 " + obj + " ."; 
+				case 'i': 	body = ins + " wdt:P31 " + obj + " .";
 							break;
-				case 'ai': 	body = ins + " wdt:P31/wdt:P279* " + obj + " ."; 
+				case 'ai': 	body = ins + " wdt:P31/wdt:P279* " + obj + " .";
 							break;
 				case 's': 	body = ins + " wdt:P279 " + obj + " .";
 							break;
-				case 'as': 	body = ins + " wdt:P279* " + obj + " ."; 
+				case 'as': 	body = ins + " wdt:P279* " + obj + " .";
 							break;
 			}
 			var i = qis.selectedProperties.stack.length;
@@ -231,7 +231,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 			qis.queryError = response;
 			resumeUI();
 		});
-		
+
 	};
 
 	// process entities on the current page
@@ -248,7 +248,9 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 		}
 		// pull labels and descriptions
 		if(entityIds.length > 0) {
-			wikidataapi.getEntityTerms(entityIds, i18n.getLanguage()).then(function(data) {
+			wikidataapi.getEntityTerms(entityIds,
+									   i18n.getLanguage(true))
+				.then(function(data) {
 				//console.log(data);
 				var i = entities.length, entity;
 				while(i--) {
@@ -263,7 +265,7 @@ function($scope, $routeParams, spinner, Classes, Properties, i18n, sparql, wikid
 	}
 
 	// immediately fire the request when in resultListMode
-	if($scope.resultListMode) { 
+	if($scope.resultListMode) {
 		qis.sparqlQuery = $routeParams.run;
 		qis.wikidataQueryHref = sparql.getWdqsUiUrl($routeParams.run);
 		setTimeout(function() {	$scope.runSparql(); }, 0); // timeout of 0 prevents some weird bug to happen

@@ -59,14 +59,14 @@ angular.module('util').factory('sparql', ['util', 'i18n', '$q', function(util, i
 						var next = poolPassive.values().next().value;
 						poolActive.add(next.promise);
 						next.resolve();
-						poolPassive.delete(next); 
+						poolPassive.delete(next);
 					}
 					return result;
 				});
 			});
 		}
 	};
-	
+
 	var getQueryForIdFromLiteral = function(propertyId, literal, limit){
 		var query = getStandardPrefixes() + 'SELECT ?id\n\
 			WHERE { \n\
@@ -90,7 +90,7 @@ angular.module('util').factory('sparql', ['util', 'i18n', '$q', function(util, i
 SELECT $p $pLabel \n\
 WHERE { \n\
    { " + getInnerQueryForPropertySubjects("p", propertyId, objectId, limit) + " } \n\
-   SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage() + "\" . } \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage(true) + "\" . } \n\
 }";
 	}
 
@@ -105,7 +105,7 @@ WHERE { \n\
 SELECT $p $pLabel \n\
 WHERE { \n\
    { " + getInnerQueryForPropertyObjects("p", subjectId, propertyId, limit) + " } \n\
-   SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage() + "\" . } \n\
+   SERVICE wikibase:label { bd:serviceParam wikibase:language \"" + i18n.getLanguage(true) + "\" . } \n\
 }";
 	}
 

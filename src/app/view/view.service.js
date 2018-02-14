@@ -203,9 +203,10 @@ angular.module('view').factory('view', ['$route', '$q', '$sce', 'sparql', 'entit
 
 		// Find Wikipedia article
 		getUrlWikipedia: function(sitelinks) {
-			var wikiName = i18n.getLanguage() + 'wiki';
-			if (i18n.getLanguage() != null && wikiName in sitelinks) {
-				return	'https://' + i18n.getLanguage() + '.wikipedia.org/wiki/' + sitelinks[wikiName].replace(" ","_");
+			var lang = i18n.getLanguage(true);
+			var wikiName = lang + 'wiki';
+			if (lang != null && wikiName in sitelinks) {
+				return	'https://' + lang + '.wikipedia.org/wiki/' + sitelinks[wikiName].replace(" ","_");
 			} else {
 				return null;
 			}
