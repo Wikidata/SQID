@@ -66,7 +66,10 @@ angular.module('i18n').factory('i18n', ['wikidataapi', 'properties', '$translate
 			propertyLabels = {}; // clear property label cache for old language
 		}
 		language = newLang;
-		$translate.use(getLanguage());
+		var languageCode = getLanguage();
+		$translate.use(languageCode);
+		// call it again, otherwise fallback won't work if no translations are available
+		$translate.use(languageCode);
 	}
 
 	// Clear term cache when it grows too big to prevent memory leak.
