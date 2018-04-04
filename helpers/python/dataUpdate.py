@@ -70,10 +70,10 @@ def doApiQuery(query):
 
 	return doRequests(query)
 
-def parseRules(result):
+def parseRules(result, origin):
 	def parseRule(text):
 		parts = text[:-2].split('|')
-		rule = {}
+		rule = {'origin': origin}
 
 		for i in range(1, len(parts)):
 			key, value = parts[i].split('=', 1)
@@ -122,7 +122,8 @@ def updateRules():
 		if 'error' in result:
 			continue
 		for page in result['query']['pages'].values():
-			rules.extend(parseRules(page['revisions'][0]['*']))
+			rules.extend(parseRules(result=page['revisions'][0]['*'],
+						origin=page['title']))
 
 	with open('rules.json', 'w') as outfile:
 		json.dump(rules, outfile)
