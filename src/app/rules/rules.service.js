@@ -31,13 +31,17 @@ define([
 			return $q.all([entityData.waitForPropertyLabels(),
 						   entityInData.waitForPropertyLabels()
 						  ])
-				.then(function() {
-					return $q.all(checkCandidateRules(
-						entityData,
-						entityInData,
-						itemId,
-						haveEditingRights
-					));
+				 .then(function() {
+					 return provider.getRules({
+						 canEdit: haveEditingRights
+					 }).then(function(rules) {
+						 return $q.all(checkCandidateRules(
+							 rules,
+							 entityData,
+							 entityInData,
+							 itemId
+						 ));
+					 });
 				}).then(function(results) {
 					return deduplicateStatements(entityData, results);
 				}).then(function(results) {
@@ -47,33 +51,32 @@ define([
 				});
 		}
 
-		function checkCandidateRules(entityData, entityInData, itemId, haveEditingRights) {
-			return provider.getRules({ canEdit: haveEditingRights })
-				.filter(matcher.couldMatch(
+		function checkCandidateRules(rules, entityData, entityInData, itemId) {
+			return rules.filter(matcher.couldMatch(
 					entityData.statements,
 					entityInData.statements,
-					itemId))
-				.map(function(rule) {
-					var subject = rule.head.arguments[0].name;
-					var binding = {};
-					binding[subject] = { id: itemId,
-										 name: subject,
-										 outbound: entityData,
-										 inbound: entityInData
-									   };
+					itemId)
+			).map(function(rule) {
+				var subject = rule.head.arguments[0].name;
+				var binding = {};
+				binding[subject] = { id: itemId,
+									 name: subject,
+									 outbound: entityData,
+									 inbound: entityInData
+				};
 
-					var query = matcher.getInstanceCandidatesQuery(rule, binding);
+				var query = matcher.getInstanceCandidatesQuery(rule, binding);
 
-					if (rule.body.length !== 0) {
-						return sparql.getQueryRequest(query.query)
-							.then(function(sparqlResults) {
-								return handleSparqlResults(query, sparqlResults);
-							});
-					} else {
-						// this rule always matches
-						return $q.all([handleApiResults(query, [])]);
-					}
-				});
+				if (rule.body.length !== 0) {
+					return sparql.getQueryRequest(query.query)
+						.then(function(sparqlResults) {
+							return handleSparqlResults(query, sparqlResults);
+						});
+				} else {
+					// this rule always matches
+					return $q.all([handleApiResults(query, [])]);
+				}
+			});
 		}
 
 		function handleSparqlResults(query, sparqlResults) {
