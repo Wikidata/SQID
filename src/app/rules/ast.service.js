@@ -6,6 +6,10 @@ function(ajv) {
 	['$http', '$log', '$sce', 'i18n',
 	 function($http, $log, $sce, i18n) {
 		function print(ast, opts) {
+			if (angular.isUndefined(ast)) {
+				return '';
+			}
+
 			if (angular.isUndefined(opts)) {
 				opts = {};
 			}
