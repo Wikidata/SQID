@@ -1,0 +1,19 @@
+<h1>{{ 'RULES.' + editor.addOrEdit | uppercase | translate }}</h1>
+<div ng-controller="EditorController">
+  <table class="table table-striped table-condensed">
+	<tbody>
+	  <tr>
+		<td translate="RULES.BODY"></td>
+		<td><input type="text" class="form-control input-md" ng-model="body" ng-change="renderRule()"></td>
+	  </tr>
+	  <tr>
+		<td translate="RULES.HEAD"></td>
+		<td><input type="text" class="form-control input-md" ng-model="head" ng-change="renderRule()"></td>
+	  </tr>
+	  <tr>
+		<td translate="RULES.RULE"></td>
+		<td><code ng-bind-html="rule | formatRule"></code></td>
+	  </tr>
+	</tbody>
+  </table>
+</div>
