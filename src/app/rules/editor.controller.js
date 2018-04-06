@@ -7,14 +7,19 @@ define(['rules/rules.module',
 	   ],
 function() {
 	angular.module('rules').controller('EditorController',
-	['$scope', '$route', '$sce', '$translate', '$q',
+	['$scope', '$route', '$sce', '$translate', '$q', '$location',
 	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser',
-	function($scope, $route, $sce, $translate, $q, i18n, wikidataapi, dataFormatter, labels, parser) {
+	function($scope, $route, $sce, $translate, $q, $location, i18n, wikidataapi, dataFormatter, labels, parser) {
 
 		$scope.body = '';
 		$scope.head = '';
 		$scope.rule = undefined;
 		$scope.error = undefined;
+
+		var wantNewRule = ($location.path().endsWith === '/new');
+		$scope.$parent.addOrEdit = (wantNewRule
+									? 'add'
+									: 'edit');
 
 		$scope.renderRule = function() {
 			var rule = undefined;
