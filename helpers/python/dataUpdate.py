@@ -73,7 +73,8 @@ def doApiQuery(query):
 def parseRules(result, origin):
 	def parseRule(text):
 		parts = text[:-2].split('|')
-		rule = {'origin': origin}
+		rule = {'origin': origin,
+			'offset': ruleNumber}
 
 		for i in range(1, len(parts)):
 			key, value = parts[i].split('=', 1)
@@ -94,6 +95,7 @@ def parseRules(result, origin):
 	left = 0
 	right = 0
 	length = len(result)
+	ruleNumber = 0
 
 	while 0 <= left <= length >= right >= 0:
 		left = result.find('{{User:Akorenchkin/Rule|', left)
@@ -101,6 +103,7 @@ def parseRules(result, origin):
 
 		if 0 <= left <= right:
 			rules.append(parseRule(result[left:right + 2]))
+			ruleNumber += 1
 		left = right + 3
 
 	return rules
