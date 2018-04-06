@@ -11,30 +11,36 @@ function() {
 	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser',
 	function($scope, $route, $sce, $translate, $q, i18n, wikidataapi, dataFormatter, labels, parser) {
 
+		$scope.body = '';
+		$scope.head = '';
 		$scope.rule = undefined;
+		$scope.error = undefined;
 
 		$scope.renderRule = function() {
 			var rule = undefined;
 			var input = $scope.body + ' -> ' + $scope.head;
 
 			try {
-				rule = parser.parse(input);
-
-			} catch(e) {
-				// parse error, ignore
+				rule = parser.parse(input, false);
+			} catch(err) {
+				// parse error, build an error message
+				$scope.error = err;
 			}
 
-			if (angular.isDefined(rule)) {
-				// redraw the rule only if parsing succeeds,
-				// and fetch all relevant labels before doing so
-				return labels.labelPromiseForRule(
+			if (angular.isUndefined(rule)) {
+				// no new rule, so we're done here
+				return $q.resolve();
+			}
+
+			// got a rule, so clear the error message
+			$scope.error = undefined;
+
+			// fetch all the relevant labels, then redraw the rule
+			return labels.labelPromiseForRule(
 					rule
-				).then(function() {
-					$scope.rule = rule;
-				});
-			}
-
-			return undefined;
+			).then(function() {
+				$scope.rule = rule;
+			});
 		};
 	}]);
 
