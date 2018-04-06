@@ -154,6 +154,19 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 			}
 		});
 	};
+
+	function getPageContent(path) {
+		var url = 'https://www.wikidata.org/w/api.php?action=query&format=json&prop=revisions&rvprop=content&titles=' + path + '&callback=JSON_CALLBACK';
+		return util.jsonpRequest(url)
+			.then(function(response) {
+				if (!response.query) {
+					return null;
+				}
+
+				return response.query;
+		});
+	}
+
 	return {
 		getEntityData: getEntityData,
 		getClaims: getClaims,
@@ -162,7 +175,8 @@ angular.module('util').factory('wikidataapi', ['util', '$q', function(util, $q) 
 		getEntityLabels: getEntityLabels,
 		searchEntities: searchEntities,
 		getImageData: getImageData,
-		getEntityClaimForProperty: getEntityClaimForProperty
+		getEntityClaimForProperty: getEntityClaimForProperty,
+		getPageContent: getPageContent
 	};
 }]);
 
