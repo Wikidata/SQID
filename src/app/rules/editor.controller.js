@@ -8,8 +8,8 @@ define(['rules/rules.module',
 function() {
 	angular.module('rules').controller('EditorController',
 	['$scope', '$route', '$sce', '$translate', '$q', '$location',
-	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser',
-	function($scope, $route, $sce, $translate, $q, $location, i18n, wikidataapi, dataFormatter, labels, parser) {
+	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser', 'provider',
+	function($scope, $route, $sce, $translate, $q, $location, i18n, wikidataapi, dataFormatter, labels, parser, provider) {
 
 		$scope.body = '';
 		$scope.head = '';
@@ -17,6 +17,27 @@ function() {
 		$scope.error = undefined;
 
 		var wantNewRule = ($location.path().endsWith === '/new');
+
+		if (!wantNewRule) {
+			var search = $location.search();
+			provider.getDynamicRule(
+				search.origin,
+				search.offset
+			).then(function(rule) {
+				if (angular.isUndefined(rule)) {
+					// rule does not exist, force new
+					wantNewRule = true;
+					return;
+				}
+
+				var components = rule.rule.split('->');
+				$scope.body = components[0];
+				$scope.head = components[1];
+
+				$scope.renderRule();
+			});
+		}
+
 		$scope.$parent.addOrEdit = (wantNewRule
 									? 'add'
 									: 'edit');

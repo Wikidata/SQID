@@ -756,6 +756,26 @@ angular.module('rules').factory('provider', [
 			};
 		}
 
+		function processDynamicRule(rule) {
+			return angular.extend({
+				source: 'DYNAMIC'
+			}, rule);
+		}
+
+		function getDynamicRule(origin, offset) {
+			return $http.get("data/rules.json")
+				.then(function(response) {
+					var rules = response.data.filter(function(rule) {
+						return (('origin' in rule) &&
+								('offset' in rule) &&
+								(rule.origin === origin) &&
+								(rule.offset == offset));
+					});
+
+					return rules[0];
+				});
+		}
+
 		function getRules(opts) {
 			opts = angular.extend({
 				canEdit: false
@@ -763,11 +783,7 @@ angular.module('rules').factory('provider', [
 
 			return $http.get("data/rules.json")
 				.then(function(response) {
-					return response.data.map(function(rule) {
-						return angular.extend({
-							source: 'DYNAMIC'
-						}, rule);
-					});
+					return response.data.map(processDynamicRule);
 				}).then(function(data) {
 					return rules
 						.concat(
@@ -786,9 +802,10 @@ angular.module('rules').factory('provider', [
 				});
 		}
 
-return {
-		getRules: getRules
-	};
+		return {
+			getRules: getRules,
+			getDynamicRule: getDynamicRule
+		};
 }]);
 
 return {}; }); // module definition end
