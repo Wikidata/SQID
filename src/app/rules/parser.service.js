@@ -98,21 +98,25 @@ define([
 			closingParenthesis: function() { return word(')'); },
 			someVariable: function(r) {
 				return P.seqObj(['name', r.variableName])
-						.thru(type('some-variable'));
+					.thru(type('some-variable'))
+					.desc('a variable');
 			},
 			ObjectVariable: function(r) {
 				return P.seqObj(['name', r.variableName])
-						.thru(type('variable'));
+					.thru(type('variable'))
+					.desc('an object variable');
 			},
 			ObjectLiteral: function(r) {
 				return P.seqObj(['name', r.objectName])
-						.thru(type('literal'));
+					.thru(type('literal'))
+					.desc('an object literal');
 			},
 			LiteralExpression: function(r) {
 				return P.seqObj(r.quote,
 								['name', r.literalExpression],
 								r.quote)
-					.thru(type('literal-expression'));
+					.thru(type('literal-expression'))
+					.desc('a quoted literal expression');
 			},
 			ObjectTerm: function(r) {
 				return P.alt(
@@ -134,7 +138,8 @@ define([
 			},
 			SetVariable: function(r) {
 				return P.seqObj(['name', r.variableName])
-						.thru(type('set-variable'));
+					.thru(type('set-variable'))
+					.desc('a set variable');
 				},
 			SetTerm: function(r) {
 				return P.alt(
@@ -214,7 +219,7 @@ define([
 							type: "plus"
 						};
 					})
-				);
+				).desc('a placeholder');
 			},
 			Assignment: function(r) {
 				return assignment(r, r.ObjectTerm);

@@ -370,20 +370,31 @@ function(ajv) {
 			var variablesInHead = variables(ast.head);
 			var variablesInBody = variables(ast.body);
 
-			vars: for (var variable in variablesInHead) {
-				for (var other in variablesInBody) {
+			var numVariablesInHead = variablesInHead.length;
+			var numVariablesInBody = variablesInBody.length;
+
+			vars: for (var i = 0; i < numVariablesInHead; ++i) {
+				var variable = variablesInHead[i];
+
+				for (var j = 0; j < numVariablesInBody; ++j) {
+					var other = variablesInBody[j];
+
 					if (variable.name === other.name) {
 						if (variable.type !== other.type) {
-							throw new SyntaxError("Variable `" + variable +
-												  " occurs with different types.");
+							throw new SyntaxError(
+								"Variable `" + variable.name +
+								" occurs with different types."
+							);
 						}
 
 						continue vars;
 					}
 				}
 
-				throw new SyntaxError("Variable `" + variable +"' " +
-									  "does not occur in rule body");
+				throw new SyntaxError(
+					"Variable `" + variable.name +
+						"' does not occur in rule body"
+				);
 			}
 		}
 

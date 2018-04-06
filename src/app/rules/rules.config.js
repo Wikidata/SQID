@@ -40,6 +40,10 @@ function() {
 				.register('labelEntity', ['filters', function(filters) {
 					return filters.labelEntity;
 				}]);
+			$filterProvider
+				.register('formatParseError', ['filters', function(filters) {
+					return filters.formatParseError;
+				}]);
 	}]);
 
 	return {};

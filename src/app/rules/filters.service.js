@@ -32,11 +32,22 @@ function() {
 			);
 		}
 
+		function formatParseError(err) {
+			if (angular.isUndefined(err)) {
+				return '';
+			}
+
+			return $sce.trustAsHtml(
+				err.message
+			);
+		}
+
 		return {
 			formatRule: formatRule,
 			linkToRule: linkToRule,
 			linkToEntity: linkToEntity,
-			labelEntity: labelEntity
+			labelEntity: labelEntity,
+			formatParseError: formatParseError
 		};
 
 	 }]);
