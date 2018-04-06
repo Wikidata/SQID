@@ -3,6 +3,25 @@
   <table class="table table-striped table-condensed">
 	<tbody>
 	  <tr>
+		<td translate="RULES.DESC"></td>
+		<td><input type="text" class="form-control input-md" ng-model="desc" /></td>
+	  </tr>
+	  <tr>
+		<td translate="RULES.KIND"></td>
+		<td>
+		  <label class="radio-inline">
+			<input type="radio" value="informational" ng-model="kind">
+			{{ 'RULES.INFORMATIONAL' | translate }}
+			</input>
+		  </label>
+		  <label class="radio-inline">
+			<input type="radio" value="materialisable" ng-model="kind">
+			{{ 'RULES.MATERIALISABLE' | translate }}
+			</input>
+		  </label>
+		</td>
+	  </tr>
+	  <tr>
 		<td translate="RULES.BODY"></td>
 		<td><textarea class="form-control input-md" ng-model="body" ng-change="renderRule()" /></td>
 	  </tr>

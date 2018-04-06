@@ -33,6 +33,8 @@ function() {
 				var components = rule.rule.split('->');
 				$scope.body = components[0];
 				$scope.head = components[1];
+				$scope.desc = rule.desc;
+				$scope.kind = rule.kind;
 
 				$scope.renderRule();
 			});
