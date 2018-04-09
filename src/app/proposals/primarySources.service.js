@@ -237,8 +237,12 @@ angular.module('proposals').factory('primarySources', ['$http', '$templateCache'
 	function addProposalInformation(pStatementGroup, id) {
 		for (var i=0; i < pStatementGroup.length; i++){
 			pStatementGroup[i].actions = {
-				approve: approve,
-				reject: reject
+				approve: function(refresh) {
+					approve(id, this, refresh);
+				},
+				reject: function(refresh) {
+					reject(id, this, refresh);
+				}
 			};
 
 			if (pStatementGroup[i].references) {
