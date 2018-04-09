@@ -68,7 +68,14 @@ function() {
 					rule
 			).then(function() {
 				$scope.rule = rule;
+				$scope.updateRule();
 			});
+		};
+
+		$scope.updateRule = function() {
+			$scope.theRule.rule = $scope.body.trim() + ' -> ' + $scope.head.trim();
+			$scope.theRule.desc = $scope.desc;
+			$scope.theRule.kind = $scope.kind;
 		};
 
 		function setRule(rule) {
@@ -83,7 +90,7 @@ function() {
 			$scope.head = components[1];
 			$scope.desc = rule.desc;
 			$scope.kind = rule.kind;
-			$scope.rule = rule;
+			$scope.theRule = rule;
 
 			$scope.renderRule();
 		}
@@ -116,7 +123,7 @@ function() {
 			var match = null;
 
 			while ((match = COMPONENT_RE.exec(fragment[2])) !== null) {
-				rule[match[2]] = match[3];
+				rule[match[2]] = match[3].trim();
 				rule.origin = page.title;
 				rule.offset = offset;
 			}
@@ -150,7 +157,7 @@ function() {
 			for (var key in KEYS) {
 				text += ((!first)
 						 ? '|'
-						 : '') + KEYS[key] + '=' + rule[KEYS[key]];
+						 : '') + KEYS[key] + '=' + rule[KEYS[key]].trim();
 				first = false;
 			}
 
