@@ -8,8 +8,8 @@ define(['rules/rules.module',
 function() {
 	angular.module('rules').controller('EditorController',
 	['$scope', '$route', '$sce', '$translate', '$q', '$location',
-	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser', 'provider',
-	function($scope, $route, $sce, $translate, $q, $location, i18n, wikidataapi, dataFormatter, labels, parser, provider) {
+	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser', 'provider', 'oauth',
+	function($scope, $route, $sce, $translate, $q, $location, i18n, wikidataapi, dataFormatter, labels, parser, provider, oauth) {
 
 		var PREFIX = '{{User:Akorenchkin/Rule|';
 		var SUFFIX = '}}';
@@ -76,6 +76,28 @@ function() {
 			$scope.theRule.rule = $scope.body.trim() + ' -> ' + $scope.head.trim();
 			$scope.theRule.desc = $scope.desc;
 			$scope.theRule.kind = $scope.kind;
+		};
+
+		$scope.submitRule = function() {
+			$scope.renderRule();
+
+			if (angular.isDefined($scope.error)) {
+				// parse error, do nothing
+				return $q.resolve();
+			}
+
+			if (wantNewRule) {
+				console.log('adding new rules is not yet supported');
+				return $q.resolve();
+			}
+
+			return oauth.genericAction({
+				action: 'edit',
+				title: $scope.theRule.origin,
+				text: generateWikitext($scope.theRule),
+				bot: true,
+				summary: 'SQID: edit rule: ' + $scope.theRule.description
+			});
 		};
 
 		function setRule(rule) {
