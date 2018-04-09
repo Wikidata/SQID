@@ -4,148 +4,143 @@ define([
 	'util/util.service'
 ], function() {
 ///////////////////////////////////////
-angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route', function(util, $http, $location, $route) {
+angular.module('oauth').factory('oauth', ['util', '$http', '$location', '$route', '$log', '$q', function(util, $http, $location, $route, $log, $q) {
 	var promiseUserInfo;
 	var dummyLogin = false;
 
-	var setDummyLogin = function(){
-		dummyLogin = true;
+	function checkDummy() {
+		if ($route.current.params.dummy) {
+			var dummy = String($route.current.params.dummy);
+			dummyLogin = (dummy === 'true' ||
+						  dummy === '1');
+		} else {
+			dummyLogin = false;
+		}
 	}
 
-	var unsetDummyLogin = function(){
+	function getUserInfo() {
+		checkDummy();
+
+		if (dummyLogin) {
+			return $q.resolve({"userinfo": {"name": "Dummy"}});
+		}
+
+		if ($location.host() == "localhost"){
+			return $q.resolve(null);
+		}
+
+		promiseUserInfo = widarRequest({
+			action: 'get_rights'
+		}).then(function(response) {
+			if (response) {
+				return response.data.result.query;
+			}
+
+			return null;
+		});
+
+		return promiseUserInfo;
+	}
+
+	function userInfo() {
+		if (!promiseUserInfo) {
+			return getUserInfo();
+		}
+
+		return promiseUserInfo;
+	}
+
+	function logout() {
+		promiseUserInfo = null;
 		dummyLogin = false;
 	}
 
-	var checkDummy = function(){
-		if ($route.current.params.dummy){
-			if ((String($route.current.params.dummy) == 'true') ||
-				(String($route.current.params.dummy) == '1')){
-				setDummyLogin();
-			}else{
-				unsetDummyLogin();
-			}
-		}else{
-			unsetDummyLogin();
+	function widarRequest(request) {
+		var uri = ($location.protocol() +
+					   '://tools.wmflabs.org/widar/index.php?botmode=1');
+
+		for (var key in request) {
+			uri += '&' + key + '=' + request[key];
 		}
+
+		return $http.get(uri);
 	}
 
-
-	var getUserInfo = function(){
-		checkDummy();
-
-		if (dummyLogin){
-			return Promise.resolve({"userinfo": {"name": "Dummy"}});
-		}
-		if ($location.host() == "localhost"){
-			return Promise.resolve(null);
-		}
-		promiseUserInfo = $http.get($location.protocol() + '://tools.wmflabs.org/widar/?action=get_rights&botmode=1').then(function(response){
-			if (response){
-				return response.data.result.query;
-			}else{
-				return null;
-			}
+	function genericAction(request) {
+		return widarRequest({
+			action: 'generic',
+			json: encodeURIComponent(angular.toJson(request))
 		});
-		return promiseUserInfo;
-	};
+	}
 
-	var setLabel = function(id, label, lang){
-		var result = $http.get($location.protocol()
-				+ '://tools.wmflabs.org/widar/index.php?action=set_label&q='
-				+ id + '&lang='
-				+ lang + '&label='
-				+ encodeURIComponent(label) + '&botmode=1').then(function(response){
-			if (response){
-				return response;
-			}else{
-				return null;
-			}});
-		return result;
-	};
+	function responseOrNull(response) {
+		return ((response)
+				? response
+				: null);
+	}
+
+	function logDataError(response) {
+		if (response.data.error) {
+			$log.error(response.data.error);
+		}
+
+		return response;
+	}
+
+	function setLabel(id, label, lang) {
+		return widarRequest({
+			action: 'set_label',
+			q: id,
+			lang: lang,
+			label: encodeURIComponent(label)
+		}).then(responseOrNull);
+	}
 
 	// Only use for properties with data type item
-	var setClaims = function(ids, prop, target){
-		var result = $http.get($location.protocol()
-				+ '://tools.wmflabs.org/widar/index.php?action=set_claims&ids='
-				+ ids + '&prop='
-				+ prop + '&target='
-				+ targets + '&botmode=1'
-			).then(function(response){
-				if (response){
-					return response;
-				}else{
-					return null;
-				}
-			});
-		return result;
+	function setClaims(ids, prop, target) {
+		return widarRequest({
+			action: 'set_claims',
+			ids: ids,
+			prop: prop,
+			target: target
+		}).then(responseOrNull);
 	}
 
-	var setString = function(id, prop, text){
-		var result = $http.get($location.protocol()
-			+ '://tools.wmflabs.org/widar/index.php?action=set_string&id='
-			+ id + '&prop='
-			+ prop + '&text='
-			+ text + '&botmode=1'
-			).then(function(response){
-				if (response){
-					return response;
-				}else{
-					return null;
-				}
-			});
-		return result;
+	function setString(id, prop, text) {
+		return widarRequest({
+			action: 'set_string',
+			id: id,
+			prop: prop,
+			text: text
+		}).then(responseOrNull);
 	}
 
-	var addStatement = function(qid, statement){
-		var data = '"{\\\"claims\\\":[' + statement.replace(/"/g, '\\\"') + ']}"';
-		var jsonArg = '{"action": "wbeditentity", "id":"' + qid	 +'", "data": ' + data + '}';
-		var genericQueryString = $location.protocol()
-			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=generic&json=' + encodeURIComponent(jsonArg);
-		var resp = $http.get(genericQueryString).then(function(response){
-			if (response.data.error){
-				console.log(response.data.error);
-			}
-		});
-		return resp;
+	function addStatement(qid, statement) {
+		return genericAction({
+			action: 'wbeditentity',
+			id: qid,
+			data: angular.toJson({claims: [statement]})
+		}).then(logDataError);
 	}
 
-	var addSource = function(snaks, stmtId){
-		var jsonArg = JSON.stringify(snaks);
-		var url = $location.protocol()
-			+ '://tools.wmflabs.org/widar/index.php?botmode=1&action=add_source&statement='
-			+ stmtId + '&snaks=' + jsonArg;
-		var resp = $http.get(url).then(function(response){
-			if (response.data.error){
-				console.log(response.data.error);
-			}
-		});
-		return resp;
-	}
-
-	var userinfo = function(){
-		if (!promiseUserInfo){
-			return getUserInfo();
-		}else{
-			return promiseUserInfo;
-		}
-	};
-
-	var logout = function(){
-		promiseUserInfo = null;
-		unsetDummyLogin();
+	function addSource(snaks, stmtId) {
+		return widarRequest({
+			action: 'add_source',
+			statement: stmtId,
+			snaks: angular.toJson(snaks)
+		}).then(logDataError);
 	}
 
 	return {
-		userinfo: userinfo,
+		userinfo: userInfo,
 		refreshUserInfo: getUserInfo,
 		setLabel: setLabel,
 		setClaims: setClaims,
 		setString: setString,
 		addStatement: addStatement,
 		addSource: addSource,
+		genericAction: genericAction,
 		logout: logout,
-		setDummyLogin: setDummyLogin,
-		unsetDummyLogin: unsetDummyLogin,
 		isDummy: function() {
 			checkDummy();
 
