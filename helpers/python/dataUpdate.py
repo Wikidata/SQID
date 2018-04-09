@@ -15,11 +15,13 @@ import requests
 import json
 import os
 import time
+import re
 #import pprint
 
 MAX_REQUESTS = 12
 API_URL = 'https://www.wikidata.org/w/api.php'
 RULES_ANCHOR = 'User:Akorenchkin/Rules list'
+RULES_RID_NS = r'^User:Akorenchkin/Rule/R(?P<rid>[0-9]+)$'
 SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
 
 def doApiQuery(query):
@@ -109,7 +111,9 @@ def parseRules(result, origin):
 	return rules
 
 def updateRules():
+	rid = re.compile(RULES_RID_NS)
 	rules = []
+	largestId = -1
 	results = doApiQuery({
 		'action': 'query',
 		'format': 'json',
@@ -128,8 +132,15 @@ def updateRules():
 			rules.extend(parseRules(result=page['revisions'][0]['*'],
 						origin=page['title']))
 
+	for rule in rules:
+		match = rid.match(rule['origin'])
+		if match:
+			largestId = max(largestId, match.group('rid'))
+
 	with open('rules.json', 'w') as outfile:
-		json.dump(rules, outfile)
+		json.dump({ 'largestRID': largestId,
+			    'rules': rules,
+			    }, outfile)
 
 
 def doSparqlQuery(query):

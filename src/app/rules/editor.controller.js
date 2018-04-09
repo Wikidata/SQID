@@ -17,11 +17,13 @@ function() {
 		var COMPONENT_RE = /(^|\|)([^=]+)=(.*?)(?=(\||$))/gm;
 		var KEYS = ['rule', 'description', 'type'];
 		var BACKLINK = '{{User:Akorenchkin/Rules list}}';
+		var ANCHOR = 'User:Akorenchkin/Rules/R';
 
 		$scope.body = '';
 		$scope.head = '';
 		$scope.rule = undefined;
 		$scope.error = undefined;
+		$scope.theRule = {};
 
 		var wantNewRule = ($location.path().endsWith === '/new');
 
@@ -86,18 +88,30 @@ function() {
 				return $q.resolve();
 			}
 
+			var action = {
+				action: 'edit',
+				text: generateWikitext($scope.theRule),
+				bot: true
+			};
+
 			if (wantNewRule) {
-				console.log('adding new rules is not yet supported');
-				return $q.resolve();
+				return provider.getDynamicRuleIndex()
+					.then(function(index) {
+						var rid = index + 1;
+
+						return oauth.genericAction(angular.extend(action, {
+							title: ANCHOR + String(rid),
+							createonly: true,
+							summary: 'SQID: add new rule: ' + $scope.theRule.description
+						}));
+					});
 			}
 
-			return oauth.genericAction({
-				action: 'edit',
+			return oauth.genericAction(angular.extend(action, {
 				title: $scope.theRule.origin,
-				text: generateWikitext($scope.theRule),
-				bot: true,
+				nocreate: true,
 				summary: 'SQID: edit rule: ' + $scope.theRule.description
-			});
+			}));
 		};
 
 		function setRule(rule) {

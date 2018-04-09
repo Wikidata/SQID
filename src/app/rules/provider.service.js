@@ -765,7 +765,7 @@ angular.module('rules').factory('provider', [
 		function getDynamicRule(origin, offset) {
 			return $http.get("data/rules.json")
 				.then(function(response) {
-					var rules = response.data.filter(function(rule) {
+					var rules = response.data.rules.filter(function(rule) {
 						return (('origin' in rule) &&
 								('offset' in rule) &&
 								(rule.origin === origin) &&
@@ -776,6 +776,13 @@ angular.module('rules').factory('provider', [
 				});
 		}
 
+		function getDynamicRuleIndex() {
+			return $http.get("data/rules.json")
+				.then(function(response) {
+					return response.data.largestRID;
+				});
+		}
+
 		function getRules(opts) {
 			opts = angular.extend({
 				canEdit: false
@@ -783,7 +790,7 @@ angular.module('rules').factory('provider', [
 
 			return $http.get("data/rules.json")
 				.then(function(response) {
-					return response.data.map(processDynamicRule);
+					return response.data.rules.map(processDynamicRule);
 				}).then(function(data) {
 					return rules
 						.concat(
@@ -804,7 +811,8 @@ angular.module('rules').factory('provider', [
 
 		return {
 			getRules: getRules,
-			getDynamicRule: getDynamicRule
+			getDynamicRule: getDynamicRule,
+			getDynamicRuleIndex: getDynamicRuleIndex
 		};
 }]);
 
