@@ -93,7 +93,7 @@ angular.module('proposals').factory('primarySources', ['$http', '$templateCache'
 				delete ref.reject;
 			});
 		}
-		var statementJSON = angular.toJSON(stmt);
+		var statementJSON = angular.toJson(stmt);
 		return oauth.addStatement(qid, statementJSON).then(function(){
 			oauth.userinfo().then(function(data){
 				var user = data.userinfo.name;
