@@ -50,7 +50,7 @@ define(['proposals/proposals.module',
 
 			return oauth.addStatement(
 				context.proposalFor,
-				angular.toJson(stmt)
+				stmt
 			);
 		}
 

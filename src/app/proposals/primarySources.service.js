@@ -93,8 +93,8 @@ angular.module('proposals').factory('primarySources', ['$http', '$templateCache'
 				delete ref.reject;
 			});
 		}
-		var statementJSON = angular.toJson(stmt);
-		return oauth.addStatement(qid, statementJSON).then(function(){
+
+		return oauth.addStatement(qid, stmt).then(function(){
 			oauth.userinfo().then(function(data){
 				var user = data.userinfo.name;
 				var url = STATEMENT_APPROVAL_URL
@@ -145,8 +145,8 @@ angular.module('proposals').factory('primarySources', ['$http', '$templateCache'
 		delete stmt.approve;
 		delete stmt.reject;
 		stmt.type = 'statement';
-		statementJSON = JSON.stringify(stmt);
-		return oauth.addStatement(qid, statementJSON).then(function(){
+
+		return oauth.addStatement(qid, stmt).then(function(){
 			if (refresh){
 				refreshFunction();
 			}
