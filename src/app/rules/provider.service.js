@@ -6,8 +6,8 @@ define([
 ///////////////////////////////////////
 
 angular.module('rules').factory('provider', [
-	'$http', 'parser',
-	function($http, parser) {
+	'$http', '$log', '$q', 'parser',
+	function($http, $log, $q, parser) {
 
 		var rules = [
 // 			{ // x inverseOf y -> y inverseOf x
@@ -687,10 +687,9 @@ angular.module('rules').factory('provider', [
 					return angular.extend({
 						kind: rule.kind,
 						desc: capitaliseFirstLetter(rule.desc),
-						source: (('source' in rule)
-								 ? rule.source
-								 : 'STATIC'
-								)
+						source: rule.source,
+						origin: rule.origin,
+						offset: rule.offset
 					}, parser.parse(rule.rule, true));
 				} catch(err) {
 					return {
@@ -756,6 +755,31 @@ angular.module('rules').factory('provider', [
 			};
 		}
 
+		function lookupRule(origin, offset) {
+			if (origin.startsWith(':')) {
+				// assume a static rule
+				if (origin !== ':static') {
+					$log.warning("unknown rule origin `" + origin +
+								 "', assuming static");
+				}
+				return $q.resolve(getStaticRule(offset));
+			} else {
+				return getDynamicRule(origin, offset);
+			}
+		}
+
+		function processStaticRule(rule, index) {
+			return angular.extend({
+				source: 'STATIC',
+				origin: ':static',
+				offset: index
+			}, rule);
+		}
+
+		function getStaticRule(offset) {
+			return processStaticRule(rules[offset]);
+		}
+
 		function processDynamicRule(rule) {
 			return angular.extend({
 				source: 'DYNAMIC'
@@ -772,7 +796,7 @@ angular.module('rules').factory('provider', [
 								(rule.offset == offset));
 					});
 
-					return rules[0];
+					return processDynamicRule(rules[0]);
 				});
 		}
 
@@ -793,7 +817,9 @@ angular.module('rules').factory('provider', [
 					return response.data.rules.map(processDynamicRule);
 				}).then(function(data) {
 					return rules
-						.concat(
+						.map(
+							processStaticRule
+						).concat(
 							data
 						).filter(
 							filter(opts)
@@ -811,6 +837,8 @@ angular.module('rules').factory('provider', [
 
 		return {
 			getRules: getRules,
+			lookupRule: lookupRule,
+			getStaticRule: getStaticRule,
 			getDynamicRule: getDynamicRule,
 			getDynamicRuleIndex: getDynamicRuleIndex
 		};
