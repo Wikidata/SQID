@@ -101,10 +101,6 @@ angular.module('util').factory('dataFormatter', ['util', 'i18n', function(util, 
 				datavalue.value = sanitize(datavalue.value);
 				displayString = sanitize(displayString);
 
-				if ('__sqid_display_string_override__' in datavalue) {
-					displayString = datavalue.__sqid_display_string_override__;
-				}
-
 				switch (properties.getDatatype(numPropId)) {
 					case 'Url':
 						return '<a class="ext-link" href="' + linkString + '" target="_blank" ng-click="$event.stopPropagation()">' + displayString + '</a>';
