@@ -7,9 +7,10 @@ define(['rules/rules.module',
 	   ],
 function() {
 	angular.module('rules').controller('EditorController',
-	['$scope', '$route', '$sce', '$translate', '$q', '$location',
+	['$scope', '$route', '$sce', '$translate', '$q', '$location', '$log',
 	'i18n', 'wikidataapi', 'dataFormatter', 'labels', 'parser', 'provider', 'oauth',
-	function($scope, $route, $sce, $translate, $q, $location, i18n, wikidataapi, dataFormatter, labels, parser, provider, oauth) {
+	function($scope, $route, $sce, $translate, $q, $location, $log,
+			 i18n, wikidataapi, dataFormatter, labels, parser, provider, oauth) {
 
 		var PREFIX = '{{User:Akorenchkin/Rule|';
 		var SUFFIX = '}}';
@@ -88,31 +89,56 @@ function() {
 				return $q.resolve();
 			}
 
-			var action = {
-				action: 'edit',
-				text: generateWikitext($scope.theRule),
-				bot: true
-			};
-
 			if (wantNewRule) {
 				return provider.getDynamicRuleIndex()
 					.then(function(index) {
-						var rid = index + 1;
-
-						return oauth.genericAction(angular.extend(action, {
-							title: ANCHOR + String(rid),
-							createonly: true,
-							summary: 'SQID: add new rule: ' + $scope.theRule.description
-						}));
+						return saveNewRule(index + 1);
 					});
 			}
 
-			return oauth.genericAction(angular.extend(action, {
+			return oauth.genericAction({
+				action: 'edit',
 				title: $scope.theRule.origin,
+				text: generateWikitext($scope.theRule),
+				bot: true,
 				nocreate: true,
 				summary: 'SQID: edit rule: ' + $scope.theRule.description
-			}));
+			}).then(function(response) {
+				if (angular.isUndefined(response.error) ||
+					response.error === 'OK') {
+					return response;
+				}
+
+				$log.error(response.error);
+
+				return response;
+			});
 		};
+
+		function saveNewRule(rid) {
+			return oauth.genericAction({
+				action: 'edit',
+				title: ANCHOR + String(rid),
+				text: generateWikitext($scope.theRule),
+				bot: true,
+				createonly: true,
+				summary: 'SQID: add new rule: ' + $scope.theRule.description
+			}).then(function(response) {
+				if (angular.isUndefined(response.error) ||
+					response.error === 'OK') {
+					return $q.resolve(response);
+				}
+
+				if (response.error === 'The article you tried to create has ' +
+					'been created already.') {
+					return saveNewRule(rid + 1);
+				}
+
+				$log.error(response.error);
+
+				return $q.resolve(response);
+			});
+		}
 
 		function setRule(rule) {
 			if (angular.isUndefined(rule)) {
