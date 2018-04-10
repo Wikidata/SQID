@@ -141,7 +141,8 @@ function() {
 		}
 
 		function setRule(rule) {
-			if (angular.isUndefined(rule)) {
+			if (angular.isUndefined(rule) ||
+				angular.isUndefined(rule.rule)) {
 				// rule does not exist, force new
 				wantNewRule = true;
 				return;
