@@ -1,14 +1,43 @@
 define(['rules/rules.module',
 		'i18n/i18n.service',
 		'util/dataFormatter.service',
+		'rules/rules.service',
 		'rules/labels.service',
-		'rules/instantiator.service'
+		'rules/provider.service',
+		'rules/instantiator.service',
+		'util/entitydata.service'
 	   ],
 function() {
 	angular.module('rules').controller('ExplainController',
-	['$scope', '$route', '$sce', '$translate', '$q',
-	'i18n', 'dataFormatter', 'labels', 'instantiator',
-	function($scope, $route, $sce, $translate, $q, i18n, dataFormatter, labels, instantiator) {
+	['$scope', '$location', '$sce', '$translate', '$q',
+	'i18n', 'dataFormatter', 'labels', 'provider', 'instantiator', 'entitydata', 'rules', 'matcher',
+	function($scope, $location, $sce, $translate, $q, i18n, dataFormatter, labels, provider, instantiator, entitydata, rules, matcher) {
+		var search = $location.search();
+
+		if (angular.isUndefined(search.item) ||
+			angular.isUndefined(search.origin) ||
+			angular.isUndefined(search.offset)) {
+			// error out
+			return;
+		}
+
+		provider.lookupRule(search.origin, search.offset)
+			.then(function(rule) {
+				console.log(rule)
+
+				entitydata.getEntityData(search.item)
+					.then(function(entityData) {
+						return entitydata.getInlinkData(search.item)
+						.then(function(entityInData) {
+							return rules.tryCandidateRule(rule, entityData, entityInData, search.item);
+						}).then(function(inst) {
+							console.log(inst)
+						});
+					});
+			});
+
+		return;
+
 		try {
 			var inference = angular.fromJson(
 				$route.current.params.inference
