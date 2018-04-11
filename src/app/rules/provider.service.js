@@ -777,7 +777,7 @@ angular.module('rules').factory('provider', [
 		}
 
 		function getStaticRule(offset) {
-			return processStaticRule(rules[offset]);
+			return process()(processStaticRule(rules[offset], offset));
 		}
 
 		function processDynamicRule(rule) {
@@ -796,7 +796,7 @@ angular.module('rules').factory('provider', [
 								(rule.offset == offset));
 					});
 
-					return processDynamicRule(rules[0]);
+					return process()(processDynamicRule(rules[0]));
 				});
 		}
 
