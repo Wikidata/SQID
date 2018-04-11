@@ -49,34 +49,39 @@ define([
 				}).then(function(results) {
 					return { claims: results.statements };
 				});
-		}
+		 }
 
 		function checkCandidateRules(rules, entityData, entityInData, itemId) {
-			return rules.filter(matcher.couldMatch(
+			return rules.filter(
+				matcher.couldMatch(
 					entityData.statements,
 					entityInData.statements,
-					itemId)
-			).map(function(rule) {
-				var subject = rule.head.arguments[0].name;
-				var binding = {};
-				binding[subject] = { id: itemId,
-									 name: subject,
-									 outbound: entityData,
-									 inbound: entityInData
-				};
+					itemId
+				)).map(function(rule) {
+					return tryCandidateRule(rule, entityData, entityInData, itemId);
+				});
+		}
 
-				var query = matcher.getInstanceCandidatesQuery(rule, binding);
+		function tryCandidateRule(rule, entityData, entityInData, itemId) {
+			var subject = rule.head.arguments[0].name;
+			var binding = {};
+			binding[subject] = { id: itemId,
+								 name: subject,
+								 outbound: entityData,
+								 inbound: entityInData
+							   };
 
-				if (rule.body.length !== 0) {
-					return sparql.getQueryRequest(query.query)
-						.then(function(sparqlResults) {
-							return handleSparqlResults(query, sparqlResults);
-						});
-				} else {
-					// this rule always matches
-					return $q.all([handleApiResults(query, [])]);
-				}
-			});
+			var query = matcher.getInstanceCandidatesQuery(rule, binding);
+
+			if (rule.body.length !== 0) {
+				return sparql.getQueryRequest(query.query)
+					.then(function(sparqlResults) {
+						return handleSparqlResults(query, sparqlResults);
+					});
+			} else {
+				// this rule always matches
+				return $q.all([handleApiResults(query, [])]);
+			}
 		}
 
 		function handleSparqlResults(query, sparqlResults) {
@@ -322,8 +327,9 @@ define([
 			getRules: getRules,
 			getStatements: getStatements,
 			getProvider: getProvider,
-			handleSparqlResults: handleSparqlResults,
+			tryCandidateRule: tryCandidateRule,
 			injectReferences: injectReferences,
+			handleSparqlResults: handleSparqlResults,
 			deduplicateStatements: deduplicateStatements
 		};
 }]);
