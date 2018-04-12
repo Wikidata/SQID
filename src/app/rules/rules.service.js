@@ -58,7 +58,11 @@ define([
 					entityInData.statements,
 					itemId
 				)).map(function(rule) {
-					return tryCandidateRule(rule, entityData, entityInData, itemId);
+					var instance = tryCandidateRule(rule, entityData, entityInData, itemId);
+
+					return (angular.isDefined(instance)
+							? instantiator.instantiateRuleHead(instance)
+							: undefined);
 				});
 		}
 
@@ -142,13 +146,9 @@ define([
 
 			var instance = matcher.verifyCandidateInstance(query);
 
-			if (angular.isUndefined(instance)) {
-				return undefined;
-			}
-
-			return $translate('RULES.EXPLAIN').then(function(linkText) {
-				return instantiator.instantiateRuleHead(instance, linkText);
-			});
+			return (angular.isDefined(instance)
+					? instance
+					: undefined);
 		}
 
 		function deduplicateStatements(entityData, data) {
