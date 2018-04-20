@@ -58,11 +58,14 @@ define([
 					entityInData.statements,
 					itemId
 				)).map(function(rule) {
-					var instance = tryCandidateRule(rule, entityData, entityInData, itemId);
-
-					return (angular.isDefined(instance)
-							? instantiator.instantiateRuleHead(instance)
-							: undefined);
+					return tryCandidateRule(rule, entityData, entityInData, itemId)
+						.then(function(instances) {
+							return instances.map(function(instance) {
+								return (angular.isDefined(instance)
+										? instantiator.instantiateRuleHead(instance)
+										: undefined);
+							});
+						});
 				});
 		}
 
