@@ -9,7 +9,11 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/nprogress": "0.0.29",
+    "axios": "^0.18.0",
     "bootstrap-vue": "^2.0.0-rc.11",
+    "nprogress": "^0.2.0",
     "register-service-worker": "^1.5.2",
     "vue": "^2.6.6",
     "vue-class-component": "^6.0.0",

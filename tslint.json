@@ -15,6 +15,7 @@
     "ordered-imports": false,
     "object-literal-sort-keys": false,
     "no-consecutive-blank-lines": false,
+    "variable-name": [true, "allow-pascal-case", "check-format", "allow-leading-underscore"],
     "semicolon": [true, "never"]
   }
 }

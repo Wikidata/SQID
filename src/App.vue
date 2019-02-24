@@ -27,3 +27,6 @@
   }
 }
 </style>
+
+<style src="nprogress/nprogress.css">
+</style>
