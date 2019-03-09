@@ -25,7 +25,7 @@ const router = new Router({
   ],
 })
 
-router.beforeResolve((to, _from, next) => {
+router.beforeResolve((_to, _from, next) => {
   NProgress.start()
   next()
 })
