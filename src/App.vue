@@ -1,16 +1,14 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+<div id="app">
+  <app-navbar/>
+  <router-view/>
+  <app-footer/>
+</div>
 </template>
 
 <style lang="less">
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -28,5 +26,20 @@
 }
 </style>
 
-<style src="nprogress/nprogress.css">
-</style>
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import AppNavbar from '@/components/AppNavbar.vue'
+import AppFooter from '@/components/AppFooter.vue'
+
+@Component({
+    components: {
+        'app-navbar': AppNavbar,
+        'app-footer': AppFooter,
+    }})
+export default class App extends Vue {
+}
+</script>
+
+<style src="nprogress/nprogress.css" />
+<style src="bootstrap/dist/css/bootstrap.css" />
+<style src="bootstrap-vue/dist/bootstrap-vue.css" />
