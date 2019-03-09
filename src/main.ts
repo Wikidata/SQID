@@ -1,11 +1,11 @@
 import '@babel/polyfill'
 import Vue from 'vue'
-import './plugins/bootstrap-vue'
-import App from './App.vue'
-import router from './router'
-import store from './store'
-import './registerServiceWorker'
-import i18n from './i18n'
+import '@/plugins/bootstrap-vue'
+import App from '@/App.vue'
+import router from '@/router'
+import store from '@/store/index'
+import '@/registerServiceWorker'
+import i18n from '@/i18n'
 import BootstrapVue from 'bootstrap-vue'
 
 Vue.config.productionTip = false

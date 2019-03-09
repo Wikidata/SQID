@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from '@/views/Home.vue'
 import NProgress from 'nprogress'
-import { loadTranslation } from '@/i18n.ts'
+import store from '@/store/index'
 
 Vue.use(Router)
 
@@ -40,7 +40,8 @@ router.beforeEach(async (to, _from, next) => {
   const query = to.query
   if (query && 'lang' in query) {
     const lang = to.query.lang.toString()
-    await loadTranslation(lang)
+
+    store.dispatch('loadTranslation', lang)
   }
 
   next()
