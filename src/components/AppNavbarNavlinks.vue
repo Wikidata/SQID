@@ -8,16 +8,17 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { RawLocation} from 'vue-router'
 
 export interface Navlink {
-    target: string,
-    label: string,
-    exact?: boolean,
+  target: RawLocation,
+  label: string,
+  exact?: boolean,
 }
 
 @Component
 export class AppNavbarNavlinks extends Vue {
-    @Prop() private navlinks!: Navlink
+  @Prop() private navlinks!: Navlink
 }
 export default AppNavbarNavlinks
 </script>

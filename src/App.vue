@@ -32,10 +32,10 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import AppFooter from '@/components/AppFooter.vue'
 
 @Component({
-    components: {
-        'app-navbar': AppNavbar,
-        'app-footer': AppFooter,
-    }})
+  components: {
+    'app-navbar': AppNavbar,
+    'app-footer': AppFooter,
+  }})
 export default class App extends Vue {
 }
 </script>
