@@ -27,7 +27,7 @@ import { Component, Vue } from 'vue-property-decorator'
 @Component
 export default class AppFooter extends Vue {
   private get statsDate(): Date {
-    return new Date(0)
+    return new Date(0) // TODO(mx): once we load real statistics, put the date here.
   }
 }
 </script>
