@@ -1,0 +1,44 @@
+<template>
+  <a :href="descriptionUrl" target="_blank">
+    <img :src="thumbUrl" />
+  </a>
+</template>
+
+<style scoped>
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+<script lang="ts">
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { getImageData, ImageInfo } from '@/api/commons'
+
+@Component
+export default class SqidImage extends Vue {
+  @Prop() private file!: string
+  @Prop() private width!: number
+
+  private imageInfo: ImageInfo | null = null
+
+  private get descriptionUrl() {
+    if (this.imageInfo !== null) {
+      return this.imageInfo.descriptionurl
+    }
+    return undefined
+  }
+
+  private get thumbUrl() {
+    if (this.imageInfo !== null) {
+      return this.imageInfo.thumburl
+    }
+    return undefined
+  }
+
+  private mounted() {
+    getImageData(this.file, this.width).then((info) => this.imageInfo = info)
+  }
+}
+</script>

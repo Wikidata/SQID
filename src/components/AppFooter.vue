@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="footer">
     <hr />
     <div class="container-fluid">
       <div class="row justify-content-between">
@@ -20,6 +20,12 @@
     </div>
   </div>
 </template>
+
+<style>
+#footer {
+ text-align: center;
+}
+</style>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
