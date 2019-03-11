@@ -6,8 +6,7 @@ import { LoginState } from './types'
 import { RootState } from '../types'
 
 export const state: LoginState = {
-  loggedIn: false,
-  session: undefined,
+  oauth: { kind: 'logged-out' },
 }
 
 export const login: Module<LoginState, RootState> = {

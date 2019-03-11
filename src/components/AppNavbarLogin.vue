@@ -1,9 +1,9 @@
 <template>
   <b-nav-form>
-    <b-button v-if="!isLoggedIn" size="sm" class="my-2 my-sm-0">Login</b-button>
+    <b-button v-if="!isLoggedIn" @click="initiate" size="sm" class="my-2 my-sm-0">Login</b-button>
     <div v-if="isLoggedIn">
       <span class="ml-sm-2">Logged in as <a :href="'https://wikidata.org/wiki/User:' + username">{{ username }}</a></span>
-      <b-button id="logoutButton" size="sm" class="my-2 ml-sm-2 my-sm-0">Logout</b-button>
+      <b-button @click="logout" id="logoutButton" size="sm" class="my-2 ml-sm-2 my-sm-0">Logout</b-button>
     </div>
   </b-nav-form>
 </template>
@@ -18,5 +18,7 @@ const login = namespace('login')
 export default class AppNavbarLogin extends Vue {
   @login.Getter private isLoggedIn!: boolean
   @login.Getter private username!: string
+  @login.Action private initiate: any
+  @login.Mutation private logout: any
 }
 </script>
