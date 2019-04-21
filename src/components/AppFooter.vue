@@ -5,7 +5,7 @@
       <div class="row justify-content-between">
         <div class="col-md-6">
           <p>{{ $t('footer.statDate', { date: $d(statsDate) }) }}
-          (<router-link to="/status">{{ $t('footer.statLink') }}</router-link>)</p>
+          (<router-link :to="{ name: 'status'}">{{ $t('footer.statLink') }}</router-link>)</p>
         </div>
         <div class="col-md-6">
           <p>{{ $t('footer.poweredBy') }}

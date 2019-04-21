@@ -43,7 +43,7 @@
         Complex statistics that cannot currently be computed live are pre-computed from the weekly data dumps using
         <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a>.
         Some complex statistics can be fetched from SPARQL, but take too long to compute in the browser. These are
-        updated every hour. See the <b><a href="#/status">status page</a></b> for recency information and statistics on the current data.</p>
+        updated every hour. See the <b><router-link :to="{ name: 'status' }">status page</router-link></b> for recency information and statistics on the current data.</p>
     </div>
     <div class="sidebar col-lg-3 col-md-12 col-sm-12">
       <sqid-image :file="'Cephalop.jpg'" :width="260" />
