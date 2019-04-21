@@ -1,6 +1,10 @@
 <template>
   <b-nav-form>
-    <b-form-input size="sm" class="mr-sm-2" type="search" placeholder="Search item" aria-label="Search" />
-    <b-button size="sm" class="my-2 my-sm-0" type="submit">Search</b-button>
+    <b-input-group>
+      <b-form-input size="sm" type="search" placeholder="Search item" aria-label="Search" />
+      <b-input-group-append>
+        <b-button size="sm" type="submit"><font-awesome-icon icon="search" /></b-button>
+      </b-input-group-append>
+    </b-input-group>
   </b-nav-form>
 </template>
