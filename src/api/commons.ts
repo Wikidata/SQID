@@ -1,4 +1,4 @@
-import { ImagePageResult, ImageInfo } from './types'
+import { ImagePageResult, ImageInfo, MWApiResult } from './types'
 import { apiRequest } from './index'
 
 const commonsEndpoint = 'https://commons.wikimedia.org/w/api.php'
@@ -12,7 +12,7 @@ export async function getImageData(fileName: string, width?: number): Promise<Im
     titles: `File:${fileName}`,
     iiprop: 'size|url',
     iiurlwidth: width,
-  })
+  }) as MWApiResult
 
   const keys = Object.keys(response!.query!.pages!)
   const page = response!.query!.pages[keys[0]] as ImagePageResult

@@ -28,6 +28,12 @@ const router = new Router({
       name: 'status',
       component: () => import(/* webpackChunkName: "status" */ '@/views/Status.vue'),
     },
+    {
+      path: '/entity/:id',
+      name: 'entity',
+      component: () => import(/* webpackChunkName: "entity" */ '@/views/Entity.vue'),
+      props: true,
+    },
   ],
 })
 

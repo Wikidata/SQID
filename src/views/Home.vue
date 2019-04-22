@@ -15,7 +15,7 @@
 
       <p>Example pages:
         <ul>
-		      <li><a href="#/view?id=Q1339">Johann Sebastian Bach</a>: classical
+		      <li><router-link :to="{ name: 'entity', params: { id: 'Q1339' }}">Johann Sebastian Bach</router-link>: classical
 		        example of a data-rich item page</li>
 		      <li><a href="#/view?id=Q8072">volcano</a>: Wikidata item that is used as a class</li>
 		      <li><a href="#/view?id=Q318">galaxy</a>: Wikidata class item that is part of the rather well designed classification of astronomical objects</li>
