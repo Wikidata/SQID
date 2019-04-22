@@ -17,11 +17,11 @@
         <ul>
 		      <li><router-link :to="{ name: 'entity', params: { id: 'Q1339' }}">Johann Sebastian Bach</router-link>: classical
 		        example of a data-rich item page</li>
-		      <li><a href="#/view?id=Q8072">volcano</a>: Wikidata item that is used as a class</li>
-		      <li><a href="#/view?id=Q318">galaxy</a>: Wikidata class item that is part of the rather well designed classification of astronomical objects</li>
-		      <li><a href="#/view?id=P21">sex or gender</a>: a frequently used Wikidata property</li>
-		      <li><a href="#/view?id=P1303">instrument</a>: another interesting Wikidata property</li>
-		      <li><a href="#/view?id=Q18616576">Wikidata property</a>: the class of all Wikidata properties; shows how properties are organised in subclasses</li>
+		      <li><router-link :to="{ name: 'entity', params: { id: 'Q8072' }}">volcano</router-link>: Wikidata item that is used as a class</li>
+		      <li><router-link :to="{ name: 'entity', params: { id: 'Q318' }}">galaxy</router-link>: Wikidata class item that is part of the rather well designed classification of astronomical objects</li>
+		      <li><router-link :to="{ name: 'entity', params: { id: 'P21' }}">sex or gender</router-link>: a frequently used Wikidata property</li>
+		      <li><router-link :to="{ name: 'entity', params: { id: 'P1303' }}">instrument</router-link>: another interesting Wikidata property</li>
+		      <li><router-link :to="{ name: 'entity', params: { id: 'Q18616576' }}">Wikidata property</router-link>: the class of all Wikidata properties; shows how properties are organised in subclasses</li>
         </ul>
       </p>
 
