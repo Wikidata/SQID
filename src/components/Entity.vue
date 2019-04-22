@@ -11,7 +11,7 @@ import { Getter, Action, Mutation, namespace } from 'vuex-class'
 export default class Entity extends Vue {
   @Prop() private entityId!: string
   @Action private getLabel: any
-  private label: string | null = null
+  private label = this.entityId
 
   private get wikidataUrl() {
     return `https://www.wikidata.org/entity/${this.entityId}`
