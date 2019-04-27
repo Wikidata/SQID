@@ -1,4 +1,5 @@
-import { EntityReference, EntityId, EntityKind, EntityResult, SearchResult, ResultList, WBApiResult } from './types'
+import { EntityReference, EntityId, EntityKind, EntityResult, SearchResult,
+         ResultList, TermResult, WBApiResult } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint } from './endpoints'
 import { i18n } from '@/i18n'
@@ -46,6 +47,66 @@ export async function getLabels(entityIds: string[], lang?: string, fallback = t
   }
 
   return labels
+}
+
+function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: string) {
+  const langCode = lang || i18n.locale
+  const terms = new Map<string, Map<string, string>>()
+  const nativeTerms = new Map<string, string>()
+  terms.set(langCode, nativeTerms)
+
+  if (!(langCode in data)) {
+    return terms
+  }
+
+  if (Array.isArray(data[langCode])) {
+    for (const entry of Object.entries(data[langCode])) {
+      const term = entry[1]
+      nativeTerms.set(entityId, term)
+
+      if (term.language && term.language !== langCode) {
+        // term in fallback language, save also to original language
+
+        if (!terms.has(term.language)) {
+          terms.set(term.language, new Map<string, string>())
+        }
+
+        terms.get(term.language)!.set(entityId, term.value)
+      }
+    }
+  } else {
+    const term = data[langCode]
+    nativeTerms.set(entityId, term.value)
+
+    if (term.language !== langCode) {
+      if (!terms.has(term.language)) {
+        terms.set(term.language, new Map<string, string>())
+      }
+
+      terms.get(term.language)!.set(entityId, term.value)
+    }
+  }
+
+  return terms
+}
+
+export async function getEntityData(entityId: string, lang?: string, fallback = true) {
+  const entities = await getEntities([entityId],
+                                     ['aliases', 'labels', 'descriptions', 'claims', 'datatype'],
+                                     lang,
+                                     fallback)
+  const entity = entities[entityId]
+  const labels = parseTerms(entityId, entity.labels!)
+  const aliases = parseTerms(entityId, entity.aliases!)
+  const descriptions = parseTerms(entityId, entity.descriptions!)
+  const claims = entities[entityId].claims!
+
+  return {
+    labels,
+    aliases,
+    descriptions,
+    claims,
+  }
 }
 
 export function parseEntityId(entityId: string): EntityReference {
