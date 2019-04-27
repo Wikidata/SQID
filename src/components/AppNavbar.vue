@@ -1,13 +1,13 @@
 <template>
-  <b-navbar toggleable="lg" type="light">
-    <b-navbar-brand href="#">
+  <b-navbar toggleable="lg" type="light" fill>
+    <b-navbar-brand to="/">
       <img src="../assets/logo.svg" alt="SQID logo">
       SQID
     </b-navbar-brand>
     <b-navbar-toggle target="mainNavbar" />
     <b-collapse is-nav id="mainNavbar">
-      <b-navbar-nav id="mainNavbar" class="ml-auto">
-        <app-navbar-search-box />
+      <b-navbar-nav id="mainNavbar" class="justify-content-end flex-grow-1">
+        <app-navbar-search-box class="w-25" />
         <app-navbar-navlinks :navlinks="navlinks" />
         <app-navbar-login />
       </b-navbar-nav>

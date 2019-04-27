@@ -1,10 +1,9 @@
-import { EntityReference, EntityId, EntityKind, EntityResult, ResultList, WBApiResult } from './types'
+import { EntityReference, EntityId, EntityKind, EntityResult, SearchResult, ResultList, WBApiResult } from './types'
 import { apiRequest } from './index'
+import { wikidataEndpoint } from './endpoints'
 import { i18n } from '@/i18n'
 
 export { EntityId, EntityKind } from './types'
-
-const wikidataEndpoint = 'https://www.wikidata.org/w/api.php'
 
 type Props = 'info' | 'sitelinks' | 'sitelinks/urls' | 'aliases' | 'labels' | 'descriptions' | 'claims' | 'datatype'
 
@@ -71,4 +70,40 @@ export function parseEntityId(entityId: string): EntityReference {
     id,
     kind,
   }
+}
+
+export async function searchEntities(search: string,
+                                     options: {
+                                       lang?: string
+                                       kind?: EntityKind,
+                                       limit?: number,
+                                       offset?: number,
+                                       fallback?: boolean,
+                                     }): Promise<ResultList<SearchResult>> {
+  const langCode = options.lang || i18n.locale
+  const params = {
+    action: 'wbsearchentities',
+    search,
+    language: langCode,
+  } as any
+
+  if (options.kind !== 'item') {
+    params.type = options.kind
+  }
+
+  if (options.limit !== 7) {
+    params.limit = options.limit
+  }
+
+  if (options.offset !== undefined) {
+    params.continue = options.offset
+  }
+
+  if (options.fallback !== undefined && !options.fallback) {
+    params.strictlanguage = true
+  }
+
+  const response = await apiRequest(wikidataEndpoint, params) as WBApiResult
+
+  return response.search!
 }

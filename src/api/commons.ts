@@ -1,7 +1,6 @@
 import { ImagePageResult, ImageInfo, MWApiResult } from './types'
 import { apiRequest } from './index'
-
-const commonsEndpoint = 'https://commons.wikimedia.org/w/api.php'
+import { commonsEndpoint } from './endpoints'
 
 export { ImageInfo } from './types'
 

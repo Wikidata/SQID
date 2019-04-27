@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
 
 @Component
@@ -17,7 +17,8 @@ export default class Entity extends Vue {
     return `https://www.wikidata.org/entity/${this.entityId}`
   }
 
-  private mounted() {
+  @Watch('entityId')
+  private onEntityIdChanged() {
     this.getLabel(this.entityId).then((label: string) => {
       this.label = label
     })

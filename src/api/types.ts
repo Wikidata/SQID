@@ -9,6 +9,8 @@ export interface MWApiResult extends ApiResult {
 
 export interface WBApiResult extends ApiResult {
   entities?: ResultList<EntityResult>
+  searchinfo?: SearchInfo
+  search?: ResultList<SearchResult>
 }
 
 export interface ResultList<T> {
@@ -53,7 +55,32 @@ export interface TermResult {
   value: string
 }
 
-export type EntityKind = 'item' | 'property'
+export interface SearchInfo {
+  search: string
+}
+
+export type MatchType = 'alias' | 'label'
+
+export interface MatchInfo {
+  type: MatchType
+  language: string
+  text: string
+}
+
+export interface SearchResult {
+  reposity: string
+  id: string
+  concepturi: string
+  title: string
+  pageid: number
+  url: string
+  label: string
+  description: string
+  match: MatchInfo
+  aliases: string[]
+}
+
+export type EntityKind = 'item' | 'property' | 'lexeme' | 'form' | 'sense'
 export type EntityId = string
 export interface EntityReference {
   id: number
