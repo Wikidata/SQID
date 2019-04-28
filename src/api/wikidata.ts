@@ -49,6 +49,42 @@ export async function getLabels(entityIds: string[], lang?: string, fallback = t
   return labels
 }
 
+function parseAliases(entityId: string, data: ResultList<TermResult>, lang?: string) {
+  const langCode = lang || i18n.locale
+  const aliases = new Map<string, Map<string, string[]>>()
+  const nativeAliases = new Map<string, string[]>()
+  aliases.set(langCode, nativeAliases)
+
+  if (!(langCode in data)) {
+    return aliases
+  }
+
+  const theAliases = []
+  for (const entry of Object.entries(data[langCode])) {
+    const alias = entry[1]
+
+    theAliases.push(alias.value)
+
+    if (alias.language !== langCode) {
+      // alias in fallback language, save also to original language
+
+      if (!aliases.has(alias.language)) {
+        aliases.set(alias.language, new Map<string, string[]>())
+      }
+
+      const fallbackAliases = aliases.get(alias.language)!
+      const otherAliases = fallbackAliases.get(entityId) || []
+      otherAliases.push(alias.value)
+
+      fallbackAliases.set(entityId, otherAliases)
+    }
+  }
+
+  nativeAliases.set(entityId, theAliases)
+
+  return aliases
+}
+
 function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: string) {
   const langCode = lang || i18n.locale
   const terms = new Map<string, Map<string, string>>()
@@ -59,32 +95,15 @@ function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: strin
     return terms
   }
 
-  if (Array.isArray(data[langCode])) {
-    for (const entry of Object.entries(data[langCode])) {
-      const term = entry[1]
-      nativeTerms.set(entityId, term)
+  const term = data[langCode]
+  nativeTerms.set(entityId, term.value)
 
-      if (term.language && term.language !== langCode) {
-        // term in fallback language, save also to original language
-
-        if (!terms.has(term.language)) {
-          terms.set(term.language, new Map<string, string>())
-        }
-
-        terms.get(term.language)!.set(entityId, term.value)
-      }
+  if (term.language !== langCode) {
+    if (!terms.has(term.language)) {
+      terms.set(term.language, new Map<string, string>())
     }
-  } else {
-    const term = data[langCode]
-    nativeTerms.set(entityId, term.value)
 
-    if (term.language !== langCode) {
-      if (!terms.has(term.language)) {
-        terms.set(term.language, new Map<string, string>())
-      }
-
-      terms.get(term.language)!.set(entityId, term.value)
-    }
+    terms.get(term.language)!.set(entityId, term.value)
   }
 
   return terms
@@ -97,7 +116,7 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
                                      fallback)
   const entity = entities[entityId]
   const labels = parseTerms(entityId, entity.labels!)
-  const aliases = parseTerms(entityId, entity.aliases!)
+  const aliases = parseAliases(entityId, entity.aliases!)
   const descriptions = parseTerms(entityId, entity.descriptions!)
   const claims = entities[entityId].claims!
 
