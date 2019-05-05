@@ -1,6 +1,6 @@
 import { GetterTree } from 'vuex'
 import { TermsState } from './types'
-import { RootState } from '../types'
+import { RootState } from '@/store/types'
 
 import { i18n } from '@/i18n'
 

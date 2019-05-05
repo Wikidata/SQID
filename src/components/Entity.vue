@@ -17,7 +17,7 @@
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
-import { ClaimsMap } from '@/store/claims/types'
+import { ClaimsMap } from '@/store/entity/claims/types'
 
 @Component
 export default class Entity extends Vue {

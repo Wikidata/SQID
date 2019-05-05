@@ -1,5 +1,5 @@
 import { ActionTree } from 'vuex'
-import { RootState } from './types'
+import { RootState } from '../types'
 
 import { i18n } from '@/i18n'
 import { getEntityData } from '@/api/wikidata'

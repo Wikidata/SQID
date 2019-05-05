@@ -1,6 +1,6 @@
 import { ActionTree } from 'vuex'
 import { ClaimsState } from './types'
-import { RootState } from '../types'
+import { RootState } from '@/store/types'
 
 import { i18n } from '@/i18n'
 import { getEntityData } from '@/api/wikidata'

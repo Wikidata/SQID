@@ -1,6 +1,6 @@
 import { ActionTree } from 'vuex'
 import { TermsState } from './types'
-import { RootState } from '../types'
+import { RootState } from '@/store/types'
 
 import { getLabels, getEntityData } from '@/api/wikidata'
 

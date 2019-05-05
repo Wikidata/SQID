@@ -3,7 +3,7 @@ import { mutations } from './mutations'
 import { actions } from './actions'
 import { getters } from './getters'
 import { TermsState } from './types'
-import { RootState } from '../types'
+import { RootState } from '@/store/types'
 
 export const state: TermsState = {
   labels: new Map<string, Map<string, string>>(),
