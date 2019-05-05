@@ -50,7 +50,7 @@ export interface EntityResult {
   labels?: ResultList<TermResult>
   descriptions?: ResultList<TermResult>
   aliases?: ResultList<TermResult>
-  claims?: ResultList<ClaimResult>
+  claims?: ResultList<Claim>
 }
 
 export interface TermResult {
@@ -61,7 +61,7 @@ export interface TermResult {
 export type ClaimType = 'statement'
 export type Rank = 'normal' | 'preferred' | 'deprecated'
 
-export interface ClaimResult {
+export interface Claim {
   mainsnak: Snak
   type: ClaimType
   id: string

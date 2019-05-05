@@ -1,5 +1,5 @@
 import { EntityReference, EntityId, EntityKind, EntityResult, SearchResult,
-         ResultList, TermResult, WBApiResult } from './types'
+         ResultList, TermResult, Claim, WBApiResult } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint } from './endpoints'
 import { i18n } from '@/i18n'
@@ -118,7 +118,9 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
   const labels = parseTerms(entityId, entity.labels!)
   const aliases = parseAliases(entityId, entity.aliases!)
   const descriptions = parseTerms(entityId, entity.descriptions!)
-  const claims = entities[entityId].claims!
+  const claims = new Map<string, Map<string, Claim>>()
+  claims.set(entityId,
+             new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
 
   return {
     labels,

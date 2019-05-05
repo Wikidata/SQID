@@ -9,6 +9,7 @@
         </ul>
       </div>
       <div id="description">{{ description }}</div>
+
     </div>
   </div>
 </template>
@@ -16,16 +17,16 @@
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
+import { ClaimsMap } from '@/store/claims/types'
 
 @Component
 export default class Entity extends Vue {
   @Prop() private entityId!: string
-  @Action private getLabel: any
-  @Action private getTerms: any
+  @Action private getEntityData: any
   private label = this.entityId
   private aliases: string[] = []
   private description: string | null = null
-  private entityData: any | null = null
+  private claims: ClaimsMap | null = null
 
   // todo(mx): retrieve canonical URI from entity data
   private get wikidataUrl() {
@@ -33,13 +34,15 @@ export default class Entity extends Vue {
   }
 
   private updateEntityData() {
-    this.getTerms(this.entityId).then((terms: {
-      label: string,
-      aliases: string[],
-      description: string }) => {
-      this.label = terms.label
-      this.aliases = terms.aliases
-      this.description = terms.description
+    this.getEntityData(this.entityId).then((data: {
+      label: string
+      aliases: string[]
+      description: string
+      claims: ClaimsMap}) => {
+        this.label = data.label
+        this.aliases = data.aliases
+        this.description = data.description
+        this.claims = data.claims
     })
   }
 
@@ -72,7 +75,7 @@ export default class Entity extends Vue {
   }
 
   #aliases ul li::after {
-    content: " | ";
+    content: " |";
   }
 
   #aliases ul li:last-child::after {
