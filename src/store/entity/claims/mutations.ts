@@ -5,7 +5,7 @@ import { Claim } from '@/api/types'
 export const mutations: MutationTree<ClaimsState> = {
   claimsLoaded(state: ClaimsState,
                claims: Map<EntityId, ClaimsMap>) {
-    for (const [entityId, claimsMap] of Object.entries(claims)) {
+    for (const [entityId, claimsMap] of claims) {
       let theClaims = state.claims.get(entityId)
 
       if (theClaims === undefined) {

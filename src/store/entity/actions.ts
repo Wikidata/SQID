@@ -10,16 +10,14 @@ export const actions: ActionTree<RootState, RootState> = {
     if (getters.hasTerms(entityId, lang) &&
         getters.hasClaims(entityId)) {
       return { ...getters.getTerms(entityId, lang),
-               ...getters.getClaims(entityId),
+               claims: getters.getClaims(entityId),
              }
     }
 
     const langCode = lang || i18n.locale
     const entityData = await getEntityData(entityId, langCode)
 
-    commit('claimsLoaded', {
-      claims: entityData.claims,
-    })
+    commit('claimsLoaded', entityData.claims)
     commit('termsLoaded', {
       labels: entityData.labels,
       aliases: entityData.aliases,
@@ -27,7 +25,7 @@ export const actions: ActionTree<RootState, RootState> = {
     })
 
     return { ...getters.getTerms(entityId, lang),
-             ...getters.getClaims(entityId),
+             claims: getters.getClaims(entityId),
            }
   },
 }
