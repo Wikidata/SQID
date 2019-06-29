@@ -1,13 +1,23 @@
 import { GetterTree } from 'vuex'
-import { ClaimsState } from './types'
+import { ClaimsState, EntityId } from './types'
 import { RootState } from '@/store/types'
 
 export const getters: GetterTree<ClaimsState, RootState> = {
-  getClaims: (state) => (entityId: string) => {
+  getClaims: (state) => (entityId: EntityId) => {
     return state.claims.get(entityId)
   },
 
-  hasClaims: (state) => (entityId: string) => {
+  getClaimsForProperty: (state) => (entityId: EntityId, propertyId: EntityId) => {
+    const claims = state.claims.get(entityId)
+
+    if (claims === undefined) {
+      return undefined
+    }
+
+    return claims.get(propertyId)
+  },
+
+  hasClaims: (state) => (entityId: EntityId) => {
     return state.claims.has(entityId)
   },
 }

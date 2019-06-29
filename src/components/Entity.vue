@@ -9,7 +9,13 @@
         </ul>
       </div>
       <div id="description">{{ description }}</div>
-
+      <div id="claims">
+        <ul v-if="claims">
+          <li v-for="prop in claims.keys()" :key="prop">
+            <claim-group :entityId="entityId" :propertyId="prop" />
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -17,9 +23,13 @@
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
-import { ClaimsMap } from '@/store/entity/claims/types'
+import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
+import ClaimGroup from './ClaimGroup.vue'
 
-@Component
+@Component({
+  components: {
+   'claim-group': ClaimGroup,
+  }})
 export default class Entity extends Vue {
   @Prop() private entityId!: string
   @Action private getEntityData: any
@@ -53,6 +63,14 @@ export default class Entity extends Vue {
   @Watch('entityId')
   private onEntityIdChanged() {
     this.updateEntityData()
+  }
+
+  private statements(propertyId: EntityId) {
+    if (this.claims) {
+      return this.claims.get(propertyId)
+    }
+
+    return []
   }
 }
 </script>
