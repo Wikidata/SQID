@@ -10,11 +10,11 @@
       </div>
       <div id="description">{{ description }}</div>
       <div id="claims">
-        <ul v-if="claims">
-          <li v-for="prop in claims.keys()" :key="prop">
-            <claim-group :entityId="entityId" :propertyId="prop" />
-          </li>
-        </ul>
+        <table class="table table-striped table-condensed statements-table">
+          <tbody>
+            <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in claims.keys()" :key="prop" />
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

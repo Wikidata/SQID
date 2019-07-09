@@ -1,10 +1,11 @@
 <template>
-<div>
-  <span>{{ propertyId }}</span>
-  <ul v-for="(claim, cidx) in claims" :key="cidx">
-    <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
-  </ul>
-</div>
+  <tbody>
+    <tr :title="propertyId" v-for="(claim, cidx) in claims" :key="cidx">
+      <td>
+        <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
+      </td>
+    </tr>
+  </tbody>
 </template>
 
 <script lang="ts">
@@ -20,21 +21,6 @@ import Claim from './Claim.vue'
 export default class ClaimGroup extends Vue {
   @Prop() private entityId!: EntityId
   @Prop() private propertyId!: EntityId
-  @Getter private getClaimsForProperty: any
-  private claims: ClaimsMap | null = null
-
-  private mounted() {
-    this.updateClaims()
-  }
-
-  @Watch('entityId')
-  @Watch('propertyId')
-  private updateClaims() {
-    const claims = this.getClaimsForProperty(this.entityId, this.propertyId)
-
-    if (claims) {
-      this.claims = claims
-    }
-  }
+  @Prop() private claims!: ClaimsMap
 }
 </script>
