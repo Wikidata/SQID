@@ -1,6 +1,7 @@
 <template>
   <tbody>
     <tr :title="propertyId" v-for="(claim, cidx) in claims" :key="cidx">
+      <td><entity-link :entityId="propertyId" /></td>
       <td>
         <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
       </td>

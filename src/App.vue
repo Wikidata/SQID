@@ -29,6 +29,9 @@
 import { Component, Vue } from 'vue-property-decorator'
 import AppNavbar from '@/components/AppNavbar.vue'
 import AppFooter from '@/components/AppFooter.vue'
+import EntityLink from '@/components/EntityLink.vue'
+
+Vue.component('entity-link', EntityLink)
 
 @Component({
   components: {

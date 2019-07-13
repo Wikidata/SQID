@@ -1,5 +1,9 @@
 <template>
 <li>
+  {{ claim.mainsnak }}
+
+  {{ claim.references }}
+
   {{ claim }}
 </li>
 </template>
