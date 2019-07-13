@@ -34,15 +34,21 @@ export async function getLabels(entityIds: string[], lang?: string, fallback = t
 
   for (const [entityId, entity] of Object.entries(entities)) {
     const label = entity.labels![langCode]
-    nativeLabels.set(entityId, label.value)
 
-    if (label.language !== langCode) {
-      // label in fallback language, save also to original language
-      if (!labels.has(label.language)) {
-        labels.set(label.language, new Map<string, string>())
+    if (label !== undefined) {
+      nativeLabels.set(entityId, label.value)
+
+      if (label.language !== langCode) {
+        // label in fallback language, save also to original language
+        if (!labels.has(label.language)) {
+          labels.set(label.language, new Map<string, string>())
+        }
+
+        labels.get(label.language)!.set(entityId, label.value)
       }
-
-      labels.get(label.language)!.set(entityId, label.value)
+    } else {
+      // no label in native or fallback language, use id
+      nativeLabels.set(entityId, entityId)
     }
   }
 
