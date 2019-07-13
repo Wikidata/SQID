@@ -9,7 +9,7 @@
         </ul>
       </div>
       <div id="description">{{ description }}</div>
-      <div id="claims">
+      <div id="claims" v-if="claims">
         <table class="table table-striped table-condensed statements-table">
           <tbody>
             <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in claims.keys()" :key="prop" />
