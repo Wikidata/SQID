@@ -30,8 +30,12 @@ import { Component, Vue } from 'vue-property-decorator'
 import AppNavbar from '@/components/AppNavbar.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import EntityLink from '@/components/EntityLink.vue'
+import Snak from '@/components/Snak.vue'
+import DataValue from '@/components/DataValue.vue'
 
 Vue.component('entity-link', EntityLink)
+Vue.component('snak', Snak)
+Vue.component('data-value', DataValue)
 
 @Component({
   components: {
