@@ -57,6 +57,46 @@ function hasTerm(terms: Terms, entityId: string, lang?: string, fallback: boolea
   return fallbackTerms.has(entityId)
 }
 
+function getPromise(inflight: any, entityId: string, lang?: string, fallback: boolean = true) {
+  const langCode = lang || i18n.locale
+  const nativeInflight = inflight.get(langCode)
+
+  if (nativeInflight !== undefined) {
+    if (nativeInflight.has(entityId)) {
+      return nativeInflight.get(entityId)!
+    }
+
+    if (fallback) {
+      const fallbackInflight = inflight.get(i18n.fallbackLocale)
+
+      if (fallbackInflight !== undefined) {
+        return fallbackInflight.get(entityId)
+      }
+    }
+  }
+}
+
+function hasPromise(inflight: any, entityId: string, lang?: string, fallback: boolean = true) {
+  const langCode = lang || i18n.locale
+  const nativeInflight = inflight.get(langCode)
+
+  if (nativeInflight !== undefined) {
+    if (nativeInflight.has(entityId)) {
+      return true
+    }
+
+    if (fallback) {
+      const fallbackInflight = inflight.get(i18n.fallbackLocale)
+
+      if (fallbackInflight !== undefined) {
+        return fallbackInflight.has(entityId)
+      }
+    }
+  }
+
+  return false
+}
+
 export const getters: GetterTree<TermsState, RootState> = {
   getEntityLabel: (state) => (entityId: string, lang?: string, fallback: boolean = true) => {
     return getTerm(state.labels, entityId, lang, fallback)
@@ -91,5 +131,17 @@ export const getters: GetterTree<TermsState, RootState> = {
     return (hasTerm(state.labels, entityId, lang, fallback) &&
             hasTerm(state.aliases, entityId, lang, fallback) &&
             hasTerm(state.descriptions, entityId, lang, fallback))
+  },
+  isLabelInflight: (state) => (entityId: string, lang?: string, fallback: boolean = true) => {
+    return hasPromise(state.inflightLabels, entityId, lang, fallback)
+  },
+  isTermsInflight: (state) => (entityId: string, lang?: string, fallback: boolean = true) => {
+    return hasPromise(state.inflightTerms, entityId, lang, fallback)
+  },
+  getLabelPromise: (state) => (entityId: string, lang?: string, fallback: boolean = true) => {
+    return getPromise(state.inflightLabels, entityId, lang, fallback)
+  },
+  getTermsPromise: (state) => (entityId: string, lang?: string, fallback: boolean = true) => {
+    return getPromise(state.inflightTerms, entityId, lang, fallback)
   },
 }
