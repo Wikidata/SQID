@@ -1,18 +1,52 @@
-import { EntityReference, EntityId, EntityKind, EntityResult, SearchResult,
-         ResultList, TermResult, Claim, WBApiResult } from './types'
+import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
+         EntityResult, SearchResult, ResultList, TermResult,
+         Claim, WBApiResult } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint } from './endpoints'
 import { i18n } from '@/i18n'
+import { ClaimsMap } from '@/store/entity/claims/types'
 
 export { EntityId, EntityKind } from './types'
 
 type Props = 'info' | 'sitelinks' | 'sitelinks/urls' | 'aliases' | 'labels' | 'descriptions' | 'claims' | 'datatype'
+
+const MAX_ENTITIES_PER_REQUEST = 50
 
 // todo(mx): implement proper request chunking for multiple ids
 export async function getEntities(entityIds: string[],
                                   props: Props[],
                                   lang?: string,
                                   fallback = true): Promise<ResultList<EntityResult>> {
+  const chunks = []
+  const ids = entityIds.length
+
+  for (let start = 0; start <= ids; start += MAX_ENTITIES_PER_REQUEST) {
+    const end = start + MAX_ENTITIES_PER_REQUEST
+    const chunk = entityIds.slice(start, end)
+
+    if (chunk.length) {
+      chunks.push(chunk)
+    }
+  }
+
+  const results = await Promise.all(chunks.map((chunk) => {
+    return getEntityChunk(chunk, props, lang, fallback)
+  }))
+  const entities: ResultList<EntityResult> = {}
+
+  for (const chunk of results) {
+    for (const [key, entity] of Object.entries(chunk)) {
+      entities[key] = entity
+    }
+  }
+
+  return entities
+}
+
+async function getEntityChunk(entityIds: string[],
+                              props: Props[],
+                              lang?: string,
+                              fallback = true): Promise<ResultList<EntityResult>> {
   const langCode = lang || i18n.locale
   const response = await apiRequest(wikidataEndpoint, {
     action: 'wbgetentities',
