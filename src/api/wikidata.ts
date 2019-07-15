@@ -229,3 +229,37 @@ export async function searchEntities(search: string,
 
   return response.search!
 }
+
+export function relatedEntityIds(claims: ClaimsMap) {
+  const entityIds = new Set()
+
+  for (const [propertyId, theClaims] of claims) {
+    entityIds.add(propertyId)
+
+    for (const claim of theClaims) {
+      const mainsnak = claim.mainsnak
+      entityIds.add(mainsnak.property)
+
+      if (mainsnak.datatype === 'wikibase-item') {
+        const datavalue = (mainsnak.datavalue as EntityIdDataValue)
+        entityIds.add(datavalue.value.id)
+      }
+
+      if ('references' in claim) {
+        for (const reference of claim.references) {
+          for (const [propId, snaks] of Object.entries(reference.snaks)) {
+            entityIds.add(propId)
+            for (const snak of snaks) {
+              if (snak.datatype === 'wikibase-item') {
+                const datavalue = (snak.datavalue as EntityIdDataValue)
+                entityIds.add(datavalue.value.id)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return entityIds
+}

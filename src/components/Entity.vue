@@ -25,6 +25,7 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
 import ClaimGroup from './ClaimGroup.vue'
+import { relatedEntityIds } from '@/api/wikidata'
 
 @Component({
   components: {
@@ -33,6 +34,7 @@ import ClaimGroup from './ClaimGroup.vue'
 export default class Entity extends Vue {
   @Prop() private entityId!: string
   @Action private getEntityData: any
+  @Action private requestLabels: any
   private label = this.entityId
   private aliases: string[] = []
   private description: string | null = null
@@ -53,6 +55,9 @@ export default class Entity extends Vue {
         this.aliases = data.aliases
         this.description = data.description
         this.claims = data.claims
+
+        const related = relatedEntityIds(this.claims)
+        this.requestLabels(related)
     })
   }
 
