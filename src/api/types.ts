@@ -80,13 +80,13 @@ export interface Snak {
   datatype: WBDatatype
 }
 
-export type DatavalueKind = 'wikibase-entityid'
+export type DatavalueKind = 'wikibase-entityid' | 'time' | 'string'
 
 export interface Datavalue {
   type: DatavalueKind
 }
 
-export interface EntityIdValue extends Datavalue {
+export interface EntityIdDataValue extends Datavalue {
   type: 'wikibase-entityid'
   value: EntityIdValue
 }
@@ -97,9 +97,23 @@ export interface EntityIdValue {
   id: string
 }
 
+export interface StringDataValue extends Datavalue {
+  type: 'string'
+  value: string
+}
+
+export interface TimeDataValue extends Datavalue { // todo(mx): fix this
+  type: 'time'
+  value: TimeValue
+}
+
+export interface TimeValue {
+  time: string
+}
+
 export interface Reference {
   hash: string
-  snaks: ResultList<Snak>
+  snaks: ResultList<Snak[]>
   'snaks-order': string[]
 }
 

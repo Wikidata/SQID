@@ -9,7 +9,7 @@ export const mutations: MutationTree<ClaimsState> = {
       let theClaims = state.claims.get(entityId)
 
       if (theClaims === undefined) {
-        theClaims = new Map<EntityId, Claim>()
+        theClaims = new Map<EntityId, Claim[]>()
       }
 
       for (const [propertyId, claim] of claimsMap) {

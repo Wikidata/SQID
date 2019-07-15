@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Datavalue } from '@/api/types'
+import { Datavalue, TimeDataValue } from '@/api/types'
 
 @Component
 export default class DataValue extends Vue {
@@ -22,7 +22,7 @@ export default class DataValue extends Vue {
   }
 
   private get timestamp() {
-    return this.value.value.time // @TODO(mmarx): implement this
+    return (this.value as TimeDataValue).value.time // todo(mx): implement this
   }
 }
 </script>

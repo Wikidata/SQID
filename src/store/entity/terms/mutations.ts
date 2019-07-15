@@ -12,9 +12,6 @@ function mergeTerms(currentTerms: MultilingualTermsMap,
     }
 
     for (const [entityId, term] of termsMap) {
-      if (theTerms.has(entityId)) {
-        console.log(`loaded ${term} [${langCode}] again for ${entityId}`)
-      }
       theTerms.set(entityId, term)
     }
 
