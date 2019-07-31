@@ -66,21 +66,31 @@ def updateClassRecords() :
 	print("[" + startTime + "] Fetching class ids and labels for classes with direct instances ...")
 
 	resultsClasses = sparqlQuery("""SELECT ?cl ?clLabel ?c
+WITH { SELECT ?cl (COUNT(*) AS ?c) WHERE {
+   ?i wdt:P31 ?cl
+  } GROUP BY ?cl
+} AS %classes
 WHERE {
-	{ SELECT ?cl (count(*) as ?c) WHERE { ?i wdt:P31 ?cl } GROUP BY ?cl }
-	SERVICE wikibase:label {
-			bd:serviceParam wikibase:language "en" .
-	}
+  INCLUDE %classes
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en" .
+    ?cl rdfs:label ?clLabel .
+  }
 }""")
 
 	if ( "error" in resultsClasses ):
 		print("Failed to fetch class data from SPARQL. Trying simpler query ...")
 		resultsClasses = sparqlQuery("""SELECT ?cl ?clLabel
+WITH { SELECT DISTINCT ?cl WHERE {
+    ?i wdt:P31 ?cl
+  }
+} AS %classes
 WHERE {
-	{ SELECT DISTINCT ?cl WHERE { ?i wdt:P31 ?cl } }
-	SERVICE wikibase:label {
-			bd:serviceParam wikibase:language "en" .
-	}
+  INCLUDE %classes
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en" .
+    ?cl rdfs:label ?clLabel .
+  }
 }""")
 		if ( "error" in resultsClasses ):
 			print("Failed to fetch class data from SPARQL. Giving up.")
@@ -129,15 +139,19 @@ def updatePropertyRecords() :
 	startTime = time.strftime("%Y-%m-%dT%H:%M:%S")
 	print("[" + startTime + "] Fetching property ids, labels, and types ...")
 
-	resultsProperties = sparqlQuery("""PREFIX wikibase: <http://wikiba.se/ontology#>
-	SELECT ?id ?idLabel ?type
-	WHERE {
-		?id a wikibase:Property .
-		?id wikibase:propertyType ?type
-		SERVICE wikibase:label {
-			bd:serviceParam wikibase:language "en" .
-		}
-	}""")
+	resultsProperties = sparqlQuery("""SELECT ?id ?idLabel ?type
+WITH { SELECT ?id ?type WHERE {
+    ?id a wikibase:Property ;
+          wikibase:propertyType ?type .
+  }
+} AS %properties
+WHERE {
+  INCLUDE %properties .
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "en" .
+    ?id rdfs:label ?idLabel .
+  }
+}""")
 
 	propertyStatistics = {}
 	for binding in resultsProperties['results']['bindings']:
@@ -155,12 +169,9 @@ def updatePropertyRecords() :
 
 	print("Fetching property usage statistics ...")
 
-	resultsPropertyCounts = sparqlQuery("""SELECT ?p (count(*) as ?c)
-	WHERE {
-		?s ?p ?o .
-	}
-	GROUP BY ?p
-	ORDER BY DESC(?c)""");
+	resultsPropertyCounts = sparqlQuery("""SELECT ?p (count(*) as ?c) WHERE {
+  ?s ?p ?o .
+} GROUP BY ?p ORDER BY DESC(?c)""");
 
 	for binding in resultsPropertyCounts['results']['bindings']:
 		propertyUri = binding['p']['value']
