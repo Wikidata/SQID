@@ -18,9 +18,14 @@ import time
 #import pprint
 
 SPARQL_SERVICE_URL = 'https://query.wikidata.org/sparql'
+SPARQL_USER_AGENT = 'SQID/1.0 (https://github.com/Wikidata/SQID)'
+SPARQL_TOOL_BANNER = '#TOOL:SQID Python Helper\n'
 
 def doSparqlQuery(query):
-	r = requests.get(SPARQL_SERVICE_URL, params={'query': "#TOOL:SQID Python Helper\n" + query, 'format': 'json'});
+	r = requests.get(SPARQL_SERVICE_URL,
+			 params={'query': SPARQL_TOOL_BANNER + query,
+				 'format': 'json'},
+			 headers={'user-agent': SPARQL_USER_AGENT})
 	return json.loads(r.text)
 
 def sparqlQuery(query):
