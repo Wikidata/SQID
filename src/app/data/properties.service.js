@@ -83,7 +83,7 @@ angular.module('data').factory('properties', ['$http', '$route', 'util', functio
 
 
 	if (!promise) {
-		promise = $http.get("data/properties.json").then(function(response){
+		promise = $http.get("//tools-static.wmflabs.org/sqid/data/properties.json").then(function(response){
 			properties = response.data;
 			idArray = util.createIdArray(properties);
 

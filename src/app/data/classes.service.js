@@ -73,7 +73,7 @@ angular.module('data').factory('classes', ['$http', '$route', 'util', function($
 	}
 
 	if (!promise){
-		promise = $http.get("data/classes.json").then(function(response){
+		promise = $http.get("//tools-static.wmflabs.org/sqid/data/classes.json").then(function(response){
 			classes = response.data;
 			idArray = util.createIdArray(classes);
 
