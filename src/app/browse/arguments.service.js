@@ -7,8 +7,16 @@ define([
 ], function() {
 ///////////////////////////////////////
 
+var filterLimits = {
+	'instances': 10E6,
+	'subclasses': 5E6,
+	'statements': 100E6,
+	'qualifiers': 50E6,
+	'references': 20E6,
+}
+
 angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n', function($http, $route, util, i18n){
-	  var args = {}; 
+	  var args = {};
 	  var statusStartValues = {
 		entityType: "classes",
 		activePage: 1,
@@ -31,8 +39,8 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  label: "",
 		  relatedProperty: "",
 		  superclass: "",
-		  instances: [0, 4000000],
-		  subclasses: [0, 2000000]
+		  instances: [0, filterLimits['instances']],
+		  subclasses: [0, filterLimits['subclasses']]
 		},
 		propertiesFilter: {
 		  label: "",
@@ -40,9 +48,9 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  relatedQualifier: "",
 		  usedForClass: "",
 		  directInstanceOf: {id: 1, name: "Any property class", qId: 0},
-		  statements: [0, 20000000],
-		  qualifiers: [0, 10000000],
-		  references: [0, 10000000],
+		  statements: [0, filterLimits['statements']],
+		  qualifiers: [0, filterLimits['qualifiers']],
+		  references: [0, filterLimits['references']],
 		  datatypes: {id: 1, name: "Any property type"}
 
 		}
@@ -129,7 +137,7 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  return util.cloneObject(statusStartValues);
 		},
 		getUrl: function(){
-		  var result =  location.origin + location.pathname + "#/browse" 
+		  var result =  location.origin + location.pathname + "#/browse"
 			+ "?activepage=" + status.activePage
 			+ "&type=" + status.entityType
 			+ "&lang=" + status.lang;
@@ -138,25 +146,25 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 			  + (status.classesFilter.relatedProperty ? "&rpcfilter=" + status.classesFilter.relatedProperty : "")
 			  + (status.classesFilter.superclass ? "&supercfilter=" + status.classesFilter.superclass : "")
 			  + (status.classesFilter.instances[0] != 0 ? "&instancesbegin=" + status.classesFilter.instances[0] : "")
-			  + (status.classesFilter.instances[1] != 4000000 ? "&instancesend=" + status.classesFilter.instances[1] : "")
+			  + (status.classesFilter.instances[1] != filterLimits['instances'] ? "&instancesend=" + status.classesFilter.instances[1] : "")
 			  + (status.classesFilter.subclasses[0] != 0 ? "&subclassesbegin=" + status.classesFilter.subclasses[0] : "")
-			  + (status.classesFilter.subclasses[1] != 2000000 ? "&subclassesend=" + status.classesFilter.subclasses[1] : "")
+			  + (status.classesFilter.subclasses[1] != filterLimits['subclasses'] ? "&subclassesend=" + status.classesFilter.subclasses[1] : "")
 			  + (status.sortCriteria.classes.label != "fa fa-sort" ? "&sortclasslabel=" + status.sortCriteria.classes.label : "")
 			  + (status.sortCriteria.classes.instances != "fa fa-sort-desc" ? "&sortclassinstances=" + status.sortCriteria.classes.instances : "")
 			  + (status.sortCriteria.classes.subclasses != "fa fa-sort" ? "&sortclasssubclasses=" + status.sortCriteria.classes.subclasses : "")
-			
+
 		  }else{
-			result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "") 
+			result += (status.propertiesFilter.label ? "&propertylabelfilter=" + status.propertiesFilter.label : "")
 			  + (status.propertiesFilter.relatedProperty ? "&rppfilter=" + status.propertiesFilter.relatedProperty : "")
 			  + (status.propertiesFilter.relatedQualifier ? "&rqualifierfilter=" + status.propertiesFilter.relatedQualifier : "")
 			  + (status.propertiesFilter.usedForClass ? "&usedforclassfilter=" + status.propertiesFilter.usedForClass : "")
 			  + (status.propertiesFilter.directInstanceOf.id != 1 ? "&dInstancefilter=" + serializePropertyClass(status.propertiesFilter.directInstanceOf) : "")
 			  + (status.propertiesFilter.statements[0] != 0 ? "&statementsbegin=" + status.propertiesFilter.statements[0] : "")
-			  + (status.propertiesFilter.statements[1] != 20000000 ? "&statementsend=" + status.propertiesFilter.statements[1] : "")
+			  + (status.propertiesFilter.statements[1] != filterLimits['statements'] ? "&statementsend=" + status.propertiesFilter.statements[1] : "")
 			  + (status.propertiesFilter.qualifiers[0] != 0 ? "&qualifiersbegin=" + status.propertiesFilter.qualifiers[0] : "")
-			  + (status.propertiesFilter.qualifiers[1] != 10000000 ? "&qualifiersend=" + status.propertiesFilter.qualifiers[1] : "")
+			  + (status.propertiesFilter.qualifiers[1] != filterLimits['qualifiers'] ? "&qualifiersend=" + status.propertiesFilter.qualifiers[1] : "")
 			  + (status.propertiesFilter.references[0] != 0 ? "&referencesbegin=" + status.propertiesFilter.references[0] : "")
-			  + (status.propertiesFilter.references[1] != 10000000   ? "&referencesend=" + status.propertiesFilter.references[1] : "")
+			  + (status.propertiesFilter.references[1] != filterLimits['references']  ? "&referencesend=" + status.propertiesFilter.references[1] : "")
 			  + (status.propertiesFilter.datatypes.id != 1 ? "&datatypes=" + serializeDatatype(status.propertiesFilter.datatypes) : "")
 			  + (status.sortCriteria.properties.label != "fa fa-sort" ? "&sortpropertylabel=" + status.sortCriteria.properties.label : "")
 			  + (status.sortCriteria.properties.datatype != "fa fa-sort" ? "&sortpropertydatatype=" + status.sortCriteria.properties.datatype : "")
@@ -170,5 +178,5 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
   }]);
 
 
-  
+
 return {}; }); // module definition end
