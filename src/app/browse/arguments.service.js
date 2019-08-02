@@ -7,15 +7,20 @@ define([
 ], function() {
 ///////////////////////////////////////
 
-var filterLimits = {
-	'instances': 10E6,
-	'subclasses': 5E6,
-	'statements': 100E6,
-	'qualifiers': 50E6,
-	'references': 20E6,
-}
-
 angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n', function($http, $route, util, i18n){
+	  var filterLimits = {
+		  'instances': 10E6,
+		  'subclasses': 5E6,
+		  'statements': 100E6,
+		  'qualifiers': 50E6,
+		  'references': 20E6,
+	  };
+
+	function getFilterLimits() {
+		return filterLimits;
+	}
+
+
 	  var args = {};
 	  var statusStartValues = {
 		entityType: "classes",

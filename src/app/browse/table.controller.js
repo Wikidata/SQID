@@ -359,31 +359,33 @@ function($scope, $translate, i18n, Arguments, Classes, Properties, util){
 	}
 
 	var initClassesSlider = function(){
-	  $scope.slider = [ // TODO replace numbers with constants
-		{name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0, 
-		  to: 5000000,
-		  startVal: status.classesFilter.instances[0], 
+	  var limits = Arguments.getFilterLimits();
+	  $scope.slider = [
+		{name: "FILTER_MENUE.FILTER_DIRECT_INS", from: 0,
+		  to: limits['instances'],
+		  startVal: status.classesFilter.instances[0],
 		  endVal: status.classesFilter.instances[1]},
 		{name: "FILTER_MENUE.FILTER_DIRECT_SUBCL", from: 0,
-		  to: 1000000,
-		  startVal: status.classesFilter.subclasses[0], 
+		  to: limits['subclasses'],
+		  startVal: status.classesFilter.subclasses[0],
 		  endVal: status.classesFilter.subclasses[1]}];
 	};
 
 	var initPropertiesSlider = function(){
-	  $scope.slider = [ // TODO replace numbers with constants
+	  var limits = Arguments.getFilterLimits();
+	  $scope.slider = [
 		{name: "FILTER_MENUE.FILTER_USE_STMTS", from: 0,
-		  to: 30000000,
+		  to: limits['statements'],
 		  startVal: status.propertiesFilter.statements[0],
 		  endVal: status.propertiesFilter.statements[1]},
 		{name: "FILTER_MENUE.FILTER_USE_QUALS", from: 0,
-		  to: 30000000,
+		  to: limits['qualifiers'],
 		  startVal: status.propertiesFilter.qualifiers[0],
 		  endVal: status.propertiesFilter.qualifiers[1]},
 		{name: "FILTER_MENUE.FILTER_USE_REFS", from: 0,
-		  to: 30000000,
+		  to: limits['references'],
 		  startVal: status.propertiesFilter.references[0],
-		  endVal: status.propertiesFilter.references[1]}]; 
+		  endVal: status.propertiesFilter.references[1]}];
 	};
 
 	var updateTable = function(){
