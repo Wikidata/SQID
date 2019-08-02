@@ -16,11 +16,6 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 		  'references': 20E6,
 	  };
 
-	function getFilterLimits() {
-		return filterLimits;
-	}
-
-
 	  var args = {};
 	  var statusStartValues = {
 		entityType: "classes",
@@ -87,6 +82,9 @@ angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n'
 
 	  var status = util.cloneObject(statusStartValues);
 	  return {
+		getFilterLimits: function() {
+		  return filterLimits;
+		},
 		refreshArgs: function(){
 		  args = {
 			type: ($route.current.params.type) ? ($route.current.params.type) : status.entityType,
