@@ -1,4 +1,5 @@
 import logging
+
 from . import sparql, queries, statistics
 
 PROPERTY_USAGE_TYPES = {sparql.WIKIDATA_PROPERTY_URI_PREFIX: 's',
@@ -8,6 +9,39 @@ PROPERTY_USAGE_TYPES = {sparql.WIKIDATA_PROPERTY_URI_PREFIX: 's',
 PROPERTY_USAGE_PREFIXES = sorted(PROPERTY_USAGE_TYPES.keys(),
                                  key=len,
                                  reverse=True)
+CLASSIFICATION = {'ids': 'i',
+		  'family': 'f',
+		  'media': 'm',
+		  'wiki': 'w',
+		  'other': 'o',
+		  'hierarchy': 'h',
+		  }
+
+CLASSES_IDS = {'19847637',  # "Wikidata property representing a unique identifier"
+               '18614948',  # "Wikidata property for authority control"
+               '19595382',  # "Wikidata property for authority control for people"
+               '19829908',  # "Wikidata property for authority control for places"
+               '19833377',  # "Wikidata property for authority control for works"
+               '18618628',  # "Wikidata property for authority control for cultural heritage identification"
+               '21745557',  # "Wikidata property for authority control for organisations"
+               '19833835',  # "Wikidata property for authority control for substances"
+               '22964274',  # "Wikidata property for identication in the film industry"
+               }
+CLASSES_HUMAN_RELATIONS = {'22964231',  # "Wikidata property for human relationships"
+                           }
+CLASSES_MEDIA = {'18610173',    # "Wikidata property for Commons"
+                 }
+CLASSES_WIKI = {'18667213',  # "Wikidata property about Wikimedia categories"
+                '22969221',  # "Wikidata property giving Wikimedia list"
+                }
+PROPERTIES_WIKI = {'1151',      # "topic's main Wikimedia portal"
+                   '910',       # "topic's main category"
+                   '1204',      # "Wikimedia portal's main topic"
+                   }
+PROPERTIES_HIERARCHY = {'31',   # "instance of"
+                        '279',  # "subclass of"
+                        }
+
 logger = logging.getLogger(__name__)
 
 
@@ -66,3 +100,45 @@ def update_property_records():
     data = statistics.get_json_data('properties')
     merged = statistics.merge(data, updated)
     statistics.update_json_data('properties', merged, timestamp)
+
+
+def update_derived_property_records():
+    """Update all derived property records."""
+    derive_property_classification()
+
+
+def derive_property_classification():
+    """Derives the property classification from property statistics."""
+    logger.info('Deriving property classification ...')
+    data = statistics.get_json_data('properties')
+
+    classification = {}
+
+    for pid in data:
+        datatype = data[pid]['d']
+        classes = set([])
+        if 'pc' in data[pid]:
+            classes = set(data[pid]['pc'])
+        kind = CLASSIFICATION['other']
+
+        is_id = (datatype == 'ExternalId') or bool(classes & CLASSES_IDS)
+        is_human_relation = bool(classes & CLASSES_HUMAN_RELATIONS)
+        is_media = (datatype == 'CommonsMedia') or bool(classes & CLASSES_MEDIA)
+        is_wiki = (pid in PROPERTIES_WIKI) or bool(classes & CLASSES_WIKI)
+
+        logger.info('%s %s %s %s %s [%s]', pid, is_id, is_human_relation, is_media, is_wiki, repr(classes))
+
+        if pid in PROPERTIES_HIERARCHY:
+            kind = CLASSIFICATION['hierarchy']
+        elif is_id:
+            kind = CLASSIFICATION['ids']
+        elif is_human_relation:
+            kind = CLASSIFICATION['family']
+        elif is_media:
+            kind = CLASSIFICATION['media']
+        elif is_wiki:
+            kind = CLASSIFICATION['wiki']
+
+        classification[pid] = kind
+
+    statistics.update_json_data('properties/classification', classification)

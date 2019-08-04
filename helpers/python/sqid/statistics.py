@@ -34,7 +34,7 @@ def get_json_data(name):
         return {}
 
 
-def update_json_data(name, data, timestamp):
+def update_json_data(name, data, timestamp=None):
     """Atomically replaces the data in file "`name'.json"."""
     try:
         with NamedTemporaryFile(mode='w', delete=False) as file:
@@ -45,7 +45,8 @@ def update_json_data(name, data, timestamp):
         logger.error('Writing dump failed: %s', err)
     else:
         shutil.move(file.name, _json_file_name(name))
-        update_timestamp(name, timestamp)
+        if timestamp is not None:
+            update_timestamp(name, timestamp)
         logger.info('Update for %s complete.', name)
 
 

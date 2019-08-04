@@ -10,6 +10,7 @@
 # be obtained in an acceptable time from SPARQL.
 
 import os
+import sys
 import logging
 import argparse
 
@@ -24,12 +25,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='Update statistics data for SQID.')
     parser.add_argument('-o', '--only', dest='only',
-                        choices=['properties', 'classes'],
+                        choices=['properties', 'classes', 'derived'],
                         help='only update statistics for KIND')
     parser.add_argument('--version', action='version',
                         version='sqid-2.0-SNAPSHOT')
     parser.add_argument('--data-path', action='store', dest='path',
                         help='path to data files', default=DATA_DIR)
+    parser.add_argument('--no-derived', action='store_false', dest='derived',
+			help='Do not compute derived records')
 
     verb = parser.add_mutually_exclusive_group()
     verb.add_argument('-v', '--verbose', dest='verbose', default=False,
@@ -50,6 +53,10 @@ if __name__ == '__main__':
 
     sqid._setup_default_logger(loglevel=loglevel)  # pylint:disable=protected-access
 
+    if args.only and args.only == 'derived' and not args.derived:
+        logger.critical('--no-derived and --only=derived are mutually exclusive')
+        sys.exit(1)
+
     # try to guess the correct directory
     try:
         wd = os.getcwd()
@@ -59,5 +66,7 @@ if __name__ == '__main__':
             sqid.update_property_records()
         if not args.only or args.only == 'classes':
             sqid.update_class_records()
+        if not args.only or args.only == 'derived':
+            sqid.update_derived_records()
     finally:
         os.chdir(wd)            # restore previous working directory
