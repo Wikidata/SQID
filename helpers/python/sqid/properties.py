@@ -126,8 +126,6 @@ def derive_property_classification():
         is_media = (datatype == 'CommonsMedia') or bool(classes & CLASSES_MEDIA)
         is_wiki = (pid in PROPERTIES_WIKI) or bool(classes & CLASSES_WIKI)
 
-        logger.info('%s %s %s %s %s [%s]', pid, is_id, is_human_relation, is_media, is_wiki, repr(classes))
-
         if pid in PROPERTIES_HIERARCHY:
             kind = CLASSIFICATION['hierarchy']
         elif is_id:
