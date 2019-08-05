@@ -5,8 +5,8 @@ export interface StatisticsDates {
 }
 
 export interface StatisticsState  {
-  dump: Date,
-  classes: Date,
-  properties: Date,
-  refreshed: Date,
+  dumpDate: Date,
+  classesDate: Date,
+  propertiesDate: Date,
+  refreshedDate: Date,
 }

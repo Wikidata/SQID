@@ -149,8 +149,17 @@ export interface EntityReference {
   kind: EntityKind
 }
 
+export interface SqidPropertyStatistics {
+  c: number,
+  cLabels: number,
+  cStmts: number,
+  cDesc: number,
+  cAliases: number,
+}
+
 export interface SqidStatistics {
   dumpDate: string,
   classUpdate: string,
   propertyUpdate: string,
+  propertyStatistics: SqidPropertyStatistics,
 }

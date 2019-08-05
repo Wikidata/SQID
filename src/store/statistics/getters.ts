@@ -1,22 +1,20 @@
 import { GetterTree } from 'vuex'
 import { StatisticsState } from './types'
 import { RootState } from '../types'
-
-const MAX_STATISTICS_AGE = 60 * 60 * 1000
-const SCRIPT_RUNTIME_SLACK = 5 * 60 * 1000
+import { shouldRefresh } from '@/api/sqid'
 
 export const getters: GetterTree<StatisticsState, RootState> = {
   dumpTimestamp: (state) => {
-    return state.dump.getTime()
+    return state.dumpDate.getTime()
   },
   classesTimestamp: (state) => {
-    return state.classes.getTime()
+    return state.classesDate.getTime()
   },
   propertiesTimestamp: (state) => {
-    return state.properties.getTime()
+    return state.propertiesDate.getTime()
   },
   lastRefresh: (state) => {
-    return state.refreshed.getTime()
+    return state.refreshedDate.getTime()
   },
   shouldCheckForUpdate: (_state, getters) => { // tslint:disable-line:no-shadowed-variable
     const now = new Date().getTime()
@@ -26,14 +24,6 @@ export const getters: GetterTree<StatisticsState, RootState> = {
     const timeSinceLastRefresh = now - getters.lastRefresh
     const timeSinceLastUpdate = now - lastUpdate
 
-    if (timeSinceLastRefresh > MAX_STATISTICS_AGE) {
-      return true
-    }
-
-    if (timeSinceLastUpdate > MAX_STATISTICS_AGE + SCRIPT_RUNTIME_SLACK) {
-      return true
-    }
-
-    return false
+    return shouldRefresh(timeSinceLastRefresh, timeSinceLastUpdate)
   },
 }

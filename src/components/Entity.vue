@@ -24,8 +24,11 @@
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
+import { PropertyClassification } from '@/store/statistics/properties/types'
 import ClaimGroup from './ClaimGroup.vue'
 import { relatedEntityIds } from '@/api/wikidata'
+
+const propertyStatistics = namespace('statistics/properties')
 
 @Component({
   components: {
@@ -35,6 +38,8 @@ export default class Entity extends Vue {
   @Prop() private entityId!: string
   @Action private getEntityData: any
   @Action private requestLabels: any
+  @propertyStatistics.Action private refreshClassification: any
+  @propertyStatistics.Getter private propertiesInGroup!: (kind: PropertyClassification) => EntityId[]
   private label = this.entityId
   private aliases: string[] = []
   private description: string | null = null
@@ -67,6 +72,7 @@ export default class Entity extends Vue {
 
   @Watch('entityId')
   private onEntityIdChanged() {
+    this.refreshClassification()
     this.updateEntityData()
   }
 

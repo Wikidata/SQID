@@ -28,6 +28,8 @@ export const actions: ActionTree<StatisticsState, RootState> = {
         classUpdate,
         propertyUpdate,
       })
+      commit('properties/invalidateClassification', {})
+      commit('properties/refreshPropertyStatistics', response.propertyStatistics)
     } else {
       // nothing new
       commit('failedRefresh')
