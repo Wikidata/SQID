@@ -2,6 +2,7 @@ import { ActionTree } from 'vuex'
 import { StatisticsState } from './types'
 import { RootState } from '../types'
 import { getStatistics } from '@/api/sqid'
+import { SiteName, SqidSiteLink } from '@/api/types'
 
 export const actions: ActionTree<StatisticsState, RootState> = {
   async refresh({ commit, getters }) {
@@ -22,12 +23,18 @@ export const actions: ActionTree<StatisticsState, RootState> = {
       const dumpDate = new Date(dump)
       const classUpdate = new Date(classes)
       const propertyUpdate = new Date(properties)
+      const sites = new Map<SiteName, SqidSiteLink>(Object.entries(response.sites))
+      const update = {dates: {dumpDate,
+                              classUpdate,
+                              propertyUpdate,
+                             },
+                      sites: {
+                        siteLinkCount: response.siteLinkCount,
+                        sites,
+                      },
+                     }
 
-      commit('successfulRefresh', {
-        dumpDate,
-        classUpdate,
-        propertyUpdate,
-      })
+      commit('successfulRefresh', update)
       commit('properties/invalidateClassification', {})
       commit('properties/refreshPropertyStatistics', response.propertyStatistics)
     } else {
