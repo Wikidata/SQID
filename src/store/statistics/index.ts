@@ -1,5 +1,5 @@
 import { Module } from 'vuex'
-import { StatisticsState } from './types'
+import { StatisticsState, SiteName, SqidSiteLink } from './types'
 import { RootState } from '../types'
 import { actions } from './actions'
 import { getters } from './getters'
@@ -11,6 +11,8 @@ export const state: StatisticsState = {
   classesDate: new Date(0),
   refreshedDate: new Date(0),
   propertiesDate: new Date(0),
+  sitelinks: 0,
+  sites: new Map<SiteName, SqidSiteLink>(),
 }
 
 export const statistics: Module<StatisticsState, RootState> = {

@@ -1,6 +1,6 @@
 import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
-         Claim, WBApiResult } from './types'
+         Claim, WBApiResult, EntitySiteLink } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint } from './endpoints'
 import { i18n } from '@/i18n'
@@ -12,7 +12,6 @@ type Props = 'info' | 'sitelinks' | 'sitelinks/urls' | 'aliases' | 'labels' | 'd
 
 const MAX_ENTITIES_PER_REQUEST = 50
 
-// todo(mx): implement proper request chunking for multiple ids
 export async function getEntities(entityIds: string[],
                                   props: Props[],
                                   lang?: string,
@@ -151,7 +150,7 @@ function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: strin
 
 export async function getEntityData(entityId: string, lang?: string, fallback = true) {
   const entities = await getEntities([entityId],
-                                     ['aliases', 'labels', 'descriptions', 'claims', 'datatype'],
+                                     ['aliases', 'labels', 'descriptions', 'claims', 'datatype', 'sitelinks'],
                                      lang,
                                      fallback)
   const entity = entities[entityId]
@@ -159,6 +158,7 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
   const aliases = parseAliases(entityId, entity.aliases!)
   const descriptions = parseTerms(entityId, entity.descriptions!)
   const claims = new Map<string, Map<string, Claim>>()
+  const sitelinks = new Map<string, EntitySiteLink>(Object.entries(entities[entityId].sitelinks!))
   claims.set(entityId,
              new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
 
@@ -167,6 +167,7 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
     aliases,
     descriptions,
     claims,
+    sitelinks,
   }
 }
 

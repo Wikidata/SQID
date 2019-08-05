@@ -45,12 +45,13 @@ export interface ImageInfo {
 }
 
 export interface EntityResult {
-  type: EntityKind
-  id: EntityId
-  labels?: ResultList<TermResult>
-  descriptions?: ResultList<TermResult>
-  aliases?: ResultList<TermResult>
-  claims?: ResultList<Claim>
+  type: EntityKind,
+  id: EntityId,
+  labels?: ResultList<TermResult>,
+  descriptions?: ResultList<TermResult>,
+  aliases?: ResultList<TermResult>,
+  claims?: ResultList<Claim>,
+  sitelinks?: ResultList<EntitySiteLink>,
 }
 
 export interface TermResult {
@@ -80,7 +81,7 @@ export interface Snak {
   datatype: WBDatatype
 }
 
-export type DatavalueKind = 'wikibase-entityid' | 'time' | 'string'
+export type DatavalueKind = 'wikibase-entityid' | 'time' | 'string' | 'monolingualtext'
 
 export interface Datavalue {
   type: DatavalueKind
@@ -162,4 +163,22 @@ export interface SqidStatistics {
   classUpdate: string,
   propertyUpdate: string,
   propertyStatistics: SqidPropertyStatistics,
+  siteLinkCount: number,
+  sites: ResultList<SqidSiteLink>,
 }
+
+export interface EntitySiteLink {
+  site: string,
+  title: string,
+  badges: EntityId[],
+}
+
+export type SiteName = string
+export interface SqidSiteLink {
+  l: string,
+  i: number,
+  u: string,
+  g: string,
+}
+
+export type SiteLinkMap = Map<SiteName, SqidSiteLink>
