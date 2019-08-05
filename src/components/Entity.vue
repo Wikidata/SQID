@@ -16,11 +16,21 @@
         <div id="claims" v-if="groupedClaims">
           <table class="table table-striped table-condensed statements-table">
             <tbody>
-              <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in group('h')" :key="prop" />
-              <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in group('f')" :key="prop" />
-              <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in group('o')" :key="prop" />
-              <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in group('w')" :key="prop" />
-              <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in group('m')" :key="prop" />
+              <claim-table :header="$t('entity.hierarchyStatements')"
+                           :entityId="entityId"
+                           :claims="group('h')" />
+              <claim-table :header="$t('entity.humanRelationshipStatements')"
+                           :entityId="entityId"
+                           :claims="group('f')" />
+              <claim-table :header="$t('entity.statements')"
+                           :entityId="entityId"
+                           :claims="group('o')" />
+              <claim-table :header="$t('entity.mediaStatements')"
+                           :entityId="entityId"
+                           :claims="group('m')" />
+              <claim-table :header="$t('entity.wikiStatements')"
+                           :entityId="entityId"
+                           :claims="group('w')" />
             </tbody>
           </table>
         </div>
@@ -28,11 +38,9 @@
       <b-col class="sidebar" lg="3" md="12" sm="12">
         <sqid-image :file="images[0]" width="260" v-if="images" />
         <div id="claims-ids" v-if="groupedClaims">
-          <table class="table table-striped table-condensed statements-table">
-            <tbody>
-              <claim-group :entityId="entityId" :propertyId="prop" :claims="statements(prop)" v-for="prop in group('i')" :key="prop" />
-            </tbody>
-          </table>
+          <claim-table :header="$t('entity.identifierStatements')"
+                       :entityId="entityId"
+                       :claims="group('i')" />
         </div>
       </b-col>
     </b-row>
@@ -44,15 +52,16 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
-import ClaimGroup from './ClaimGroup.vue'
+import ClaimTable from './ClaimTable.vue'
 import SqidImage from './SqidImage.vue'
+import { Claim } from '@/api/types'
 import { relatedEntityIds } from '@/api/wikidata'
 
 const propertyStatistics = namespace('statistics/properties')
 
 @Component({
   components: {
-    'claim-group': ClaimGroup,
+    'claim-table': ClaimTable,
     'sqid-image': SqidImage,
   }})
 export default class Entity extends Vue {
@@ -68,7 +77,7 @@ export default class Entity extends Vue {
   private aliases: string[] = []
   private description: string | null = null
   private claims: ClaimsMap | null = null
-  private groupedClaims: Map<PropertyClassification, EntityId[]> | null = null
+  private groupedClaims: Map<PropertyClassification, ClaimsMap> | null = null
   private images: string | null = null
   private banner: string | null = null
   private homepage: string | null = null
@@ -96,26 +105,28 @@ export default class Entity extends Vue {
         this.banner = this.getBanner(this.entityId)
         this.homepage = this.getHomepage(this.entityId)
       })
-      .then(this.refreshClassification).then(() => {
-        if (this.claims) {
-          const groupedClaims = new Map<PropertyClassification, EntityId[]>()
+      .then(this.refreshClassification)
+      .then(this.regroupClaims)
+  }
 
-          for (const prop of this.claims.keys()) {
-            const kind = this.propertyGroups(prop)
-            let group = groupedClaims.get(kind)
+  private regroupClaims() {
+    if (this.claims) {
+      const groupedClaims = new Map<PropertyClassification, ClaimsMap>()
 
-            if (group === undefined) {
-              group = []
-            }
+      for (const [prop, claim] of this.claims.entries()) {
+        const kind = this.propertyGroups(prop)
+        let group = groupedClaims.get(kind)
 
-            group.push(prop)
-
-            groupedClaims.set(kind, group)
-          }
-
-          this.groupedClaims = groupedClaims
+        if (group === undefined) {
+          group = new Map<EntityId, Claim[]>()
         }
-      })
+
+        group.set(prop, claim)
+        groupedClaims.set(kind, group)
+      }
+
+      this.groupedClaims = groupedClaims
+    }
   }
 
   private created() {
@@ -125,14 +136,6 @@ export default class Entity extends Vue {
   @Watch('entityId')
   private onEntityIdChanged() {
     this.updateEntityData()
-  }
-
-  private statements(propertyId: EntityId) {
-    if (this.claims) {
-      return this.claims.get(propertyId)
-    }
-
-    return []
   }
 
   private group(kind: PropertyClassification) {

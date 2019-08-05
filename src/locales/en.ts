@@ -16,5 +16,13 @@ export const messages: LocaleMessages = {
     poweredBy: 'Powered by',
     sourceCode: 'Source code available on {0}',
   },
+  entity: {
+    hierarchyStatements: 'Property hierarchy',
+    humanRelationshipStatements: 'Human relationships',
+    statements: 'Statements',
+    mediaStatements: 'Media',
+    wikiStatements: 'Wikimedia Categories and Portals',
+    identifierStatements: 'Identifiers',
+  },
 }
 export default messages

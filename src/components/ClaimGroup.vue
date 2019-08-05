@@ -1,7 +1,7 @@
 <template>
   <tbody>
     <tr :title="propertyId" v-for="(claim, cidx) in claims" :key="cidx">
-      <td><entity-link :entityId="propertyId" /></td>
+      <th :rowspan="claims.length" v-if="cidx === 0"><entity-link :entityId="propertyId" /></th>
       <td>
         <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
       </td>
