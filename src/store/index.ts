@@ -4,6 +4,7 @@ import { RootState } from './types'
 import { i18n } from './i18n/index'
 import { login } from './login/index'
 import { entity } from './entity/index'
+import { statistics } from './statistics/index'
 
 Vue.use(Vuex)
 
@@ -13,6 +14,7 @@ const store: StoreOptions<RootState> = {
     i18n,
     login,
     entity,
+    statistics,
   },
 }
 

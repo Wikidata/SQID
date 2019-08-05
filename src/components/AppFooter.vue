@@ -28,12 +28,19 @@
 </style>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Watch, Vue } from 'vue-property-decorator'
+import { Action, Getter, namespace } from 'vuex-class'
+
+const statistics = namespace('statistics')
 
 @Component
 export default class AppFooter extends Vue {
-  private get statsDate(): Date {
-    return new Date(0) // TODO(mx): once we load real statistics, put the date here.
+  @statistics.Getter('dumpTimestamp') private statsDate!: number
+  @statistics.Action('refresh') private refreshStatistics!: any
+
+  @Watch('$route')
+  private onRouteChanged() {
+    this.refreshStatistics()
   }
 }
 </script>

@@ -37,7 +37,7 @@ export default class SqidImage extends Vue {
     return undefined
   }
 
-  private mounted() {
+  private created() {
     getImageData(this.file, this.width).then((info) => this.imageInfo = info)
   }
 }

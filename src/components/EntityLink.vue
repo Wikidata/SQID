@@ -29,7 +29,7 @@ export default class EntityLink extends Vue {
       })
   }
 
-  private mounted() {
+  private created() {
     this.updateLabel()
   }
 

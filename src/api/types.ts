@@ -148,3 +148,9 @@ export interface EntityReference {
   id: number
   kind: EntityKind
 }
+
+export interface SqidStatistics {
+  dumpDate: string,
+  classUpdate: string,
+  propertyUpdate: string,
+}

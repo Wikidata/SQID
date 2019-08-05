@@ -61,7 +61,7 @@ export default class Entity extends Vue {
     })
   }
 
-  private mounted() {
+  private created() {
     this.onEntityIdChanged()
   }
 
