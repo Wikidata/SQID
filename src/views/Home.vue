@@ -1,7 +1,7 @@
 <template>
-<div class="container">
-  <div class="row">
-	  <div class="mainbar col-lg-9 col-md-12 col-sm-12">
+<b-container>
+  <b-row>
+	  <b-col class="mainbar" lg="9" md="12" sm="12">
 	    <h1>A fresh look at Wikidata</h1>
       <p>SQID is a fast way to browse and
         query <a href="https://www.wikidata.org/">Wikidata</a>, the
@@ -44,12 +44,12 @@
         <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a>.
         Some complex statistics can be fetched from SPARQL, but take too long to compute in the browser. These are
         updated every hour. See the <b><router-link :to="{ name: 'status' }">status page</router-link></b> for recency information and statistics on the current data.</p>
-    </div>
-    <div class="sidebar col-lg-3 col-md-12 col-sm-12">
+    </b-col>
+    <b-col class="sidebar" lg="3" md="12" sm="12">
       <sqid-image :file="'Cephalop.jpg'" :width="260" />
-    </div>
-  </div>
-</div>
+    </b-col>
+  </b-row>
+</b-container>
 </template>
 
 <script lang="ts">
