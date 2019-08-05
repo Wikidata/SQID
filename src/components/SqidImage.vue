@@ -32,7 +32,10 @@ export default class SqidImage extends Vue {
 
   private get thumbUrl() {
     if (this.imageInfo !== null) {
-      return this.imageInfo.thumburl
+      if (this.imageInfo.thumburl !== undefined) {
+        return this.imageInfo.thumburl
+      }
+      return this.imageInfo.url
     }
     return undefined
   }
