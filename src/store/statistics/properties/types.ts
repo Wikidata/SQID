@@ -10,7 +10,7 @@ export enum PropertyClassification {
 }
 
 export interface PropertiesState {
-  propertyGroups: Map<EntityId, PropertyClassification>,
+  propertyGroups: object,       // todo(mx): this should be a map, but that breaks vue-devtools
   propertiesByGroup: Map<PropertyClassification, EntityId[]>,
   classificationRefreshed: Date,
   count: number,

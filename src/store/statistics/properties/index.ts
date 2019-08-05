@@ -7,7 +7,7 @@ import { RootState } from '@/store/types'
 import { EntityId } from '@/api/types'
 
 export const state: PropertiesState = {
-  propertyGroups: new Map<EntityId, PropertyClassification>(),
+  propertyGroups: new Object(), // todo(mx): this should be a map, but that breaks vue-devtools
   propertiesByGroup: new Map<PropertyClassification, EntityId[]>(),
   classificationRefreshed: new Date(0),
 

@@ -6,7 +6,9 @@ import { shouldRefresh } from '@/api/sqid'
 
 export const getters: GetterTree<PropertiesState, RootState> = {
   propertyGroups: (state) => (entityId: EntityId) => {
-    return state.propertyGroups.get(entityId)
+    const kind = ((state as any).propertyGroups[entityId] as PropertyClassification)
+
+    return kind
   },
   propertiesInGroup: (state) => (group: PropertyClassification) => {
     return state.propertiesByGroup.get(group)

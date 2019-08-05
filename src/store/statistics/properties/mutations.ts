@@ -5,6 +5,7 @@ import { EntityId, SqidPropertyStatistics } from '@/api/types'
 
 export const mutations: MutationTree<PropertiesState> = {
   refreshClassification: (state, classification: Map<EntityId, PropertyClassification>) => {
+    const propertyGroups: any = new Object()
     const propertiesByGroup = new Map<PropertyClassification, EntityId[]>()
 
     for (const [entityId, kind] of classification) {
@@ -16,10 +17,12 @@ export const mutations: MutationTree<PropertiesState> = {
 
       group.push(entityId)
       propertiesByGroup.set(kind, group)
+      propertyGroups[entityId] = kind
     }
 
     state.propertiesByGroup = propertiesByGroup
-    // Vue.set(state, 'propertyGroups', classification) // todo(mx): this breaks vuex debugging
+    // todo(mx): this should be a map, but that breaks vue-devtools
+    state.propertyGroups = propertyGroups
     state.classificationRefreshed = new Date()
   },
   refreshPropertyStatistics: (state, counts: SqidPropertyStatistics) => {
@@ -31,7 +34,7 @@ export const mutations: MutationTree<PropertiesState> = {
   },
   invalidateClassification: (state) => {
     state.classificationRefreshed = new Date(0)
-    state.propertyGroups = new Map<EntityId, PropertyClassification>()
+    state.propertyGroups = new Object() // todo(mx): this should be a map, but that breaks vue-devtools
     state.propertiesByGroup = new Map<PropertyClassification, EntityId[]>()
   },
 }
