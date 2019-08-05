@@ -1,3 +1,4 @@
+import os
 import json
 import time
 import shutil
@@ -44,6 +45,7 @@ def update_json_data(name, data, timestamp=None):
     except RuntimeError as err:
         logger.error('Writing dump failed: %s', err)
     else:
+        os.chmod(file.name, 0o644)
         shutil.move(file.name, _json_file_name(name))
         if timestamp is not None:
             update_timestamp(name, timestamp)
