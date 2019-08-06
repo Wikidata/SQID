@@ -37,6 +37,7 @@ export const actions: ActionTree<StatisticsState, RootState> = {
       commit('successfulRefresh', update)
       commit('properties/invalidateClassification', {})
       commit('properties/refreshPropertyStatistics', response.propertyStatistics)
+      commit('items/refreshItemStatistics', response.itemStatistics)
     } else {
       // nothing new
       commit('failedRefresh')

@@ -1,5 +1,5 @@
 import { ActionTree } from 'vuex'
-import { PropertiesState, PropertyClassification } from './types'
+import { PropertiesState } from './types'
 import { RootState } from '@/store/types'
 import { getPropertyClassification } from '@/api/sqid'
 

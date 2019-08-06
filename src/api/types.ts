@@ -150,7 +150,7 @@ export interface EntityReference {
   kind: EntityKind
 }
 
-export interface SqidPropertyStatistics {
+export interface SqidEntityStatistics {
   c: number,
   cLabels: number,
   cStmts: number,
@@ -162,7 +162,8 @@ export interface SqidStatistics {
   dumpDate: string,
   classUpdate: string,
   propertyUpdate: string,
-  propertyStatistics: SqidPropertyStatistics,
+  propertyStatistics: SqidEntityStatistics,
+  itemStatistics: SqidEntityStatistics,
   siteLinkCount: number,
   sites: ResultList<SqidSiteLink>,
 }
