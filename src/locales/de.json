@@ -46,6 +46,22 @@
     "dumpDate": "Dump-Datum",
     "propertyDate": "Aktualisierung der Eigenschafts-Daten",
     "classDate": "Aktualisierung der Klassen-Daten",
-    "clientDate": "Aktualisierung der Daten im Browser"
+    "clientDate": "Aktualisierung der Daten im Browser",
+    "refreshedRecently": "Kürzlich erfrischt?"
+  },
+  "about": {
+    "about": "Über SQID",
+    "aboutDescription": "SQID ist ein Projekt der {kbsGroup} der {tuDresden}. Zu den Entwicklern gehören {developersList} und {lastDeveloper}.",
+    "aboutImplementation": "SQID ist in TypeScript geschrieben und verwendet zusätzlich serverseitigen Code in Java und Python, um Daten zu extrahieren, abzufragen und aufzubereiten.",
+    "kbsGroup": "Wissensbasierte Systeme-Gruppe",
+    "meaning": "Was bedeutet SQID?",
+    "meaningHypotheses": "Der Ursprung des Namens ist unbekannt, aber es scheint sich um eine Abkürzung für irgendetwas zu handeln. Aktuelle Hypothesen sind unter anderem: {hypotheses} Eine andere Theorie besagt, dass der Name tatsachlich durch die hohe intelligenz, das bewundernswerte Sozialverhalten und den scharfen Blick, die gleichwohl für viele {squids} wie auch für Wikidata-Editoren charakteristisch sind, inspiriert wurde.",
+    "squids": "Kopffüßler",
+    "contribute": "Wo kann ich Anmerkungen machen oder mithelfen?",
+    "contributions": "Der komplette Code befindet sich in unserem {githubRepository}. Bugs und Wünsche erreichen uns am Besten, wenn sie dort als {submitIssue}. Pull-Requests sind willkommen.",
+    "githubRepository": "öffentlichen Github-Repository",
+    "submitIssue": "Issue angelegt werden",
+    "dontEatMe": "Bitte ess' mich nicht."
   }
+
 }

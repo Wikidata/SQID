@@ -231,6 +231,22 @@ export async function searchEntities(search: string,
   return response.search!
 }
 
+export async function siteLinkUrls(entityId: EntityId) {
+  const entities = await getEntities([entityId], ['sitelinks/urls'])
+  const urls: any = {}
+
+  if (entities !== undefined) {
+    const entity = entities[entityId]
+    if (entity !== undefined) {
+      for (const [site, sitelink] of Object.entries(entity.sitelinks!)) {
+        urls[site] = sitelink.url!
+      }
+    }
+  }
+
+  return urls
+}
+
 export function relatedEntityIds(claims: ClaimsMap) {
   const entityIds = new Set()
 

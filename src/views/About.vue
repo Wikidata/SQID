@@ -1,41 +1,70 @@
 <template>
   <sqid-bars>
     <template v-slot:mainbar>
-	    <h1>About SQID</h1>
-	    <p>SQID is a project of the <a href="https://kbs.inf.tu-dresden.de">Knowledge-Based Systems Group</a>
-        of <a href="https://tu-dresden.de/">TU Dresden</a>.
+	    <h1 v-t="'about.about'" />
+      <i18n tag="p" path="about.aboutDescription">
+        <a place="kbsGroup" :href="kbsLink">{{ $t('about.kbsGroup') }}</a>
+        <a place="tuDresden" href="https://tu-dresden.de/">TU Dresden</a>
+        <span place="developersList">Markus Krötzsch, Michael Günther, Markus Damm, Georg Wild</span>
+        <span place="lastDeveloper">Maximilian Marx</span>
+      </i18n>
 
-        Developers include Markus Krötzsch, Michael Günther, Markus Damm, Georg Wild, and Maximilian Marx.</p>
-	    <p>SQID is programmed in TypeScript with additional server-side code in Java and Python to
-        extract, query, and preprocess data.</p>
-
-	    <h2>What does SQID mean?</h2>
-	    <p>The origin of the name is unknown, but it seems to be an abbreviation of something.
-	      Current hypotheses include:
-	      <ul>
+	    <h2 v-t="'about.meaning'" />
+	    <i18n tag="p" path="about.meaningHypotheses">
+	      <ul place="hypotheses">
 		      <li>Searching, Querying, and Interacting with Data</li>
 		      <li>Sweet QIDs</li>
 		      <li>SPARQL Querying Isn't Difficult</li>
 		      <li>Surprisingly Quick Information Display</li>
 		      <li>See Quality In Data</li>
         </ul>
-        Another possible theory is that the name is indeed inspired by
-        the high intelligence, amazing social skills, and sharp vision
-        that are characteristic for
-        many <a href="https://en.wikipedia.org/wiki/Cephalopoda">cephalopods</a>
-        and Wikidata editors alike.</p>
+        <a place="squids" :href="squidLink" v-t="'about.squids'" />
+      </i18n>
 
-      <h2>Where can I make comments and contributions?</h2>
-      <p>All code is found in
-        our <a href="https://github.com/Wikidata/SQID/">public
-          repository</a>. Bugs and wishes are best reported
-        by <a href="https://github.com/Wikidata/SQID/issues">submitting
-          an issue there</a>. Pull requests are welcome.
-      </p>
+      <h2 v-t="'about.contribute'" />
+      <i18n tag="p" path="about.contributions">
+        <a place="githubRepository" href="https://github.com/Wikidata/SQID/">{{ $t('about.githubRepository') }}</a>
+        <a place="submitIssue" href="https://github.com/Wikidata/SQID/issues">{{ $t('about.submitIssue') }}</a>
+      </i18n>
     </template>
     <template v-slot:sidebar>
       <sqid-image file="Squid_komodo.jpg" width="260" />
-      <div style="text-align: center; width: 100%;">Please don't eat me.</div>
+      <div style="text-align: center; width: 100%;" v-t="'about.dontEatMe'" />
     </template>
   </sqid-bars>
 </template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import { siteLinkUrls } from '@/api/wikidata'
+import { i18n } from '@/i18n'
+
+@Component
+export default class About extends Vue {
+  private sitelinks: {[key: string]: string} | null = null
+
+  private created() {
+    siteLinkUrls('Q128257').then((urls) => { // Cephalopods
+      this.sitelinks = urls
+    })
+  }
+
+  private get kbsLink() {
+    if (i18n.locale === 'de') {
+      return 'https://wbs.inf.tu-dresden.de'
+    }
+
+    return 'https://kbs.inf.tu-dresden.de'
+  }
+
+  private get squidLink() {
+    if (this.sitelinks === null) {
+      return 'https://en.wikipedia.org/wiki/Cephalopoda'
+    }
+
+    const wiki = `${i18n.locale}wiki`
+
+    return this.sitelinks[wiki]
+  }
+}
+</script>

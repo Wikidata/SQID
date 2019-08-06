@@ -171,6 +171,7 @@ export interface SqidStatistics {
 export interface EntitySiteLink {
   site: string,
   title: string,
+  url?: string,
   badges: EntityId[],
 }
 

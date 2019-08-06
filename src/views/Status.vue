@@ -80,7 +80,7 @@
     </template>
     <template v-slot:sidebar>
 			<sqid-image file="Sepia_officinalis_(aquarium).jpg" width="260" />
-			<div style="text-align: center; width: 100%;">Refreshed recently?</div>
+			<div style="text-align: center; width: 100%;" v-t="'status.refreshedRecently'" />
     </template>
   </sqid-bars>
 </template>
