@@ -26,5 +26,26 @@
     "mediaStatements": "Medien",
     "wikiStatements": "Wikimedia-Kategorien und Portale",
     "identifierStatements": "Bezeichner"
+  },
+  "status": {
+    "status": "Status",
+    "statusOverview": "Diese Seite zeigt einen Überblick über den aktuellen Datenbestand des Systems. Die Daten werden im Browser gecached. Aktuellere Daten könnten auf dem Server vorhanden sein.",
+    "statistics": "Statistiken",
+    "statsBasedOn": "Basierend auf dem Wikidata-Dump vom {date}",
+    "items": "Items",
+    "properties": "Eigenschaften",
+    "totals": "Summe",
+    "numbers": "Anzahl",
+    "statements": "Aussagen",
+    "labels": "Label",
+    "descriptions": "Beschreibungen",
+    "aliases": "Aliase",
+    "sitelinks": "Sitelinks",
+    "freshness": "Datenbestand",
+		"refreshCycle": "Statistische Daten werden aus dem Dump ungefähr wöchentlich berechnet. Einfachere Statistiken (Klassen- und Eigenschaftsnamen, Verwendungszahlen für Eigenschaften, direkte Instanzen von Klassen) werden öften (ungefähr stündlich) berechnet. Alle weiteren Daten sind aktuell.",
+    "dumpDate": "Dump-Datum",
+    "propertyDate": "Aktualisierung der Eigenschafts-Daten",
+    "classDate": "Aktualisierung der Klassen-Daten",
+    "clientDate": "Aktualisierung der Daten im Browser"
   }
 }

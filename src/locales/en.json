@@ -26,5 +26,26 @@
     "mediaStatements": "Media",
     "wikiStatements": "Wikimedia Categories and Portals",
     "identifierStatements": "Identifiers"
+  },
+  "status": {
+    "status": "Status",
+    "statusOverview": "This page reports on the current status of the data shown in the system. Data is cached in your browser. More recent data may be available on the server.",
+    "statistics": "Statistics",
+    "statsBasedOn": "Based on Wikidata dump {date}",
+    "items": "Items",
+    "properties": "Properties",
+    "totals": "Total",
+    "numbers": "Numbers",
+    "statements": "Statements",
+    "labels": "Labels",
+    "descriptions": "Descriptions",
+    "aliases": "Aliases",
+    "sitelinks": "Site links",
+    "freshness": "Data Freshness",
+		"refreshCycle": "Statistical data is computed from the data dump about once per week. Basic statisics (class and property names, usage counts for properties, direct instances of classes) are refreshed more frequently, about once per hour. All other data is live.",
+    "dumpDate": "Dump date",
+    "propertyDate": "Property data refresh",
+    "classDate": "Class data refresh",
+    "clientDate": "Client-side data refresh"
   }
 }
