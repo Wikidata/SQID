@@ -39,6 +39,10 @@ export default class AppFooter extends Vue {
   @statistics.Action('refresh') private refreshStatistics!: any
   @Action private setCurrentTranslation!: any
 
+  private created() {
+    this.onRouteChanged()
+  }
+
   @Watch('$route')
   private onRouteChanged() {
     this.refreshStatistics()
