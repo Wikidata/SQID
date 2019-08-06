@@ -44,11 +44,18 @@ router.beforeResolve((_to, _from, next) => {
 
 router.beforeEach(async (to, _from, next) => {
   const query = to.query
+
   if (query && 'lang' in query) {
     const lang = query.lang.toString()
 
     store.dispatch('loadTranslation', lang)
   }
+
+  next()
+})
+
+router.beforeEach(async (to, _from, next) => {
+  const query = to.query
 
   if (query && 'oauth_verifier' in query && 'oauth_token' in query) {
     const verifier = query.oauth_verifier.toString()

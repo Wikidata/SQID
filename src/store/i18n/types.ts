@@ -1,3 +1,4 @@
 export interface I18nState {
-  loadedTranslations: string[]
+  loadedTranslations: string[],
+  currentTranslation: string,
 }

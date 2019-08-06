@@ -37,10 +37,12 @@ const statistics = namespace('statistics')
 export default class AppFooter extends Vue {
   @statistics.Getter('dumpTimestamp') private statsDate!: number
   @statistics.Action('refresh') private refreshStatistics!: any
+  @Action private setCurrentTranslation!: any
 
   @Watch('$route')
   private onRouteChanged() {
     this.refreshStatistics()
+    this.setCurrentTranslation()
   }
 }
 </script>

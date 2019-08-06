@@ -10,7 +10,7 @@ export const i18n = new VueI18n({
   messages: {en: enMessages},
 })
 
-export function setCurrentTranslation(lang: string) {
+export function updateCurrentTranslation(lang: string) {
   i18n.locale = lang
 }
 

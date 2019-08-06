@@ -6,6 +6,7 @@ import { RootState } from '../types'
 
 export const state: I18nState = {
   loadedTranslations: ['en'],
+  currentTranslation: 'en',
 }
 
 export const i18n: Module<I18nState, RootState> = {

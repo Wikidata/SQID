@@ -5,4 +5,7 @@ export const mutations: MutationTree<I18nState> = {
   translationLoaded(state, lang: string) {
     state.loadedTranslations.push(lang)
   },
+  changeTranslation(state, lang: string) {
+    state.currentTranslation = lang
+  },
 }
