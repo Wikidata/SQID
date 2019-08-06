@@ -1,7 +1,6 @@
 <template>
-<b-container>
-  <b-row>
-	  <b-col class="mainbar" lg="9" md="12" sm="12">
+  <sqid-bars>
+    <template v-slot:mainbar>
 	    <h1>A fresh look at Wikidata</h1>
       <p>SQID is a fast way to browse and
         query <a href="https://www.wikidata.org/">Wikidata</a>, the
@@ -44,12 +43,11 @@
         <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a>.
         Some complex statistics can be fetched from SPARQL, but take too long to compute in the browser. These are
         updated every hour. See the <b><router-link :to="{ name: 'status' }">status page</router-link></b> for recency information and statistics on the current data.</p>
-    </b-col>
-    <b-col class="sidebar" lg="3" md="12" sm="12">
+    </template>
+    <template v-slot:sidebar>
       <sqid-image :file="'Cephalop.jpg'" :width="260" />
-    </b-col>
-  </b-row>
-</b-container>
+    </template>
+  </sqid-bars>
 </template>
 
 <script lang="ts">
@@ -63,19 +61,3 @@ import SqidImage from '@/components/SqidImage.vue'
 })
 export default class Home extends Vue {}
 </script>
-
-<style>
-  .mainbar {
-	margin-right: -1px;
-    margin-bottom: 10px;
-    border-right: 1px solid #DDD;
-    padding-right: 5px;
-	border-style: collapse;
-}
-.sidebar {
-    margin-bottom: 10px;
-    border-left: 1px solid #DDD;
-    padding-left: 5px;
-	border-style: collapse;
-  }
-</style>

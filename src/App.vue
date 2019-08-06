@@ -32,10 +32,14 @@ import AppFooter from '@/components/AppFooter.vue'
 import EntityLink from '@/components/EntityLink.vue'
 import Snak from '@/components/Snak.vue'
 import DataValue from '@/components/DataValue.vue'
+import SqidImage from '@/components/SqidImage.vue'
+import SqidBars from '@/components/SqidBars.vue'
 
 Vue.component('entity-link', EntityLink)
 Vue.component('snak', Snak)
 Vue.component('data-value', DataValue)
+Vue.component('sqid-image', SqidImage)
+Vue.component('sqid-bars', SqidBars)
 
 @Component({
   components: {

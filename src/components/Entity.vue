@@ -14,25 +14,21 @@
         </div>
         <div id="description">{{ description }}</div>
         <div id="claims" v-if="groupedClaims">
-          <table class="table table-striped table-condensed statements-table">
-            <tbody>
-              <claim-table :header="$t('entity.hierarchyStatements')"
-                           :entityId="entityId"
-                           :claims="group('h')" />
-              <claim-table :header="$t('entity.humanRelationshipStatements')"
-                           :entityId="entityId"
-                           :claims="group('f')" />
-              <claim-table :header="$t('entity.statements')"
-                           :entityId="entityId"
-                           :claims="group('o')" />
-              <claim-table :header="$t('entity.mediaStatements')"
-                           :entityId="entityId"
-                           :claims="group('m')" />
-              <claim-table :header="$t('entity.wikiStatements')"
-                           :entityId="entityId"
-                           :claims="group('w')" />
-            </tbody>
-          </table>
+          <claim-table :header="$t('entity.hierarchyStatements')"
+                       :entityId="entityId"
+                       :claims="group('h')" />
+          <claim-table :header="$t('entity.humanRelationshipStatements')"
+                       :entityId="entityId"
+                       :claims="group('f')" />
+          <claim-table :header="$t('entity.statements')"
+                       :entityId="entityId"
+                       :claims="group('o')" />
+          <claim-table :header="$t('entity.mediaStatements')"
+                       :entityId="entityId"
+                       :claims="group('m')" />
+          <claim-table :header="$t('entity.wikiStatements')"
+                       :entityId="entityId"
+                       :claims="group('w')" />
         </div>
       </b-col>
       <b-col class="sidebar" lg="3" md="12" sm="12">
@@ -53,7 +49,6 @@ import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
 import ClaimTable from './ClaimTable.vue'
-import SqidImage from './SqidImage.vue'
 import { Claim } from '@/api/types'
 import { relatedEntityIds } from '@/api/wikidata'
 
@@ -62,7 +57,6 @@ const propertyStatistics = namespace('statistics/properties')
 @Component({
   components: {
     'claim-table': ClaimTable,
-    'sqid-image': SqidImage,
   }})
 export default class Entity extends Vue {
   @Prop() private entityId!: string
