@@ -12,3 +12,13 @@ export interface TermsState {
   inflightTerms: MultilingualInflightMap
   inflightLabels: MultilingualInflightMap
 }
+
+export interface LabelOptions {
+  entityId: EntityId,
+  lang: LangCode | null,
+}
+
+export interface LabelsOptions {
+  entityIds: EntityId[],
+  lang: LangCode | null,
+}

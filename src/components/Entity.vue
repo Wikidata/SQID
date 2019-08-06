@@ -93,7 +93,7 @@ export default class Entity extends Vue {
         this.claims = data.claims
 
         const related = relatedEntityIds(this.claims)
-        this.requestLabels(related)
+        this.requestLabels({entityIds: related})
 
         this.images = this.getImages(this.entityId)
         this.banner = this.getBanner(this.entityId)

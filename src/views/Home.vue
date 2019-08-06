@@ -58,8 +58,20 @@ import { i18n } from '@/i18n'
 export default class Home extends Vue {
   @Action private requestLabels: any
 
+  private get language() {
+    return i18n.locale
+  }
+
+  @Watch('language')
+  private updateLanguage() {
+    this.requestLabels({
+      entityIds: ['Q1339', 'Q8072', 'Q318', 'P21', 'P1303', 'Q18616576', 'P31', 'P279'],
+      lang: this.language,
+    })
+  }
+
   private created() {
-    this.requestLabels(['Q1339', 'Q8072', 'Q318', 'P21', 'P1303', 'Q18616576', 'P31', 'P279'])
+    this.updateLanguage()
   }
 }
 </script>

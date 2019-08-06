@@ -1,12 +1,15 @@
 import { ActionTree } from 'vuex'
-import { TermsState } from './types'
+import { TermsState, LabelOptions, LabelsOptions } from './types'
 import { RootState } from '@/store/types'
 
 import { i18n } from '@/i18n'
 import { getLabels, getEntityData } from '@/api/wikidata'
 
 export const actions: ActionTree<TermsState, RootState> = {
-  async getLabel({ commit, getters }, entityId, lang?) {
+  async getLabel({ commit, getters }, opts: LabelOptions) {
+    const entityId = opts.entityId
+    const lang = opts.lang || null
+
     if (getters.hasEntityLabel(entityId, lang, false)) {
       return getters.getEntityLabel(entityId, lang)
     }
@@ -27,7 +30,7 @@ export const actions: ActionTree<TermsState, RootState> = {
       return entityId
     }
 
-    const promise = getLabels([entityId], lang)
+    const promise = getLabels([entityId], lang || undefined)
     commit('labelsRequested', {
       entities: [entityId],
       lang,
@@ -38,7 +41,9 @@ export const actions: ActionTree<TermsState, RootState> = {
 
     return getters.getEntityLabel(entityId, lang)
   },
-  async requestLabels({ commit, getters }, entityIds, lang?) {
+  async requestLabels({ commit, getters }, opts: LabelsOptions) {
+    const entityIds = opts.entityIds
+    const lang = opts.lang || null
     const missingLabels = []
 
     for (const entityId of entityIds) {
@@ -48,16 +53,16 @@ export const actions: ActionTree<TermsState, RootState> = {
       }
     }
 
-    const promise = getLabels(missingLabels, lang)
+    const promise = getLabels(missingLabels, lang || undefined)
     commit('labelsRequested', {
       entities: missingLabels,
       lang,
       promise,
     })
-
-    await promise
   },
-  async getTerms({ commit, getters }, entityId, lang?) {
+  async getTerms({ commit, getters }, opts: LabelOptions) {
+    const entityId = opts.entityId
+    const lang = opts.lang || null
     if (getters.hasTerms(entityId, lang, false)) {
       return getters.getTerms(entityId, lang)
     }
@@ -104,7 +109,7 @@ export const actions: ActionTree<TermsState, RootState> = {
       }
     }
 
-    const promise = getEntityData(entityId, lang)
+    const promise = getEntityData(entityId, lang || undefined)
     commit('termsRequested', {
       entities: [entityId],
       lang,

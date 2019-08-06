@@ -6,6 +6,7 @@
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Action } from 'vuex-class'
 import { EntityId } from '@/store/entity/claims/types'
+import { i18n } from '@/i18n'
 
 @Component
 export default class EntityLink extends Vue {
@@ -23,10 +24,14 @@ export default class EntityLink extends Vue {
     return `${this.label} (${this.entityId})`
   }
 
-  private updateLabel() {
-    this.getLabel(this.entityId).then((label: string) => {
-        this.label = label
-      })
+  private get language() {
+    return i18n.locale
+  }
+
+  private async updateLabel() {
+    this.label = await this.getLabel({
+      entityId: this.entityId,
+      lang: this.language})
   }
 
   private created() {
@@ -34,6 +39,7 @@ export default class EntityLink extends Vue {
   }
 
   @Watch('entityId')
+  @Watch('language')
   private onEntityIdChanged() {
     this.updateLabel()
   }
