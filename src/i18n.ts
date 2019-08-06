@@ -28,6 +28,7 @@ export const i18n = new VueI18n({
   fallbackLocale: 'en',
   messages: {en: enMessages},
   dateTimeFormats,
+  warnHtmlInMessage: 'warn',
 })
 
 export function updateCurrentTranslation(lang: string) {
