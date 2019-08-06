@@ -5,8 +5,8 @@
   :serializer="s => s.label"
   @hit="onSelectedEntity($event)"
   size="sm"
-  placeholder="Search item"
-  aria-label="Search">
+  :placeholder="$t('pageTitle.searchItem')"
+  :aria-label="$t('pageTitle.search')">
   <template slot="append">
     <b-button
       size="sm"

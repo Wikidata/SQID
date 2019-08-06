@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
-import enMessages from '@/locales/en'
+import enMessages from '@/locales/en.json'
 
 Vue.use(VueI18n)
 

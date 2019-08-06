@@ -1,7 +1,7 @@
 <template>
   <b-navbar-nav>
-    <template v-for="link of navlinks">
-      <b-nav-item :to="link.target" active-class="active" :exact="link.exact">{{ link.label }}</b-nav-item>
+    <template v-for="(link, lidx) of navlinks">
+      <b-nav-item :to="link.target" active-class="active" :exact="link.exact" :key="lidx">{{ $t(link.message) }}</b-nav-item>
     </template>
   </b-navbar-nav>
 </template>
@@ -12,7 +12,7 @@ import { RawLocation} from 'vue-router'
 
 export interface Navlink {
   target: RawLocation,
-  label: string,
+  message: string,
   exact?: boolean,
 }
 

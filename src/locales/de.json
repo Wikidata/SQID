@@ -1,0 +1,30 @@
+{
+  "pageTitle": {
+    "start": "Start",
+    "about": "Über SQID",
+    "classes": "Klassen",
+    "properties": "Eigenschaften",
+    "query": "Suche",
+    "rules": "Regeln",
+    "lexemes": "Lexeme",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "loggedInAs": "Angemeldet als {}",
+    "searchItem": "Suche nach Item",
+    "search": "Suchen"
+  },
+  "footer": {
+    "statDate": "Statistiken Stand {date}",
+    "statLink": "Details",
+    "poweredBy": "Powered by",
+    "sourceCode": "Quelltext verfügbar auf {0}"
+  },
+  "entity": {
+    "hierarchyStatements": "Klassenhierarchie",
+    "humanRelationshipStatements": "Beziehungen",
+    "statements": "Aussagen",
+    "mediaStatements": "Medien",
+    "wikiStatements": "Wikimedia-Kategorien und Portale",
+    "identifierStatements": "Bezeichner"
+  }
+}

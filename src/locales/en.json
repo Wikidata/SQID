@@ -1,0 +1,30 @@
+{
+  "pageTitle": {
+    "start": "Start",
+    "about": "About",
+    "classes": "Classes",
+    "properties": "Properties",
+    "query": "Query",
+    "rules": "Rules",
+    "lexemes": "Lexemes",
+    "login": "Login",
+    "logout": "Logout",
+    "loggedInAs": "Logged in as {0}",
+    "searchItem": "Search item",
+    "search": "Search"
+  },
+  "footer": {
+    "statDate": "Statistics based on data dump {date}",
+    "statLink": "details",
+    "poweredBy": "Powered by",
+    "sourceCode": "Source code available on {0}"
+  },
+  "entity": {
+    "hierarchyStatements": "Class hierarchy",
+    "humanRelationshipStatements": "Human relationships",
+    "statements": "Statements",
+    "mediaStatements": "Media",
+    "wikiStatements": "Wikimedia Categories and Portals",
+    "identifierStatements": "Identifiers"
+  }
+}

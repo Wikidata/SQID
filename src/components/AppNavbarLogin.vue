@@ -1,9 +1,11 @@
 <template>
   <b-nav-form>
-    <b-button v-if="!isLoggedIn" @click="initiate" size="sm" class="my-2 my-sm-0">Login</b-button>
+    <b-button v-if="!isLoggedIn" @click="initiate" size="sm" class="my-2 my-sm-0">{{ $t('pageTitle.login') }}</b-button>
     <div v-if="isLoggedIn">
-      <span class="ml-sm-2">Logged in as <a :href="'https://wikidata.org/wiki/User:' + username">{{ username }}</a></span>
-      <b-button @click="logout" id="logoutButton" size="sm" class="my-2 ml-sm-2 my-sm-0">Logout</b-button>
+      <i18n class="ml-sm-2" tag="span" path="pageTitle.loggedInAs">
+        <a :href="'https://wikidata.org/wiki/User:' + username">{{ username }}</a>
+      </i18n>
+      <b-button @click="logout" id="logoutButton" size="sm" class="my-2 ml-sm-2 my-sm-0">{{ $t('pageTitle.logout') }}</b-button>
     </div>
   </b-nav-form>
 </template>

@@ -29,12 +29,12 @@ import AppNavbarLogin from './AppNavbarLogin.vue'
     }})
 export default class AppNavbar extends Vue {
     private navlinks: Navlink[] = [
-        { target: {name: 'home'}, label: 'Start', exact: true },
-        { target: '/classes', label: 'Classes' },
-        { target: '/properties', label: 'Properties' },
-        { target: '/lexemes', label: 'Lexemes' },
-        { target: '/rules', label: 'Rules' },
-        { target: {name: 'about'}, label: 'About' },
+      { target: {name: 'home'}, message: 'pageTitle.start', exact: true },
+      { target: '/classes', message: 'pageTitle.classes' },
+      { target: '/properties', message: 'pageTitle.properties' },
+      { target: '/lexemes', message: 'pageTitle.lexemes' },
+      { target: '/rules', message: 'pageTitle.rules' },
+      { target: {name: 'about'}, message: 'pageTitle.about' },
     ]
 }
 </script>
