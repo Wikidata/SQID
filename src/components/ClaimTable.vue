@@ -1,13 +1,13 @@
 <template>
   <b-card :header="header">
     <table class="table table-striped table-condensed statements-table">
-      <tbody v-if="claims">
+      <template v-if="claims">
         <claim-group :entityId="entityId"
                      :propertyId="prop"
                      :claims="statements(prop)"
                      v-for="prop in claims.keys()"
                      :key="prop" />
-      </tbody>
+      </template>
     </table>
   </b-card>
 </template>
