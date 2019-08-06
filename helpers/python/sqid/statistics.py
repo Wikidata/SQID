@@ -12,7 +12,7 @@ SEPARATORS = (',', ':')
 TIMESTAMP_KEYS = {'classes': 'classUpdate',
                   'properties': 'propertyUpdate',
                   }
-ISO8601_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S"
+ISO8601_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
 logger = logging.getLogger(__name__)
 
 
