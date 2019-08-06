@@ -1,48 +1,47 @@
 <template>
   <sqid-bars>
     <template v-slot:mainbar>
-	    <h1>A fresh look at Wikidata</h1>
-      <p>SQID is a fast way to browse and
-        query <a href="https://www.wikidata.org/">Wikidata</a>, the
-        free knowledge base of Wikipedia. SQID is inspired by Magnus
-        Manske's <a href="https://tools.wmflabs.org/reasonator/?">Reasonator</a>,
-        but it has a different focus. In particular, information about
-        Wikidata classes and properties is prominently shown,
-        including derived statistics and query results that are not
-        part of Wikidata.  SQID wants to help editors to improve
-        Wikidata.</p>
-
-      <p>Example pages:
+	    <h1 v-t="'home.home'" />
+      <i18n tag="p" path="home.description">
+        <a place="wikidata" href="https://www.wikidata.org">{{ $t('home.wikidata') }}</a>
+        <a place="reasonator" href="https://tools.wmflabs.org/reasonator/?">{{ $t('home.reasonator') }}</a>
+      </i18n>
+      <p>{{ $t('home.examples') }}
         <ul>
-		      <li><router-link :to="{ name: 'entity', params: { id: 'Q1339' }}">Johann Sebastian Bach</router-link>: classical
-		        example of a data-rich item page</li>
-		      <li><router-link :to="{ name: 'entity', params: { id: 'Q8072' }}">volcano</router-link>: Wikidata item that is used as a class</li>
-		      <li><router-link :to="{ name: 'entity', params: { id: 'Q318' }}">galaxy</router-link>: Wikidata class item that is part of the rather well designed classification of astronomical objects</li>
-		      <li><router-link :to="{ name: 'entity', params: { id: 'P21' }}">sex or gender</router-link>: a frequently used Wikidata property</li>
-		      <li><router-link :to="{ name: 'entity', params: { id: 'P1303' }}">instrument</router-link>: another interesting Wikidata property</li>
-		      <li><router-link :to="{ name: 'entity', params: { id: 'Q18616576' }}">Wikidata property</router-link>: the class of all Wikidata properties; shows how properties are organised in subclasses</li>
+		      <i18n tag="li" path="home.examplesBach"><entity-link place="bach" entityId="Q1339" /></i18n>
+          <i18n tag="li" path="home.examplesVolcano"><entity-link place="volcano" entityId="Q8072" /></i18n>
+          <i18n tag="li" path="home.examplesGalaxy"><entity-link place="galaxy" entityId="Q318" /></i18n>
+          <i18n tag="li" path="home.examplesSexOrGender"><entity-link place="sexOrGender" entityId="P21" /></i18n>
+          <i18n tag="li" path="home.examplesInstrument"><entity-link place="instrument" entityId="P1303" /></i18n>
+          <i18n tag="li" path="home.examplesProperty"><entity-link place="property" entityId="Q18616576" /></i18n>
         </ul>
       </p>
 
-      <p>
-        <b>Properties</b> are special Wikidata entities that are used
-        for describing relationships between entities, and for assigning
-        many types of data values to entities. You can find all properties
-        in SQID's <b><a href="#/browse?type=properties">property
-            browser</a></b>.
-      </p>
-      <p>
-      <b>Classes</b> are Wikidata items that are used as the value in
-      an <a href="#/view?id=P31">instance-of</a> statement, or that are
-      subject or value in a <a href="#/view?id=P279">subclass-of</a>
-      statement. You can find all classes in
-      SQID's <b><a href="#/browse?type=classes">classes browser</a></b>.
-      </p>
-      <p>Most data shown by SQID is <b>live data</b> taken from the <a href="https://www.wikidata.org/w/api.php">Wikidata API</a> or the <a href="https://query.wikidata.org/">Wikidata SPARQL query service</a>.
-        Complex statistics that cannot currently be computed live are pre-computed from the weekly data dumps using
-        <a href="https://github.com/Wikidata/Wikidata-Toolkit">Wikidata Toolkit</a>.
-        Some complex statistics can be fetched from SPARQL, but take too long to compute in the browser. These are
-        updated every hour. See the <b><router-link :to="{ name: 'status' }">status page</router-link></b> for recency information and statistics on the current data.</p>
+      <i18n tag="p" path="home.propertiesDescription">
+        <b place="properties" v-t="'home.properties'" />
+        <router-link place="propertyBrowser" :to="{name: 'properties'}">
+          <b v-t="'home.propertyBrowser'" />
+        </router-link>
+      </i18n>
+
+      <i18n tag="p" path="home.classesDescription">
+        <b place="classes" v-t="'home.classes'" />
+        <entity-link place="instanceOf" entityId="P31" />
+        <entity-link place="subclassOf" entityId="P279" />
+        <router-link place="classBrowser" :to="{name: 'classes'}">
+          <b v-t="'home.classBrowser'" />
+        </router-link>
+      </i18n>
+
+      <i18n tag="p" path="home.data">
+        <b place="liveData" v-t="'home.liveData'" />
+        <a place="wikidataAPI" href="https://www.wikidata.org/w/api.php">{{ $t('home.wikidataAPI') }}</a>
+        <a place="wdqs" href="https://query.wikidata.org/">{{ $t('home.wdqs') }}</a>
+        <a place="wdtk" href="https://github.com/Wikidata/Wikidata-Toolkit">{{ $t('home.wdtk') }}</a>
+        <router-link place="statusPage" :to="{name: 'status'}">
+          <b v-t="'home.statusPage'" />
+        </router-link>
+      </i18n>
     </template>
     <template v-slot:sidebar>
       <sqid-image :file="'Cephalop.jpg'" :width="260" />
@@ -51,13 +50,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import SqidImage from '@/components/SqidImage.vue'
+import { Component, Vue, Watch } from 'vue-property-decorator'
+import { Action } from 'vuex-class'
+import { i18n } from '@/i18n'
 
-@Component({
-  components: {
-    SqidImage,
-  },
-})
-export default class Home extends Vue {}
+@Component
+export default class Home extends Vue {
+  @Action private requestLabels: any
+
+  private created() {
+    this.requestLabels(['Q1339', 'Q8072', 'Q318', 'P21', 'P1303', 'Q18616576', 'P31', 'P279'])
+  }
+}
 </script>
