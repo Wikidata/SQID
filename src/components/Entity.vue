@@ -107,7 +107,7 @@ export default class Entity extends Vue {
         aliases: string[]
         description: string
         claims: ClaimsMap}) => {
-          this.label = data.label
+          this.label = data.label || this.entityId
           this.aliases = data.aliases
           this.description = data.description
           this.claims = data.claims
