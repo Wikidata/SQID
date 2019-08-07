@@ -187,6 +187,9 @@ export function parseEntityId(entityId: string): EntityReference {
     case 'Q':
       kind = 'item'
       break
+    case 'L':
+      kind = 'lexeme'
+      break
 
     default:
       throw new RangeError(`Unknown prefix ${prefix} in entityId`)

@@ -95,7 +95,7 @@ export interface Claim {
 }
 
 export type SnakType = 'value'
-export type WBDatatype = 'wikibase-item' | 'wikibase-property'
+export type WBDatatype = 'wikibase-item' | 'wikibase-property' | 'wikibase-lexeme' | 'wikibase-form' | 'wikibase-sense'
 
 export interface Snak {
   snaktype: SnakType
