@@ -18,26 +18,31 @@
                        :entityId="entityId"
                        :claims="group('h')"
                        :reverseClaims="reverseGroup('h')"
+                       id="hierarchy"
                        v-if="showGroup('h')" />
           <claim-table :header="$t('entity.humanRelationshipStatements')"
                        :entityId="entityId"
                        :claims="group('f')"
                        :reverseClaims="reverseGroup('f')"
+                       id="family"
                        v-if="showGroup('f')" />
           <claim-table :header="$t('entity.statements')"
                        :entityId="entityId"
                        :claims="group('o')"
                        :reverseClaims="reverseGroup('o')"
+                       id="statements"
                        v-if="showGroup('o')" />
           <claim-table :header="$t('entity.mediaStatements')"
                        :entityId="entityId"
                        :claims="group('m')"
                        :reverseClaims="reverseGroup('m')"
+                       id="media"
                        v-if="showGroup('m')" />
           <claim-table :header="$t('entity.wikiStatements')"
                        :entityId="entityId"
                        :claims="group('w')"
                        :reverseClaims="reverseGroup('w')"
+                       id="wiki"
                        v-if="showGroup('w')" />
         </div>
       </b-col>
@@ -47,6 +52,7 @@
           <claim-table :header="$t('entity.identifierStatements')"
                        :entityId="entityId"
                        :claims="group('i')"
+                       id="identifiers"
                        v-if="showGroup('i')" />
         </div>
       </b-col>

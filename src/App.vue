@@ -34,12 +34,14 @@ import Snak from '@/components/Snak.vue'
 import DataValue from '@/components/DataValue.vue'
 import SqidImage from '@/components/SqidImage.vue'
 import SqidBars from '@/components/SqidBars.vue'
+import SqidCollapseButton from '@/components/SqidCollapseButton.vue'
 
 Vue.component('entity-link', EntityLink)
 Vue.component('snak', Snak)
 Vue.component('data-value', DataValue)
 Vue.component('sqid-image', SqidImage)
 Vue.component('sqid-bars', SqidBars)
+Vue.component('sqid-collapse-button', SqidCollapseButton)
 
 @Component({
   components: {

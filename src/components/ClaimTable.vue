@@ -1,18 +1,12 @@
 <template>
-  <b-card :header="header" no-body>
-    <b-card-body v-if="!reverseClaims || !reverseClaims.size">
-      <table class="table table-striped table-condensed statements-table">
-        <template v-if="claims">
-          <claim-group :entityId="entityId"
-                       :propertyId="prop"
-                       :claims="statements(prop)"
-                       v-for="prop in claims.keys()"
-                       :key="prop" />
-        </template>
-      </table>
-    </b-card-body>
-    <b-tabs card v-if="reverseClaims && reverseClaims.size">
-      <b-tab :title="$t('entity.ownStatements')">
+  <b-card header-tag="header" no-body>
+    <template v-slot:header>
+      <sqid-collapse-button :id="id">
+        {{ header }}
+      </sqid-collapse-button>
+    </template>
+    <b-collapse :id="collapseId" visible>
+      <b-card-body v-if="!reverseClaims || !reverseClaims.size">
         <table class="table table-striped table-condensed statements-table">
           <template v-if="claims">
             <claim-group :entityId="entityId"
@@ -22,20 +16,33 @@
                          :key="prop" />
           </template>
         </table>
-      </b-tab>
-      <b-tab :title="$t('entity.reverseStatements')">
-        <table class="table table-striped table-condensed statements-table">
-          <template v-if="reverseClaims">
-            <claim-group :entityId="entityId"
-                         :propertyId="prop"
-                         :claims="reverseStatements(prop)"
-                         v-for="prop in reverseClaims.keys()"
-                         :key="prop"
-                         reverse />
-          </template>
-        </table>
-      </b-tab>
-    </b-tabs>
+      </b-card-body>
+      <b-tabs card v-if="reverseClaims && reverseClaims.size">
+        <b-tab :title="$t('entity.ownStatements')">
+          <table class="table table-striped table-condensed statements-table">
+            <template v-if="claims">
+              <claim-group :entityId="entityId"
+                           :propertyId="prop"
+                           :claims="statements(prop)"
+                           v-for="prop in claims.keys()"
+                           :key="prop" />
+            </template>
+          </table>
+        </b-tab>
+        <b-tab :title="$t('entity.reverseStatements')">
+          <table class="table table-striped table-condensed statements-table">
+            <template v-if="reverseClaims">
+              <claim-group :entityId="entityId"
+                           :propertyId="prop"
+                           :claims="reverseStatements(prop)"
+                           v-for="prop in reverseClaims.keys()"
+                           :key="prop"
+                           reverse />
+            </template>
+          </table>
+        </b-tab>
+      </b-tabs>
+    </b-collapse>
   </b-card>
 </template>
 
