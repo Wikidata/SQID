@@ -160,7 +160,8 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
   const aliases = parseAliases(entityId, entity.aliases!)
   const descriptions = parseTerms(entityId, entity.descriptions!)
   const claims = new Map<string, Map<string, Claim>>()
-  const sitelinks = new Map<string, EntitySiteLink>(Object.entries(entities[entityId].sitelinks!))
+  const links = entities[entityId].sitelinks || {}
+  const sitelinks = new Map<string, EntitySiteLink>(Object.entries(links))
   claims.set(entityId,
              new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
 
