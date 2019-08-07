@@ -17,23 +17,28 @@
           <claim-table :header="$t('entity.hierarchyStatements')"
                        :entityId="entityId"
                        :claims="group('h')"
-                       :reverseClaims="reverseGroup('h')" />
+                       :reverseClaims="reverseGroup('h')"
+                       v-if="showGroup('h')" />
           <claim-table :header="$t('entity.humanRelationshipStatements')"
                        :entityId="entityId"
                        :claims="group('f')"
-                       :reverseClaims="reverseGroup('f')" />
+                       :reverseClaims="reverseGroup('f')"
+                       v-if="showGroup('f')" />
           <claim-table :header="$t('entity.statements')"
                        :entityId="entityId"
                        :claims="group('o')"
-                       :reverseClaims="reverseGroup('o')" />
+                       :reverseClaims="reverseGroup('o')"
+                       v-if="showGroup('o')" />
           <claim-table :header="$t('entity.mediaStatements')"
                        :entityId="entityId"
                        :claims="group('m')"
-                       :reverseClaims="reverseGroup('m')" />
+                       :reverseClaims="reverseGroup('m')"
+                       v-if="showGroup('m')" />
           <claim-table :header="$t('entity.wikiStatements')"
                        :entityId="entityId"
                        :claims="group('w')"
-                       :reverseClaims="reverseGroup('w')"/>
+                       :reverseClaims="reverseGroup('w')"
+                       v-if="showGroup('w')" />
         </div>
       </b-col>
       <b-col class="sidebar" lg="3" md="12" sm="12">
@@ -41,7 +46,8 @@
         <div id="claims-ids" v-if="groupedClaims">
           <claim-table :header="$t('entity.identifierStatements')"
                        :entityId="entityId"
-                       :claims="group('i')" />
+                       :claims="group('i')"
+                       v-if="showGroup('i')" />
         </div>
       </b-col>
     </b-row>
@@ -142,20 +148,28 @@ export default class Entity extends Vue {
     this.updateEntityData()
   }
 
-  private group(kind: PropertyClassification) {
-    if (this.groupedClaims) {
-      return this.groupedClaims.get(kind)
+  private group(kind: PropertyClassification): ClaimsMap {
+    if (this.groupedClaims && this.groupedClaims.has(kind)) {
+      return this.groupedClaims.get(kind)!
     }
 
-    return []
+    return new Map<EntityId, Claim[]>()
   }
 
   private reverseGroup(kind: PropertyClassification) {
-    if (this.groupedReverseClaims) {
-      return this.groupedReverseClaims.get(kind)
+    if (this.groupedReverseClaims && this.groupedReverseClaims.has(kind)) {
+      return this.groupedReverseClaims.get(kind)!
     }
 
-    return []
+    return new Map<EntityId, Claim[]>()
+  }
+
+  private showGroup(kind: PropertyClassification) {
+    if (kind === 'i') {
+      return this.group(kind).size > 0
+    }
+
+    return (this.group(kind).size + this.reverseGroup(kind).size) > 0
   }
 }
 </script>

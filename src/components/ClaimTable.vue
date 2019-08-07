@@ -1,6 +1,6 @@
 <template>
   <b-card :header="header" no-body>
-    <b-card-body v-if="!reverseClaims">
+    <b-card-body v-if="!reverseClaims || !reverseClaims.size">
       <table class="table table-striped table-condensed statements-table">
         <template v-if="claims">
           <claim-group :entityId="entityId"
@@ -11,7 +11,7 @@
         </template>
       </table>
     </b-card-body>
-    <b-tabs card v-if="reverseClaims">
+    <b-tabs card v-if="reverseClaims && reverseClaims.size">
       <b-tab :title="$t('entity.ownStatements')">
         <table class="table table-striped table-condensed statements-table">
           <template v-if="claims">
