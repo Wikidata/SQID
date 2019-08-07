@@ -37,7 +37,7 @@
         </div>
       </b-col>
       <b-col class="sidebar" lg="3" md="12" sm="12">
-        <sqid-image :file="images[0]" width="260" v-if="images" />
+        <sqid-image :file="images[0]" width="260" v-if="images && images[0]" />
         <div id="claims-ids" v-if="groupedClaims">
           <claim-table :header="$t('entity.identifierStatements')"
                        :entityId="entityId"
