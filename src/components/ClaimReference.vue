@@ -16,6 +16,6 @@ import { Reference } from '@/api/types'
 
 @Component
 export default class ClaimReference extends Vue {
-  @Prop() private reference!: Reference
+  @Prop({ required: true }) private reference!: Reference
 }
 </script>

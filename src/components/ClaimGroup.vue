@@ -20,8 +20,8 @@ import Claim from './Claim.vue'
     claim: Claim,
   }})
 export default class ClaimGroup extends Vue {
-  @Prop() private entityId!: EntityId
-  @Prop() private propertyId!: EntityId
-  @Prop() private claims!: ClaimsMap
+  @Prop({ required: true }) private entityId!: EntityId
+  @Prop({ required: true }) private propertyId!: EntityId
+  @Prop({ required: true }) private claims!: ClaimsMap
 }
 </script>

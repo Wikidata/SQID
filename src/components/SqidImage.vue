@@ -18,8 +18,8 @@ import { getImageData, ImageInfo } from '@/api/commons'
 
 @Component
 export default class SqidImage extends Vue {
-  @Prop() private file!: string
-  @Prop() private width!: number
+  @Prop({ required: true }) private file!: string
+  @Prop({ required: true }) private width!: number
 
   private imageInfo: ImageInfo | null = null
 

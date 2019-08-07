@@ -12,6 +12,6 @@ import SnakValue from '@/components/SnakValue.vue'
     'snak-value': SnakValue,
   }})
 export default class Snak extends Vue {
-  @Prop() private snak!: SnakData
+  @Prop({ required: true }) private snak!: SnakData
 }
 </script>

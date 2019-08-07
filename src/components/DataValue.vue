@@ -15,7 +15,7 @@ import { Datavalue, TimeDataValue } from '@/api/types'
 
 @Component
 export default class DataValue extends Vue {
-  @Prop() private value!: Datavalue
+  @Prop({ required: true }) private value!: Datavalue
 
   private get datatype() {
     return this.value.type

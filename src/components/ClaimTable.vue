@@ -50,10 +50,15 @@ import ClaimGroup from './ClaimGroup.vue'
     'claim-group': ClaimGroup,
   }})
 export default class ClaimTable extends Vue {
-  @Prop() private entityId!: EntityId
-  @Prop() private claims!: ClaimsMap
-  @Prop() private reverseClaims: ClaimsMap | undefined
-  @Prop() private header!: string
+  @Prop({ required: true }) private entityId!: EntityId
+  @Prop({ required: true }) private claims!: ClaimsMap
+  @Prop({ default: undefined }) private reverseClaims: ClaimsMap | undefined
+  @Prop({ required: true }) private header!: string
+  @Prop({ required: true }) private id!: string
+
+  private get collapseId() {
+    return `collapse-${this.id}`
+  }
 
   private statements(propertyId: EntityId) {
     if (this.claims) {

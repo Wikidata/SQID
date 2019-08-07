@@ -18,7 +18,7 @@ export interface Navlink {
 
 @Component
 export class AppNavbarNavlinks extends Vue {
-  @Prop() private navlinks!: Navlink
+  @Prop({ default: [] }) private navlinks!: Navlink[]
 }
 export default AppNavbarNavlinks
 </script>

@@ -71,7 +71,7 @@ const propertyStatistics = namespace('statistics/properties')
     'claim-table': ClaimTable,
   }})
 export default class Entity extends Vue {
-  @Prop() private entityId!: string
+  @Prop({ required: true }) private entityId!: string
   @Action private getEntityData: any
   @Action private getReverseClaims: any
   @Action private requestLabels: any

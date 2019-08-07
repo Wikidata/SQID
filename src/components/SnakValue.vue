@@ -13,7 +13,7 @@ import { Snak as SnakData } from '@/api/types'
 
 @Component
 export default class SnakValue extends Vue {
-  @Prop() private snak!: SnakData
+  @Prop({ required: true }) private snak!: SnakData
 
   private get snaktype() {
     return this.snak.snaktype

@@ -17,9 +17,9 @@ import Reference from '@/components/ClaimReference.vue'
     reference: Reference,
   }})
 export default class Claim extends Vue {
-  @Prop() private entityId!: EntityId
-  @Prop() private propertyId!: EntityId
-  @Prop() private claim!: ClaimData
+  @Prop({ required: true }) private entityId!: EntityId
+  @Prop({ required: true }) private propertyId!: EntityId
+  @Prop({ required: true }) private claim!: ClaimData
 
   private get mainsnak() {
     return this.claim.mainsnak

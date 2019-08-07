@@ -10,7 +10,7 @@ import { i18n } from '@/i18n'
 
 @Component
 export default class EntityLink extends Vue {
-  @Prop() private entityId!: EntityId
+  @Prop({ required: true }) private entityId!: EntityId
   @Action private getLabel: any
   private label: string = this.entityId
 
