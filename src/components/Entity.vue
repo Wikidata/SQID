@@ -122,6 +122,9 @@ export default class Entity extends Vue {
     const reverseClaims = this.getReverseClaims(this.entityId)
       .then((claims: ClaimsMap) => {
         this.reverseClaims = claims
+
+        const related = relatedEntityIds(claims)
+        this.requestLabels({entityIds: related})
       })
 
     Promise.all([forwardClaims, reverseClaims])
