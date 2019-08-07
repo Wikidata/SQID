@@ -25,7 +25,9 @@
     "statements": "Aussagen",
     "mediaStatements": "Medien",
     "wikiStatements": "Wikimedia-Kategorien und Portale",
-    "identifierStatements": "Bezeichner"
+    "identifierStatements": "Bezeichner",
+    "ownStatements": "Eigene Aussagen",
+    "reverseStatements": "Von verwandten Einträgen"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

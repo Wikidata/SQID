@@ -25,7 +25,9 @@
     "statements": "Statements",
     "mediaStatements": "Media",
     "wikiStatements": "Wikimedia Categories and Portals",
-    "identifierStatements": "Identifiers"
+    "identifierStatements": "Identifiers",
+    "ownStatements": "Own statements",
+    "reverseStatements": "From related entities"
   },
   "home": {
     "home": "A fresh look at Wikidata",

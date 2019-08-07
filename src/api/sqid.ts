@@ -1,5 +1,6 @@
 import { http } from '@/http'
-import { EntityId, SqidStatistics } from './types'
+import { Claim, EntityId, SqidStatistics } from './types'
+import { ClaimsMap } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
 
 const MAX_STATISTICS_AGE = 60 * 60 * 1000
@@ -44,4 +45,26 @@ export async function getPropertyClassification(lastRefresh: number): Promise<Ma
   }
 
   return classification
+}
+
+type PropertyClassifier = (entityId: EntityId) => PropertyClassification
+
+export function groupClaims(claims: ClaimsMap,
+                            propertyGroups: PropertyClassifier):
+Map<PropertyClassification, ClaimsMap> {
+  const groupedClaims = new Map<PropertyClassification, ClaimsMap>()
+
+  for (const [prop, claim] of claims.entries()) {
+    const kind = propertyGroups(prop)
+    let group = groupedClaims.get(kind)
+
+    if (group === undefined) {
+      group = new Map<EntityId, Claim[]>()
+    }
+
+    group.set(prop, claim)
+    groupedClaims.set(kind, group)
+  }
+
+  return groupedClaims
 }

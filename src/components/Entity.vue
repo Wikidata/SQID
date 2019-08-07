@@ -16,19 +16,24 @@
         <div id="claims" v-if="groupedClaims">
           <claim-table :header="$t('entity.hierarchyStatements')"
                        :entityId="entityId"
-                       :claims="group('h')" />
+                       :claims="group('h')"
+                       :reverseClaims="reverseGroup('h')" />
           <claim-table :header="$t('entity.humanRelationshipStatements')"
                        :entityId="entityId"
-                       :claims="group('f')" />
+                       :claims="group('f')"
+                       :reverseClaims="reverseGroup('f')" />
           <claim-table :header="$t('entity.statements')"
                        :entityId="entityId"
-                       :claims="group('o')" />
+                       :claims="group('o')"
+                       :reverseClaims="reverseGroup('o')" />
           <claim-table :header="$t('entity.mediaStatements')"
                        :entityId="entityId"
-                       :claims="group('m')" />
+                       :claims="group('m')"
+                       :reverseClaims="reverseGroup('m')" />
           <claim-table :header="$t('entity.wikiStatements')"
                        :entityId="entityId"
-                       :claims="group('w')" />
+                       :claims="group('w')"
+                       :reverseClaims="reverseGroup('w')"/>
         </div>
       </b-col>
       <b-col class="sidebar" lg="3" md="12" sm="12">
@@ -51,6 +56,7 @@ import { PropertyClassification } from '@/store/statistics/properties/types'
 import ClaimTable from './ClaimTable.vue'
 import { Claim } from '@/api/types'
 import { relatedEntityIds } from '@/api/wikidata'
+import { groupClaims } from '@/api/sqid'
 
 const propertyStatistics = namespace('statistics/properties')
 
@@ -61,6 +67,7 @@ const propertyStatistics = namespace('statistics/properties')
 export default class Entity extends Vue {
   @Prop() private entityId!: string
   @Action private getEntityData: any
+  @Action private getReverseClaims: any
   @Action private requestLabels: any
   @propertyStatistics.Action private refreshClassification: any
   @propertyStatistics.Getter private propertyGroups!: (entityId: EntityId) => PropertyClassification
@@ -71,8 +78,10 @@ export default class Entity extends Vue {
   private aliases: string[] = []
   private description: string | null = null
   private claims: ClaimsMap | null = null
+  private reverseClaims: ClaimsMap | null = null
   private groupedClaims: Map<PropertyClassification, ClaimsMap> | null = null
-  private images: string | null = null
+  private groupedReverseClaims: Map<PropertyClassification, ClaimsMap> | null = null
+  private images: string[] | null = null
   private banner: string | null = null
   private homepage: string | null = null
 
@@ -82,44 +91,45 @@ export default class Entity extends Vue {
   }
 
   private updateEntityData() {
-    this.getEntityData(this.entityId).then((data: {
-      label: string
-      aliases: string[]
-      description: string
-      claims: ClaimsMap}) => {
-        this.label = data.label
-        this.aliases = data.aliases
-        this.description = data.description
-        this.claims = data.claims
+    this.images = null
+    this.banner = null
+    this.homepage = null
 
-        const related = relatedEntityIds(this.claims)
-        this.requestLabels({entityIds: related})
+    const forwardClaims = this.getEntityData(this.entityId)
+      .then((data: {
+        label: string
+        aliases: string[]
+        description: string
+        claims: ClaimsMap}) => {
+          this.label = data.label
+          this.aliases = data.aliases
+          this.description = data.description
+          this.claims = data.claims
 
-        this.images = this.getImages(this.entityId)
-        this.banner = this.getBanner(this.entityId)
-        this.homepage = this.getHomepage(this.entityId)
+          const related = relatedEntityIds(this.claims)
+          this.requestLabels({entityIds: related})
+
+          this.images = this.getImages(this.entityId)
+          this.banner = this.getBanner(this.entityId)
+          this.homepage = this.getHomepage(this.entityId)
+        })
+    const reverseClaims = this.getReverseClaims(this.entityId)
+      .then((claims: ClaimsMap) => {
+        this.reverseClaims = claims
       })
+
+    Promise.all([forwardClaims, reverseClaims])
       .then(this.refreshClassification)
       .then(this.regroupClaims)
   }
 
   private regroupClaims() {
     if (this.claims) {
-      const groupedClaims = new Map<PropertyClassification, ClaimsMap>()
+      this.groupedClaims = groupClaims(this.claims, this.propertyGroups)
+    }
 
-      for (const [prop, claim] of this.claims.entries()) {
-        const kind = this.propertyGroups(prop)
-        let group = groupedClaims.get(kind)
-
-        if (group === undefined) {
-          group = new Map<EntityId, Claim[]>()
-        }
-
-        group.set(prop, claim)
-        groupedClaims.set(kind, group)
-      }
-
-      this.groupedClaims = groupedClaims
+    if (this.reverseClaims) {
+      this.groupedReverseClaims = groupClaims(this.reverseClaims, this.propertyGroups)
     }
   }
 
@@ -135,6 +145,14 @@ export default class Entity extends Vue {
   private group(kind: PropertyClassification) {
     if (this.groupedClaims) {
       return this.groupedClaims.get(kind)
+    }
+
+    return []
+  }
+
+  private reverseGroup(kind: PropertyClassification) {
+    if (this.groupedReverseClaims) {
+      return this.groupedReverseClaims.get(kind)
     }
 
     return []
