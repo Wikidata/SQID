@@ -20,6 +20,9 @@ export default class SqidCollapseButton extends Vue {
 </script>
 
 <style lang="less" scoped>
+div {
+  cursor: pointer;
+}
 div > svg {
   float: right;
   color: grey;
