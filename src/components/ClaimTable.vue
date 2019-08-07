@@ -6,7 +6,7 @@
       </sqid-collapse-button>
     </template>
     <b-collapse :id="collapseId" visible>
-      <b-card-body v-if="!reverseClaims || !reverseClaims.size">
+      <b-card-body class="overflow" v-if="!reverseClaims || !reverseClaims.size">
         <table class="table table-striped table-condensed statements-table">
           <template v-if="claims">
             <claim-group :entityId="entityId"
@@ -18,7 +18,7 @@
         </table>
       </b-card-body>
       <b-tabs card v-if="reverseClaims && reverseClaims.size">
-        <b-tab :title="$t('entity.ownStatements')">
+        <b-tab class="overflow" :title="$t('entity.ownStatements')">
           <table class="table table-striped table-condensed statements-table">
             <template v-if="claims">
               <claim-group :entityId="entityId"
@@ -29,7 +29,7 @@
             </template>
           </table>
         </b-tab>
-        <b-tab :title="$t('entity.reverseStatements')">
+        <b-tab class="overflow" :title="$t('entity.reverseStatements')">
           <table class="table table-striped table-condensed statements-table">
             <template v-if="reverseClaims">
               <claim-group :entityId="entityId"
@@ -84,3 +84,13 @@ export default class ClaimTable extends Vue {
   }
 }
 </script>
+
+<style lang="less" scoped>
+.card {
+  margin: 1.5em 0;
+}
+
+.overflow {
+  overflow: auto;
+}
+</style>
