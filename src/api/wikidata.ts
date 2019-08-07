@@ -2,15 +2,14 @@ import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
          Claim, WBApiResult, EntitySiteLink } from './types'
 import { apiRequest } from './index'
-import { wikidataEndpoint } from './endpoints'
+import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
 import { i18n } from '@/i18n'
 import { ClaimsMap } from '@/store/entity/claims/types'
+import { TaskQueue } from 'cwait'
 
 export { EntityId, EntityKind } from './types'
 
 type Props = 'info' | 'sitelinks' | 'sitelinks/urls' | 'aliases' | 'labels' | 'descriptions' | 'claims' | 'datatype'
-
-const MAX_ENTITIES_PER_REQUEST = 50
 
 export async function getEntities(entityIds: string[],
                                   props: Props[],
@@ -19,8 +18,8 @@ export async function getEntities(entityIds: string[],
   const chunks = []
   const ids = entityIds.length
 
-  for (let start = 0; start <= ids; start += MAX_ENTITIES_PER_REQUEST) {
-    const end = start + MAX_ENTITIES_PER_REQUEST
+  for (let start = 0; start <= ids; start += MAX_ENTITIES_PER_API_REQUEST) {
+    const end = start + MAX_ENTITIES_PER_API_REQUEST
     const chunk = entityIds.slice(start, end)
 
     if (chunk.length) {
@@ -28,8 +27,11 @@ export async function getEntities(entityIds: string[],
     }
   }
 
+  const queue = new TaskQueue(Promise, MAX_SIMULTANEOUS_API_REQUESTS)
+  const getChunk = queue.wrap(getEntityChunk)
+
   const results = await Promise.all(chunks.map((chunk) => {
-    return getEntityChunk(chunk, props, lang, fallback)
+    return getChunk(chunk, props, lang, fallback)
   }))
   const entities: ResultList<EntityResult> = {}
 
