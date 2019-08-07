@@ -21,6 +21,30 @@ export interface QueryResult {
   pages: ResultList<PageResult>
 }
 
+export interface SparqlList<T> {
+  [key: number]: T
+}
+
+export interface SparqlValue {
+  type: 'uri',
+  value: string,
+}
+
+export interface SparqlBinding {
+  [key: string]: SparqlValue,
+}
+
+export interface SparqlResults {
+  bindings: SparqlBinding[],
+}
+
+export type SparqlHead = SparqlList<string>
+
+export interface SparqlResult {
+  head: SparqlHead,
+  results: SparqlResults,
+}
+
 export type PageResult = ImagePageResult
 
 export interface ImagePageResult {
@@ -71,7 +95,7 @@ export interface Claim {
 }
 
 export type SnakType = 'value'
-export type WBDatatype = 'wikibase-item'
+export type WBDatatype = 'wikibase-item' | 'wikibase-property'
 
 export interface Snak {
   snaktype: SnakType
@@ -145,6 +169,7 @@ export interface SearchResult {
 
 export type EntityKind = 'item' | 'property' | 'lexeme' | 'form' | 'sense'
 export type EntityId = string
+export type StatementId = string
 export interface EntityReference {
   id: number
   kind: EntityKind
@@ -184,3 +209,10 @@ export interface SqidSiteLink {
 }
 
 export type SiteLinkMap = Map<SiteName, SqidSiteLink>
+
+export interface SqidStatement {
+  item: EntityId,
+  statement: StatementId,
+  property: EntityId,
+  rank: Rank,
+}
