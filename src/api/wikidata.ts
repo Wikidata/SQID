@@ -286,3 +286,12 @@ export function relatedEntityIds(claims: ClaimsMap) {
 
   return entityIds
 }
+
+export function wikidataUrl(entityId: EntityId, lang?: string) {
+  let forceLang = ''
+  if (lang !== undefined) {
+    forceLang = `?uselang=${lang}`
+  }
+
+  return `https://www.wikidata.org/entity/${entityId}${forceLang}`
+}

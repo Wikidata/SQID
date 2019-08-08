@@ -56,7 +56,7 @@
       </b-card>
       <b-card :title="$t('status.freshness')"
               :sub-title="$t('status.refreshCycle')">
-        <table class="table table-striped table-condensed number-table">
+        <table class="table table-striped number-table">
           <tbody>
             <tr>
               <th v-t="'status.dumpDate'" />

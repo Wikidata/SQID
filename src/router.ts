@@ -48,6 +48,7 @@ router.beforeEach(async (to, _from, next) => {
   if (query && 'lang' in query) {
     const lang = query.lang.toString()
 
+    store.commit('setTranslationFromUri')
     store.dispatch('loadTranslation', lang)
   }
 

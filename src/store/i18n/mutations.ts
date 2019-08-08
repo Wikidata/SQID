@@ -8,4 +8,7 @@ export const mutations: MutationTree<I18nState> = {
   changeTranslation(state, lang: string) {
     state.currentTranslation = lang
   },
+  setTranslationFromUri(state) {
+     state.translationFromUri = true
+  },
 }

@@ -31,7 +31,12 @@
     "noReferences": "no references given",
     "extraStatements": "no statements | one statement | {count} statements",
     "deprecatedStatement": "This is a deprecated statement",
-    "preferredStatement": "This a preferred statement"
+    "preferredStatement": "This a preferred statement",
+    "links": "Links",
+    "wikidataLink": "Wikidata page",
+    "homepageLink": "Official website",
+    "wikipediaLink": "Wikipedia article",
+    "reasonatorLink": "Reasonator"
   },
   "home": {
     "home": "A fresh look at Wikidata",

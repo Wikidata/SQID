@@ -31,7 +31,12 @@
     "noReferences": "keine Fundstelle angegeben",
     "extraStatements": "keine Aussagen | eine Aussage | {count} Aussagen",
     "deprecatedStatement": "Dies ist eine überholte Aussage",
-    "preferredStatement": "Dies ist eine bevorzugte Aussage"
+    "preferredStatement": "Dies ist eine bevorzugte Aussage",
+    "links": "Links",
+    "wikidataLink": "Wikidata",
+    "homepageLink": "Offizielle Website",
+    "wikipediaLink": "Wikipedia",
+    "reasonatorLink": "Reasonator"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

@@ -1,6 +1,7 @@
 import { GetterTree } from 'vuex'
 import { ClaimsState, EntityId } from './types'
 import { RootState } from '@/store/types'
+import { wikidataUrl } from '@/api/wikidata'
 import { Claim } from '@/api/types'
 
 function getStatementValue(claim: Claim) {
@@ -88,5 +89,24 @@ export const getters: GetterTree<ClaimsState, RootState> = {
   getHomepage: (_state, getters) => // tslint:disable-line:no-shadowed-variable
     (entityId: EntityId) => {
       return getters.getBestValueForProperty(entityId, 'P856')
+    },
+  getWikidataUrl: (_state, _getters, _rootState, rootGetters) =>
+    (entityId: EntityId) => {
+      if (rootGetters.translationSetFromUri) {
+        return wikidataUrl(entityId, rootGetters.currentTranslation)
+      }
+
+      return wikidataUrl(entityId)
+    },
+  getWikipediaUrl: (_state, _getters) => // tslint:disable-line:no-shadowed-variable
+    (entityId: EntityId) => {
+      return null               // todo(mx): implement this
+    },
+  getReasonatorUrl: (_state, _getters, _rootState, rootGetters) =>
+    (entityId: EntityId) => {
+      const forceLang = (rootGetters.translationSetFromUri
+                         ? `&lang=${rootGetters.currentTranslation}`
+                         : '')
+      return `https://tools.wmflabs.org/?q=${entityId}${forceLang}`
     },
 }

@@ -97,6 +97,5 @@ table {
 
 .narrow {
   font-size: 90%;
-  table-layout: fixed;
 }
 </style>

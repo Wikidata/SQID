@@ -6,7 +6,7 @@
           <sqid-image :file="banner" width="850" />
         </div>
         <h1><span>{{ label }}</span>
-          &nbsp;<small>(<a :href="wikidataUrl">{{ entityId }}</a>)</small></h1>
+          &nbsp;<small>(<a :href="wikidata">{{ entityId }}</a>)</small></h1>
         <div id="aliases">
           <ul class="list-inline">
             <li class="list-inline-item" v-for="alias in aliases" :key="alias.value">{{ alias }}</li>
@@ -48,6 +48,17 @@
       </b-col>
       <b-col class="sidebar" lg="3" md="12" sm="12">
         <sqid-image :file="images[0]" width="260" v-if="images && images[0]" />
+        <sqid-collapsible-card :header="$t('entity.links')" :id="links" narrow>
+          <b-card-body>
+            <table class="table table-striped table-sm narrow">
+              <tbody>
+                <tr v-for="(link, lidx) in links" :key="lidx">
+                  <th><a :href="link.url">{{ link.label }}</a></th>
+                </tr>
+              </tbody>
+            </table>
+          </b-card-body>
+        </sqid-collapsible-card>
         <div id="claims-ids" v-if="groupedClaims">
           <claim-table :header="$t('entity.identifierStatements')"
                        :entityId="entityId"
@@ -70,6 +81,7 @@ import ClaimTable from './ClaimTable.vue'
 import { Claim } from '@/api/types'
 import { relatedEntityIds } from '@/api/wikidata'
 import { groupClaims } from '@/api/sqid'
+import { i18n } from '@/i18n'
 
 const propertyStatistics = namespace('statistics/properties')
 
@@ -87,6 +99,10 @@ export default class Entity extends Vue {
   @Getter private getImages: any
   @Getter private getBanner: any
   @Getter private getHomepage: any
+  @Getter private getWikidataUrl: any
+  @Getter private getWikipediaUrl: any
+  @Getter private getReasonatorUrl: any
+  private linkUrls: Array<{ url: string, label: any }> = []
   private label = this.entityId
   private aliases: string[] = []
   private description: string | null = null
@@ -96,17 +112,10 @@ export default class Entity extends Vue {
   private groupedReverseClaims: Map<PropertyClassification, ClaimsMap> | null = null
   private images: string[] | null = null
   private banner: string | null = null
-  private homepage: string | null = null
-
-  // todo(mx): retrieve canonical URI from entity data
-  private get wikidataUrl() {
-    return `https://www.wikidata.org/entity/${this.entityId}`
-  }
 
   private updateEntityData() {
     this.images = null
     this.banner = null
-    this.homepage = null
 
     const forwardClaims = this.getEntityData(this.entityId)
       .then((data: {
@@ -124,7 +133,6 @@ export default class Entity extends Vue {
 
           this.images = this.getImages(this.entityId)
           this.banner = this.getBanner(this.entityId)
-          this.homepage = this.getHomepage(this.entityId)
         })
     const reverseClaims = this.getReverseClaims(this.entityId)
       .then((claims: ClaimsMap) => {
@@ -151,6 +159,7 @@ export default class Entity extends Vue {
 
   private created() {
     this.onEntityIdChanged()
+    this.updateLinks()
   }
 
   @Watch('entityId')
@@ -181,35 +190,81 @@ export default class Entity extends Vue {
 
     return (this.group(kind).size + this.reverseGroup(kind).size) > 0
   }
+
+  private get wikidata() {
+    return this.getWikidataUrl(this.entityId)
+  }
+
+  @Watch('claims')
+  private updateLinks() {
+    const urls: Array<{ url: string, label: any }> =
+      [{ url: this.wikidata,
+         label: this.$t('entity.wikidataLink'),
+       }]
+
+    const homepage = this.getHomepage(this.entityId)
+    if (homepage !== null) {
+      urls.push({ url: homepage,
+                  label: this.$t('entity.homepageLink'),
+                })
+    }
+
+    const wikipedia = this.getWikipediaUrl(this.entityId)
+
+    if (wikipedia !== null) {
+      urls.push({ url: wikipedia,
+                  label: this.$t('entity.wikipediaLink'),
+                })
+    }
+
+    urls.push({ url: this.getReasonatorUrl(this.entityId),
+                label: this.$t('entity.reasonatorLink'),
+              })
+
+    this.linkUrls = urls
+  }
+
+  private get links() {
+    return this.linkUrls
+  }
 }
 </script>
 
 <style lang="less">
-  #aliases {
-    margin-top: -10px;
-    margin-bottom: 0px;
-    color: #999999;
-  }
+#aliases {
+  margin-top: -10px;
+  margin-bottom: 0px;
+  color: #999999;
+}
 
-  #aliases ul {
-    margin-top: -10px;
-    margin-bottom: 0px;
-  }
+#aliases ul {
+  margin-top: -10px;
+  margin-bottom: 0px;
+}
 
-  #aliases ul li {
-    margin-top: -10px;
-    padding-right: 0px;
-  }
+#aliases ul li {
+  margin-top: -10px;
+  padding-right: 0px;
+}
 
-  #aliases ul li::after {
-    content: " |";
-  }
+#aliases ul li::after {
+  content: " |";
+}
 
-  #aliases ul li:last-child::after {
-    content: "";
-  }
+#aliases ul li:last-child::after {
+  content: "";
+}
 
-  #description {
-    font-size: 1.3em;
-  }
+#description {
+  font-size: 1.3em;
+}
+
+table {
+  table-layout: fixed;
+  margin-bottom: 0px !important;
+}
+
+.card-body {
+  padding: 0 0;
+}
 </style>
