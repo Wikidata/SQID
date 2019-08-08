@@ -1,12 +1,20 @@
 <template>
-  <b-card header-tag="header" no-body>
-    <template v-slot:header>
-      <sqid-collapse-button :id="id">
-        <b>{{ header }}</b>
-      </sqid-collapse-button>
-    </template>
-    <b-collapse :id="collapseId" visible>
-      <b-card-body class="overflow" v-if="!reverseClaims || !reverseClaims.size">
+  <sqid-collapsible-card :header="header"
+                         :id="id"
+                         :narrow="narrow">
+    <b-card-body class="overflow" v-if="!reverseClaims || !reverseClaims.size">
+      <table :class="['table', 'table-striped', { narrow, 'table-sm': narrow }]">
+        <template v-if="claims">
+          <claim-group :entityId="entityId"
+                       :propertyId="prop"
+                       :claims="statements(prop)"
+                       v-for="prop in claims.keys()"
+                       :key="prop" />
+        </template>
+      </table>
+    </b-card-body>
+    <b-tabs card v-if="reverseClaims && reverseClaims.size">
+      <b-tab class="overflow" :title="$t('entity.ownStatements')">
         <table :class="['table', 'table-striped', { narrow, 'table-sm': narrow }]">
           <template v-if="claims">
             <claim-group :entityId="entityId"
@@ -16,34 +24,21 @@
                          :key="prop" />
           </template>
         </table>
-      </b-card-body>
-      <b-tabs card v-if="reverseClaims && reverseClaims.size">
-        <b-tab class="overflow" :title="$t('entity.ownStatements')">
-          <table :class="['table', 'table-striped', { narrow }]">
-            <template v-if="claims">
-              <claim-group :entityId="entityId"
-                           :propertyId="prop"
-                           :claims="statements(prop)"
-                           v-for="prop in claims.keys()"
-                           :key="prop" />
-            </template>
-          </table>
-        </b-tab>
-        <b-tab class="overflow" :title="$t('entity.reverseStatements')">
-          <table :class="['table', 'table-striped', { narrow }]">
-            <template v-if="reverseClaims">
-              <claim-group :entityId="entityId"
-                           :propertyId="prop"
-                           :claims="reverseStatements(prop)"
-                           v-for="prop in reverseClaims.keys()"
-                           :key="prop"
-                           reverse />
-            </template>
-          </table>
-        </b-tab>
-      </b-tabs>
-    </b-collapse>
-  </b-card>
+      </b-tab>
+      <b-tab class="overflow" :title="$t('entity.reverseStatements')">
+        <table :class="['table', 'table-striped', { narrow, 'table-sm': narrow }]">
+          <template v-if="reverseClaims">
+            <claim-group :entityId="entityId"
+                         :propertyId="prop"
+                         :claims="reverseStatements(prop)"
+                         v-for="prop in reverseClaims.keys()"
+                         :key="prop"
+                         reverse />
+          </template>
+        </table>
+      </b-tab>
+    </b-tabs>
+  </sqid-collapsible-card>
 </template>
 
 <script lang="ts">
@@ -87,10 +82,6 @@ export default class ClaimTable extends Vue {
 </script>
 
 <style lang="less" scoped>
-.card {
-  margin: 1.5em 0;
-}
-
 .card-body {
   padding: 0 0;
 }
