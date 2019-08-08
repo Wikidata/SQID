@@ -20,3 +20,9 @@ export default class SnakValue extends Vue {
   }
 }
 </script>
+
+<style lang="less" scoped>
+span.deprecated {
+  text-decoration: line-through;
+}
+</style>

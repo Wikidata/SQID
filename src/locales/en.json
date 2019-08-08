@@ -29,7 +29,9 @@
     "ownStatements": "Own statements",
     "reverseStatements": "From related entities",
     "noReferences": "no references given",
-    "extraStatements": "no statements | one statement | {count} statements"
+    "extraStatements": "no statements | one statement | {count} statements",
+    "deprecatedStatement": "This is a deprecated statement",
+    "preferredStatement": "This a preferred statement"
   },
   "home": {
     "home": "A fresh look at Wikidata",

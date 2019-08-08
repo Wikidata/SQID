@@ -29,7 +29,9 @@
     "ownStatements": "Eigene Aussagen",
     "reverseStatements": "Von verwandten Einträgen",
     "noReferences": "keine Fundstelle angegeben",
-    "extraStatements": "keine Aussagen | eine Aussage | {count} Aussagen"
+    "extraStatements": "keine Aussagen | eine Aussage | {count} Aussagen",
+    "deprecatedStatement": "Dies ist eine überholte Aussage",
+    "preferredStatement": "Dies ist eine bevorzugte Aussage"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

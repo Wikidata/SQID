@@ -1,7 +1,7 @@
 <template>
   <div :id="claimId">
     <sqid-collapse-button :id="claimId">
-      <snak :snak="mainsnak" /> ({{ rank }})
+      <snak :snak="mainsnak" :rank="rank" />
     </sqid-collapse-button>
     <b-collapse :id="`collapse-${claimId}`">
       <span v-if="!references" v-t="'entity.noReferences'" />
