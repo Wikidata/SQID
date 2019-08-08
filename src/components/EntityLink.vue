@@ -31,7 +31,8 @@ export default class EntityLink extends Vue {
   private async updateLabel() {
     this.label = await this.getLabel({
       entityId: this.entityId,
-      lang: this.language})
+      lang: this.language,
+    })
   }
 
   private created() {

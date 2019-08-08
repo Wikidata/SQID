@@ -1,6 +1,8 @@
 <template>
   <tbody>
-    <tr :title="propertyId" v-for="(claim, cidx) in claims.slice(0, hideAllBut)" :key="cidx">
+    <tr :title="tooltip"
+        v-for="(claim, cidx) in claims.slice(0, hideAllBut)"
+        :key="cidx">
       <th :rowspan="claims.length" v-if="cidx === 0">
         <entity-link :entityId="propertyId" />
         <template v-if="hiddenClaims">
@@ -18,6 +20,7 @@
       </td>
     </tr>
     <b-collapse tag="tr"
+                :title="tooltip"
                 :id="`collapse-${collapseId}`"
                 v-for="(claim, cidx) in claims.slice(hideAllBut)"
                 :key="cidx + hideAllBut">
@@ -33,8 +36,9 @@
 
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
-import { Getter } from 'vuex-class'
+import { Action, Getter } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
+import { i18n } from '@/i18n'
 import Claim from './Claim.vue'
 
 @Component({
@@ -47,6 +51,8 @@ export default class ClaimGroup extends Vue {
   @Prop({ required: true }) private claims!: Claim[]
   @Prop({ default: false, type: Boolean }) private reverse!: boolean
   @Prop({ default: 3, type: Number }) private hideAllBut!: number
+  @Action private getLabel: any
+  private label: string = this.propertyId
 
   private get collapseId() {
     const direction = this.reverse ? 'reverse' : 'statements'
@@ -56,6 +62,31 @@ export default class ClaimGroup extends Vue {
 
   private get hiddenClaims() {
     return Math.max(0, this.claims.length - this.hideAllBut)
+  }
+
+  private get language() {
+    return i18n.locale
+  }
+
+  private get tooltip() {
+    return `${this.label} (${this.propertyId})`
+  }
+
+  private async updateLabel() {
+    this.label = await this.getLabel({
+      entityId: this.propertyId,
+      lang: this.language,
+    })
+  }
+
+  private created() {
+    this.updateLabel()
+  }
+
+  @Watch('propertyId')
+  @Watch('language')
+  private onPropertyIdChanged() {
+    this.updateLabel()
   }
 }
 </script>
