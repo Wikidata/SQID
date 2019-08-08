@@ -28,7 +28,8 @@
     "identifierStatements": "Bezeichner",
     "ownStatements": "Eigene Aussagen",
     "reverseStatements": "Von verwandten Einträgen",
-    "noReferences": "keine Fundstelle angegeben"
+    "noReferences": "keine Fundstelle angegeben",
+    "extraStatements": "keine Aussagen | eine Aussage | {count} Aussagen"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

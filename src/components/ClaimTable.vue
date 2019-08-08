@@ -7,7 +7,7 @@
     </template>
     <b-collapse :id="collapseId" visible>
       <b-card-body class="overflow" v-if="!reverseClaims || !reverseClaims.size">
-        <table :class="['table', 'table-striped', { narrow: narrow }]">
+        <table :class="['table', 'table-striped', { narrow, 'table-sm': narrow }]">
           <template v-if="claims">
             <claim-group :entityId="entityId"
                          :propertyId="prop"
@@ -89,6 +89,10 @@ export default class ClaimTable extends Vue {
 <style lang="less" scoped>
 .card {
   margin: 1.5em 0;
+}
+
+.card-body {
+  padding: 0 0;
 }
 
 .overflow {

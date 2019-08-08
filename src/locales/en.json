@@ -28,7 +28,8 @@
     "identifierStatements": "Identifiers",
     "ownStatements": "Own statements",
     "reverseStatements": "From related entities",
-    "noReferences": "no references given"
+    "noReferences": "no references given",
+    "extraStatements": "no statements | one statement | {count} statements"
   },
   "home": {
     "home": "A fresh look at Wikidata",
