@@ -53,7 +53,8 @@
                        :entityId="entityId"
                        :claims="group('i')"
                        id="identifiers"
-                       v-if="showGroup('i')" />
+                       v-if="showGroup('i')"
+                       narrow />
         </div>
       </b-col>
     </b-row>

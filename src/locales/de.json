@@ -27,7 +27,8 @@
     "wikiStatements": "Wikimedia-Kategorien und Portale",
     "identifierStatements": "Bezeichner",
     "ownStatements": "Eigene Aussagen",
-    "reverseStatements": "Von verwandten Einträgen"
+    "reverseStatements": "Von verwandten Einträgen",
+    "noReferences": "keine Fundstelle angegeben"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

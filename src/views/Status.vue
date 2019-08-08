@@ -5,7 +5,7 @@
 			<p v-t="'status.statusOverview'" />
       <b-card :title="$t('status.statistics')"
               :sub-title="$t('status.statsBasedOn', { date: $d(dumpTimestamp) })">
-        <table class="table table-striped table-condensed number-table">
+        <table class="table table-striped">
           <thead>
             <tr>
               <th></th>
@@ -113,8 +113,11 @@ export default class Status extends Vue {
 }
 </script>
 
-<style lang="less">
-.number-table td, .number-table th {
+<style lang="less" scoped>
+table {
+  margin-bottom: 0px;
+}
+td, th {
 	text-align: right;
 	width: 15%;
 }

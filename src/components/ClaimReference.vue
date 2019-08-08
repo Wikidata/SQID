@@ -19,3 +19,24 @@ export default class ClaimReference extends Vue {
   @Prop({ required: true }) private reference!: Reference
 }
 </script>
+
+<style lang="less" scoped>
+table {
+  font-size: 90%;
+  table-layout: fixed;
+
+  td {
+    padding-left: 5px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    min-width: 25%;
+  }
+
+  th {
+    padding-top: 7px;
+    padding-bottom: 3px;
+    width: 100%;
+    color: #555;
+  }
+}
+</style>

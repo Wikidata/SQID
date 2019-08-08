@@ -25,3 +25,18 @@ export default class ClaimGroup extends Vue {
   @Prop({ required: true }) private claims!: ClaimsMap
 }
 </script>
+
+<style lang="less" scoped>
+th {
+  vertical-align: top;
+  background: #ffffff;
+
+  :not(.narrow) & {
+    width: 25%;
+  }
+
+  .narrow & {
+    width: 40%;
+  }
+}
+</style>

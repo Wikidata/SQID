@@ -7,7 +7,7 @@
     </template>
     <b-collapse :id="collapseId" visible>
       <b-card-body class="overflow" v-if="!reverseClaims || !reverseClaims.size">
-        <table class="table table-striped table-condensed statements-table">
+        <table :class="['table', 'table-striped', { narrow: narrow }]">
           <template v-if="claims">
             <claim-group :entityId="entityId"
                          :propertyId="prop"
@@ -19,7 +19,7 @@
       </b-card-body>
       <b-tabs card v-if="reverseClaims && reverseClaims.size">
         <b-tab class="overflow" :title="$t('entity.ownStatements')">
-          <table class="table table-striped table-condensed statements-table">
+          <table :class="['table', 'table-striped', { narrow }]">
             <template v-if="claims">
               <claim-group :entityId="entityId"
                            :propertyId="prop"
@@ -30,7 +30,7 @@
           </table>
         </b-tab>
         <b-tab class="overflow" :title="$t('entity.reverseStatements')">
-          <table class="table table-striped table-condensed statements-table">
+          <table :class="['table', 'table-striped', { narrow }]">
             <template v-if="reverseClaims">
               <claim-group :entityId="entityId"
                            :propertyId="prop"
@@ -62,6 +62,7 @@ export default class ClaimTable extends Vue {
   @Prop({ default: undefined }) private reverseClaims: ClaimsMap | undefined
   @Prop({ required: true }) private header!: string
   @Prop({ required: true }) private id!: string
+  @Prop({ default: false, type: Boolean }) private narrow!: boolean
 
   private get collapseId() {
     return `collapse-${this.id}`
@@ -92,5 +93,15 @@ export default class ClaimTable extends Vue {
 
 .overflow {
   overflow: auto;
+}
+
+table {
+  margin-bottom: 0px;
+  table-layout: fixed;
+}
+
+.narrow {
+  font-size: 90%;
+  table-layout: fixed;
 }
 </style>
