@@ -91,6 +91,8 @@ export interface Claim {
   type: ClaimType
   id: string
   rank: Rank
+  qualifiers?: ResultList<Snak[]>
+  'qualifiers-order'?: EntityId[]
   references: Reference[]
 }
 
