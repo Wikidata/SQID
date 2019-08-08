@@ -17,7 +17,7 @@
     <b-collapse tag="tr"
                 :id="`collapse-${collapseId}`"
                 v-for="(claim, cidx) in claims.slice(hideAllBut)"
-                :key="cidx">
+                :key="cidx + hideAllBut">
       <td>
         <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
       </td>
