@@ -1,6 +1,6 @@
 <template>
   <div v-b-toggle="collapseId">
-    <b><slot /></b>
+    <slot />
     <font-awesome-icon class="when-opened" icon="angle-down" />
     <font-awesome-icon class="when-closed" icon="angle-right" />
   </div>

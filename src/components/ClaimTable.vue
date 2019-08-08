@@ -2,7 +2,7 @@
   <b-card header-tag="header" no-body>
     <template v-slot:header>
       <sqid-collapse-button :id="id">
-        {{ header }}
+        <b>{{ header }}</b>
       </sqid-collapse-button>
     </template>
     <b-collapse :id="collapseId" visible>

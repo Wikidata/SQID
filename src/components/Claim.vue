@@ -1,8 +1,13 @@
 <template>
-<div :id="claimId">
-  <snak :snak="mainsnak" /> ({{ rank }})
-  <reference v-for="(reference, refId) in references" :key="refId" :reference="reference" />
-</div>
+  <div :id="claimId">
+    <sqid-collapse-button :id="claimId">
+      <snak :snak="mainsnak" /> ({{ rank }})
+    </sqid-collapse-button>
+    <b-collapse :id="`collapse-${claimId}`">
+      <span v-if="!references" v-t="'entity.noReferences'" />
+      <reference v-for="(reference, refId) in references" :key="refId" :reference="reference" />
+    </b-collapse>
+  </div>
 </template>
 
 <script lang="ts">
