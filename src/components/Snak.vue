@@ -1,5 +1,6 @@
 <template>
   <span>
+    <font-awesome-icon icon="arrow-left" v-if="reverse" />
     <snak-value :snak="snak" :class="{ deprecated }" />
     <font-awesome-icon :title="$t('entity.deprecatedStatement')" icon="ban" v-if="deprecated" />
     <font-awesome-icon :title="$t('entity.preferredStatement')" icon="star" v-if="preferred" />
@@ -18,6 +19,7 @@ import SnakValue from '@/components/SnakValue.vue'
 export default class Snak extends Vue {
   @Prop({ required: true }) private snak!: SnakData
   @Prop({ default: 'normal' }) private rank!: Rank
+  @Prop({ default: false, type: Boolean }) private reverse!: boolean
 
   private get deprecated() {
     return this.rank === 'deprecated'
@@ -30,7 +32,8 @@ export default class Snak extends Vue {
 </script>
 
 <style lang="less" scoped>
-  svg {
+svg {
   margin-left: 1em;
+  margin-right: 1em;
 }
 </style>

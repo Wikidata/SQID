@@ -1,17 +1,22 @@
 <template>
   <div :id="claimId">
-    <sqid-collapse-button :id="claimId">
-      <snak :snak="mainsnak" :rank="rank" />
-    </sqid-collapse-button>
-    <div class="qualifiers" v-for="(prop, pidx) in qualifierOrder" :key="pidx">
-      <div v-for="(qualifier, qidx) in qualifiers(prop)" :key="qidx">
-        <entity-link :entityId="prop" />: <snak-value :snak="qualifier" />
+    <template v-if="!reverse">
+      <sqid-collapse-button :id="claimId">
+        <snak :snak="mainsnak" :rank="rank" />
+      </sqid-collapse-button>
+      <div class="qualifiers" v-for="(prop, pidx) in qualifierOrder" :key="pidx">
+        <div v-for="(qualifier, qidx) in qualifiers(prop)" :key="qidx">
+          <entity-link :entityId="prop" />: <snak-value :snak="qualifier" />
+        </div>
       </div>
-    </div>
-    <b-collapse :id="`collapse-${claimId}`">
-      <span v-if="!references" v-t="'entity.noReferences'" />
-      <reference v-for="(reference, refId) in references" :key="refId" :reference="reference" />
-    </b-collapse>
+      <b-collapse :id="`collapse-${claimId}`">
+        <span v-if="!references.length" v-t="'entity.noReferences'" />
+        <reference v-for="(reference, refId) in references" :key="refId" :reference="reference" />
+      </b-collapse>
+    </template>
+    <template v-if="reverse">
+      <snak :snak="mainsnak" :rank="rank" reverse />
+    </template>
   </div>
 </template>
 
@@ -32,6 +37,7 @@ export default class Claim extends Vue {
   @Prop({ required: true }) private entityId!: EntityId
   @Prop({ required: true }) private propertyId!: EntityId
   @Prop({ required: true }) private claim!: ClaimData
+  @Prop({ default: false, type: Boolean }) private reverse!: boolean
 
   private get mainsnak() {
     return this.claim.mainsnak
@@ -50,7 +56,7 @@ export default class Claim extends Vue {
   }
 
   private get references() {
-    return this.claim.references
+    return this.claim.references || []
   }
 
   private get qualifierOrder(): EntityId[] {

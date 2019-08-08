@@ -11,7 +11,10 @@
         </template>
       </th>
       <td>
-        <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
+        <claim :entityId="entityId"
+               :propertyId="propertyId"
+               :claim="claim"
+               :reverse="reverse" />
       </td>
     </tr>
     <b-collapse tag="tr"
@@ -19,7 +22,10 @@
                 v-for="(claim, cidx) in claims.slice(hideAllBut)"
                 :key="cidx + hideAllBut">
       <td>
-        <claim :entityId="entityId" :propertyId="propertyId" :claim="claim" />
+        <claim :entityId="entityId"
+               :propertyId="propertyId"
+               :claim="claim"
+               :reverse="reverse" />
       </td>
     </b-collapse>
   </tbody>
