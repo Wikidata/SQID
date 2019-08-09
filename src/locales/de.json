@@ -37,8 +37,11 @@
     "homepageLink": "Offizielle Website",
     "wikipediaLink": "Wikipedia",
     "reasonatorLink": "Reasonator",
+    "dateBC": "{date} v. u. Z.",
     "calendar": "({calendar})",
-    "globe": "auf {globe}"
+    "globe": "auf {globe}",
+    "someValue": "unbekannter Wert",
+    "noValue": "kein Wert"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

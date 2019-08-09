@@ -265,8 +265,9 @@ export function relatedEntityIds(claims: ClaimsMap) {
       const mainsnak = claim.mainsnak
       entityIds.add(mainsnak.property)
 
-      if (mainsnak.datatype === 'wikibase-item') {
+      if (mainsnak.snaktype === 'value' && mainsnak.datatype === 'wikibase-item') {
         const datavalue = (mainsnak.datavalue as EntityIdDataValue)
+
         entityIds.add(datavalue.value.id)
       }
 

@@ -1,8 +1,8 @@
 <template>
 <span>
     <template v-if="snaktype === 'value'"><data-value :value="snak.datavalue" /></template>
-    <template v-else-if="snaktype === 'somevalue'">some value</template>
-    <template v-else-if="snaktype === 'novalue'">no value</template>
+    <template v-else-if="snaktype === 'somevalue'">{{ $t('entity.someValue') }}</template>
+    <template v-else-if="snaktype === 'novalue'">{{ $t('entity.noValue') }}</template>
     <template v-else>unknown snaktype</template>
   </span>
 </template>

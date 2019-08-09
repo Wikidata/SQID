@@ -37,8 +37,11 @@
     "homepageLink": "Official website",
     "wikipediaLink": "Wikipedia article",
     "reasonatorLink": "Reasonator",
+    "dateBC": "{date} BCE",
     "calendar": "({calendar})",
-    "globe": "on {globe}"
+    "globe": "on {globe}",
+    "someValue": "Unknown value",
+    "noValue": "No value"
   },
   "home": {
     "home": "A fresh look at Wikidata",
