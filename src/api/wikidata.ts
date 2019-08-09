@@ -312,8 +312,13 @@ export function dateFromTimeData(data: TimeDataValue) {
   const precision = data.value.precision
   const calendar = data.value.calendarmodel.slice(ENTITY_PREFIX_LEN)
 
+  let negative = false
+
   if (timestring.startsWith('+')) {
     timestring = timestring.slice(1)
+  } else if (timestring.startsWith('-')) {
+    timestring = timestring.slice(1)
+    negative = true
   }
 
   let TZ = 'Z'
@@ -326,21 +331,28 @@ export function dateFromTimeData(data: TimeDataValue) {
 
   const [ date, time ] = timestring.split('T')
   let [ year, month, day ] = date.split('-')
-  let [ hour, minute, second ] = time.split(':')
+  const [ hour, minute, second ] = time.split(':')
 
   if (['0000', '+0000', '-0000'].includes(year)) {
     year = '0001'
   }
 
+  const prefix = negative ? '-00' : ''
   month = makeComponentValid(month)
   day = makeComponentValid(day)
-  hour = makeComponentValid(hour)
-  minute = makeComponentValid(minute)
-  second = makeComponentValid(second)
 
-  return { time: new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}${TZ}`),
+  const result = new Date(`${prefix}${year}-${month}-${day}T${hour}:${minute}:${second}${TZ}`)
+
+  return { time: result,
            format: `precision-${precision}`,
            calendar,
+           year,
+           month,
+           day,
+           hour,
+           minute,
+           second,
+           negative,
          }
 }
 
