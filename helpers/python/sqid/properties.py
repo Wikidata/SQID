@@ -105,6 +105,7 @@ def update_property_records():
 def update_derived_property_records():
     """Update all derived property records."""
     derive_property_classification()
+    derive_related_properties()
 
 
 def derive_property_classification():
@@ -140,3 +141,17 @@ def derive_property_classification():
         classification[pid] = kind
 
     statistics.update_json_data('properties/classification', classification)
+
+
+def derive_related_properties():
+    """Derives the list of related properties from property statistics."""
+    logger.info('Deriving related properties ...')
+    data = statistics.get_json_data('properties')
+
+    related = {}
+
+    for pid in data:
+        if 'r' in data[pid] and data[pid]['r']:
+            related[pid] = data[pid]['r']
+
+    statistics.update_json_data('properties/related', related)
