@@ -36,7 +36,8 @@
     "wikidataLink": "Wikidata page",
     "homepageLink": "Official website",
     "wikipediaLink": "Wikipedia article",
-    "reasonatorLink": "Reasonator"
+    "reasonatorLink": "Reasonator",
+    "calendar": "({calendar})"
   },
   "home": {
     "home": "A fresh look at Wikidata",

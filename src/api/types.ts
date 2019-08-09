@@ -135,7 +135,9 @@ export interface TimeDataValue extends Datavalue { // todo(mx): fix this
 }
 
 export interface TimeValue {
-  time: string
+  time: string,
+  precision: number,
+  calendarmodel: string,
 }
 
 export interface Reference {

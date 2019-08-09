@@ -1,8 +1,9 @@
 import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
-         Claim, WBApiResult, EntitySiteLink } from './types'
+         Claim, WBApiResult, EntitySiteLink, TimeDataValue } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
+import { ENTITY_PREFIX_LEN } from './sparql'
 import { i18n } from '@/i18n'
 import { ClaimsMap } from '@/store/entity/claims/types'
 import { TaskQueue } from 'cwait'
@@ -294,4 +295,49 @@ export function wikidataUrl(entityId: EntityId, lang?: string) {
   }
 
   return `https://www.wikidata.org/entity/${entityId}${forceLang}`
+}
+
+function makeComponentValid(component: string) {
+  if (component === '00') {
+    return '01'
+  }
+
+  return component
+}
+
+export function dateFromTimeData(data: TimeDataValue) {
+  let timestring = data.value.time
+  const precision = data.value.precision
+  const calendar = data.value.calendarmodel.slice(ENTITY_PREFIX_LEN)
+
+  if (timestring.startsWith('+')) {
+    timestring = timestring.slice(1)
+  }
+
+  let TZ = 'Z'
+
+  if (timestring.endsWith('Z')) {
+    timestring = timestring.slice(0, timestring.length - 1)
+  } else {
+    [ timestring, TZ ] = timestring.split('+')
+  }
+
+  const [ date, time ] = timestring.split('T')
+  let [ year, month, day ] = date.split('-')
+  let [ hour, minute, second ] = time.split(':')
+
+  if (['0000', '+0000', '-0000'].includes(year)) {
+    year = '0001'
+  }
+
+  month = makeComponentValid(month)
+  day = makeComponentValid(day)
+  hour = makeComponentValid(hour)
+  minute = makeComponentValid(minute)
+  second = makeComponentValid(second)
+
+  return { time: new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}${TZ}`),
+           format: `precision-${precision}`,
+           calendar,
+         }
 }

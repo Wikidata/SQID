@@ -4,12 +4,12 @@ import { EntityId, Rank, SparqlValue, SparqlBinding, SqidStatement } from './typ
 import { TaskQueue } from 'cwait'
 
 export const MAX_RELATED_BATCH = 101
-const RANK_PREFIX = 'http://wikiba.se/ontology#'
-const ENTITY_PREFIX = 'http://www.wikidata.org/entity/'
-const STATEMENT_PREFIX = 'http://www.wikidata.org/entity/statement/'
-const RANK_PREFIX_LEN = RANK_PREFIX.length
-const ENTITY_PREFIX_LEN = ENTITY_PREFIX.length
-const STATEMENT_PREFIX_LEN = STATEMENT_PREFIX.length
+export const RANK_PREFIX = 'http://wikiba.se/ontology#'
+export const ENTITY_PREFIX = 'http://www.wikidata.org/entity/'
+export const STATEMENT_PREFIX = 'http://www.wikidata.org/entity/statement/'
+export const RANK_PREFIX_LEN = RANK_PREFIX.length
+export const ENTITY_PREFIX_LEN = ENTITY_PREFIX.length
+export const STATEMENT_PREFIX_LEN = STATEMENT_PREFIX.length
 
 function statementsFromBindings(bindings: SparqlBinding[]) {
   return bindings.map((binding) => {
