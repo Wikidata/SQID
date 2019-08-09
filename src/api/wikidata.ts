@@ -70,7 +70,15 @@ export async function getLabels(entityIds: string[], lang?: string, fallback = t
   labels.set(langCode, nativeLabels)
 
   for (const [entityId, entity] of Object.entries(entities)) {
-    const label = entity.labels![langCode]
+    const { kind } = parseEntityId(entityId)
+
+    let label
+
+    if (!('labels' in entity)) {
+      label = { value: entityId, language: langCode }
+    } else {
+      label = entity.labels![langCode]
+    }
 
     if (label !== undefined) {
       nativeLabels.set(entityId, label.value)
@@ -179,7 +187,6 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
 export function parseEntityId(entityId: string): EntityReference {
   const prefix = entityId.slice(0, 1).toUpperCase()
   const id = parseInt(entityId.slice(1), 10)
-
   let kind = '' as EntityKind
 
   switch (prefix) {
@@ -191,6 +198,31 @@ export function parseEntityId(entityId: string): EntityReference {
       break
     case 'L':
       kind = 'lexeme'
+
+      if (isNaN(id)) {
+        const [entity, sub] = entityId.slice(1).split('-')
+        const subPrefix = sub.slice(0, 1).toUpperCase()
+        const subId = parseInt(sub.slice(1), 10)
+
+        switch (subPrefix) {
+          case 'S':
+            kind = 'sense'
+            break
+          case 'F':
+            kind = 'form'
+            break
+
+          default:
+            throw new RangeError(`Unknown subPrefix ${subPrefix} in lexicographical entityId`)
+        }
+
+        return {
+          id: parseInt(entity, 10),
+          kind,
+          subId,
+        }
+      }
+
       break
 
     default:

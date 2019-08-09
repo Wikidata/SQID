@@ -190,8 +190,9 @@ export type EntityKind = 'item' | 'property' | 'lexeme' | 'form' | 'sense'
 export type EntityId = string
 export type StatementId = string
 export interface EntityReference {
-  id: number
-  kind: EntityKind
+  id: number,
+  kind: EntityKind,
+  subId?: number,
 }
 
 export interface SqidEntityStatistics {
