@@ -97,7 +97,9 @@ export interface Claim {
 }
 
 export type SnakType = 'value'
-export type WBDatatype = 'wikibase-item' | 'wikibase-property' | 'wikibase-lexeme' | 'wikibase-form' | 'wikibase-sense'
+export type WBDatatype = 'wikibase-item' | 'wikibase-property' |
+  'wikibase-lexeme' | 'wikibase-form' | 'wikibase-sense' |
+  'globe-coordinate' | 'time' | 'monolingualtext' | 'quantity' | 'commonsMedia'
 
 export interface Snak {
   snaktype: SnakType
@@ -107,7 +109,7 @@ export interface Snak {
   datatype: WBDatatype
 }
 
-export type DatavalueKind = 'wikibase-entityid' | 'time' | 'string' | 'monolingualtext'
+export type DatavalueKind = 'wikibase-entityid' | 'time' | 'globecoordinate' | 'string' | 'monolingualtext'
 
 export interface Datavalue {
   type: DatavalueKind
@@ -129,7 +131,7 @@ export interface StringDataValue extends Datavalue {
   value: string
 }
 
-export interface TimeDataValue extends Datavalue { // todo(mx): fix this
+export interface TimeDataValue extends Datavalue {
   type: 'time'
   value: TimeValue
 }
@@ -138,6 +140,19 @@ export interface TimeValue {
   time: string,
   precision: number,
   calendarmodel: string,
+}
+
+export interface GlobeCoordinateValue extends Datavalue {
+  type: 'globecoordinate',
+  value: GlobeCoordinate,
+}
+
+export interface GlobeCoordinate {
+  latitude: number,
+  longitude: number,
+  precision: number,
+  globe: string,
+  altitude?: null
 }
 
 export interface Reference {

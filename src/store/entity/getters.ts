@@ -42,7 +42,7 @@ export const getters: GetterTree<EntityState, RootState> = {
       const title = getters.getSiteLinkTitle(entityId, wikiname)
       const url = rootGetters['statistics/siteLinkUrl'](wikiname)
 
-      if (title === undefined || url === undefined) {
+      if (!title || !url) {
         return null
       }
 

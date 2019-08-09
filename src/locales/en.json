@@ -37,7 +37,8 @@
     "homepageLink": "Official website",
     "wikipediaLink": "Wikipedia article",
     "reasonatorLink": "Reasonator",
-    "calendar": "({calendar})"
+    "calendar": "({calendar})",
+    "globe": "on {globe}"
   },
   "home": {
     "home": "A fresh look at Wikidata",

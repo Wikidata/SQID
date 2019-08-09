@@ -1,6 +1,7 @@
 import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
-         Claim, WBApiResult, EntitySiteLink, TimeDataValue } from './types'
+         Claim, WBApiResult, EntitySiteLink, TimeDataValue,
+         GlobeCoordinateValue } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
 import { ENTITY_PREFIX_LEN } from './sparql'
@@ -340,4 +341,42 @@ export function dateFromTimeData(data: TimeDataValue) {
            format: `precision-${precision}`,
            calendar,
          }
+}
+
+function extractCoordinateComponents(value: number) {
+  const degrees = Math.floor(value)
+  value -= degrees
+
+  const minutes = Math.floor(value * 60)
+  value *= 60
+  value -= Math.floor(value)
+
+  const seconds = Math.floor(value * 60)
+
+  return { degrees,
+           minutes,
+           seconds,
+         }
+}
+
+export function coordinateFromGlobeCoordinate(data: GlobeCoordinateValue) {
+  const globe = data.value.globe.slice(ENTITY_PREFIX_LEN)
+  const precision = data.value.precision.toExponential()
+  const places = Number(precision.split('e-')[1])
+
+  const latitude = data.value.latitude
+  const lat = Math.abs(latitude).toFixed(places)
+  const ns = (latitude >= 0) ? 'N' : 'S'
+  const { degrees: lad, minutes: lam, seconds: las } = extractCoordinateComponents(Number(lat))
+
+  const longitude = Number(data.value.longitude)
+  const lon = Math.abs(longitude).toFixed(places)
+  const we = (longitude >= 0) ? 'W' : 'E'
+  const { degrees: lod, minutes: lom, seconds: los } = extractCoordinateComponents(Number(lon))
+
+  const coordinate = `(${lad}°${lam}'${las}" ${ns}, ${lod}°${lom}'${los}" ${we})`
+  return {
+    coordinate,
+    globe,
+  }
 }
