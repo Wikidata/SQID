@@ -14,6 +14,7 @@ const router = new Router({
       path: '/',
       name: 'home',
       component: Home,
+      meta: { title: 'SQID – Wikidata Explorer' },
     },
     {
       path: '/about',
@@ -22,11 +23,13 @@ const router = new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "about" */ '@/views/About.vue'),
+      meta: { title: 'SQID – About' },
     },
     {
       path: '/status',
       name: 'status',
       component: () => import(/* webpackChunkName: "status" */ '@/views/Status.vue'),
+      meta: { title: 'SQID – Status' },
     },
     {
       path: '/entity/:id',
@@ -62,6 +65,17 @@ router.beforeEach(async (to, _from, next) => {
     const verifier = query.oauth_verifier.toString()
     const key = query.oauth_token.toString()
     store.dispatch('complete', { verifier, key })
+  }
+
+  next()
+})
+
+router.beforeEach((to, _from, next) => {
+  const segments = to.matched.slice().reverse()
+  const title = segments.find((segment) => segment.meta && segment.meta.title)
+
+  if (title) {
+    document.title = title.meta.title
   }
 
   next()

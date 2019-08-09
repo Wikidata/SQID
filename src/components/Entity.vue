@@ -117,6 +117,7 @@ export default class Entity extends Vue {
   private updateEntityData() {
     this.images = null
     this.banner = null
+    document.title = `${this.label} – SQID`
 
     const forwardClaims = this.getEntityData(this.entityId)
       .then((data: {
@@ -124,7 +125,13 @@ export default class Entity extends Vue {
         aliases: string[]
         description: string
         claims: ClaimsMap}) => {
-          this.label = data.label || this.entityId
+          if (data.label) {
+            this.label = data.label
+            document.title = `${this.label} (${this.entityId}) – SQID`
+          } else {
+            this.label = this.entityId
+            document.title = `${this.label} – SQID`
+          }
           this.aliases = data.aliases
           this.description = data.description
           this.claims = data.claims
