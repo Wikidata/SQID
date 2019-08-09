@@ -68,3 +68,11 @@ Map<PropertyClassification, ClaimsMap> {
 
   return groupedClaims
 }
+
+export function wikifyLink(uri: string | null): string | null {
+  if (uri !== null) {
+    return uri.replace(/ /g, '_')
+  }
+
+  return null
+}

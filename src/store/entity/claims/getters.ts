@@ -3,19 +3,12 @@ import { ClaimsState, EntityId } from './types'
 import { RootState } from '@/store/types'
 import { wikidataUrl } from '@/api/wikidata'
 import { Claim } from '@/api/types'
+import { wikifyLink } from '@/api/sqid'
 
 function getStatementValue(claim: Claim) {
   if (claim.mainsnak.snaktype === 'value') {
     return (claim.mainsnak.datavalue as any).value
   }
-}
-
-function wikifyLink(uri: string | null): string | null {
-  if (uri !== null) {
-    return uri.replace(/ /g, '_')
-  }
-
-  return null
 }
 
 export const getters: GetterTree<ClaimsState, RootState> = {
@@ -97,10 +90,6 @@ export const getters: GetterTree<ClaimsState, RootState> = {
       }
 
       return wikidataUrl(entityId)
-    },
-  getWikipediaUrl: (_state, _getters) => // tslint:disable-line:no-shadowed-variable
-    (entityId: EntityId) => {
-      return null               // todo(mx): implement this
     },
   getReasonatorUrl: (_state, _getters, _rootState, rootGetters) =>
     (entityId: EntityId) => {

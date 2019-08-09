@@ -19,6 +19,15 @@ export const getters: GetterTree<StatisticsState, RootState> = {
   siteLinkCount: (state) => {
     return state.sitelinks
   },
+  siteLinkUrl: (state) => (wikiname: string) => {
+    const sitelink = state.sites.get(wikiname)
+
+    if (sitelink === undefined) {
+      return null
+    }
+
+    return sitelink.u
+  },
   shouldCheckForUpdate: (_state, getters) => { // tslint:disable-line:no-shadowed-variable
     const now = new Date().getTime()
     const lastUpdate = Math.max(getters.dumpTimestamp,

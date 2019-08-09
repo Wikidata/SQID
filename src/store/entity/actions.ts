@@ -7,7 +7,7 @@ import { getEntityData, parseEntityId } from '@/api/wikidata'
 import { getRelatedStatements } from '@/api/sparql'
 
 export const actions: ActionTree<RootState, RootState> = {
-  async getEntityData({ commit, getters }, entityId) {
+  async getEntityData({ commit, getters }, entityId: EntityId) {
     const lang = i18n.locale
 
     if (getters.hasTerms(entityId, lang) &&
@@ -26,12 +26,16 @@ export const actions: ActionTree<RootState, RootState> = {
       aliases: entityData.aliases,
       descriptions: entityData.descriptions,
     })
+    commit('sitelinksLoaded', {
+      entityId,
+      sitelinks: entityData.sitelinks,
+    })
 
     return { ...getters.getTerms(entityId, lang),
              claims: getters.getClaims(entityId),
            }
   },
-  async getReverseClaims({}, entityId) {
+  async getReverseClaims({}, entityId: EntityId) {
     const statements = await getRelatedStatements(entityId)
     const claims = new Map<EntityId, Claim[]>()
 
