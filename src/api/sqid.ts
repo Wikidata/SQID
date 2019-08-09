@@ -36,6 +36,31 @@ export async function getStatistics(lastRefresh: number): Promise<SqidStatistics
   return response.data
 }
 
+export interface RelatednessMapping {
+  [key: string]: RelatednessScores,
+}
+
+export interface RelatednessScores {
+  [key: string]: number,
+}
+
+export async function getRelatedProperties(lastRefresh: number): Promise<RelatednessMapping> {
+  const response = await http.get(getDataFileURI('properties/related', lastRefresh))
+  const scores: RelatednessMapping = {}
+
+  for (const [entityId, related] of Object.entries(response.data)) {
+    const relatedScores: RelatednessScores = {}
+
+    for (const [relatedId, score] of Object.entries(related as RelatednessScores)) {
+      relatedScores[`P${relatedId}`] = score
+    }
+
+    scores[`P${entityId}`] = relatedScores
+  }
+
+  return Object.freeze(scores)
+}
+
 export async function getPropertyClassification(lastRefresh: number): Promise<Map<EntityId, PropertyClassification>> {
   const response = await http.get(getDataFileURI('properties/classification', lastRefresh))
   const classification = new Map<EntityId, PropertyClassification>()
@@ -47,14 +72,48 @@ export async function getPropertyClassification(lastRefresh: number): Promise<Ma
   return classification
 }
 
-type PropertyClassifier = (entityId: EntityId) => PropertyClassification
+export type PropertyClassifier = (entityId: EntityId) => PropertyClassification
 
 export function groupClaims(claims: ClaimsMap,
-                            propertyGroups: PropertyClassifier):
+                            propertyGroups: PropertyClassifier,
+                            relatedScores: RelatednessMapping):
 Map<PropertyClassification, ClaimsMap> {
   const groupedClaims = new Map<PropertyClassification, ClaimsMap>()
+  const scores = new Map<EntityId, number>()
+  const properties = []
 
-  for (const [prop, claim] of claims.entries()) {
+  for (const propertyId of claims.keys()) {
+    properties.push(propertyId)
+
+    if (!(propertyId in relatedScores)) {
+      scores.set(propertyId, 0)
+    } else {
+      for (const [relatedId, score] of Object.entries(relatedScores[propertyId])) {
+        scores.set(relatedId, score + (scores.get(relatedId) || 0))
+      }
+    }
+  }
+
+  const sortedProperties = properties.sort((left, right) => {
+    const lhs = scores.get(left) || 0
+    const rhs = scores.get(right) || 0
+
+    if (lhs < rhs) {
+      return 1
+    } else if (lhs > rhs) {
+      return -1
+    } else {
+      return 0
+    }
+  })
+
+  const sortedClaims = new Map<EntityId, Claim[]>()
+
+  for (const propertyId of sortedProperties) {
+    sortedClaims.set(propertyId, claims.get(propertyId)!)
+  }
+
+  for (const [prop, claim] of sortedClaims.entries()) {
     const kind = propertyGroups(prop)
     let group = groupedClaims.get(kind)
 

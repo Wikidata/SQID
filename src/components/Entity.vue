@@ -80,7 +80,7 @@ import { PropertyClassification } from '@/store/statistics/properties/types'
 import ClaimTable from './ClaimTable.vue'
 import { Claim } from '@/api/types'
 import { relatedEntityIds } from '@/api/wikidata'
-import { groupClaims } from '@/api/sqid'
+import { groupClaims, RelatednessMapping } from '@/api/sqid'
 import { i18n } from '@/i18n'
 
 const propertyStatistics = namespace('statistics/properties')
@@ -94,6 +94,7 @@ export default class Entity extends Vue {
   @Action private getEntityData: any
   @Action private getReverseClaims: any
   @Action private requestLabels: any
+  @propertyStatistics.Action private refreshRelatedProperties: any
   @propertyStatistics.Action private refreshClassification: any
   @propertyStatistics.Getter private propertyGroups!: (entityId: EntityId) => PropertyClassification
   @Getter private getImages: any
@@ -142,18 +143,26 @@ export default class Entity extends Vue {
         this.requestLabels({entityIds: related})
       })
 
-    Promise.all([forwardClaims, reverseClaims])
-      .then(this.refreshClassification)
-      .then(this.regroupClaims)
+    Promise.all([this.refreshRelatedProperties(),
+                 forwardClaims,
+                 reverseClaims,
+                 this.refreshClassification()])
+      .then((data) => {
+        this.regroupClaims(data[0])
+      })
   }
 
-  private regroupClaims() {
+  private regroupClaims(relatednessScores: RelatednessMapping) {
     if (this.claims) {
-      this.groupedClaims = groupClaims(this.claims, this.propertyGroups)
+      this.groupedClaims = groupClaims(this.claims,
+                                       this.propertyGroups,
+                                       relatednessScores)
     }
 
     if (this.reverseClaims) {
-      this.groupedReverseClaims = groupClaims(this.reverseClaims, this.propertyGroups)
+      this.groupedReverseClaims = groupClaims(this.reverseClaims,
+                                              this.propertyGroups,
+                                              relatednessScores)
     }
   }
 

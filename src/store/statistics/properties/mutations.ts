@@ -1,6 +1,8 @@
+import Vue from 'vue'
 import { MutationTree } from 'vuex'
 import { PropertiesState, PropertyClassification } from './types'
 import { EntityId, SqidEntityStatistics } from '@/api/types'
+import { RelatednessMapping, RelatednessScores } from '@/api/sqid'
 
 export const mutations: MutationTree<PropertiesState> = {
   refreshClassification: (state, classification: Map<EntityId, PropertyClassification>) => {
@@ -16,13 +18,19 @@ export const mutations: MutationTree<PropertiesState> = {
 
       group.push(entityId)
       propertiesByGroup.set(kind, group)
-      propertyGroups[entityId] = kind
+      Object.defineProperty(propertyGroups, entityId, { value: kind,
+                                                        configurable: false,
+                                                      })
     }
 
     state.propertiesByGroup = propertiesByGroup
     // todo(mx): this should be a map, but that breaks vue-devtools
-    state.propertyGroups = propertyGroups
+    state.propertyGroups = Object.freeze(propertyGroups)
     state.classificationRefreshed = new Date()
+  },
+  refreshRelatedProperties: (state) => {
+    state.cachedRelatedPropertiesRefresh = state.relatedPropertiesRefreshed.getTime()
+    state.relatedPropertiesRefreshed = new Date()
   },
   refreshPropertyStatistics: (state, counts: SqidEntityStatistics) => {
     state.count = counts.c
