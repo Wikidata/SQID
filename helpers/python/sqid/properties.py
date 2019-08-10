@@ -109,7 +109,7 @@ def update_derived_property_records():
 
 
 def derive_property_classification():
-    """Derives the property classification from property statistics."""
+    """Derive the property classification from property statistics."""
     logger.info('Deriving property classification ...')
     data = statistics.get_json_data('properties')
 
@@ -144,7 +144,7 @@ def derive_property_classification():
 
 
 def derive_related_properties():
-    """Derives the list of related properties from property statistics."""
+    """Derive the list of related properties from property statistics."""
     logger.info('Deriving related properties ...')
     data = statistics.get_json_data('properties')
 

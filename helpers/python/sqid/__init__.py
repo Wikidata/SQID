@@ -1,7 +1,7 @@
 import logging
 
 from .classes import update_class_records
-#from .classes import update_derived_class_records
+from .classes import update_derived_class_records
 from .properties import update_property_records
 from .properties import update_derived_property_records
 
@@ -20,4 +20,4 @@ def _setup_default_logger(loglevel=logging.INFO):
 def update_derived_records():
     """Update derived records for classes and properties."""
     update_derived_property_records()
-    #update_derived_class_records()
+    update_derived_class_records()

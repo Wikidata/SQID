@@ -39,3 +39,27 @@ def update_class_records():
     data = statistics.get_json_data('classes')
     merged = statistics.merge(data, updated, default_others={'i': 0})
     statistics.update_json_data('classes', merged, timestamp)
+
+
+def update_derived_class_records():
+    """Update all derived class records."""
+    derive_class_hierarchy()
+
+
+def derive_class_hierarchy():
+    """Derive the class hierarchy infromation from class statistics."""
+    logger.info('Deriving class hierarchy ...')
+    data = statistics.get_json_data('classes')
+
+    hierarchy = {}
+    keys = ['i', 's', 'ai', 'as', 'sc', 'sb']
+
+    for cid in data:
+        record = {}
+
+        for key in keys:
+            if key in data[cid] and data[cid][key]:
+                record[key] = data[cid][key]
+        hierarchy[cid] = record
+
+    statistics.update_json_data('classes/hierarchy', hierarchy)
