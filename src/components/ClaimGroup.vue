@@ -8,7 +8,7 @@
         <template v-if="hiddenClaims">
           <br>
           <sqid-collapse-button :id="collapseId" class="badge">
-            {{ $tc('entity.extraStatements', hiddenClaims) }}
+            {{ $tc('entity.extraStatements', hideAllBut + hiddenClaims) }}
           </sqid-collapse-button>
         </template>
       </th>
@@ -50,7 +50,7 @@ export default class ClaimGroup extends Vue {
   @Prop({ required: true }) private propertyId!: EntityId
   @Prop({ required: true }) private claims!: Claim[]
   @Prop({ default: false, type: Boolean }) private reverse!: boolean
-  @Prop({ default: 3, type: Number }) private hideAllBut!: number
+  @Prop({ default: 4, type: Number }) private hideAllBut!: number
   @Action private getLabel: any
   private label: string = this.propertyId
 
