@@ -53,6 +53,10 @@ export const actions: ActionTree<TermsState, RootState> = {
       }
     }
 
+    if (missingLabels.length === 0) {
+      return
+    }
+
     const promise = getLabels(missingLabels, lang || undefined)
     commit('labelsRequested', {
       entities: missingLabels,
