@@ -3,6 +3,13 @@ import { Claim, EntityId, SqidStatistics, SqidHierarchyRecord } from './types'
 import { ClaimsMap } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
 import { ClassStatistics } from '@/store/statistics/classes/types'
+import { getPropertySubjects } from './sparql'
+
+export const RELATED_PROPERTIES_THRESHOLD = 5
+export const MAX_EXAMPLE_INSTANCES = 20
+export const MAX_DIRECT_SUBCLASSES = 10
+export const MAX_EXAMPLE_SUBCLASSES = 10
+export const MAX_EXAMPLE_ITEMS = 20
 
 const MAX_STATISTICS_AGE = 60 * 60 * 1000
 const SCRIPT_RUNTIME_SLACK = 5 * 60 * 1000
@@ -159,6 +166,7 @@ export async function getClassHierarchyChunk(chunkId: number, lastRefresh: numbe
     const related: RelatednessScores = data.r || {}
 
     const sortedProperties = Object.entries(related)
+      .filter((property) => property[1] > RELATED_PROPERTIES_THRESHOLD)
       .sort((left, right) => {
         if (left[1] < right[1]) {
           return 1
@@ -185,4 +193,17 @@ export async function getClassHierarchyChunk(chunkId: number, lastRefresh: numbe
   }
 
   return chunk
+}
+
+
+export async function getExampleInstances(entityId: EntityId, lang: string) {
+  return getPropertySubjects('P31', lang, MAX_EXAMPLE_INSTANCES + 1, entityId)
+}
+
+export async function getExampleSubclasses(entityId: EntityId, lang: string) {
+  return getPropertySubjects('P279', lang, MAX_EXAMPLE_SUBCLASSES + 1, entityId)
+}
+
+export async function getExampleItems(entityId: EntityId, lang: string) {
+  return getPropertySubjects(entityId, lang, MAX_EXAMPLE_ITEMS + 1, undefined)
 }

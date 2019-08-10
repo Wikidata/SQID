@@ -4,6 +4,7 @@ import { EntityId, Rank, SparqlValue, SparqlBinding, SqidStatement } from './typ
 import { TaskQueue } from 'cwait'
 
 export const MAX_RELATED_BATCH = 101
+
 export const RANK_PREFIX = 'http://wikiba.se/ontology#'
 export const ENTITY_PREFIX = 'http://www.wikidata.org/entity/'
 export const STATEMENT_PREFIX = 'http://www.wikidata.org/entity/statement/'
@@ -111,5 +112,31 @@ async function getRelatingProperties(entityId: EntityId): Promise<EntityId[]> {
 
   return result.map((binding) => {
     return entityValue(binding.p)
+  })
+}
+
+function propertySubjectsQuery(propertyId: EntityId,
+                               lang: string,
+                               object?: EntityId,
+                               limit?: number,
+                               resultVariable = 'p'): string {
+  const obj = `wd:${object}` || '[]'
+  const limitClause = limit ? ` LIMIT ${limit} ` : ''
+
+  return `SELECT ?${resultVariable} ?${resultVariable}Label WHERE {{
+  SELECT DISTINCT ?${resultVariable} WHERE {
+    ?${resultVariable} wdt:${propertyId} ${obj} .
+  }${limitClause}}
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "${lang}" }
+}`
+}
+
+export async function getPropertySubjects(propertyId: EntityId, lang: string, limit: number, entityId?: EntityId) {
+  const result = await sparqlQuery(propertySubjectsQuery(propertyId, lang, entityId, limit))
+
+  return result.map((binding) => {
+    return { entityId: entityValue(binding.p),
+             label: binding.pLabel.value,
+           }
   })
 }

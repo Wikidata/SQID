@@ -1,10 +1,32 @@
-import { ActionTree } from 'vuex'
+import { ActionTree, Commit } from 'vuex'
 import { RootState } from '../types'
 
 import { i18n } from '@/i18n'
 import { Claim, Datavalue, EntityId, SnakType, WBDatatype } from '@/api/types'
 import { getEntityData, parseEntityId } from '@/api/wikidata'
 import { getRelatedStatements } from '@/api/sparql'
+import { getExampleInstances, getExampleSubclasses, getExampleItems } from '@/api/sqid'
+
+async function idsFromExamples(commit: Commit,
+                               getExample: (entityId: EntityId, lang: string)
+                               => Promise<Array<{ entityId: EntityId,
+                                                  label: string,
+                                                }>>,
+                               entityId: EntityId): Promise<EntityId[]> {
+    const lang = i18n.locale
+    const result = await getExample(entityId, lang)
+    const labels = new Map<string, Map<EntityId, string>>()
+    const langLabels = new Map<EntityId, string>()
+
+    for (const { entityId: id, label } of result) {
+      langLabels.set(id, label)
+    }
+
+    labels.set(lang, langLabels)
+    commit('labelsLoaded', labels)
+
+    return result.map((entity) => entity.entityId)
+}
 
 export const actions: ActionTree<RootState, RootState> = {
   async getEntityData({ commit, getters }, entityId: EntityId) {
@@ -87,5 +109,14 @@ export const actions: ActionTree<RootState, RootState> = {
     }
 
     return claims
+  },
+  async getExampleInstances({ commit }, entityId: EntityId) {
+    return idsFromExamples(commit, getExampleInstances, entityId)
+  },
+  async getExampleSubclasses({ commit }, entityId: EntityId) {
+    return idsFromExamples(commit, getExampleSubclasses, entityId)
+  },
+  async getExampleItems({ commit }, entityId: EntityId) {
+    return idsFromExamples(commit, getExampleItems, entityId)
   },
 }
