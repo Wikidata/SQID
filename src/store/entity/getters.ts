@@ -48,5 +48,7 @@ export const getters: GetterTree<EntityState, RootState> = {
 
       return wikifyLink(url.replace('$1', title))
     },
-
+  getPropertyDatatype: (state) => (entityId: EntityId) => {
+    return state.datatypes.get(entityId)
+  },
 }

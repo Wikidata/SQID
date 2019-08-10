@@ -13,13 +13,51 @@
           </ul>
         </div>
         <div id="description">{{ description }}</div>
+        <div id="hierarchy-information">
+          <i18n tag="div" path="entity.propertyDatatype" v-if="propertyDatatype">
+            <b place="label" v-t="'entity.propertyDatatypeLabel'" />
+            <span place="type">{{ propertyDatatype }}</span>
+          </i18n>
+          <i18n tag="div" path="entity.superProperties" v-if="superProperties.length">
+            <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
+            <span place="property">{{ label }}</span>
+            <span place="properties">
+              <span v-for="(superProperty, supidx) of superProperties" :key="supidx">
+                <template v-if="supidx > 0">, </template>
+                <entity-link :entityId="superProperty" />
+              </span>
+            </span>
+          </i18n>
+          <i18n tag="div" path="entity.superClasses" v-if="superClasses.length">
+            <b place="subclassOf"><entity-link entityId="P279" /></b>
+            <span place="class">{{ label }}</span>
+            <span place="classes">
+              <span v-for="(superClass, sucidx) of superClasses" :key="sucidx">
+                <template v-if="sucidx > 0">, </template>
+                <entity-link :entityId="superClass" />
+              </span>
+            </span>
+          </i18n>
+          <i18n tag="div" path="entity.noSuperClasses" v-else> <!-- todo(mx): only show if there are direct subclasses-->
+            <b place="subclassOf"><entity-link entityId="P279" /></b>
+            <span place="class">{{ label }}</span>
+          </i18n>
+          <i18n tag="div" path="entity.instanceClasses" v-if="instanceClasses.length">
+            <b place="instanceOf"><entity-link entityId="P31" /></b>
+            <span place="instance">{{ label }}</span>
+            <span place="classes">
+              <span v-for="(instanceClass, incidx) of instanceClasses" :key="incidx">
+                <template v-if="incidx > 0">, </template>
+                <entity-link :entityId="instanceClass" />
+              </span>
+            </span>
+          </i18n>
+          <i18n tag="div" path="entity.noInstanceClasses" v-else>
+            <b place="instanceOf"><entity-link entityId="P31" /></b>
+            <span place="instance">{{ label }}</span>
+          </i18n>
+        </div>
         <div id="claims" v-if="groupedClaims">
-          <claim-table :header="$t('entity.hierarchyStatements')"
-                       :entityId="entityId"
-                       :claims="group('h')"
-                       :reverseClaims="reverseGroup('h')"
-                       id="hierarchy"
-                       v-if="showGroup('h')" />
           <claim-table :header="$t('entity.humanRelationshipStatements')"
                        :entityId="entityId"
                        :claims="group('f')"
@@ -78,8 +116,8 @@ import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
 import ClaimTable from './ClaimTable.vue'
-import { Claim } from '@/api/types'
-import { relatedEntityIds } from '@/api/wikidata'
+import { Claim, EntityKind, EntityIdValue, WBDatatype } from '@/api/types'
+import { relatedEntityIds, parseEntityId, entityIdFromEntity } from '@/api/wikidata'
 import { groupClaims, RelatednessMapping } from '@/api/sqid'
 import { i18n } from '@/i18n'
 
@@ -103,6 +141,8 @@ export default class Entity extends Vue {
   @Getter private getWikidataUrl: any
   @Getter private getWikipediaUrl: any
   @Getter private getReasonatorUrl: any
+  @Getter private getValuesForProperty!: (entityId: EntityId, propertyId: EntityId) => Array<{}>
+  @Getter private getPropertyDatatype!: (entityId: EntityId) => WBDatatype | undefined
   private linkUrls: Array<{ url: string, label: any }> = []
   private label = this.entityId
   private aliases: string[] = []
@@ -113,10 +153,21 @@ export default class Entity extends Vue {
   private groupedReverseClaims: Map<PropertyClassification, ClaimsMap> | null = null
   private images: string[] | null = null
   private banner: string | null = null
+  private kind: EntityKind | null = null
+  private propertyDatatype: WBDatatype | null = null
+  private superProperties: EntityId[] = []
+  private superClasses: EntityId[] = []
+  private instanceClasses: EntityId[] = []
 
   private updateEntityData() {
     this.images = null
     this.banner = null
+    const { kind } = parseEntityId(this.entityId)
+    this.kind = kind
+    this.propertyDatatype = null
+    this.superProperties = []
+    this.superClasses = []
+    this.instanceClasses = []
     document.title = `${this.label} – SQID`
 
     const forwardClaims = this.getEntityData(this.entityId)
@@ -141,6 +192,24 @@ export default class Entity extends Vue {
 
           this.images = this.getImages(this.entityId)
           this.banner = this.getBanner(this.entityId)
+
+          if (kind === 'property') {
+            this.propertyDatatype = this.getPropertyDatatype(this.entityId) || null
+
+            const values = (this.getValuesForProperty(this.entityId, 'P1647') as EntityIdValue[]) || []
+            this.superProperties = values.map(entityIdFromEntity)
+          }
+
+          const superClasses = (this.getValuesForProperty(this.entityId, 'P279') as EntityIdValue[]) || []
+          this.superClasses = superClasses.map(entityIdFromEntity)
+
+          const instanceClasses = (this.getValuesForProperty(this.entityId, 'P31') as EntityIdValue[]) || []
+          this.instanceClasses = instanceClasses.map(entityIdFromEntity)
+
+          const entityIds = ['P1647', 'P279', 'P31'].concat(this.superProperties,
+                                                            this.superClasses,
+                                                            this.instanceClasses)
+          this.requestLabels({ entityIds })
         })
     const reverseClaims = this.getReverseClaims(this.entityId)
       .then((claims: ClaimsMap) => {

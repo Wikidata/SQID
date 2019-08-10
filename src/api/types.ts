@@ -71,6 +71,7 @@ export interface ImageInfo {
 export interface EntityResult {
   type: EntityKind,
   id: EntityId,
+  datatype?: WBDatatype,
   labels?: ResultList<TermResult>,
   descriptions?: ResultList<TermResult>,
   aliases?: ResultList<TermResult>,

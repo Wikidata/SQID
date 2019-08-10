@@ -1,7 +1,8 @@
 import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
          Claim, WBApiResult, EntitySiteLink, TimeDataValue,
-         GlobeCoordinateValue } from './types'
+         GlobeCoordinateValue,
+         EntityIdValue} from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
 import { ENTITY_PREFIX_LEN } from './sparql'
@@ -38,8 +39,10 @@ export async function getEntities(entityIds: string[],
   const entities: ResultList<EntityResult> = {}
 
   for (const chunk of results) {
-    for (const [key, entity] of Object.entries(chunk)) {
-      entities[key] = entity
+    if (chunk !== undefined) {
+      for (const [key, entity] of Object.entries(chunk)) {
+        entities[key] = entity
+      }
     }
   }
 
@@ -162,7 +165,8 @@ function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: strin
 
 export async function getEntityData(entityId: string, lang?: string, fallback = true) {
   const entities = await getEntities([entityId],
-                                     ['aliases', 'labels', 'descriptions', 'claims', 'datatype', 'sitelinks'],
+                                     ['aliases', 'labels', 'descriptions', 'info',
+                                      'claims', 'datatype', 'sitelinks'],
                                      lang,
                                      fallback)
   const entity = entities[entityId]
@@ -172,6 +176,7 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
   const claims = new Map<string, Map<string, Claim>>()
   const links = entities[entityId].sitelinks || {}
   const sitelinks = new Map<string, EntitySiteLink>(Object.entries(links))
+  const datatype = entity.datatype
   claims.set(entityId,
              new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
 
@@ -181,6 +186,7 @@ export async function getEntityData(entityId: string, lang?: string, fallback = 
     descriptions,
     claims,
     sitelinks,
+    datatype,
   }
 }
 
@@ -424,4 +430,8 @@ export function coordinateFromGlobeCoordinate(data: GlobeCoordinateValue) {
     coordinate,
     globe,
   }
+}
+
+export function entityIdFromEntity(entity: EntityIdValue) {
+  return entity.id
 }

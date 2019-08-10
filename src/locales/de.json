@@ -41,7 +41,15 @@
     "calendar": "({calendar})",
     "globe": "auf {globe}",
     "someValue": "unbekannter Wert",
-    "noValue": "kein Wert"
+    "noValue": "kein Wert",
+    "propertyDatatype": "{label}: {type}",
+    "propertyDatatypeLabel": "Datentyp",
+    "superProperties": "{subpropertyOf}: jede(r/s) {property} ist auch ein(e) {properties}",
+    "noSuperProperties": "{subpropertyOf}: ist keine Untereigenschaft einer anderen Eigenschaft",
+    "instanceClasses": "{instanceOf}: {instance} ist auch ein(e) {classes}",
+    "noInstanceClasses": "{instanceOf}: {instance} ist keine Instanz einer anderen Klasse",
+    "superClasses": "{subclassOf}: jede(r/s) {class} ist auch ein(e) {classes}",
+    "noSuperClasses": "{subclassOf}: {class} ist keine Unterklasse einer anderen Klasse"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

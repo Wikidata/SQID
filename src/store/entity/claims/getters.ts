@@ -96,6 +96,6 @@ export const getters: GetterTree<ClaimsState, RootState> = {
       const forceLang = (rootGetters.translationSetFromUri
                          ? `&lang=${rootGetters.currentTranslation}`
                          : '')
-      return `https://tools.wmflabs.org/?q=${entityId}${forceLang}`
+      return `https://tools.wmflabs.org/reasonator/?q=${entityId}${forceLang}`
     },
 }

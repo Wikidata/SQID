@@ -1,7 +1,8 @@
-import { EntityId, EntitySiteLink } from '@/api/types'
-export { EntityId, EntitySiteLink }
+import { EntityId, EntitySiteLink, WBDatatype } from '@/api/types'
+export { EntityId, EntitySiteLink, WBDatatype }
 
 export interface EntityState {
   timestamps: Map<EntityId, Date>,
-  sitelinks: Map<EntityId, Map<string, EntitySiteLink>>
+  sitelinks: Map<EntityId, Map<string, EntitySiteLink>>,
+  datatypes: Map<EntityId, WBDatatype>,
 }

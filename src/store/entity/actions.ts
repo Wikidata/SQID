@@ -31,6 +31,15 @@ export const actions: ActionTree<RootState, RootState> = {
       sitelinks: entityData.sitelinks,
     })
 
+    const datatype = entityData.datatype
+
+    if (datatype) {
+      commit('datatypeLoaded', {
+        entityId,
+        datatype,
+      })
+    }
+
     return { ...getters.getTerms(entityId, lang),
              claims: getters.getClaims(entityId),
            }
