@@ -22,7 +22,7 @@
             <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
             <span place="property">{{ label }}</span>
             <ul place="properties" class="comma-separated">
-              <li class="comma-separated" v-for="(superProperty, supidx) of superProperties" :key="supidx">
+              <li v-for="(superProperty, supidx) of superProperties" :key="supidx">
                 <entity-link :entityId="superProperty.value.id" />
                 <sqid-qualifier-icon :claim="superProperty" />
               </li>
@@ -36,7 +36,7 @@
             <b place="subclassOf"><entity-link entityId="P279" /></b>
             <span place="class">{{ label }}</span>
             <ul place="classes" class="comma-separated" >
-              <li class="comma-separated" v-for="(superClass, sucidx) of superClasses" :key="sucidx">
+              <li v-for="(superClass, sucidx) of superClasses" :key="sucidx">
                 <entity-link :entityId="superClass.value.id" />
                 <sqid-qualifier-icon :claim="superClass" />
               </li>
@@ -98,6 +98,80 @@
                 </tr>
               </tbody>
             </table>
+        </sqid-collapsible-card>
+        <sqid-collapsible-card v-if="hierarchyStatistics.directSubclasses || hierarchyStatistics.superClasses.length"
+                               :header="$t('entity.classification')"
+                               id="hierarchy-classification">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <th v-t="'entity.directSuperclasses'" />
+                <td v-if="superClasses.length">
+                  <ul class="comma-separated">
+                    <li v-for="(superClass, supcidx) of superClasses" :key="supcidx">
+                      <entity-link :entityId="superClass.value.id" />
+                      <sqid-qualifier-icon :claim="superClass" />
+                      <b-badge>{{ superClassesUsage.get(superClass.value.id) }}</b-badge>
+                    </li>
+                  </ul>
+                </td>
+                <td v-else v-t="entity.noDirectSuperclasses" />
+              </tr>
+              <tr>
+                <th v-t="'entity.directSubclasses'" />
+                <td>
+                  <b-tabs>
+                    <b-tab>
+                      <template v-slot:title>
+                        <i18n path="entity.directSubclassesInstances"
+                              v-b-tooltip="$t('entity.directSubclassesInstancesDescription')">
+                          <b-badge place="count">{{ Object.keys(subclassesInstances).length }}</b-badge>
+                        </i18n>
+                      </template>
+                      <ul class="comma-separated">
+                        <li v-for="(subClass, dsciidx) of Object.keys(subclassesInstances)" :key="dsciidx">
+                          <entity-link :entityId="subClass" />
+                          <b-badge>{{ subclassesInstances[subClass] }}</b-badge>
+                        </li>
+                      </ul>
+                    </b-tab>
+                    <b-tab>
+                      <template v-slot:title>
+                        <i18n path="entity.directSubclassesSubclasses"
+                              v-b-tooltip="$t('entity.directSubclassesSubclassesDescription')">
+                          <b-badge place="count">{{ Object.keys(subclassesSubclasses).length }}</b-badge>
+                        </i18n>
+                      </template>
+                      <ul class="comma-separated">
+                        <li v-for="(subClass, dscsidx) of Object.keys(subclassesSubclasses)" :key="dscsidx">
+                          <entity-link :entityId="subClass" />
+                          <b-badge>{{ subclassesSubclasses[subClass] }}</b-badge>
+                        </li>
+                      </ul>
+                    </b-tab>
+                    <b-tab>
+                      <template v-slot:title>
+                        <i18n path="entity.directSubclassesAll">
+                          <b-badge place="count">{{ hierarchyStatistics.directSubclasses }}</b-badge>
+                        </i18n>
+                      </template>
+                      <ul class="comma-separated">
+                        <li v-for="(subClass, dscaidx) of exampleSubclasses" :key="dscaidx">
+                          <entity-link :entityId="subClass" />
+                        </li>
+                      </ul>
+                    </b-tab>
+                  </b-tabs>
+                </td>
+              </tr>
+              <tr>
+                <th v-t="'entity.allSubclasses'"
+                    v-b-tooltip
+                    :title="$t('entity.allSubclassesDescription')" />
+                <td>{{ hierarchyStatistics.allSubclasses }}</td>
+              </tr>
+            </tbody>
+          </table>
         </sqid-collapsible-card>
         <div id="claims" v-if="groupedClaims">
           <claim-table :header="$t('entity.humanRelationshipStatements')"
@@ -162,7 +236,7 @@ import ClaimTable from './ClaimTable.vue'
 import SqidQualifierIcon from './SqidQualifierIcon.vue'
 import { Claim, EntityKind, QualifiedEntityValue, WBDatatype } from '@/api/types'
 import { relatedEntityIds, parseEntityId, idsFromQualifiedEntity } from '@/api/wikidata'
-import { groupClaims, RelatednessMapping } from '@/api/sqid'
+import { groupClaims, RelatednessMapping, getClassHierarchyChunk } from '@/api/sqid'
 import { i18n } from '@/i18n'
 
 const classStatistics = namespace('statistics/classes')
@@ -179,7 +253,10 @@ export default class Entity extends Vue {
   @Action private getReverseClaims: any
   @Action private requestLabels: any
   @Action private getExampleInstances!: (entityId: EntityId) => Promise<EntityId[]>
+  @Action private getExampleSubclasses!: (entityId: EntityId) => Promise<EntityId[]>
   @classStatistics.Action private getClassHierarchyRecord!: (entityId: EntityId) => Promise<ClassStatistics>
+  @classStatistics.Action private getClassUsageCounts!: (entityIds: EntityId[]) => Promise<Map<EntityId, number>>
+  @classStatistics.Getter private getHierarchyRecord!: (entityId: EntityId) => ClassStatistics
   @propertyStatistics.Action private refreshRelatedProperties: any
   @propertyStatistics.Action private refreshClassification: any
   @propertyStatistics.Getter private propertyGroups!: (entityId: EntityId) => PropertyClassification
@@ -205,8 +282,12 @@ export default class Entity extends Vue {
   private propertyDatatype: WBDatatype | null = null
   private superProperties: QualifiedEntityValue[] = []
   private superClasses: QualifiedEntityValue[] = []
+  private superClassesUsage: Map<EntityId, number> = new Map<EntityId, number>()
   private instanceClasses: QualifiedEntityValue[] = []
+  private subclassesInstances: { [key: string]: number } = {}
+  private subclassesSubclasses: { [key: string]: number } = {}
   private exampleInstances: EntityId[] = []
+  private exampleSubclasses: EntityId[] = []
   private hierarchyStatistics: ClassStatistics = {
     directInstances: 0,
     directSubclasses: 0,
@@ -225,8 +306,12 @@ export default class Entity extends Vue {
     this.propertyDatatype = null
     this.superProperties = []
     this.superClasses = []
+    this.superClassesUsage = new Map<EntityId, number>()
     this.instanceClasses = []
     this.exampleInstances = []
+    this.exampleSubclasses = []
+    this.subclassesInstances = {}
+    this.subclassesSubclasses = {}
     this.hierarchyStatistics = {
       directInstances: 0,
       directSubclasses: 0,
@@ -243,14 +328,34 @@ export default class Entity extends Vue {
         if (record) {
           this.hierarchyStatistics = record
           const entityIds = record.superClasses.concat(record.nonemptySubClasses,
-                                                      record.relatedProperties)
+                                                       record.relatedProperties)
           this.requestLabels({ entityIds })
+
+          this.getClassUsageCounts(record.nonemptySubClasses).then((usage) => {
+            for (const subclassId of record.nonemptySubClasses) {
+              const instances = usage.get(subclassId)!
+              const subclasses = this.getHierarchyRecord(subclassId).allSubclasses
+
+              if (instances) {
+                Vue.set(this.subclassesInstances, subclassId, instances)
+              }
+
+              if (subclasses) {
+                Vue.set(this.subclassesSubclasses, subclassId, subclasses)
+              }
+            }
+          })
         }
       })
 
     this.getExampleInstances(this.entityId)
       .then((examples) => {
         this.exampleInstances = examples
+      })
+
+    this.getExampleSubclasses(this.entityId)
+      .then((examples) => {
+        this.exampleSubclasses = examples
       })
 
     const forwardClaims = this.getEntityData(this.entityId)
@@ -285,6 +390,10 @@ export default class Entity extends Vue {
 
           const superClasses = (this.getValuesForProperty(this.entityId, 'P279') as QualifiedEntityValue[]) || []
           this.superClasses = superClasses
+          this.getClassUsageCounts(this.superClasses.map((entity) => entity.value.id))
+            .then((counts) => {
+              this.superClassesUsage = counts
+            })
 
           const instanceClasses = (this.getValuesForProperty(this.entityId, 'P31') as QualifiedEntityValue[]) || []
           this.instanceClasses = instanceClasses
@@ -462,5 +571,10 @@ table {
   li:last-child::after {
     content: "";
   }
+
+.badge {
+  margin-left: .25em;
+  margin-right: .05em;
+}
 }
 </style>

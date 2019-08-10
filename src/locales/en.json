@@ -55,7 +55,17 @@
     "allInstances": "All instances",
     "allInstancesDescription": "Total number of unique instances of this class and its {num} direct and indirect subclasses",
     "typicalProperties": "Typical Properties",
-    "typicalPropertiesDescription": "Other properties typically used by direct and indirect instances of this class"
+    "typicalPropertiesDescription": "Other properties typically used by direct and indirect instances of this class",
+    "classification": "Classification",
+    "directSuperclasses": "Direct superclasses",
+    "directSubclasses": "Direct subclasses",
+    "directSubclassesInstances": "With instances {count}",
+    "directSubclassesInstancesDescription": "Direct subclasess that have instances, together with the number of their direct and indirect instances",
+    "directSubclassesSubclasses": "With subclasses {count}",
+    "directSubclassesSubclassesDescription": "Direct subclasses that have subclasses, together with the number of their direct and indirect subclasses",
+    "directSubclassesAll": "All {count}",
+    "allSubclasses": "All subclasses",
+    "allSubclassesDescription": "Number of unique direct and indirect subclasses"
   },
   "home": {
     "home": "A fresh look at Wikidata",

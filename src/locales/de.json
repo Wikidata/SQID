@@ -55,7 +55,17 @@
     "allInstances": "Alle Instances",
     "allInstancesDescription": "Anzahl aller eindeutigen Instanzen dieser Klasse und ihrer {num} direkten und indirekten Unterklassen",
     "typicalProperties": "Typische Eigenschaften",
-    "typicalPropertiesDescription": "Andere Eigenschaften, die typischerweise von direkten und indirekten Instanzen dieser Klasse benutzt werden"
+    "typicalPropertiesDescription": "Andere Eigenschaften, die typischerweise von direkten und indirekten Instanzen dieser Klasse benutzt werden",
+    "classification": "Klassifikation",
+    "directSuperclasses": "Direkte Oberklassen",
+    "directSubclasses": "Direkte Unterklassen",
+    "directSubclassesInstances": "Mit Instanzen {count}",
+    "directSubclassesInstancesDescription": "Direkte Unterklassen mit Instanzen, zusammen mit der Anzahl ihrer direkten und indirekten Instanzen",
+    "directSubclassesSubclasses": "Mit Unterklassen {count}",
+    "directSubclassesSubclassesDescription": "Direkte Unterklassen mit Unterklassen, zusammen mit der Anzahl ihrer direkten und indirekten Unterklassen",
+    "directSubclassesAll": "Alle {count}",
+    "allSubclasses": "Alle Unterklassen",
+    "allSubclassesDescription": "Anzahl der eindeutigen direkten und indirekten Unterklassen"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",
