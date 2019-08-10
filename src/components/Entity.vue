@@ -28,6 +28,10 @@
               </li>
             </ul>
           </i18n>
+          <i18n tag="div" path="entity.noSuperProperties" v-else-if="kind === 'property'">
+            <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
+            <span place="property">{{ label }}</span>
+          </i18n>
           <i18n tag="div" path="entity.superClasses" v-if="superClasses.length">
             <b place="subclassOf"><entity-link entityId="P279" /></b>
             <span place="class">{{ label }}</span>

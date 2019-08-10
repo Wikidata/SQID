@@ -45,7 +45,7 @@
     "propertyDatatype": "{label}: {type}",
     "propertyDatatypeLabel": "Type",
     "superProperties": "{subpropertyOf}: every {property} is also a(n) {properties}",
-    "noSuperProperties": "{subpropertyOf}: is not a subproperty of any other property",
+    "noSuperProperties": "{subpropertyOf}: {property} is not a subproperty of any other property",
     "instanceClasses": "{instanceOf}: {instance} is a(n) {classes}",
     "noInstanceClasses": "{instanceOf}: {instance} is not an instance of any other class",
     "superClasses": "{subclassOf}: every {class} is also a(n) {classes}",

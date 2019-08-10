@@ -45,7 +45,7 @@
     "propertyDatatype": "{label}: {type}",
     "propertyDatatypeLabel": "Datentyp",
     "superProperties": "{subpropertyOf}: jede(r/s) {property} ist auch ein(e) {properties}",
-    "noSuperProperties": "{subpropertyOf}: ist keine Untereigenschaft einer anderen Eigenschaft",
+    "noSuperProperties": "{subpropertyOf}: {property} ist keine Untereigenschaft einer anderen Eigenschaft",
     "instanceClasses": "{instanceOf}: {instance} ist ein(e) {classes}",
     "noInstanceClasses": "{instanceOf}: {instance} ist keine Instanz einer anderen Klasse",
     "superClasses": "{subclassOf}: jede(r/s) {class} ist auch ein(e) {classes}",
