@@ -14,7 +14,9 @@
       </table>
     </b-card-body>
     <b-tabs card v-if="reverseClaims && reverseClaims.size">
-      <b-tab class="overflow" :title="$t('entity.ownStatements')">
+      <b-tab class="overflow"
+             :title="$t('entity.ownStatements')"
+             :disabled="!claims.size">
         <table :class="['table', 'table-striped', { narrow, 'table-sm': narrow }]">
           <template v-if="claims">
             <claim-group :entityId="entityId"
