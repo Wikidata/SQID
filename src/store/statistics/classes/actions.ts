@@ -2,8 +2,7 @@ import { ActionTree } from 'vuex'
 import { ClassesState } from './types'
 import { RootState } from '@/store/types'
 import { EntityId } from '@/api/types'
-import { getClassHierarchyChunk } from '@/api/sqid'
-import { parseEntityId } from '@/api/wikidata'
+import { getClassHierarchyChunk, getChunkId } from '@/api/sqid'
 
 export const actions: ActionTree<ClassesState, RootState> = {
   async getClassHierarchyRecord({ dispatch, commit, getters }, entityId: EntityId) {
@@ -15,8 +14,7 @@ export const actions: ActionTree<ClassesState, RootState> = {
 
     await dispatch('statistics/refresh', {}, { root: true })
 
-    const { id } = parseEntityId(entityId)
-    const chunkId = Math.floor(id / 1000)
+    const chunkId = getChunkId(entityId, 1000)
     const timestamp = (mustRefresh
                        ? getters.lastHierarchyRefresh
                        : getters.cachedHierarchyRefresh)
@@ -48,9 +46,7 @@ export const actions: ActionTree<ClassesState, RootState> = {
                        : getters.cachedHierarchyRefresh)
 
     for (const entityId of staleIds) {
-      const { id } = parseEntityId(entityId)
-      const chunkId = Math.floor(id / 1000)
-      staleChunks.add(chunkId)
+      staleChunks.add(getChunkId(entityId, 1000))
     }
 
     const requests = []

@@ -4,6 +4,7 @@ import { ClaimsMap } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
 import { ClassStatistics } from '@/store/statistics/classes/types'
 import { getPropertySubjects } from './sparql'
+import { parseEntityId } from './wikidata'
 
 export const RELATED_PROPERTIES_THRESHOLD = 5
 export const MAX_EXAMPLE_INSTANCES = 20
@@ -62,6 +63,28 @@ export interface RelatednessMapping {
 
 export interface RelatednessScores {
   [key: string]: number,
+}
+
+export function getChunkId(entityId: EntityId, chunkSize: number) {
+  const { id } = parseEntityId(entityId)
+  return Math.floor(id / chunkSize)
+}
+
+export async function getRelatedPropertiesChunk(chunkId: number, lastRefresh: number) {
+  const response = await http.get(getDataFileURI(`properties/related-${chunkId}`, lastRefresh))
+  const chunk: RelatednessMapping = {}
+
+  for (const [entityId, related] of Object.entries(response.data)) {
+    const scores: RelatednessScores = {}
+
+    for (const [relatedId, score] of Object.entries(related as RelatednessScores)) {
+      scores[pifyNumericId(relatedId)] = score
+    }
+
+    chunk[pifyNumericId(entityId)] = scores
+  }
+
+  return Object.freeze(chunk)
 }
 
 export async function getRelatedProperties(lastRefresh: number): Promise<RelatednessMapping> {
@@ -194,7 +217,6 @@ export async function getClassHierarchyChunk(chunkId: number, lastRefresh: numbe
 
   return chunk
 }
-
 
 export async function getExampleInstances(entityId: EntityId, lang: string) {
   return getPropertySubjects('P31', lang, MAX_EXAMPLE_INSTANCES + 1, entityId)

@@ -412,12 +412,23 @@ export default class Entity extends Vue {
         this.requestLabels({entityIds: related})
       })
 
-    Promise.all([this.refreshRelatedProperties(),
-                 forwardClaims,
+    Promise.all([forwardClaims,
                  reverseClaims,
                  this.refreshClassification()])
-      .then((data) => {
-        this.regroupClaims(data[0])
+      .then(() => {
+        const properties = []
+
+        for (const property of this.claims!.keys()) {
+          properties.push(property)
+        }
+
+        for (const property of this.reverseClaims!.keys()) {
+          properties.push(property)
+        }
+
+        return this.refreshRelatedProperties(properties)
+      }).then((scores) => {
+        this.regroupClaims(scores)
       })
   }
 

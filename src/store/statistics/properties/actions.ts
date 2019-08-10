@@ -1,7 +1,9 @@
 import { ActionTree } from 'vuex'
 import { PropertiesState } from './types'
 import { RootState } from '@/store/types'
-import { getRelatedProperties, getPropertyClassification } from '@/api/sqid'
+import { EntityId } from '@/api/types'
+import { getPropertyClassification, getChunkId,
+         getRelatedPropertiesChunk, RelatednessMapping, RelatednessScores } from '@/api/sqid'
 
 export const actions: ActionTree<PropertiesState, RootState> = {
   async refreshClassification({ dispatch, commit, getters }) {
@@ -14,17 +16,37 @@ export const actions: ActionTree<PropertiesState, RootState> = {
     const response = await getPropertyClassification(getters.lastClassificationRefresh)
     commit('refreshClassification', response)
   },
-  async refreshRelatedProperties({ dispatch, commit, getters }) {
+  async refreshRelatedProperties({ commit, getters }, propertyIds: EntityId[]) {
+    const mustRefresh = getters.mustRefreshRelatedProperties
+    const chunkIds = new Set<number>()
 
-    if (!getters.mustRefreshRelatedProperties) {
-      return await getRelatedProperties(getters.cachedRelatedPropertiesRefresh)
+    for (const propertyId of propertyIds) {
+      chunkIds.add(getChunkId(propertyId, 10))
     }
 
-    await dispatch('statistics/refresh', {}, { root: true })
+    const requests = []
+    const timestamp = (mustRefresh
+                       ? getters.lastRelatedPropertiesRefresh
+                       : getters.cachedRelatedPropertiesRefresh)
 
-    const response = await getRelatedProperties(getters.lastRelatedPropertiesRefresh)
-    commit('refreshRelatedProperties')
+    for (const chunkId of chunkIds) {
+      requests.push(getRelatedPropertiesChunk(chunkId, timestamp))
+    }
 
-    return response
+    const responses = await Promise.all(requests)
+
+    if (mustRefresh) {
+      commit('refreshRelatedProperties')
+    }
+
+    const result: RelatednessMapping = {}
+
+    for (const response of responses) {
+      for (const [entityId, related] of Object.entries(response)) {
+        result[entityId] = related as RelatednessScores
+      }
+    }
+
+    return result
   },
 }
