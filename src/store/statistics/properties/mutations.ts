@@ -1,8 +1,6 @@
-import Vue from 'vue'
 import { MutationTree } from 'vuex'
 import { PropertiesState, PropertyClassification } from './types'
 import { EntityId, SqidEntityStatistics } from '@/api/types'
-import { RelatednessMapping, RelatednessScores } from '@/api/sqid'
 
 export const mutations: MutationTree<PropertiesState> = {
   refreshClassification: (state, classification: Map<EntityId, PropertyClassification>) => {

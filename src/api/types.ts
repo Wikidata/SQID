@@ -204,6 +204,16 @@ export interface SqidEntityStatistics {
   cAliases: number,
 }
 
+export interface SqidHierarchyRecord {
+  i?: number,
+  s?: number,
+  ai?: number,
+  as?: number,
+  sc?: EntityId[],
+  sb?: EntityId[],
+  r?: ResultList<number>,
+}
+
 export interface SqidStatistics {
   dumpDate: string,
   classUpdate: string,

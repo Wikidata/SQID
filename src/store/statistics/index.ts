@@ -5,6 +5,7 @@ import { actions } from './actions'
 import { getters } from './getters'
 import { mutations } from './mutations'
 import { properties } from './properties'
+import { classes } from './classes'
 import { items } from './items'
 
 export const state: StatisticsState = {
@@ -20,6 +21,7 @@ export const statistics: Module<StatisticsState, RootState> = {
   namespaced: true,
   modules: {
     properties,
+    classes,
     items,
   },
   state,

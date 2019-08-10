@@ -1,7 +1,8 @@
 import { http } from '@/http'
-import { Claim, EntityId, SqidStatistics } from './types'
+import { Claim, EntityId, SqidStatistics, SqidHierarchyRecord } from './types'
 import { ClaimsMap } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
+import { ClassStatistics } from '@/store/statistics/classes/types'
 
 const MAX_STATISTICS_AGE = 60 * 60 * 1000
 const SCRIPT_RUNTIME_SLACK = 5 * 60 * 1000
@@ -9,6 +10,18 @@ const endpoint = 'https://tools-static.wmflabs.org/sqid/data'
 
 function getDataFileURI(name: string, timestamp: number): string {
   return `${endpoint}/${name}.json?ts=${timestamp}`
+}
+
+function ifyNumericId(entityId: string, prefix: string): EntityId {
+  return `${prefix}${entityId}`
+}
+
+function qifyNumericId(entityId: string) {
+  return ifyNumericId(entityId, 'Q')
+}
+
+function pifyNumericId(entityId: string) {
+  return ifyNumericId(entityId, 'P')
 }
 
 export function shouldRefresh(timeSinceLastRefresh: number,
@@ -134,4 +147,42 @@ export function wikifyLink(uri: string | null): string | null {
   }
 
   return null
+}
+
+export async function getClassHierarchyChunk(chunkId: number, lastRefresh: number) {
+  const chunk = new Map<EntityId, ClassStatistics>()
+  const response = await http.get(getDataFileURI(`classes/hierarchy-${chunkId}`, lastRefresh))
+
+  for (const [entityId, data] of Object.entries(response.data as { [key: string]: SqidHierarchyRecord })) {
+    const superClasses = data.sc || []
+    const nonemptySubClasses = data.sb || []
+    const related: RelatednessScores = data.r || {}
+
+    const sortedProperties = Object.entries(related)
+      .sort((left, right) => {
+        if (left[1] < right[1]) {
+          return 1
+        } else if (left[1] > right[1]) {
+          return -1
+        }
+
+        return 0
+      })
+
+    const relatedProperties = sortedProperties.map((property) => pifyNumericId(property[0]))
+
+    const record = {
+      directInstances: data.i || 0,
+      directSubclasses: data.s || 0,
+      allInstances: data.ai || 0,
+      allSubclasses: data.as || 0,
+      superClasses: superClasses.map(qifyNumericId),
+      nonemptySubClasses: nonemptySubClasses.map(qifyNumericId),
+      relatedProperties,
+    }
+
+    chunk.set(qifyNumericId(entityId), record)
+  }
+
+  return chunk
 }
