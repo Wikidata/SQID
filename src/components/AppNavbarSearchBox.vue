@@ -2,7 +2,7 @@
   <vue-bootstrap-typeahead
     v-model="entitySearch"
     :data="entities"
-    :serializer="s => `${s.id}: : ${s.label} ( (${s.description}) )`"
+    :serializer="s => `${s.id}: : ${s.label || ''} ( (${s.description || ''}) )`"
     @hit="onSelectedEntity($event)"
     size="sm"
     :placeholder="$t('pageTitle.searchItem')"
@@ -40,11 +40,22 @@ export default class AppNavbarSearchBox extends Vue {
   private entities: any[] = []
   private searchEntities = _.debounce(async function(this: AppNavbarSearchBox, search) {
     try {
-      const response = await searchEntities(search, { limit: 10 } )
+      const response = await searchEntities(search, { limit: 10 })
       this.entities = []
       for (const [key, entity] of Object.entries(response)) {
         this.entities.push(entity)
       }
+
+      if (search.match(/^P\d+$/)) {
+        const properties = await searchEntities(search, { limit: 10,
+                                                          kind: 'property',
+                                                        })
+
+        for (const [key, entity] of Object.entries(properties)) {
+          this.entities.push(entity)
+        }
+      }
+
     } catch (err) {
       // do nothing
     }
