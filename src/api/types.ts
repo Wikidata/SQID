@@ -247,3 +247,9 @@ export interface SqidStatement {
   property: EntityId,
   rank: Rank,
 }
+
+export interface QualifiedEntityValue {
+  value: EntityIdValue,
+  qualifiers: Map<EntityId, Snak[]>,
+  id: string,
+}

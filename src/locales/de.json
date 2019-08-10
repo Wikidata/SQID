@@ -49,7 +49,13 @@
     "instanceClasses": "{instanceOf}: {instance} ist ein(e) {classes}",
     "noInstanceClasses": "{instanceOf}: {instance} ist keine Instanz einer anderen Klasse",
     "superClasses": "{subclassOf}: jede(r/s) {class} ist auch ein(e) {classes}",
-    "noSuperClasses": "{subclassOf}: {class} ist keine Unterklasse einer anderen Klasse"
+    "noSuperClasses": "{subclassOf}: {class} ist keine Unterklasse einer anderen Klasse",
+    "instances": "Instanzen",
+    "directInstances": "Direkte Instanzen",
+    "allInstances": "Alle Instances",
+    "allInstancesDescription": "Anzahl aller eindeutigen Instanzen dieser Klasse und ihrer {num} direkten und indirekten Unterklassen",
+    "typicalProperties": "Typische Eigenschaften",
+    "typicalPropertiesDescription": "Andere Eigenschaften, die typischerweise von direkten und indirekten Instanzen dieser Klasse benutzt werden"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

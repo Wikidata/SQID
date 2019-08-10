@@ -2,13 +2,29 @@ import { GetterTree } from 'vuex'
 import { ClaimsState, EntityId } from './types'
 import { RootState } from '@/store/types'
 import { wikidataUrl } from '@/api/wikidata'
-import { Claim } from '@/api/types'
+import { Claim, Snak } from '@/api/types'
 import { wikifyLink } from '@/api/sqid'
 
 function getStatementValue(claim: Claim) {
   if (claim.mainsnak.snaktype === 'value') {
     return (claim.mainsnak.datavalue as any).value
   }
+}
+
+function getStatementQualifiers(claim: Claim) {
+  const qualifiers = new Map<EntityId, Snak[]>()
+
+  if (!claim.qualifiers) {
+    return qualifiers
+  }
+
+  const order = claim['qualifiers-order'] || Object.keys(claim.qualifiers)
+
+  for (const propId of order) {
+    qualifiers.set(propId, claim.qualifiers[propId])
+  }
+
+  return qualifiers
 }
 
 export const getters: GetterTree<ClaimsState, RootState> = {
@@ -37,7 +53,10 @@ export const getters: GetterTree<ClaimsState, RootState> = {
 
     if (claims !== undefined) {
       for (const claim of claims) {
-        result.push(getStatementValue(claim))
+        result.push({ value: getStatementValue(claim),
+                      qualifiers: getStatementQualifiers(claim),
+                      id: claim.id,
+                    })
       }
     }
 
@@ -68,7 +87,7 @@ export const getters: GetterTree<ClaimsState, RootState> = {
       const images = getters.getValuesForProperty(entityId, 'P18')
 
       if (images !== undefined) {
-        for (const image of images) {
+        for (const { value: image } of images) {
           result.push(wikifyLink(image))
         }
       }

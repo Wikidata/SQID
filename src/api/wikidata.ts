@@ -1,8 +1,7 @@
 import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
          Claim, WBApiResult, EntitySiteLink, TimeDataValue,
-         GlobeCoordinateValue,
-         EntityIdValue} from './types'
+         GlobeCoordinateValue, QualifiedEntityValue } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
 import { ENTITY_PREFIX_LEN } from './sparql'
@@ -445,6 +444,18 @@ export function coordinateFromGlobeCoordinate(data: GlobeCoordinateValue) {
   }
 }
 
-export function entityIdFromEntity(entity: EntityIdValue) {
-  return entity.id
+export function idsFromQualifiedEntity(entity: QualifiedEntityValue): EntityId[] {
+  const ids = [entity.value.id]
+
+  for (const [propId, snaks] of entity.qualifiers) {
+    ids.push(propId)
+
+    for (const snak of snaks) {
+      if (snak.snaktype === 'value' && snak.datavalue.type === 'wikibase-entityid') {
+        ids.push((snak.datavalue as EntityIdDataValue).value.id)
+      }
+    }
+  }
+
+  return ids
 }

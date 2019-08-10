@@ -21,42 +21,80 @@
           <i18n tag="div" path="entity.superProperties" v-if="superProperties.length">
             <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
             <span place="property">{{ label }}</span>
-            <span place="properties">
-              <span v-for="(superProperty, supidx) of superProperties" :key="supidx">
-                <template v-if="supidx > 0">, </template>
-                <entity-link :entityId="superProperty" />
-              </span>
-            </span>
+            <ul place="properties" class="comma-separated">
+              <li class="comma-separated" v-for="(superProperty, supidx) of superProperties" :key="supidx">
+                <entity-link :entityId="superProperty.value.id" />
+                <sqid-qualifier-icon :claim="superProperty" />
+              </li>
+            </ul>
           </i18n>
           <i18n tag="div" path="entity.superClasses" v-if="superClasses.length">
             <b place="subclassOf"><entity-link entityId="P279" /></b>
             <span place="class">{{ label }}</span>
-            <span place="classes">
-              <span v-for="(superClass, sucidx) of superClasses" :key="sucidx">
-                <template v-if="sucidx > 0">, </template>
-                <entity-link :entityId="superClass" />
-              </span>
-            </span>
+            <ul place="classes" class="comma-separated" >
+              <li class="comma-separated" v-for="(superClass, sucidx) of superClasses" :key="sucidx">
+                <entity-link :entityId="superClass.value.id" />
+                <sqid-qualifier-icon :claim="superClass" />
+              </li>
+            </ul>
           </i18n>
-          <i18n tag="div" path="entity.noSuperClasses" v-else> <!-- todo(mx): only show if there are direct subclasses-->
+          <i18n tag="div" path="entity.noSuperClasses" v-else-if="hierarchyStatistics.directSubclasses">
             <b place="subclassOf"><entity-link entityId="P279" /></b>
             <span place="class">{{ label }}</span>
           </i18n>
           <i18n tag="div" path="entity.instanceClasses" v-if="instanceClasses.length">
             <b place="instanceOf"><entity-link entityId="P31" /></b>
             <span place="instance">{{ label }}</span>
-            <span place="classes">
-              <span v-for="(instanceClass, incidx) of instanceClasses" :key="incidx">
-                <template v-if="incidx > 0">, </template>
-                <entity-link :entityId="instanceClass" />
-              </span>
-            </span>
+            <ul place="classes" class="comma-separated">
+              <li v-for="(instanceClass, incidx) of instanceClasses" :key="incidx">
+                <entity-link :entityId="instanceClass.value.id" />
+                <sqid-qualifier-icon :claim="instanceClass" />
+              </li>
+            </ul>
           </i18n>
           <i18n tag="div" path="entity.noInstanceClasses" v-else>
             <b place="instanceOf"><entity-link entityId="P31" /></b>
             <span place="instance">{{ label }}</span>
           </i18n>
         </div>
+        <sqid-collapsible-card v-if="hierarchyStatistics.directInstances || hierarchyStatistics.allInstances"
+                               :header="$t('entity.instances')"
+                               id="hierarchy-instances">
+          <table class="table table-striped">
+              <tbody>
+                <tr>
+                  <th v-t="'entity.directInstances'" />
+                  <td>{{ hierarchyStatistics.directInstances }}
+                    <div class="four-lines" v-if="hierarchyStatistics.directInstances">
+                      <ul class="comma-separated">
+                        <li v-for="(exInstId, eiidx) of exampleInstances" :key="eiidx">
+                          <entity-link :entityId="exInstId" />
+                        </li>
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <th v-t="'entity.allInstances'"
+                      v-b-tooltip
+                      :title="$t('entity.allInstancesDescription', { num: hierarchyStatistics.allSubclasses })" />
+                  <td>{{ hierarchyStatistics.allInstances }}</td>
+                </tr>
+                <tr>
+                  <th v-t="'entity.typicalProperties'"
+                      v-b-tooltip
+                      :title="$t('entity.typicalPropertiesDescription')" />
+                  <td><div class="four-lines">
+                      <ul class="comma-separated">
+                        <li v-for="(relatedId, relidx) of hierarchyStatistics.relatedProperties" :key="relidx">
+                          <entity-link :entityId="relatedId" />
+                        </li>
+                      </ul>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+        </sqid-collapsible-card>
         <div id="claims" v-if="groupedClaims">
           <claim-table :header="$t('entity.humanRelationshipStatements')"
                        :entityId="entityId"
@@ -115,23 +153,29 @@ import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
 import { PropertyClassification } from '@/store/statistics/properties/types'
+import { ClassStatistics } from '@/store/statistics/classes/types'
 import ClaimTable from './ClaimTable.vue'
-import { Claim, EntityKind, EntityIdValue, WBDatatype } from '@/api/types'
-import { relatedEntityIds, parseEntityId, entityIdFromEntity } from '@/api/wikidata'
+import SqidQualifierIcon from './SqidQualifierIcon.vue'
+import { Claim, EntityKind, QualifiedEntityValue, WBDatatype } from '@/api/types'
+import { relatedEntityIds, parseEntityId, idsFromQualifiedEntity } from '@/api/wikidata'
 import { groupClaims, RelatednessMapping } from '@/api/sqid'
 import { i18n } from '@/i18n'
 
+const classStatistics = namespace('statistics/classes')
 const propertyStatistics = namespace('statistics/properties')
 
 @Component({
   components: {
     'claim-table': ClaimTable,
+    'sqid-qualifier-icon': SqidQualifierIcon,
   }})
 export default class Entity extends Vue {
   @Prop({ required: true }) private entityId!: string
   @Action private getEntityData: any
   @Action private getReverseClaims: any
   @Action private requestLabels: any
+  @Action private getExampleInstances!: (entityId: EntityId) => Promise<EntityId[]>
+  @classStatistics.Action private getClassHierarchyRecord!: (entityId: EntityId) => Promise<ClassStatistics>
   @propertyStatistics.Action private refreshRelatedProperties: any
   @propertyStatistics.Action private refreshClassification: any
   @propertyStatistics.Getter private propertyGroups!: (entityId: EntityId) => PropertyClassification
@@ -155,9 +199,19 @@ export default class Entity extends Vue {
   private banner: string | null = null
   private kind: EntityKind | null = null
   private propertyDatatype: WBDatatype | null = null
-  private superProperties: EntityId[] = []
-  private superClasses: EntityId[] = []
-  private instanceClasses: EntityId[] = []
+  private superProperties: QualifiedEntityValue[] = []
+  private superClasses: QualifiedEntityValue[] = []
+  private instanceClasses: QualifiedEntityValue[] = []
+  private exampleInstances: EntityId[] = []
+  private hierarchyStatistics: ClassStatistics = {
+    directInstances: 0,
+    directSubclasses: 0,
+    allInstances: 0,
+    allSubclasses: 0,
+    superClasses: [],
+    nonemptySubClasses: [],
+    relatedProperties: [],
+  }
 
   private updateEntityData() {
     this.images = null
@@ -168,7 +222,32 @@ export default class Entity extends Vue {
     this.superProperties = []
     this.superClasses = []
     this.instanceClasses = []
+    this.exampleInstances = []
+    this.hierarchyStatistics = {
+      directInstances: 0,
+      directSubclasses: 0,
+      allInstances: 0,
+      allSubclasses: 0,
+      superClasses: [],
+      nonemptySubClasses: [],
+      relatedProperties: [],
+    }
     document.title = `${this.label} – SQID`
+
+    this.getClassHierarchyRecord(this.entityId)
+      .then((record) => {
+        if (record) {
+          this.hierarchyStatistics = record
+          const entityIds = record.superClasses.concat(record.nonemptySubClasses,
+                                                      record.relatedProperties)
+          this.requestLabels({ entityIds })
+        }
+      })
+
+    this.getExampleInstances(this.entityId)
+      .then((examples) => {
+        this.exampleInstances = examples
+      })
 
     const forwardClaims = this.getEntityData(this.entityId)
       .then((data: {
@@ -196,19 +275,20 @@ export default class Entity extends Vue {
           if (kind === 'property') {
             this.propertyDatatype = this.getPropertyDatatype(this.entityId) || null
 
-            const values = (this.getValuesForProperty(this.entityId, 'P1647') as EntityIdValue[]) || []
-            this.superProperties = values.map(entityIdFromEntity)
+            const values = (this.getValuesForProperty(this.entityId, 'P1647') as QualifiedEntityValue[]) || []
+            this.superProperties = values
           }
 
-          const superClasses = (this.getValuesForProperty(this.entityId, 'P279') as EntityIdValue[]) || []
-          this.superClasses = superClasses.map(entityIdFromEntity)
+          const superClasses = (this.getValuesForProperty(this.entityId, 'P279') as QualifiedEntityValue[]) || []
+          this.superClasses = superClasses
 
-          const instanceClasses = (this.getValuesForProperty(this.entityId, 'P31') as EntityIdValue[]) || []
-          this.instanceClasses = instanceClasses.map(entityIdFromEntity)
+          const instanceClasses = (this.getValuesForProperty(this.entityId, 'P31') as QualifiedEntityValue[]) || []
+          this.instanceClasses = instanceClasses
 
-          const entityIds = ['P1647', 'P279', 'P31'].concat(this.superProperties,
-                                                            this.superClasses,
-                                                            this.instanceClasses)
+          const entityIds = ['P1647', 'P279', 'P31'].concat(
+            ...this.superProperties.map(idsFromQualifiedEntity),
+            ...this.superClasses.map(idsFromQualifiedEntity),
+            ...this.instanceClasses.map(idsFromQualifiedEntity))
           this.requestLabels({ entityIds })
         })
     const reverseClaims = this.getReverseClaims(this.entityId)
@@ -315,7 +395,7 @@ export default class Entity extends Vue {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 #aliases {
   margin-top: -10px;
   margin-bottom: 0px;
@@ -347,9 +427,36 @@ export default class Entity extends Vue {
 table {
   table-layout: fixed;
   margin-bottom: 0px !important;
+
+  &:not(.narrow) th {
+    width: 25%;
+  }
 }
 
 .card-body {
   padding: 0 0;
+}
+
+.four-lines {
+  overflow: auto;
+  max-height: 6em;
+}
+
+.comma-separated {
+  display: inline;
+  list-style: none;
+  padding: 0;
+
+  li {
+    display: inline;
+  }
+
+  li::after {
+    content: ", ";
+  }
+
+  li:last-child::after {
+    content: "";
+  }
 }
 </style>

@@ -49,7 +49,13 @@
     "instanceClasses": "{instanceOf}: {instance} is a(n) {classes}",
     "noInstanceClasses": "{instanceOf}: {instance} is not an instance of any other class",
     "superClasses": "{subclassOf}: every {class} is also a(n) {classes}",
-    "noSuperClasses": "{subclassOf}: {class} is not a subclass of any other class"
+    "noSuperClasses": "{subclassOf}: {class} is not a subclass of any other class",
+    "instances": "Instances",
+    "directInstances": "Direct instances",
+    "allInstances": "All instances",
+    "allInstancesDescription": "Total number of unique instances of this class and its {num} direct and indirect subclasses",
+    "typicalProperties": "Typical Properties",
+    "typicalPropertiesDescription": "Other properties typically used by direct and indirect instances of this class"
   },
   "home": {
     "home": "A fresh look at Wikidata",
