@@ -54,7 +54,7 @@ def derive_class_hierarchy():
 
     hierarchy = {}
     splits = defaultdict(dict)
-    keys = ['i', 's', 'ai', 'as', 'sc', 'sb']
+    keys = ['i', 's', 'ai', 'as', 'sc', 'sb', 'r']
 
     for cid in data:
         record = {}
