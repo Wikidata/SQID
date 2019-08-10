@@ -322,6 +322,19 @@ export function relatedEntityIds(claims: ClaimsMap) {
           }
         }
       }
+
+      if ('qualifiers' in claim) {
+        for (const [propId, snaks] of Object.entries(claim.qualifiers!)) {
+          entityIds.add(propId)
+
+          for (const snak of snaks) {
+            if (snak.datatype === 'wikibase-item') {
+              const datavalue = (snak.datavalue as EntityIdDataValue)
+              entityIds.add(datavalue.value.id)
+            }
+          }
+        }
+      }
     }
   }
 
