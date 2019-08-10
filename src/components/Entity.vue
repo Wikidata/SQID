@@ -129,9 +129,9 @@
                         </i18n>
                       </template>
                       <ul class="comma-separated">
-                        <li v-for="(subClass, dsciidx) of Object.keys(subclassesInstances)" :key="dsciidx">
-                          <entity-link :entityId="subClass" />
-                          <b-badge>{{ subclassesInstances[subClass] }}</b-badge>
+                        <li v-for="(subClass, dsciidx) of sortedSubclassesInstances" :key="dsciidx">
+                          <entity-link :entityId="subClass.id" />
+                          <b-badge>{{ subClass.count }}</b-badge>
                         </li>
                       </ul>
                     </b-tab>
@@ -143,9 +143,9 @@
                         </i18n>
                       </template>
                       <ul class="comma-separated">
-                        <li v-for="(subClass, dscsidx) of Object.keys(subclassesSubclasses)" :key="dscsidx">
-                          <entity-link :entityId="subClass" />
-                          <b-badge>{{ subclassesSubclasses[subClass] }}</b-badge>
+                        <li v-for="(subClass, dscsidx) of sortedSubclassesSubclasses" :key="dscsidx">
+                          <entity-link :entityId="subClass.id" />
+                          <b-badge>{{ subClass.count }}</b-badge>
                         </li>
                       </ul>
                     </b-tab>
@@ -504,6 +504,45 @@ export default class Entity extends Vue {
 
   private get links() {
     return this.linkUrls
+  }
+
+  private compareByCount(left: { count: number }, right: { count: number }) {
+    const lhs = left.count
+    const rhs = right.count
+
+    if (lhs < rhs) {
+      return 1
+    }
+
+    if (lhs > rhs) {
+      return -1
+    }
+
+    return 0
+  }
+
+  private get sortedSubclassesInstances() {
+    const result = []
+
+    for (const [subclassId, count] of Object.entries(this.subclassesInstances)) {
+      result.push({ id: subclassId,
+                    count,
+                  })
+    }
+
+    return result.sort(this.compareByCount)
+  }
+
+  private get sortedSubclassesSubclasses() {
+    const result = []
+
+    for (const [subclassId, count] of Object.entries(this.subclassesSubclasses)) {
+      result.push({ id: subclassId,
+                    count,
+                  })
+    }
+
+    return result.sort(this.compareByCount)
   }
 }
 </script>
