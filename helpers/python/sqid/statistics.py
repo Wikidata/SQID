@@ -52,6 +52,20 @@ def update_json_data(name, data, timestamp=None):
         logger.info('Update for %s complete.', name)
 
 
+def update_split_json_data(name, data, chunk_size):
+    """Updates split JSON data for file "`name.json",
+       with customisable chunk size."""
+
+    chunks = defaultdict(dict)
+
+    for entity, record in data.items():
+        chunk = int(entity) // chunk_size
+        chunks[chunk][entity] = record
+
+    for index, chunk in chunks.items():
+        update_json_data('{}-{}'.format(name, index), chunk)
+
+
 def update_timestamp(name, timestamp):
     """Updates the statistics `timestamp` for `name`."""
     data = get_json_data('statistics')

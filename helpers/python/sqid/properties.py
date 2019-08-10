@@ -155,3 +155,4 @@ def derive_related_properties():
             related[pid] = data[pid]['r']
 
     statistics.update_json_data('properties/related', related)
+    statistics.update_split_json_data('properties/related', related, 10)

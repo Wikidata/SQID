@@ -53,7 +53,6 @@ def derive_class_hierarchy():
     data = statistics.get_json_data('classes')
 
     hierarchy = {}
-    splits = defaultdict(dict)
     keys = ['i', 's', 'ai', 'as', 'sc', 'sb', 'r']
 
     for cid in data:
@@ -64,10 +63,5 @@ def derive_class_hierarchy():
                 record[key] = data[cid][key]
         hierarchy[cid] = record
 
-        index = int(cid) // 1000
-        splits[index][cid] = record
-
     statistics.update_json_data('classes/hierarchy', hierarchy)
-
-    for (index, chunk) in splits.items():
-        statistics.update_json_data('classes/hierarchy-{}'.format(index), chunk)
+    statistics.update_split_json_data('classes/hierarchy', hierarchy, 1000)
