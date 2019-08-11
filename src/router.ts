@@ -95,6 +95,26 @@ const router = new Router({
       beforeEnter: ensureEntityIsValid,
     },
     {
+      path: '/classes/',
+      name: 'classes',
+      component: () => import(/* webpackChunkName: "construction" */ '@/views/Construction.vue'),
+    },
+    {
+      path: '/properties/',
+      name: 'properties',
+      component: () => import(/* webpackChunkName: "construction" */ '@/views/Construction.vue'),
+    },
+    {
+      path: '/rules/',
+      name: 'rules',
+      component: () => import(/* webpackChunkName: "construction" */ '@/views/Construction.vue'),
+    },
+    {
+      path: '/lexemes/',
+      name: 'lexemes',
+      component: () => import(/* webpackChunkName: "construction" */ '@/views/Construction.vue'),
+    },
+    {
       path: '/invalid/:id',
       name: 'invalid-entity',
       component: () => import(/* webpackChunkName: "invalidEntity" */ '@/views/InvalidEntity.vue'),

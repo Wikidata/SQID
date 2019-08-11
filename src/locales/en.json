@@ -25,7 +25,9 @@
     "noSuchEntity": "Sorry, I could not find any entity with ID “{entityId}”.",
     "noSuchEntityDescription": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know.",
     "invalidEntity": "Sorry, I could not parse “{entityId}” as a valid entity ID.",
-    "invalidEntityDescription": "While trying to read “{entityId}” as an entity ID, this error occured: “{error}”."
+    "invalidEntityDescription": "While trying to read “{entityId}” as an entity ID, this error occured: “{error}”.",
+    "underConstruction": "Sorry, this part of SQID is still under construction.",
+    "underConstructionDescription": "This rewrite of SQID is still under development. For the moment, you can still use {sqid}."
   },
   "entity": {
     "hierarchyStatements": "Class hierarchy",

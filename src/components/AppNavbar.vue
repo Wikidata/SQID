@@ -32,7 +32,7 @@ export default class AppNavbar extends Vue {
       { target: {name: 'home'}, message: 'pageTitle.start', exact: true },
       { target: '/classes', message: 'pageTitle.classes' },
       { target: '/properties', message: 'pageTitle.properties' },
-      { target: '/lexemes', message: 'pageTitle.lexemes' },
+//      { target: '/lexemes', message: 'pageTitle.lexemes' },
       { target: '/rules', message: 'pageTitle.rules' },
       { target: {name: 'about'}, message: 'pageTitle.about' },
     ]

@@ -25,7 +25,9 @@
     "noSuchEntity": "Tut mir leid, ich konnte keine Entität mit ID „{entityId}“ finden.",
     "noSuchEntityDescription": "Vielleicht wurde sie gelöscht. Vielleicht hat sie nie existiert. Vielleicht werden wir es nie wissen.",
     "invalidEntity": "Tut mir leid, ich koennte „{entityId}“ nicht als gültige ID einer Entität lesen.",
-    "invalidEntityDescription": "Beim Versuch, „{entityId}“ als ID einer Entität zu lesen, trat der folgende Fehler auf: „{error}“."
+    "invalidEntityDescription": "Beim Versuch, „{entityId}“ als ID einer Entität zu lesen, trat der folgende Fehler auf: „{error}“.",
+    "underConstruction": "Tut mir leid, dieser Teil von SQID ist noch eine Baustelle.",
+    "underConstructionDescription": "Diese neue Version von SQID ist noch nicht fertig und wird noch weiter entwickelt. Im Moment steht noch {sqid} zur Verfügung."
   },
   "entity": {
     "hierarchyStatements": "Klassenhierarchie",
