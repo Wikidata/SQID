@@ -1,8 +1,12 @@
-# SQID
+# SQID-1.0
 (a.k.a. Wikidata Class Browser)
 
 This repository contains the code for the [SQID Wikidata Browser](http://tools.wmflabs.org/sqid/).
 You can use the application online without installing anything.
+
+## Legacy version
+
+This is the source code for the (currently still deployed) AngularJS version of SQID that is no longer actively developed. Current development has moved to the `master` branch.
 
 ## Submitting comments, bug reports, feature requests
 
