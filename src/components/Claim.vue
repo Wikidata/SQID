@@ -2,7 +2,7 @@
   <div :id="claimId">
     <template v-if="!reverse">
       <sqid-collapse-button :id="claimId">
-        <snak :snak="mainsnak" :rank="rank" @click.native="$event.stopImmediatePropagation()" />
+        <snak :snak="mainsnak" :rank="rank" />
       </sqid-collapse-button>
       <div class="qualifiers" v-for="(prop, pidx) in qualifierOrder" :key="pidx">
         <div v-for="(qualifier, qidx) in qualifiers(prop)" :key="qidx">

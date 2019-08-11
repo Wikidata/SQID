@@ -1,5 +1,9 @@
 <template>
-  <router-link :to="destination" :title="tooltip">{{ label }}</router-link>
+  <router-link :to="destination"
+               :title="tooltip"
+               @click.native="$event.stopImmediatePropagation()">
+    {{ label }}
+  </router-link>
 </template>
 
 <script lang="ts">
