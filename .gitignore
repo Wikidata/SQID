@@ -1,10 +1,10 @@
-src/data/classes.json
-src/data/properties.json
-src/data/statistics.json
+public/data/classes.json
+public/data/properties.json
+public/data/statistics.json
 node_modules
 *.pyc
 \#*\#
 *~
 .\#*
-src/data/properties/*.json
-src/data/classes/*.json
+public/data/properties/*.json
+public/data/classes/*.json
