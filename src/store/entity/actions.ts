@@ -3,7 +3,7 @@ import { RootState } from '../types'
 
 import { i18n } from '@/i18n'
 import { Claim, Datavalue, EntityId, SnakType, WBDatatype } from '@/api/types'
-import { getEntityData, parseEntityId } from '@/api/wikidata'
+import { getEntities, getEntityData, parseEntityId } from '@/api/wikidata'
 import { getRelatedStatements } from '@/api/sparql'
 import { getExampleInstances, getExampleSubclasses, getExampleItems, getExampleValues } from '@/api/sqid'
 
@@ -65,6 +65,34 @@ export const actions: ActionTree<RootState, RootState> = {
     return { ...getters.getTerms(entityId, lang),
              claims: getters.getClaims(entityId),
            }
+  },
+  async getPropertyDatatypes({ commit, getters }, entityIds: EntityId[]) {
+    const missing = []
+
+    for (const entityId of entityIds) {
+      if (getters.getPropertyDatatype(entityId) === undefined) {
+        missing.push(entityId)
+      }
+    }
+
+    const entityData = await getEntities(missing, ['info'])
+
+    const datatypes: { [key: string]: WBDatatype } = {}
+    for (const [entityId, data] of Object.entries(entityData)) {
+      if ('datatype' in data) {
+        datatypes[entityId] = data.datatype as WBDatatype
+      }
+    }
+
+    commit('datatypesLoaded', datatypes)
+
+    const result: { [key: string]: string } = {}
+
+    for (const entityId of entityIds) {
+      result[entityId] = getters.getPropertyDatatype(entityId)
+    }
+
+    return result
   },
   async getReverseClaims({}, entityId: EntityId) {
     const statements = await getRelatedStatements(entityId)

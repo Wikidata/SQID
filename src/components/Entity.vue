@@ -331,6 +331,7 @@ const propertyStatistics = namespace('statistics/properties')
 export default class Entity extends Vue {
   @Prop({ required: true }) private entityId!: string
   @Action private getEntityData: any
+  @Action private getPropertyDatatypes: any
   @Action private getReverseClaims: any
   @Action private requestLabels: any
   @Action private getExampleItems!: (entityId: EntityId) => Promise<EntityId[]>
@@ -342,6 +343,7 @@ export default class Entity extends Vue {
   @classStatistics.Getter private getHierarchyRecord!: (entityId: EntityId) => ClassStatistics
   @propertyStatistics.Action private refreshRelatedProperties: any
   @propertyStatistics.Action private refreshClassification: any
+  @propertyStatistics.Action private getUrlPattern: any
   @propertyStatistics.Action private getPropertyUsage!: (entityId: EntityId) => Promise<PropertyStatistics>
   @propertyStatistics.Getter private propertyGroups!: (entityId: EntityId) => PropertyClassification
   @Getter private getImages: any
@@ -535,6 +537,7 @@ export default class Entity extends Vue {
 
           const related = relatedEntityIds(this.claims)
           this.requestLabels({entityIds: related})
+          this.getPropertyDatatypes(related)
 
           this.images = this.getImages(this.entityId)
           this.banner = this.getBanner(this.entityId)
@@ -568,6 +571,7 @@ export default class Entity extends Vue {
 
         const related = relatedEntityIds(claims)
         this.requestLabels({entityIds: related})
+        this.getPropertyDatatypes(related)
       })
 
     Promise.all([forwardClaims,
@@ -583,7 +587,6 @@ export default class Entity extends Vue {
         for (const property of this.reverseClaims!.keys()) {
           properties.push(property)
         }
-
         return this.refreshRelatedProperties(properties)
       }).then((scores) => {
         this.regroupClaims(scores)
@@ -605,6 +608,7 @@ export default class Entity extends Vue {
   }
 
   private created() {
+    this.getUrlPattern(this.entityId)
     this.onEntityIdChanged()
     this.updateLinks()
   }

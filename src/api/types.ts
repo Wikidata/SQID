@@ -110,7 +110,7 @@ export interface Snak {
   datatype: WBDatatype
 }
 
-export type DatavalueKind = 'wikibase-entityid' | 'time' | 'globecoordinate' | 'string' | 'monolingualtext'
+export type DatavalueKind = 'wikibase-entityid' | 'time' | 'globecoordinate' | 'string' | 'monolingualtext' | 'quantity'
 
 export interface Datavalue {
   type: DatavalueKind
@@ -153,7 +153,17 @@ export interface GlobeCoordinate {
   longitude: number,
   precision: number,
   globe: string,
-  altitude?: null
+  altitude?: null,
+}
+
+export interface QuantityDataValue extends Datavalue {
+  type: 'quantity',
+  value: QuantityValue,
+}
+
+export interface QuantityValue {
+  amount: string,
+  unit?: '1' | EntityId,
 }
 
 export interface Reference {

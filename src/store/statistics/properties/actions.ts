@@ -56,7 +56,7 @@ export const actions: ActionTree<PropertiesState, RootState> = {
 
     await dispatch('statistics/refresh', {}, { root: true })
 
-    const response = await getUrlPatterns(getters.lastUrlPatternRefresh)
+    const response = await getUrlPatterns(getters.lastUrlPatternsRefresh)
     commit('refreshUrlPatterns', response)
 
     return response.get(entityId)

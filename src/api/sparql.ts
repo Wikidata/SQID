@@ -39,7 +39,7 @@ function rankValue(binding: SparqlValue): Rank {
   throw new TypeError(`unknown rank value ${rank}`)
 }
 
-function entityValue(binding: SparqlValue) {
+export function entityValue(binding: SparqlValue) {
   return binding.value.slice(ENTITY_PREFIX_LEN)
 }
 
