@@ -61,6 +61,7 @@
     "classTypicalPropertiesDescription": "Properties typically used by direct and indirect instances of this class",
     "classification": "Classification",
     "directSuperclasses": "Direct superclasses",
+    "noDirectSuperclasses": "No direct superclasses",
     "directSubclasses": "Direct subclasses",
     "directSubclassesInstances": "With instances {count}",
     "directSubclassesInstancesDescription": "Direct subclasess that have instances, together with the number of their direct and indirect instances",

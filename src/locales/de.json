@@ -58,6 +58,7 @@
     "classTypicalPropertiesDescription": "Eigenschaften, die typischerweise von direkten und indirekten Instanzen dieser Klasse benutzt werden",
     "classification": "Klassifikation",
     "directSuperclasses": "Direkte Oberklassen",
+    "noDirectSuperclasses": "Keine direkten Oberklassen",
     "directSubclasses": "Direkte Unterklassen",
     "directSubclassesInstances": "Mit Instanzen {count}",
     "directSubclassesInstancesDescription": "Direkte Unterklassen mit Instanzen, zusammen mit der Anzahl ihrer direkten und indirekten Instanzen",
