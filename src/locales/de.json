@@ -19,6 +19,14 @@
     "poweredBy": "Powered by",
     "sourceCode": "Quelltext verfügbar auf {0}"
   },
+  "errors": {
+    "pageNotFound": "Tut mir leid, ich konnte keine Seite unter dieser URI finden.",
+    "pageNotFoundDescription": "Die URI, die hierher führte, scheint fehlerhaft zu sein.",
+    "noSuchEntity": "Tut mir leid, ich konnte keine Entität mit ID „{entityId}“ finden.",
+    "noSuchEntityDescription": "Vielleicht wurde sie gelöscht. Vielleicht hat sie nie existiert. Vielleicht werden wir es nie wissen.",
+    "invalidEntity": "Tut mir leid, ich koennte „{entityId}“ nicht als gültige ID einer Entität lesen.",
+    "invalidEntityDescription": "Beim Versuch, „{entityId}“ als ID einer Entität zu lesen, trat der folgende Fehler auf: „{error}“."
+  },
   "entity": {
     "hierarchyStatements": "Klassenhierarchie",
     "humanRelationshipStatements": "Beziehungen",

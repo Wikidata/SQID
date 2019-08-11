@@ -1,15 +1,14 @@
 import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
          EntityResult, SearchResult, ResultList, TermResult,
          Claim, WBApiResult, EntitySiteLink, TimeDataValue,
-         GlobeCoordinateValue, QualifiedEntityValue } from './types'
+         GlobeCoordinateValue, QualifiedEntityValue,
+         EntityMissingError, MalformedEntityIdError } from './types'
 import { apiRequest } from './index'
 import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
 import { ENTITY_PREFIX_LEN } from './sparql'
 import { i18n } from '@/i18n'
 import { ClaimsMap } from '@/store/entity/claims/types'
 import { TaskQueue } from 'cwait'
-
-export { EntityId, EntityKind } from './types'
 
 type Props = 'info' | 'sitelinks' | 'sitelinks/urls' | 'aliases' | 'labels' | 'descriptions' | 'claims' | 'datatype'
 
@@ -162,12 +161,32 @@ function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: strin
   return terms
 }
 
-export async function getEntityData(entityId: string, lang?: string, fallback = true) {
+export async function getEntityInfo(entityId: EntityId) {
+  try {
+    const _id = parseEntityId(entityId)
+  } catch (err) {
+    throw err
+  }
+
+  const entities = await getEntities([entityId], ['info']) || []
+
+  if (!(entityId in entities) ||
+      ('missing' in entities[entityId])) {
+    throw new EntityMissingError(entityId)
+  }
+}
+
+export async function getEntityData(entityId: EntityId, lang?: string, fallback = true) {
   const entities = await getEntities([entityId],
                                      ['aliases', 'labels', 'descriptions', 'info',
                                       'claims', 'datatype', 'sitelinks'],
                                      lang,
                                      fallback)
+
+  if ('missing' in entities[entityId]) {
+    throw new EntityMissingError(entityId)
+  }
+
   const entity = entities[entityId]
   const labels = parseTerms(entityId, entity.labels!)
   const aliases = parseAliases(entityId, entity.aliases!)
@@ -206,8 +225,22 @@ export function parseEntityId(entityId: string): EntityReference {
 
       if (isNaN(id)) {
         const [entity, sub] = entityId.slice(1).split('-')
+
+        if (!entity || !sub) {
+          throw new MalformedEntityIdError(entityId, `Ill-formed numeric part ${entityId.slice(1)}`)
+        }
+
         const subPrefix = sub.slice(0, 1).toUpperCase()
         const subId = parseInt(sub.slice(1), 10)
+        const mainId = parseInt(entity, 10)
+
+        if (isNaN(mainId)) {
+          throw new MalformedEntityIdError(entityId, `Ill-formed numeric part ${entity}`)
+        }
+
+        if (isNaN(subId)) {
+          throw new MalformedEntityIdError(entityId, `Ill-formed numeric part ${sub.slice(1)}`)
+        }
 
         switch (subPrefix) {
           case 'S':
@@ -218,11 +251,10 @@ export function parseEntityId(entityId: string): EntityReference {
             break
 
           default:
-            throw new RangeError(`Unknown subPrefix ${subPrefix} in lexicographical entityId`)
+            throw new MalformedEntityIdError(entityId, `Unknown subPrefix ${subPrefix}`)
         }
-
         return {
-          id: parseInt(entity, 10),
+          id: mainId,
           kind,
           subId,
         }
@@ -231,7 +263,11 @@ export function parseEntityId(entityId: string): EntityReference {
       break
 
     default:
-      throw new RangeError(`Unknown prefix ${prefix} in entityId`)
+      throw new MalformedEntityIdError(entityId, `Unknown prefix ${prefix}`)
+  }
+
+  if (isNaN(id)) {
+    throw new MalformedEntityIdError(entityId, `Ill-formed numeric part ${entityId.slice(1)}`)
   }
 
   return {

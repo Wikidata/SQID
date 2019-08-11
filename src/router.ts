@@ -1,10 +1,66 @@
 import Vue from 'vue'
-import Router from 'vue-router'
+import Router, { NavigationGuard } from 'vue-router'
 import Home from '@/views/Home.vue'
 import NProgress from 'nprogress'
 import store from '@/store/index'
 
+import { EntityMissingError, MalformedEntityIdError } from '@/api/types'
+import { getEntityInfo } from '@/api/wikidata'
+
 Vue.use(Router)
+
+const ensureEntityIsValid: NavigationGuard<Vue> = async (to, _from, next) => {
+  const entityId = to.params.id
+
+  if (entityId === undefined) {
+    return next({ name: 'not-found' })
+  }
+
+  try {
+    await getEntityInfo(entityId)
+  } catch (err) {
+    if (err instanceof MalformedEntityIdError) {
+      return next({ name: 'invalid-entity',
+                    params: { id: err.entityId },
+                  })
+    }
+
+    if (err instanceof EntityMissingError) {
+      return next({ name: 'not-found',
+                    params: { id: err.entityId },
+                  })
+    }
+
+    return next(err)
+  }
+
+  return next()
+}
+
+const ensureEntityIsInvalid: NavigationGuard<Vue> = async (to, _from, next) => {
+  const entityId = to.params.id
+
+  if (entityId === undefined) {
+    return next()
+  }
+
+  try {
+    await getEntityInfo(entityId)
+  } catch (err) {
+    if (err instanceof MalformedEntityIdError ||
+        err instanceof EntityMissingError) {
+      return next()
+    }
+
+    return next(err)
+  }
+
+  // actually a valid entity, redirect
+  return next({ name: 'entity',
+                params: { id: entityId },
+              })
+}
+
 
 const router = new Router({
   mode: 'history',
@@ -36,6 +92,25 @@ const router = new Router({
       name: 'entity',
       component: () => import(/* webpackChunkName: "entity" */ '@/views/Entity.vue'),
       props: true,
+      beforeEnter: ensureEntityIsValid,
+    },
+    {
+      path: '/invalid/:id',
+      name: 'invalid-entity',
+      component: () => import(/* webpackChunkName: "invalidEntity" */ '@/views/InvalidEntity.vue'),
+      props: true,
+      beforeEnter: ensureEntityIsInvalid,
+    },
+    {
+      path: '/404/:id?',
+      name: 'not-found',
+      component: () => import(/* webpackChunkName: "notFound" */ '@/views/NotFound.vue'),
+      props: true,
+      beforeEnter: ensureEntityIsInvalid,
+    },
+    {
+      path: '*',
+      redirect: { name: 'not-found' },
     },
   ],
 })

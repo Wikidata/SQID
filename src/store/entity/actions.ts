@@ -2,8 +2,8 @@ import { ActionTree, Commit } from 'vuex'
 import { RootState } from '../types'
 
 import { i18n } from '@/i18n'
-import { Claim, Datavalue, EntityId, SnakType, WBDatatype } from '@/api/types'
-import { getEntities, getEntityData, parseEntityId } from '@/api/wikidata'
+import { Claim, Datavalue, EntityId, SnakType, WBDatatype, EntityMissingError } from '@/api/types'
+import { getEntities, getEntityData, getEntityInfo, parseEntityId } from '@/api/wikidata'
 import { getRelatedStatements } from '@/api/sparql'
 import { getExampleInstances, getExampleSubclasses, getExampleItems, getExampleValues } from '@/api/sqid'
 
@@ -153,5 +153,19 @@ export const actions: ActionTree<RootState, RootState> = {
   },
   async getExampleValues({ commit }, entityId: EntityId) {
     return idsFromExamples(commit, getExampleValues, entityId)
+  },
+  async doesEntityExist({}, entityId: EntityId) {
+    try {
+      await getEntityInfo(entityId)
+    } catch (err) {
+      if (err instanceof EntityMissingError) {
+        return false
+      }
+
+      // something else, re-throw
+      throw err
+    }
+
+    return true
   },
 }

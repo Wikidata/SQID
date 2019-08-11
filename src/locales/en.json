@@ -19,6 +19,14 @@
     "poweredBy": "Powered by",
     "sourceCode": "Source code available on {0}"
   },
+  "errors": {
+    "pageNotFound": "Sorry, I could not find any page with that URI.",
+    "pageNotFoundDescription": "There seems to be an error in the URI you followed here.",
+    "noSuchEntity": "Sorry, I could not find any entity with ID “{entityId}”.",
+    "noSuchEntityDescription": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know.",
+    "invalidEntity": "Sorry, I could not parse “{entityId}” as a valid entity ID.",
+    "invalidEntityDescription": "While trying to read “{entityId}” as an entity ID, this error occured: “{error}”."
+  },
   "entity": {
     "hierarchyStatements": "Class hierarchy",
     "humanRelationshipStatements": "Human relationships",

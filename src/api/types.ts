@@ -272,3 +272,29 @@ export interface QualifiedEntityValue {
   qualifiers: Map<EntityId, Snak[]>,
   id: string,
 }
+
+export class MalformedEntityIdError extends Error {
+  private entity: EntityId
+
+  constructor(entityId: EntityId, description: string) {
+    super(`EntityId ${entityId} is malformed: ${description}`)
+    this.entity = entityId
+  }
+
+  public get entityId() {
+    return this.entity
+  }
+}
+
+export class EntityMissingError extends Error { // tslint:disable-line:max-classes-per-file
+  private entity: EntityId
+
+  constructor(entityId: EntityId) {
+    super(`Entity ${entityId} does not exist`)
+    this.entity = entityId
+  }
+
+  public get entityId() {
+    return this.entity
+  }
+}

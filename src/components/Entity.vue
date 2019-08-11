@@ -1,310 +1,308 @@
 <template>
-  <b-container>
-    <b-row>
-      <b-col class="mainbar" lg="9" md="12" sm="12">
-        <div v-if="banner" style="overflow: hidden;">
-          <sqid-image :file="banner" width="850" />
-        </div>
-        <h1><span>{{ label }}</span>
-          &nbsp;<small>(<a :href="wikidata">{{ entityId }}</a>)</small></h1>
-        <div id="aliases">
-          <ul class="list-inline">
-            <li class="list-inline-item" v-for="alias in aliases" :key="alias.value">{{ alias }}</li>
+  <sqid-bars>
+    <template v-slot:mainbar>
+      <div v-if="banner" style="overflow: hidden;">
+        <sqid-image :file="banner" width="850" />
+      </div>
+      <h1><span>{{ label }}</span>
+        &nbsp;<small>(<a :href="wikidata">{{ entityId }}</a>)</small></h1>
+      <div id="aliases">
+        <ul class="list-inline">
+          <li class="list-inline-item" v-for="alias in aliases" :key="alias.value">{{ alias }}</li>
+        </ul>
+      </div>
+      <div id="description">{{ description }}</div>
+      <div id="hierarchy-information">
+        <i18n tag="div" path="entity.propertyDatatype" v-if="propertyDatatype">
+          <b place="label" v-t="'entity.propertyDatatypeLabel'" />
+          <span place="type">{{ propertyDatatype }}</span>
+        </i18n>
+        <i18n tag="div" path="entity.superProperties" v-if="superProperties.length">
+          <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
+          <span place="property">{{ label }}</span>
+          <ul place="properties" class="comma-separated">
+            <li v-for="(superProperty, supidx) of superProperties" :key="supidx">
+              <entity-link :entityId="superProperty.value.id" />
+              <sqid-qualifier-icon :claim="superProperty" />
+            </li>
           </ul>
-        </div>
-        <div id="description">{{ description }}</div>
-        <div id="hierarchy-information">
-          <i18n tag="div" path="entity.propertyDatatype" v-if="propertyDatatype">
-            <b place="label" v-t="'entity.propertyDatatypeLabel'" />
-            <span place="type">{{ propertyDatatype }}</span>
-          </i18n>
-          <i18n tag="div" path="entity.superProperties" v-if="superProperties.length">
-            <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
-            <span place="property">{{ label }}</span>
-            <ul place="properties" class="comma-separated">
-              <li v-for="(superProperty, supidx) of superProperties" :key="supidx">
-                <entity-link :entityId="superProperty.value.id" />
-                <sqid-qualifier-icon :claim="superProperty" />
-              </li>
-            </ul>
-          </i18n>
-          <i18n tag="div" path="entity.noSuperProperties" v-else-if="kind === 'property'">
-            <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
-            <span place="property">{{ label }}</span>
-          </i18n>
-          <i18n tag="div" path="entity.superClasses" v-if="superClasses.length">
-            <b place="subclassOf"><entity-link entityId="P279" /></b>
-            <span place="class">{{ label }}</span>
-            <ul place="classes" class="comma-separated" >
-              <li v-for="(superClass, sucidx) of superClasses" :key="sucidx">
-                <entity-link :entityId="superClass.value.id" />
-                <sqid-qualifier-icon :claim="superClass" />
-              </li>
-            </ul>
-          </i18n>
-          <i18n tag="div" path="entity.noSuperClasses" v-else-if="hierarchyStatistics.directSubclasses">
-            <b place="subclassOf"><entity-link entityId="P279" /></b>
-            <span place="class">{{ label }}</span>
-          </i18n>
-          <i18n tag="div" path="entity.instanceClasses" v-if="instanceClasses.length">
-            <b place="instanceOf"><entity-link entityId="P31" /></b>
-            <span place="instance">{{ label }}</span>
-            <ul place="classes" class="comma-separated">
-              <li v-for="(instanceClass, incidx) of instanceClasses" :key="incidx">
-                <entity-link :entityId="instanceClass.value.id" />
-                <sqid-qualifier-icon :claim="instanceClass" />
-              </li>
-            </ul>
-          </i18n>
-          <i18n tag="div" path="entity.noInstanceClasses" v-else>
-            <b place="instanceOf"><entity-link entityId="P31" /></b>
-            <span place="instance">{{ label }}</span>
-          </i18n>
-        </div>
-        <sqid-collapsible-card v-if="kind === 'property'"
-                               :header="$t('entity.propertyUsage')"
-                               id="property-usage">
-          <table class="table table-striped">
-            <tbody>
-              <tr>
-                <th v-t="'entity.propertyEntities'"
-                    v-b-tooltip
-                    :title="$t('entity.propertyEntitiesDescription')" />
-                <td>{{ propertyUsage.items }}
-                  <div class="four-lines">
-                    <ul class="comma-separated">
-                      <li v-for="(example, exidx) of exampleItems" :key="exidx">
-                        <entity-link :entityId="example" />
-                      </li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th v-t="'entity.propertyValues'"
-                    v-b-tooltip
-                    :title="$t('entity.propertyValuesDescription')" />
-                <td>
+        </i18n>
+        <i18n tag="div" path="entity.noSuperProperties" v-else-if="kind === 'property'">
+          <b place="subpropertyOf"><entity-link entityId="P1647" /></b>
+          <span place="property">{{ label }}</span>
+        </i18n>
+        <i18n tag="div" path="entity.superClasses" v-if="superClasses.length">
+          <b place="subclassOf"><entity-link entityId="P279" /></b>
+          <span place="class">{{ label }}</span>
+          <ul place="classes" class="comma-separated" >
+            <li v-for="(superClass, sucidx) of superClasses" :key="sucidx">
+              <entity-link :entityId="superClass.value.id" />
+              <sqid-qualifier-icon :claim="superClass" />
+            </li>
+          </ul>
+        </i18n>
+        <i18n tag="div" path="entity.noSuperClasses" v-else-if="hierarchyStatistics.directSubclasses">
+          <b place="subclassOf"><entity-link entityId="P279" /></b>
+          <span place="class">{{ label }}</span>
+        </i18n>
+        <i18n tag="div" path="entity.instanceClasses" v-if="instanceClasses.length">
+          <b place="instanceOf"><entity-link entityId="P31" /></b>
+          <span place="instance">{{ label }}</span>
+          <ul place="classes" class="comma-separated">
+            <li v-for="(instanceClass, incidx) of instanceClasses" :key="incidx">
+              <entity-link :entityId="instanceClass.value.id" />
+              <sqid-qualifier-icon :claim="instanceClass" />
+            </li>
+          </ul>
+        </i18n>
+        <i18n tag="div" path="entity.noInstanceClasses" v-else>
+          <b place="instanceOf"><entity-link entityId="P31" /></b>
+          <span place="instance">{{ label }}</span>
+        </i18n>
+      </div>
+      <sqid-collapsible-card v-if="kind === 'property'"
+                             :header="$t('entity.propertyUsage')"
+                             id="property-usage">
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <th v-t="'entity.propertyEntities'"
+                  v-b-tooltip
+                  :title="$t('entity.propertyEntitiesDescription')" />
+              <td>{{ propertyUsage.items }}
+                <div class="four-lines">
                   <ul class="comma-separated">
-                    <li v-for="(exampleValue, exvidx) of exampleValues" :key="exvidx">
-                      <entity-link :entityId="exampleValue" />
+                    <li v-for="(example, exidx) of exampleItems" :key="exidx">
+                      <entity-link :entityId="example" />
                     </li>
                   </ul>
-                </td>
-              </tr>
-              <tr>
-                <th v-t="'entity.propertyTypicalProperties'"
-                    v-b-tooltip
-                    :title="$t('entity.propertyTypicalPropertiesDescription')" />
-                <td>
-                  <div class="four-lines">
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.propertyValues'"
+                  v-b-tooltip
+                  :title="$t('entity.propertyValuesDescription')" />
+              <td>
+                <ul class="comma-separated">
+                  <li v-for="(exampleValue, exvidx) of exampleValues" :key="exvidx">
+                    <entity-link :entityId="exampleValue" />
+                  </li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.propertyTypicalProperties'"
+                  v-b-tooltip
+                  :title="$t('entity.propertyTypicalPropertiesDescription')" />
+              <td>
+                <div class="four-lines">
+                  <ul class="comma-separated">
+                    <li v-for="(typicalProperty, typpidx) of typicalProperties" :key="typpidx">
+                      <entity-link :entityId="typicalProperty" />
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.propertyStatements'"
+                  v-b-tooltip
+                  :title="$t('entity.propertyStatementsDescription')" />
+              <td><i18n path="entity.propertyStatementsValue">
+                  <span place="count">{{ propertyUsage.statements }}</span>
+                  <span place="average">{{ averagePropertyStatements }}</span>
+                </i18n>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.propertyQualifiers'"
+                  v-b-tooltip
+                  :title="$t('entity.propertyQualifiersDescription')" />
+              <td>
+                <div class="four-lines">
+                  <ul class="comma-separated">
+                    <li v-for="(qualifier, pqidx) of propertyUsage.qualifiers" :key="pqidx">
+                      <entity-link :entityId="qualifier[0]" />
+                      <b-badge>{{ qualifier[1] }}</b-badge>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.propertyAsQualifier'" />
+              <td>{{ propertyUsage.inQualifiers }}</td>
+            </tr>
+            <tr>
+              <th v-t="'entity.propertyInReference'" />
+              <td>{{ propertyUsage.inReferences }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </sqid-collapsible-card>
+      <sqid-collapsible-card v-if="hierarchyStatistics.directInstances || hierarchyStatistics.allInstances"
+                             :header="$t('entity.instances')"
+                             id="hierarchy-instances">
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <th v-t="'entity.directInstances'" />
+              <td>{{ hierarchyStatistics.directInstances }}
+                <div class="four-lines" v-if="hierarchyStatistics.directInstances">
+                  <ul class="comma-separated">
+                    <li v-for="(exInstId, eiidx) of exampleInstances" :key="eiidx">
+                      <entity-link :entityId="exInstId" />
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.allInstances'"
+                  v-b-tooltip
+                  :title="$t('entity.allInstancesDescription', { num: hierarchyStatistics.allSubclasses })" />
+              <td>{{ hierarchyStatistics.allInstances }}</td>
+            </tr>
+            <tr>
+              <th v-t="'entity.classTypicalProperties'"
+                  v-b-tooltip
+                  :title="$t('entity.classTypicalPropertiesDescription')" />
+              <td><div class="four-lines">
+                  <ul class="comma-separated">
+                    <li v-for="(relatedId, relidx) of hierarchyStatistics.relatedProperties" :key="relidx">
+                      <entity-link :entityId="relatedId" />
+                    </li>
+                  </ul>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </sqid-collapsible-card>
+      <sqid-collapsible-card v-if="hierarchyStatistics.directSubclasses || hierarchyStatistics.superClasses.length"
+                             :header="$t('entity.classification')"
+                             id="hierarchy-classification">
+        <table class="table table-striped">
+          <tbody>
+            <tr>
+              <th v-t="'entity.directSuperclasses'" />
+              <td v-if="superClasses.length">
+                <ul class="comma-separated">
+                  <li v-for="(superClass, supcidx) of superClasses" :key="supcidx">
+                    <entity-link :entityId="superClass.value.id" />
+                    <sqid-qualifier-icon :claim="superClass" />
+                    <b-badge>{{ superClassesUsage.get(superClass.value.id) }}</b-badge>
+                  </li>
+                </ul>
+              </td>
+              <td v-else v-t="'entity.noDirectSuperclasses'" />
+            </tr>
+            <tr>
+              <th v-t="'entity.directSubclasses'" />
+              <td>
+                <b-tabs>
+                  <b-tab>
+                    <template v-slot:title>
+                      <i18n path="entity.directSubclassesInstances"
+                            v-b-tooltip="$t('entity.directSubclassesInstancesDescription')">
+                        <b-badge place="count">{{ Object.keys(subclassesInstances).length }}</b-badge>
+                      </i18n>
+                    </template>
                     <ul class="comma-separated">
-                      <li v-for="(typicalProperty, typpidx) of typicalProperties" :key="typpidx">
-                        <entity-link :entityId="typicalProperty" />
+                      <li v-for="(subClass, dsciidx) of sortedSubclassesInstances" :key="dsciidx">
+                        <entity-link :entityId="subClass.id" />
+                        <b-badge>{{ subClass.count }}</b-badge>
                       </li>
                     </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th v-t="'entity.propertyStatements'"
-                    v-b-tooltip
-                    :title="$t('entity.propertyStatementsDescription')" />
-                <td><i18n path="entity.propertyStatementsValue">
-                    <span place="count">{{ propertyUsage.statements }}</span>
-                    <span place="average">{{ averagePropertyStatements }}</span>
-                  </i18n>
-                </td>
-              </tr>
-              <tr>
-                <th v-t="'entity.propertyQualifiers'"
-                    v-b-tooltip
-                    :title="$t('entity.propertyQualifiersDescription')" />
-                <td>
-                  <div class="four-lines">
+                  </b-tab>
+                  <b-tab>
+                    <template v-slot:title>
+                      <i18n path="entity.directSubclassesSubclasses"
+                            v-b-tooltip="$t('entity.directSubclassesSubclassesDescription')">
+                        <b-badge place="count">{{ Object.keys(subclassesSubclasses).length }}</b-badge>
+                      </i18n>
+                    </template>
                     <ul class="comma-separated">
-                      <li v-for="(qualifier, pqidx) of propertyUsage.qualifiers" :key="pqidx">
-                        <entity-link :entityId="qualifier[0]" />
-                        <b-badge>{{ qualifier[1] }}</b-badge>
+                      <li v-for="(subClass, dscsidx) of sortedSubclassesSubclasses" :key="dscsidx">
+                        <entity-link :entityId="subClass.id" />
+                        <b-badge>{{ subClass.count }}</b-badge>
                       </li>
                     </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th v-t="'entity.propertyAsQualifier'" />
-                <td>{{ propertyUsage.inQualifiers }}</td>
-              </tr>
-              <tr>
-                <th v-t="'entity.propertyInReference'" />
-                <td>{{ propertyUsage.inReferences }}</td>
+                  </b-tab>
+                  <b-tab>
+                    <template v-slot:title>
+                      <i18n path="entity.directSubclassesAll">
+                        <b-badge place="count">{{ hierarchyStatistics.directSubclasses }}</b-badge>
+                      </i18n>
+                    </template>
+                    <ul class="comma-separated">
+                      <li v-for="(subClass, dscaidx) of exampleSubclasses" :key="dscaidx">
+                        <entity-link :entityId="subClass" />
+                      </li>
+                    </ul>
+                  </b-tab>
+                </b-tabs>
+              </td>
+            </tr>
+            <tr>
+              <th v-t="'entity.allSubclasses'"
+                  v-b-tooltip
+                  :title="$t('entity.allSubclassesDescription')" />
+              <td>{{ hierarchyStatistics.allSubclasses }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </sqid-collapsible-card>
+      <div id="claims" v-if="groupedClaims">
+        <claim-table :header="$t('entity.humanRelationshipStatements')"
+                     :entityId="entityId"
+                     :claims="group('f')"
+                     :reverseClaims="reverseGroup('f')"
+                     id="family"
+                     v-if="showGroup('f')" />
+        <claim-table :header="$t('entity.statements')"
+                     :entityId="entityId"
+                     :claims="group('o')"
+                     :reverseClaims="reverseGroup('o')"
+                     id="statements"
+                     v-if="showGroup('o')" />
+        <claim-table :header="$t('entity.mediaStatements')"
+                     :entityId="entityId"
+                     :claims="group('m')"
+                     :reverseClaims="reverseGroup('m')"
+                     id="media"
+                     v-if="showGroup('m')" />
+        <claim-table :header="$t('entity.wikiStatements')"
+                     :entityId="entityId"
+                     :claims="group('w')"
+                     :reverseClaims="reverseGroup('w')"
+                     id="wiki"
+                     v-if="showGroup('w')" />
+      </div>
+    </template>
+    <template v-slot:sidebar>
+      <sqid-image :file="images[0]" width="260" v-if="images && images[0]" />
+      <sqid-collapsible-card :header="$t('entity.links')" :id="links" narrow>
+        <b-card-body>
+          <table class="table table-striped table-sm narrow">
+            <tbody>
+              <tr v-for="(link, lidx) in links" :key="lidx">
+                <th><a :href="link.url">{{ link.label }}</a></th>
               </tr>
             </tbody>
           </table>
-        </sqid-collapsible-card>
-        <sqid-collapsible-card v-if="hierarchyStatistics.directInstances || hierarchyStatistics.allInstances"
-                               :header="$t('entity.instances')"
-                               id="hierarchy-instances">
-          <table class="table table-striped">
-              <tbody>
-                <tr>
-                  <th v-t="'entity.directInstances'" />
-                  <td>{{ hierarchyStatistics.directInstances }}
-                    <div class="four-lines" v-if="hierarchyStatistics.directInstances">
-                      <ul class="comma-separated">
-                        <li v-for="(exInstId, eiidx) of exampleInstances" :key="eiidx">
-                          <entity-link :entityId="exInstId" />
-                        </li>
-                      </ul>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th v-t="'entity.allInstances'"
-                      v-b-tooltip
-                      :title="$t('entity.allInstancesDescription', { num: hierarchyStatistics.allSubclasses })" />
-                  <td>{{ hierarchyStatistics.allInstances }}</td>
-                </tr>
-                <tr>
-                  <th v-t="'entity.classTypicalProperties'"
-                      v-b-tooltip
-                      :title="$t('entity.classTypicalPropertiesDescription')" />
-                  <td><div class="four-lines">
-                      <ul class="comma-separated">
-                        <li v-for="(relatedId, relidx) of hierarchyStatistics.relatedProperties" :key="relidx">
-                          <entity-link :entityId="relatedId" />
-                        </li>
-                      </ul>
-                  </div></td>
-                </tr>
-              </tbody>
-            </table>
-        </sqid-collapsible-card>
-        <sqid-collapsible-card v-if="hierarchyStatistics.directSubclasses || hierarchyStatistics.superClasses.length"
-                               :header="$t('entity.classification')"
-                               id="hierarchy-classification">
-          <table class="table table-striped">
-            <tbody>
-              <tr>
-                <th v-t="'entity.directSuperclasses'" />
-                <td v-if="superClasses.length">
-                  <ul class="comma-separated">
-                    <li v-for="(superClass, supcidx) of superClasses" :key="supcidx">
-                      <entity-link :entityId="superClass.value.id" />
-                      <sqid-qualifier-icon :claim="superClass" />
-                      <b-badge>{{ superClassesUsage.get(superClass.value.id) }}</b-badge>
-                    </li>
-                  </ul>
-                </td>
-                <td v-else v-t="'entity.noDirectSuperclasses'" />
-              </tr>
-              <tr>
-                <th v-t="'entity.directSubclasses'" />
-                <td>
-                  <b-tabs>
-                    <b-tab>
-                      <template v-slot:title>
-                        <i18n path="entity.directSubclassesInstances"
-                              v-b-tooltip="$t('entity.directSubclassesInstancesDescription')">
-                          <b-badge place="count">{{ Object.keys(subclassesInstances).length }}</b-badge>
-                        </i18n>
-                      </template>
-                      <ul class="comma-separated">
-                        <li v-for="(subClass, dsciidx) of sortedSubclassesInstances" :key="dsciidx">
-                          <entity-link :entityId="subClass.id" />
-                          <b-badge>{{ subClass.count }}</b-badge>
-                        </li>
-                      </ul>
-                    </b-tab>
-                    <b-tab>
-                      <template v-slot:title>
-                        <i18n path="entity.directSubclassesSubclasses"
-                              v-b-tooltip="$t('entity.directSubclassesSubclassesDescription')">
-                          <b-badge place="count">{{ Object.keys(subclassesSubclasses).length }}</b-badge>
-                        </i18n>
-                      </template>
-                      <ul class="comma-separated">
-                        <li v-for="(subClass, dscsidx) of sortedSubclassesSubclasses" :key="dscsidx">
-                          <entity-link :entityId="subClass.id" />
-                          <b-badge>{{ subClass.count }}</b-badge>
-                        </li>
-                      </ul>
-                    </b-tab>
-                    <b-tab>
-                      <template v-slot:title>
-                        <i18n path="entity.directSubclassesAll">
-                          <b-badge place="count">{{ hierarchyStatistics.directSubclasses }}</b-badge>
-                        </i18n>
-                      </template>
-                      <ul class="comma-separated">
-                        <li v-for="(subClass, dscaidx) of exampleSubclasses" :key="dscaidx">
-                          <entity-link :entityId="subClass" />
-                        </li>
-                      </ul>
-                    </b-tab>
-                  </b-tabs>
-                </td>
-              </tr>
-              <tr>
-                <th v-t="'entity.allSubclasses'"
-                    v-b-tooltip
-                    :title="$t('entity.allSubclassesDescription')" />
-                <td>{{ hierarchyStatistics.allSubclasses }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </sqid-collapsible-card>
-        <div id="claims" v-if="groupedClaims">
-          <claim-table :header="$t('entity.humanRelationshipStatements')"
-                       :entityId="entityId"
-                       :claims="group('f')"
-                       :reverseClaims="reverseGroup('f')"
-                       id="family"
-                       v-if="showGroup('f')" />
-          <claim-table :header="$t('entity.statements')"
-                       :entityId="entityId"
-                       :claims="group('o')"
-                       :reverseClaims="reverseGroup('o')"
-                       id="statements"
-                       v-if="showGroup('o')" />
-          <claim-table :header="$t('entity.mediaStatements')"
-                       :entityId="entityId"
-                       :claims="group('m')"
-                       :reverseClaims="reverseGroup('m')"
-                       id="media"
-                       v-if="showGroup('m')" />
-          <claim-table :header="$t('entity.wikiStatements')"
-                       :entityId="entityId"
-                       :claims="group('w')"
-                       :reverseClaims="reverseGroup('w')"
-                       id="wiki"
-                       v-if="showGroup('w')" />
-        </div>
-      </b-col>
-      <b-col class="sidebar" lg="3" md="12" sm="12">
-        <sqid-image :file="images[0]" width="260" v-if="images && images[0]" />
-        <sqid-collapsible-card :header="$t('entity.links')" :id="links" narrow>
-          <b-card-body>
-            <table class="table table-striped table-sm narrow">
-              <tbody>
-                <tr v-for="(link, lidx) in links" :key="lidx">
-                  <th><a :href="link.url">{{ link.label }}</a></th>
-                </tr>
-              </tbody>
-            </table>
-          </b-card-body>
-        </sqid-collapsible-card>
-        <div id="claims-ids" v-if="groupedClaims">
-          <claim-table :header="$t('entity.identifierStatements')"
-                       :entityId="entityId"
-                       :claims="group('i')"
-                       id="identifiers"
-                       v-if="showGroup('i')"
-                       narrow />
-        </div>
-      </b-col>
-    </b-row>
-  </b-container>
+        </b-card-body>
+      </sqid-collapsible-card>
+      <div id="claims-ids" v-if="groupedClaims">
+        <claim-table :header="$t('entity.identifierStatements')"
+                     :entityId="entityId"
+                     :claims="group('i')"
+                     id="identifiers"
+                     v-if="showGroup('i')"
+                     narrow />
+      </div>
+    </template>
+  </sqid-bars>
 </template>
 
 <script lang="ts">

@@ -14,7 +14,8 @@ img {
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { getImageData, ImageInfo } from '@/api/commons'
+import { getImageData } from '@/api/commons'
+import { ImageInfo } from '@/api/types'
 
 @Component
 export default class SqidImage extends Vue {
