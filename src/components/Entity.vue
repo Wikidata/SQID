@@ -196,7 +196,7 @@
                     </li>
                   </ul>
                 </td>
-                <td v-else v-t="entity.noDirectSuperclasses" />
+                <td v-else v-t="'entity.noDirectSuperclasses'" />
               </tr>
               <tr>
                 <th v-t="'entity.directSubclasses'" />
