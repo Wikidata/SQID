@@ -214,6 +214,15 @@ export interface SqidHierarchyRecord {
   r?: ResultList<number>,
 }
 
+export interface SqidPropertyUsageRecord {
+  i?: number,
+  s?: number,
+  q?: number,
+  e?: number,
+  qs?: ResultList<number>,
+  pc?: EntityId[],
+}
+
 export interface SqidStatistics {
   dumpDate: string,
   classUpdate: string,

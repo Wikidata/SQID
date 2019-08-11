@@ -5,7 +5,7 @@ import { i18n } from '@/i18n'
 import { Claim, Datavalue, EntityId, SnakType, WBDatatype } from '@/api/types'
 import { getEntityData, parseEntityId } from '@/api/wikidata'
 import { getRelatedStatements } from '@/api/sparql'
-import { getExampleInstances, getExampleSubclasses, getExampleItems } from '@/api/sqid'
+import { getExampleInstances, getExampleSubclasses, getExampleItems, getExampleValues } from '@/api/sqid'
 
 async function idsFromExamples(commit: Commit,
                                getExample: (entityId: EntityId, lang: string)
@@ -118,5 +118,8 @@ export const actions: ActionTree<RootState, RootState> = {
   },
   async getExampleItems({ commit }, entityId: EntityId) {
     return idsFromExamples(commit, getExampleItems, entityId)
+  },
+  async getExampleValues({ commit }, entityId: EntityId) {
+    return idsFromExamples(commit, getExampleValues, entityId)
   },
 }

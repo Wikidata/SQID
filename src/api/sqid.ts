@@ -1,16 +1,18 @@
 import { http } from '@/http'
-import { Claim, EntityId, SqidStatistics, SqidHierarchyRecord } from './types'
+import { Claim, EntityId, ResultList, SqidStatistics,
+         SqidHierarchyRecord, SqidPropertyUsageRecord } from './types'
 import { ClaimsMap } from '@/store/entity/claims/types'
-import { PropertyClassification } from '@/store/statistics/properties/types'
+import { PropertyClassification, PropertyStatistics } from '@/store/statistics/properties/types'
 import { ClassStatistics } from '@/store/statistics/classes/types'
-import { getPropertySubjects } from './sparql'
+import { getPropertySubjects, getPropertyObjects } from './sparql'
 import { parseEntityId } from './wikidata'
 
 export const RELATED_PROPERTIES_THRESHOLD = 5
 export const MAX_EXAMPLE_INSTANCES = 20
 export const MAX_DIRECT_SUBCLASSES = 10
 export const MAX_EXAMPLE_SUBCLASSES = 10
-export const MAX_EXAMPLE_ITEMS = 20
+export const MAX_EXAMPLE_ITEMS = 10
+export const MAX_EXAMPLE_VALUSE = 20
 
 const MAX_STATISTICS_AGE = 60 * 60 * 1000
 const SCRIPT_RUNTIME_SLACK = 5 * 60 * 1000
@@ -228,4 +230,59 @@ export async function getExampleSubclasses(entityId: EntityId, lang: string) {
 
 export async function getExampleItems(entityId: EntityId, lang: string) {
   return getPropertySubjects(entityId, lang, MAX_EXAMPLE_ITEMS + 1, undefined)
+}
+
+export async function getExampleValues(entityId: EntityId, lang: string) {
+  return getPropertyObjects(entityId, lang, MAX_EXAMPLE_VALUSE + 1, undefined)
+}
+
+export async function getUrlPatterns(lastRefresh: number) {
+  const patterns = new Map<EntityId, string>()
+  const response = await http.get(getDataFileURI('properties/urlpatterns', lastRefresh))
+
+  for (const [propertyId, pattern] of Object.entries(response.data)) {
+    patterns.set(pifyNumericId(propertyId), pattern as string)
+  }
+
+  return patterns
+}
+
+export async function getPropertyUsage(lastRefresh: number) {
+  const usage: { [key: string]: PropertyStatistics } = {}
+  const response = await http.get(getDataFileURI('properties/usage', lastRefresh))
+
+  for (const [propertyId, record] of Object.entries(response.data as
+                                                    ResultList<SqidPropertyUsageRecord>)) {
+
+    const classes = record.pc || []
+
+    const usageRecord = {
+      items: record.i || 0,
+      statements: record.s || 0,
+      inQualifiers: record.q || 0,
+      inReferences: record.e || 0,
+      classes: classes.map(qifyNumericId),
+      qualifiers: new Map<EntityId, number>(),
+    }
+
+    if ('qs' in record) {
+      const qualifiers = Object.entries(record.qs!).sort((left, right) => {
+        if (left[1] < right[1]) {
+          return 1
+        } else if (left[1] > right[1]) {
+          return -1
+        }
+
+        return 0
+      })
+
+      for (const [qualifier, count] of qualifiers) {
+        usageRecord.qualifiers.set(pifyNumericId(qualifier), count)
+      }
+    }
+
+    usage[pifyNumericId(propertyId)] = usageRecord
+  }
+
+  return usage
 }

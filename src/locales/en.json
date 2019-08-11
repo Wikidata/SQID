@@ -65,7 +65,21 @@
     "directSubclassesSubclassesDescription": "Direct subclasses that have subclasses, together with the number of their direct and indirect subclasses",
     "directSubclassesAll": "All {count}",
     "allSubclasses": "All subclasses",
-    "allSubclassesDescription": "Number of unique direct and indirect subclasses"
+    "allSubclassesDescription": "Number of unique direct and indirect subclasses",
+    "propertyUsage": "Property Usage",
+    "propertyEntities": "Entities",
+    "propertyEntitiesDescription": "Entities with some statement for this property",
+    "propertyValues": "Values",
+    "propertyValuesDescription": "Values used in some statement with this property",
+    "propertyTypicalProperties": "Typical Properties",
+    "propertyTypicalPropertiesDescription": "Other properties typically used by entities using this property",
+    "propertyStatements": "Statements",
+    "propertyStatementsValue": "{count} ({average} per entity)",
+    "propertyStatementsDescription": "Number of statements for this property",
+    "propertyQualifiers": "Qualifiers",
+    "propertyQualifiersDescription": "Other properties that are used as qualifiers for this property, together with the number of uses",
+    "propertyAsQualifier": "Uses as qualifier",
+    "propertyInReference": "Uses in references"
   },
   "home": {
     "home": "A fresh look at Wikidata",

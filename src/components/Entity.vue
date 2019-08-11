@@ -61,6 +61,87 @@
             <span place="instance">{{ label }}</span>
           </i18n>
         </div>
+        <sqid-collapsible-card v-if="kind === 'property'"
+                               :header="$t('entity.propertyUsage')"
+                               id="property-usage">
+          <table class="table table-striped">
+            <tbody>
+              <tr>
+                <th v-t="'entity.propertyEntities'"
+                    v-b-tooltip
+                    :title="$t('entity.propertyEntitiesDescription')" />
+                <td>{{ propertyUsage.items }}
+                  <div class="four-lines">
+                    <ul class="comma-separated">
+                      <li v-for="(example, exidx) of exampleItems" :key="exidx">
+                        <entity-link :entityId="example" />
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th v-t="'entity.propertyValues'"
+                    v-b-tooltip
+                    :title="$t('entity.propertyValuesDescription')" />
+                <td>
+                  <ul class="comma-separated">
+                    <li v-for="(exampleValue, exvidx) of exampleValues" :key="exvidx">
+                      <entity-link :entityId="exampleValue" />
+                    </li>
+                  </ul>
+                </td>
+              </tr>
+              <tr>
+                <th v-t="'entity.propertyTypicalProperties'"
+                    v-b-tooltip
+                    :title="$t('entity.propertyTypicalPropertiesDescription')" />
+                <td>
+                  <div class="four-lines">
+                    <ul class="comma-separated">
+                      <li v-for="(typicalProperty, typpidx) of typicalProperties" :key="typpidx">
+                        <entity-link :entityId="typicalProperty" />
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th v-t="'entity.propertyStatements'"
+                    v-b-tooltip
+                    :title="$t('entity.propertyStatementsDescription')" />
+                <td><i18n path="entity.propertyStatementsValue">
+                    <span place="count">{{ propertyUsage.statements }}</span>
+                    <span place="average">{{ averagePropertyStatements }}</span>
+                  </i18n>
+                </td>
+              </tr>
+              <tr>
+                <th v-t="'entity.propertyQualifiers'"
+                    v-b-tooltip
+                    :title="$t('entity.propertyQualifiersDescription')" />
+                <td>
+                  <div class="four-lines">
+                    <ul class="comma-separated">
+                      <li v-for="(qualifier, pqidx) of propertyUsage.qualifiers" :key="pqidx">
+                        <entity-link :entityId="qualifier[0]" />
+                        <b-badge>{{ qualifier[1] }}</b-badge>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th v-t="'entity.propertyAsQualifier'" />
+                <td>{{ propertyUsage.inQualifiers }}</td>
+              </tr>
+              <tr>
+                <th v-t="'entity.propertyInReference'" />
+                <td>{{ propertyUsage.inReferences }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </sqid-collapsible-card>
         <sqid-collapsible-card v-if="hierarchyStatistics.directInstances || hierarchyStatistics.allInstances"
                                :header="$t('entity.instances')"
                                id="hierarchy-instances">
@@ -230,13 +311,13 @@
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
-import { PropertyClassification } from '@/store/statistics/properties/types'
+import { PropertyClassification, PropertyStatistics } from '@/store/statistics/properties/types'
 import { ClassStatistics } from '@/store/statistics/classes/types'
 import ClaimTable from './ClaimTable.vue'
 import SqidQualifierIcon from './SqidQualifierIcon.vue'
 import { Claim, EntityKind, QualifiedEntityValue, WBDatatype } from '@/api/types'
 import { relatedEntityIds, parseEntityId, idsFromQualifiedEntity } from '@/api/wikidata'
-import { groupClaims, RelatednessMapping, getClassHierarchyChunk } from '@/api/sqid'
+import { groupClaims, RelatednessMapping, getClassHierarchyChunk, RELATED_PROPERTIES_THRESHOLD } from '@/api/sqid'
 import { i18n } from '@/i18n'
 
 const classStatistics = namespace('statistics/classes')
@@ -252,6 +333,8 @@ export default class Entity extends Vue {
   @Action private getEntityData: any
   @Action private getReverseClaims: any
   @Action private requestLabels: any
+  @Action private getExampleItems!: (entityId: EntityId) => Promise<EntityId[]>
+  @Action private getExampleValues!: (entityId: EntityId) => Promise<EntityId[]>
   @Action private getExampleInstances!: (entityId: EntityId) => Promise<EntityId[]>
   @Action private getExampleSubclasses!: (entityId: EntityId) => Promise<EntityId[]>
   @classStatistics.Action private getClassHierarchyRecord!: (entityId: EntityId) => Promise<ClassStatistics>
@@ -259,6 +342,7 @@ export default class Entity extends Vue {
   @classStatistics.Getter private getHierarchyRecord!: (entityId: EntityId) => ClassStatistics
   @propertyStatistics.Action private refreshRelatedProperties: any
   @propertyStatistics.Action private refreshClassification: any
+  @propertyStatistics.Action private getPropertyUsage!: (entityId: EntityId) => Promise<PropertyStatistics>
   @propertyStatistics.Getter private propertyGroups!: (entityId: EntityId) => PropertyClassification
   @Getter private getImages: any
   @Getter private getBanner: any
@@ -286,6 +370,9 @@ export default class Entity extends Vue {
   private instanceClasses: QualifiedEntityValue[] = []
   private subclassesInstances: { [key: string]: number } = {}
   private subclassesSubclasses: { [key: string]: number } = {}
+  private typicalProperties: EntityId[] = []
+  private exampleItems: EntityId[] = []
+  private exampleValues: EntityId[] = []
   private exampleInstances: EntityId[] = []
   private exampleSubclasses: EntityId[] = []
   private hierarchyStatistics: ClassStatistics = {
@@ -296,6 +383,14 @@ export default class Entity extends Vue {
     superClasses: [],
     nonemptySubClasses: [],
     relatedProperties: [],
+  }
+  private propertyUsage: PropertyStatistics = {
+    items: 0,
+    statements: 0,
+    inQualifiers: 0,
+    inReferences: 0,
+    qualifiers: new Map<EntityId, number>(),
+    classes: [],
   }
 
   private updateEntityData() {
@@ -308,6 +403,9 @@ export default class Entity extends Vue {
     this.superClasses = []
     this.superClassesUsage = new Map<EntityId, number>()
     this.instanceClasses = []
+    this.typicalProperties = []
+    this.exampleItems = []
+    this.exampleValues = []
     this.exampleInstances = []
     this.exampleSubclasses = []
     this.subclassesInstances = {}
@@ -320,6 +418,14 @@ export default class Entity extends Vue {
       superClasses: [],
       nonemptySubClasses: [],
       relatedProperties: [],
+    }
+    this.propertyUsage = {
+      items: 0,
+      statements: 0,
+      inQualifiers: 0,
+      inReferences: 0,
+      qualifiers: new Map<EntityId, number>(),
+      classes: [],
     }
     document.title = `${this.label} – SQID`
 
@@ -348,6 +454,16 @@ export default class Entity extends Vue {
         }
       })
 
+    this.getExampleItems(this.entityId)
+      .then((examples) => {
+        this.exampleItems = examples
+      })
+
+    this.getExampleValues(this.entityId)
+      .then((examples) => {
+        this.exampleValues = examples
+      })
+
     this.getExampleInstances(this.entityId)
       .then((examples) => {
         this.exampleInstances = examples
@@ -356,6 +472,48 @@ export default class Entity extends Vue {
     this.getExampleSubclasses(this.entityId)
       .then((examples) => {
         this.exampleSubclasses = examples
+      })
+
+    this.refreshRelatedProperties([this.entityId])
+      .then((data: RelatednessMapping) => {
+        if (!(this.entityId in data)) {
+          return
+        }
+
+        const related = Object.entries(data[this.entityId]).sort((left, right) => {
+          if (left[1] < right[1]) {
+            return 1
+          } else if (left[1] > right[1]) {
+            return -1
+          }
+          return 0
+        })
+        const typical = []
+
+        for (const [entityId, score] of related) {
+          if (score > RELATED_PROPERTIES_THRESHOLD) {
+            typical.push(entityId)
+          }
+        }
+
+        this.requestLabels({ entityIds: typical })
+        this.typicalProperties = typical
+      })
+
+    this.getPropertyUsage(this.entityId)
+      .then((usage) => {
+        if (usage === undefined) {
+          return
+        }
+
+        this.propertyUsage = usage
+        const entityIds = ([] as string[]).concat(usage.classes)
+
+        for (const entityId of usage.qualifiers.keys()) {
+          entityIds.push(entityId)
+        }
+
+        return this.requestLabels({ entityIds })
       })
 
     const forwardClaims = this.getEntityData(this.entityId)
@@ -554,6 +712,13 @@ export default class Entity extends Vue {
     }
 
     return result.sort(this.compareByCount)
+  }
+
+  private get averagePropertyStatements() {
+    const statements = this.propertyUsage.statements
+    const items = this.propertyUsage.items || 1
+
+    return Math.round(100 * statements / items) / 100
   }
 }
 </script>

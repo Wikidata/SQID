@@ -33,6 +33,18 @@ export const getters: GetterTree<PropertiesState, RootState> = {
   cachedRelatedPropertiesRefresh: (state) => {
     return state.cachedRelatedPropertiesRefresh
   },
+  mustRefreshUrlPatterns: (_state, getters) => { // tslint:disable-line:no-shadowed-variable
+    return mustRefresh(getters.lastUrlPatternsRefresh)
+  },
+  lastUrlPatternsRefresh: (state) => {
+    return state.urlPatternsRefreshed.getTime()
+  },
+  mustRefreshUsage: (_state, getters) => { // tslint:disable-line:no-shadowed-variable
+    return mustRefresh(getters.lastUsageRefresh)
+  },
+  lastUsageRefresh: (state) => {
+    return state.usageRefreshed.getTime()
+  },
   count: (state) => {
     return state.count
   },
@@ -47,5 +59,14 @@ export const getters: GetterTree<PropertiesState, RootState> = {
   },
   countAliases: (state) => {
     return state.countAliases
+  },
+  hasUrlPattern: (state) => (entityId: EntityId) => {
+    return state.urlPatterns.has(entityId)
+  },
+  getUrlPattern: (state) => (entityId: EntityId) => {
+    return state.urlPatterns.get(entityId)
+  },
+  getUsage: (state) => (entityId: EntityId) => {
+    return state.usage[entityId]
   },
 }

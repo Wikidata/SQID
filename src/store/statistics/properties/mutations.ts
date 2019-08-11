@@ -39,7 +39,15 @@ export const mutations: MutationTree<PropertiesState> = {
   },
   invalidateClassification: (state) => {
     state.classificationRefreshed = new Date(0)
-    state.propertyGroups = new Object() // todo(mx): this should be a map, but that breaks vue-devtools
+    state.propertyGroups = {} // todo(mx): this should be a map, but that breaks vue-devtools
     state.propertiesByGroup = new Map<PropertyClassification, EntityId[]>()
+  },
+  refreshUrlPatterns: (state, urlPatterns) => {
+    state.urlPatterns = urlPatterns
+    state.urlPatternsRefreshed = new Date()
+  },
+  refreshPropertyUsage: (state, usage) => {
+    state.usage = usage
+    state.usageRefreshed = new Date()
   },
 }

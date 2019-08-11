@@ -65,7 +65,21 @@
     "directSubclassesSubclassesDescription": "Direkte Unterklassen mit Unterklassen, zusammen mit der Anzahl ihrer direkten und indirekten Unterklassen",
     "directSubclassesAll": "Alle {count}",
     "allSubclasses": "Alle Unterklassen",
-    "allSubclassesDescription": "Anzahl der eindeutigen direkten und indirekten Unterklassen"
+    "allSubclassesDescription": "Anzahl der eindeutigen direkten und indirekten Unterklassen",
+    "propertyUsage": "Verwendung der Eigenschaft",
+    "propertyEntities": "Entitäten",
+    "propertyEntitiesDescription": "Entitäten mit einer Aussage für diese Eigenschaft",
+    "propertyValues": "Werte",
+    "propertyValuesDescription": "Werte, die in Aussagen mit dieser Eigenschaft benutzt werden",
+    "propertyTypicalProperties": "Typische Eigenschaften",
+    "propertyTypicalPropertiesDescription": "Andere Eigenschaften, die typischerweise von Entitäten benutzt werden, die diese Eigenschaft verwenden",
+    "propertyStatements": "Aussagen",
+    "propertyStatementsValue": "{count} ({average} pro Entität)",
+    "propertyStatementsDescription": "Anzahl der Aussagen für diese Eigenschaft",
+    "propertyQualifiers": "Qualifikatoren",
+    "propertyQualifiersDescription": "Andere Eigenschaften, die als Qualifikator für diese Eigenschaft benutzt werden, zusammen mit der Anzahl der Benutzungen",
+    "propertyAsQualifier": "Verwendung als Qualifikator",
+    "propertyInReference": "Verwendung in Referenzen"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",

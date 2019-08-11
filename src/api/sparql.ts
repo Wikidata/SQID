@@ -142,3 +142,31 @@ export async function getPropertySubjects(propertyId: EntityId, lang: string, li
            }
   })
 }
+
+function propertyObjectsQuery(propertyId: EntityId,
+                              lang: string,
+                              subject?: EntityId,
+                              limit?: number,
+                              resultVariable = 'p'): string {
+  const subj = (subject
+                ? `wd:${subject}`
+                : '[]')
+  const limitClause = limit ? ` LIMIT ${limit} ` : ''
+
+  return `SELECT ?${resultVariable} ?${resultVariable}Label WHERE {{
+  SELECT DISTINCT ?${resultVariable} WHERE {
+    ${subj} wdt:${propertyId} ?${resultVariable} .
+  }${limitClause}}
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "${lang}" }
+}`
+}
+
+export async function getPropertyObjects(propertyId: EntityId, lang: string, limit: number, entityId?: EntityId) {
+  const result = await sparqlQuery(propertyObjectsQuery(propertyId, lang, entityId, limit))
+
+  return result.map((binding) => {
+    return { entityId: entityValue(binding.p),
+             label: binding.pLabel.value,
+           }
+  })
+}

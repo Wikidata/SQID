@@ -2,7 +2,7 @@ import { ActionTree } from 'vuex'
 import { PropertiesState } from './types'
 import { RootState } from '@/store/types'
 import { EntityId } from '@/api/types'
-import { getPropertyClassification, getChunkId,
+import { getPropertyClassification, getChunkId, getPropertyUsage, getUrlPatterns,
          getRelatedPropertiesChunk, RelatednessMapping, RelatednessScores } from '@/api/sqid'
 
 export const actions: ActionTree<PropertiesState, RootState> = {
@@ -48,5 +48,29 @@ export const actions: ActionTree<PropertiesState, RootState> = {
     }
 
     return result
+  },
+  async getUrlPattern({ dispatch, commit, getters }, entityId: EntityId) {
+    if (!getters.mustRefreshUrlPatterns) {
+      return getters.getUrlPattern(entityId)
+    }
+
+    await dispatch('statistics/refresh', {}, { root: true })
+
+    const response = await getUrlPatterns(getters.lastUrlPatternRefresh)
+    commit('refreshUrlPatterns', response)
+
+    return response.get(entityId)
+  },
+  async getPropertyUsage({ dispatch, commit, getters }, entityId: EntityId) {
+    if (!getters.mustRefreshUsage) {
+      return getters.getUsage(entityId)
+    }
+
+    await dispatch('statistics/refresh', {}, { root: true })
+
+    const response = await getPropertyUsage(getters.lastUsageRefresh)
+    commit('refreshPropertyUsage', response)
+
+    return getters.getUsage(entityId)
   },
 }
