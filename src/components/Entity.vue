@@ -85,9 +85,9 @@
                   <td>{{ hierarchyStatistics.allInstances }}</td>
                 </tr>
                 <tr>
-                  <th v-t="'entity.typicalProperties'"
+                  <th v-t="'entity.classTypicalProperties'"
                       v-b-tooltip
-                      :title="$t('entity.typicalPropertiesDescription')" />
+                      :title="$t('entity.classTypicalPropertiesDescription')" />
                   <td><div class="four-lines">
                       <ul class="comma-separated">
                         <li v-for="(relatedId, relidx) of hierarchyStatistics.relatedProperties" :key="relidx">
