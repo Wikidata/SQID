@@ -109,6 +109,7 @@ def update_derived_property_records():
     derive_related_properties()
     derive_url_patterns()
     derive_property_usage()
+    derive_property_datatypes()
 
 
 def derive_property_classification():
@@ -189,3 +190,17 @@ def derive_property_usage():
                 usage[pid][key] = data[pid][key]
 
     statistics.update_json_data('properties/usage', usage)
+
+
+def derive_property_datatypes():
+    """Derive property datatype information from property statistics."""
+    logger.info('Deriving property datatypes ...')
+    data = statistics.get_json_data('properties')
+
+    types = {}
+
+    for pid in data:
+        if 'd' in data[pid] and data[pid]['d']:
+            types[pid] = data[pid]['d']
+
+    statistics.update_json_data('properties/datatypes', types)
