@@ -120,7 +120,9 @@ function propertySubjectsQuery(propertyId: EntityId,
                                object?: EntityId,
                                limit?: number,
                                resultVariable = 'p'): string {
-  const obj = `wd:${object}` || '[]'
+  const obj = (object
+               ? `wd:${object}`
+               : '[]')
   const limitClause = limit ? ` LIMIT ${limit} ` : ''
 
   return `SELECT ?${resultVariable} ?${resultVariable}Label WHERE {{
