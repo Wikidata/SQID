@@ -52,16 +52,13 @@ def derive_class_hierarchy():
     logger.info('Deriving class hierarchy ...')
     data = statistics.get_json_data('classes')
 
-    hierarchy = {}
+    hierarchy = defaultdict(dict)
     keys = ['i', 's', 'ai', 'as', 'sc', 'sb', 'r']
 
     for cid in data:
-        record = {}
-
         for key in keys:
             if key in data[cid] and data[cid][key]:
-                record[key] = data[cid][key]
-        hierarchy[cid] = record
+                hierarchy[cid][key] = data[cid][key]
 
     statistics.update_json_data('classes/hierarchy', hierarchy)
     statistics.update_split_json_data('classes/hierarchy', hierarchy, 1000)

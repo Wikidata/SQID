@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 from . import sparql, queries, statistics
 
@@ -106,6 +107,8 @@ def update_derived_property_records():
     """Update all derived property records."""
     derive_property_classification()
     derive_related_properties()
+    derive_url_patterns()
+    derive_property_usage()
 
 
 def derive_property_classification():
@@ -156,3 +159,33 @@ def derive_related_properties():
 
     statistics.update_json_data('properties/related', related)
     statistics.update_split_json_data('properties/related', related, 10)
+
+
+def derive_url_patterns():
+    """Derive the list of URL patterns from property statistics."""
+    logger.info('Deriving URL patterns ...')
+    data = statistics.get_json_data('properties')
+
+    patterns = {}
+
+    for pid in data:
+        if 'u' in data[pid] and data[pid]['u']:
+            patterns[pid] = data[pid]['u']
+
+    statistics.update_json_data('properties/urlpatterns', patterns)
+
+
+def derive_property_usage():
+    """Derive property usage statistics from property statistics."""
+    logger.info('Deriving property usage ...')
+    data = statistics.get_json_data('properties')
+
+    usage = defaultdict(dict)
+    keys = ['i', 's', 'q', 'e', 'qs', 'pc']
+
+    for pid in data:
+        for key in keys:
+            if key in data[pid] and data[pid][key]:
+                usage[pid][key] = data[pid][key]
+
+    statistics.update_json_data('properties/usage', usage)
