@@ -45,7 +45,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Action, Getter, namespace } from 'vuex-class'
 import { EntityId, Datavalue, StringDataValue, TimeDataValue,
          GlobeCoordinateValue, QuantityDataValue } from '@/api/types'
@@ -66,17 +66,27 @@ export default class DataValue extends Vue {
   private datatype: string | null = null
   private urlPattern: string | null = null
 
-  private async created() {
-    const datatypes = await this.getPropertyDatatypes([this.propertyId])
+  private created() {
+    this.onUpdate()
+  }
 
-    if (datatypes && this.propertyId in datatypes) {
-      this.datatype = datatypes[this.propertyId]
-    }
+  @Watch('value')
+  private async onUpdate() {
+    this.datatype = null
+    this.urlPattern = null
 
-    const pattern = await this.getUrlPattern(this.propertyId)
+    if (this.valuetype === 'string') {
+      const datatypes = await this.getPropertyDatatypes([this.propertyId])
 
-    if (pattern) {
-      this.urlPattern = pattern
+      if (datatypes && this.propertyId in datatypes) {
+        this.datatype = datatypes[this.propertyId]
+      }
+
+      const pattern = await this.getUrlPattern(this.propertyId)
+
+      if (pattern) {
+        this.urlPattern = pattern
+      }
     }
   }
 
@@ -166,9 +176,9 @@ export default class DataValue extends Vue {
     const value = (this.value as StringDataValue).value
 
     switch (this.datatype) {
-      case 'Url':
+      case 'url':
         return value
-      case 'CommonsMedia':
+      case 'commonsMedia':
         const filename = value.replace(/ /g, '_')
         return `https://commons.wikimedia.org/wiki/File:${filename}`
       default:

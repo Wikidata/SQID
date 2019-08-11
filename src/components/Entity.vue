@@ -316,7 +316,7 @@ import { ClassStatistics } from '@/store/statistics/classes/types'
 import ClaimTable from './ClaimTable.vue'
 import SqidQualifierIcon from './SqidQualifierIcon.vue'
 import { Claim, EntityKind, QualifiedEntityValue, WBDatatype } from '@/api/types'
-import { relatedEntityIds, parseEntityId, idsFromQualifiedEntity } from '@/api/wikidata'
+import { relatedEntityIds, parseEntityId, idsFromQualifiedEntity, isPropertyId } from '@/api/wikidata'
 import { groupClaims, RelatednessMapping, getClassHierarchyChunk, RELATED_PROPERTIES_THRESHOLD } from '@/api/sqid'
 import { i18n } from '@/i18n'
 
@@ -537,7 +537,15 @@ export default class Entity extends Vue {
 
           const related = relatedEntityIds(this.claims)
           this.requestLabels({entityIds: related})
-          this.getPropertyDatatypes(related)
+
+          const properties = []
+          for (const entityId of related) {
+            if (isPropertyId(entityId as EntityId)) {
+              properties.push(entityId)
+            }
+          }
+
+          this.getPropertyDatatypes(properties)
 
           this.images = this.getImages(this.entityId)
           this.banner = this.getBanner(this.entityId)
@@ -571,7 +579,16 @@ export default class Entity extends Vue {
 
         const related = relatedEntityIds(claims)
         this.requestLabels({entityIds: related})
-        this.getPropertyDatatypes(related)
+
+        const properties = []
+
+        for (const entityId of related) {
+          if (isPropertyId(entityId as EntityId)) {
+            properties.push(entityId)
+          }
+        }
+
+        this.getPropertyDatatypes(properties)
       })
 
     Promise.all([forwardClaims,
@@ -608,9 +625,9 @@ export default class Entity extends Vue {
   }
 
   private created() {
-    this.getUrlPattern(this.entityId)
     this.onEntityIdChanged()
     this.updateLinks()
+    this.getUrlPattern(this.entityId)
   }
 
   @Watch('entityId')

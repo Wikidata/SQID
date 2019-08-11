@@ -73,7 +73,12 @@ export function getChunkId(entityId: EntityId, chunkSize: number) {
 }
 
 export async function getRelatedPropertiesChunk(chunkId: number, lastRefresh: number) {
-  const response = await http.get(getDataFileURI(`properties/related-${chunkId}`, lastRefresh))
+  let response
+  try {
+    response = await http.get(getDataFileURI(`properties/related-${chunkId}`, lastRefresh))
+  } catch {
+    return {}
+  }
   const chunk: RelatednessMapping = {}
 
   for (const [entityId, related] of Object.entries(response.data)) {
@@ -183,7 +188,12 @@ export function wikifyLink(uri: string | null): string | null {
 
 export async function getClassHierarchyChunk(chunkId: number, lastRefresh: number) {
   const chunk = new Map<EntityId, ClassStatistics>()
-  const response = await http.get(getDataFileURI(`classes/hierarchy-${chunkId}`, lastRefresh))
+  let response
+  try {
+    response = await http.get(getDataFileURI(`classes/hierarchy-${chunkId}`, lastRefresh))
+  } catch {
+    return chunk
+  }
 
   for (const [entityId, data] of Object.entries(response.data as { [key: string]: SqidHierarchyRecord })) {
     const superClasses = data.sc || []

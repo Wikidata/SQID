@@ -75,16 +75,20 @@ export const actions: ActionTree<RootState, RootState> = {
       }
     }
 
-    const entityData = await getEntities(missing, ['info'])
+    if (missing.length) {
+      const entityData = await getEntities(missing, ['info'])
 
-    const datatypes: { [key: string]: WBDatatype } = {}
-    for (const [entityId, data] of Object.entries(entityData)) {
-      if ('datatype' in data) {
-        datatypes[entityId] = data.datatype as WBDatatype
+      const datatypes: { [key: string]: WBDatatype } = {}
+      for (const [entityId, data] of Object.entries(entityData)) {
+        if ('datatype' in data) {
+          datatypes[entityId] = data.datatype as WBDatatype
+        }
+      }
+
+      if (Object.keys(datatypes).length) {
+        commit('datatypesLoaded', datatypes)
       }
     }
-
-    commit('datatypesLoaded', datatypes)
 
     const result: { [key: string]: string } = {}
 

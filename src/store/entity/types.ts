@@ -4,5 +4,5 @@ export { EntityId, EntitySiteLink, WBDatatype }
 export interface EntityState {
   timestamps: Map<EntityId, Date>,
   sitelinks: Map<EntityId, Map<string, EntitySiteLink>>,
-  datatypes: Map<EntityId, WBDatatype>,
+  datatypes: { [key: string]: WBDatatype },
 }

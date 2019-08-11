@@ -2,8 +2,9 @@ import { ActionTree } from 'vuex'
 import { PropertiesState } from './types'
 import { RootState } from '@/store/types'
 import { EntityId } from '@/api/types'
+import { parseEntityId } from '@/api/wikidata'
 import { getPropertyClassification, getChunkId, getPropertyUsage, getUrlPatterns,
-         getRelatedPropertiesChunk, RelatednessMapping, RelatednessScores } from '@/api/sqid'
+         getRelatedPropertiesChunk, RelatednessMapping, RelatednessScores} from '@/api/sqid'
 
 export const actions: ActionTree<PropertiesState, RootState> = {
   async refreshClassification({ dispatch, commit, getters }) {
@@ -21,7 +22,11 @@ export const actions: ActionTree<PropertiesState, RootState> = {
     const chunkIds = new Set<number>()
 
     for (const propertyId of propertyIds) {
-      chunkIds.add(getChunkId(propertyId, 10))
+      const { kind } = parseEntityId(propertyId)
+
+      if (kind === 'property') {
+        chunkIds.add(getChunkId(propertyId, 10))
+      }
     }
 
     const requests = []

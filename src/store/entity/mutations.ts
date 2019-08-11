@@ -15,11 +15,13 @@ export const mutations: MutationTree<EntityState> = {
                  { entityId, datatype }: { entityId: EntityId,
                                            datatype: WBDatatype,
                                          }) {
-    state.datatypes.set(entityId, datatype)
+    Object.defineProperty(state.datatypes, entityId, { value: datatype,
+                                                       configurable: false })
   },
   datatypesLoaded(state, datatypes: { [key: string]: WBDatatype }) {
     for (const [propertyId, datatype] of Object.entries(datatypes)) {
-      state.datatypes.set(propertyId, datatype)
+      Object.defineProperty(state.datatypes, propertyId, { value: datatype,
+                                                            configurable: false })
     }
   },
 

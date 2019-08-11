@@ -460,3 +460,15 @@ export function idsFromQualifiedEntity(entity: QualifiedEntityValue): EntityId[]
 
   return ids
 }
+
+export function isItemId(entityId: EntityId) {
+  const { kind } = parseEntityId(entityId)
+
+  return kind === 'item'
+}
+
+export function isPropertyId(entityId: EntityId) {
+  const { kind } = parseEntityId(entityId)
+
+  return kind === 'property'
+}
