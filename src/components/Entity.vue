@@ -429,6 +429,10 @@ export default class Entity extends Vue {
       qualifiers: new Map<EntityId, number>(),
       classes: [],
     }
+    this.claims = null
+    this.reverseClaims = null
+    this.groupedClaims = null
+    this.groupedReverseClaims = null
     document.title = `${this.label} – SQID`
 
     this.getClassHierarchyRecord(this.entityId)
