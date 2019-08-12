@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router, { NavigationGuard } from 'vue-router'
 import Home from '@/views/Home.vue'
-import NProgress from 'nprogress'
+import Progress from './progress'
 import store from '@/store/index'
 
 import { EntityMissingError, MalformedEntityIdError } from '@/api/types'
@@ -136,7 +136,7 @@ const router = new Router({
 })
 
 router.beforeResolve((_to, _from, next) => {
-  NProgress.start()
+  Progress.start()
   next()
 })
 
@@ -176,6 +176,6 @@ router.beforeEach((to, _from, next) => {
   next()
 })
 
-router.afterEach((_to, _from) => NProgress.done())
+router.afterEach((_to, _from) => Progress.done())
 
 export default router

@@ -1,16 +1,16 @@
 import axios from 'axios'
-import NProgress from 'nprogress'
+import Progress from './progress'
 
 export const http = axios.create()
 
 http.interceptors.request.use((config) => {
-  NProgress.start()
+  Progress.start()
 
   return config
 })
 
 http.interceptors.response.use((response) => {
-  NProgress.done()
+  Progress.done()
 
   return response
 })

@@ -308,6 +308,7 @@
 <script lang="ts">
 import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
 import { Getter, Action, Mutation, namespace } from 'vuex-class'
+import Progress from '@/progress'
 import { ClaimsMap, EntityId } from '@/store/entity/claims/types'
 import { PropertyClassification, PropertyStatistics } from '@/store/statistics/properties/types'
 import { ClassStatistics } from '@/store/statistics/classes/types'
@@ -394,6 +395,7 @@ export default class Entity extends Vue {
   }
 
   private updateEntityData() {
+    Progress.start()
     this.images = null
     this.banner = null
     const { kind } = parseEntityId(this.entityId)
@@ -609,7 +611,7 @@ export default class Entity extends Vue {
         return this.refreshRelatedProperties(properties)
       }).then((scores) => {
         this.regroupClaims(scores)
-      })
+      }).then(() => Progress.done())
   }
 
   private regroupClaims(relatednessScores: RelatednessMapping) {
