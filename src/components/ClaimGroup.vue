@@ -16,7 +16,8 @@
         <claim :entityId="entityId"
                :propertyId="propertyId"
                :claim="claim"
-               :reverse="reverse" />
+               :reverse="reverse"
+               :narrow="narrow" />
       </td>
     </tr>
     <b-collapse tag="tr"
@@ -28,7 +29,8 @@
         <claim :entityId="entityId"
                :propertyId="propertyId"
                :claim="claim"
-               :reverse="reverse" />
+               :reverse="reverse"
+               :narrow="narrow" />
       </td>
     </b-collapse>
   </tbody>
@@ -49,6 +51,7 @@ export default class ClaimGroup extends Vue {
   @Prop({ required: true }) private entityId!: EntityId
   @Prop({ required: true }) private propertyId!: EntityId
   @Prop({ required: true }) private claims!: Claim[]
+  @Prop({ default: false, type: Boolean }) private narrow!: boolean
   @Prop({ default: false, type: Boolean }) private reverse!: boolean
   @Prop({ default: 4, type: Number }) private hideAllBut!: number
   @Action private getLabel: any

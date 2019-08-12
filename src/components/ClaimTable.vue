@@ -6,6 +6,7 @@
       <table :class="['table', 'table-striped', { narrow, 'table-sm': narrow }]">
         <template v-if="claims">
           <claim-group :entityId="entityId"
+                       :narrow="narrow"
                        :propertyId="prop"
                        :claims="statements(prop)"
                        v-for="prop in claims.keys()"
@@ -21,6 +22,7 @@
           <template v-if="claims">
             <claim-group :entityId="entityId"
                          :propertyId="prop"
+                         :narrow="narrow"
                          :claims="statements(prop)"
                          v-for="prop in claims.keys()"
                          :key="prop" />
@@ -32,6 +34,7 @@
           <template v-if="reverseClaims">
             <claim-group :entityId="entityId"
                          :propertyId="prop"
+                         :narrow="narrow"
                          :claims="reverseStatements(prop)"
                          v-for="prop in reverseClaims.keys()"
                          :key="prop"
