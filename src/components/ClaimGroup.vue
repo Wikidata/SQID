@@ -3,7 +3,7 @@
     <tr :title="tooltip"
         v-for="(claim, cidx) in claims.slice(0, hideAllBut)"
         :key="cidx">
-      <th :rowspan="claims.length" v-if="cidx === 0">
+      <th :rowspan="shownRows" v-if="cidx === 0">
         <entity-link :entityId="propertyId" />
         <template v-if="hiddenClaims">
           <br>
@@ -24,7 +24,9 @@
                 :title="tooltip"
                 :id="`collapse-${collapseId}`"
                 v-for="(claim, cidx) in claims.slice(hideAllBut)"
-                :key="cidx + hideAllBut">
+                :key="cidx + hideAllBut"
+                @show="onToggle(true)"
+                @hidden="onToggle(false)">
       <td>
         <claim :entityId="entityId"
                :propertyId="propertyId"
@@ -55,6 +57,7 @@ export default class ClaimGroup extends Vue {
   @Prop({ default: false, type: Boolean }) private reverse!: boolean
   @Prop({ default: 4, type: Number }) private hideAllBut!: number
   @Action private getLabel: any
+  private shownRows = Math.min(this.claims.length, this.hideAllBut)
   private label: string = this.propertyId
 
   private get collapseId() {
@@ -90,6 +93,16 @@ export default class ClaimGroup extends Vue {
   @Watch('language')
   private onPropertyIdChanged() {
     this.updateLabel()
+  }
+
+  private onToggle(shown: boolean) {
+    const claims = this.claims.length
+
+    if (shown) {
+      this.shownRows = claims
+    } else {
+      this.shownRows = Math.min(this.hideAllBut, claims)
+    }
   }
 }
 </script>
