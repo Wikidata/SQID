@@ -13,6 +13,10 @@ http.interceptors.response.use((response) => {
   Progress.done()
 
   return response
+}, (error) => {
+  Progress.done()
+
+  return Promise.reject(error)
 })
 
 export default http
