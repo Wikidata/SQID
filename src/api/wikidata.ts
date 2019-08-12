@@ -350,7 +350,8 @@ export function relatedEntityIds(claims: ClaimsMap) {
           for (const [propId, snaks] of Object.entries(reference.snaks)) {
             entityIds.add(propId)
             for (const snak of snaks) {
-              if (snak.datatype === 'wikibase-item') {
+              if (snak.snaktype === 'value' &&
+                  snak.datatype === 'wikibase-item') {
                 const datavalue = (snak.datavalue as EntityIdDataValue)
                 entityIds.add(datavalue.value.id)
               }
@@ -364,7 +365,8 @@ export function relatedEntityIds(claims: ClaimsMap) {
           entityIds.add(propId)
 
           for (const snak of snaks) {
-            if (snak.datatype === 'wikibase-item') {
+            if (snak.snaktype === 'value' &&
+                snak.datatype === 'wikibase-item') {
               const datavalue = (snak.datavalue as EntityIdDataValue)
               entityIds.add(datavalue.value.id)
             }
