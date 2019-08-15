@@ -27,6 +27,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { Action } from 'vuex-class'
 import AppNavbar from '@/components/AppNavbar.vue'
 import AppFooter from '@/components/AppFooter.vue'
 import EntityLink from '@/components/EntityLink.vue'
@@ -51,6 +52,12 @@ Vue.component('sqid-collapsible-card', SqidCollapsibleCard)
     'app-footer': AppFooter,
   }})
 export default class App extends Vue {
+  @Action private loadTranslation!: (lang: string) => void
+
+  private created() {
+    const preferredLanguage = navigator.language.split('-')[0]
+    this.loadTranslation(preferredLanguage)
+  }
 }
 </script>
 
