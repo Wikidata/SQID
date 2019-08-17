@@ -1,6 +1,6 @@
 module.exports = {
   publicPath: (process.env.NODE_ENV === 'production'
-               ? '/sqid/sqid-ng-test/'
+               ? '/sqid/sqid-ng/'
                : '/'),
   pluginOptions: {
     i18n: {
