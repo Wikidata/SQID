@@ -1,4 +1,4 @@
 #*#
 *~
-/dependency-reduced-pom.xml
-target/
+helpers/java/dependency-reduced-pom.xml
+helpers/java/target
