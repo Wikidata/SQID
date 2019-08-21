@@ -94,20 +94,6 @@ public class ClientConfigurationTest {
 	}
 
 	@Test
-	public void testStdOutOutputArgumentsShort() {
-		String[] args = new String[] { "-a", "sqid", "-s" };
-		ClientConfiguration config = new ClientConfiguration(args);
-		assertTrue(config.isQuiet());
-	}
-
-	@Test
-	public void testStdOutOutputArgumentsLong() {
-		String[] args = new String[] { "--action", "sqid", "--stdout" };
-		ClientConfiguration config = new ClientConfiguration(args);
-		assertTrue(config.isQuiet());
-	}
-
-	@Test
 	public void testQuietArgumentsShort() {
 		String[] args = new String[] { "-q" };
 		ClientConfiguration config = new ClientConfiguration(args);

@@ -65,16 +65,6 @@ public class ClientTest {
 	}
 
 	@Test
-	public void testQuietStdOutLoggingConfig() throws ParseException,
-			IOException {
-		String[] args = new String[] { "-a", "sqid", "-s" };
-		new Client(mockDpc, args);
-
-		assertEquals(Level.OFF, Client.consoleAppender.getThreshold());
-		assertEquals(Level.WARN, Client.errorAppender.getThreshold());
-	}
-
-	@Test
 	public void testQuietLoggingConfig() throws ParseException, IOException {
 		String[] TEST_ARGS = new String[] { "-a", "sqid", "-q" };
 		new Client(mockDpc, TEST_ARGS);

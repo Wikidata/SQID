@@ -158,27 +158,6 @@ public class ClientConfiguration {
 	public static final String OPTION_CREATE_REPORT = "report";
 	/**
 	 * Name of the long command line option and configuration file field for
-	 * defining the destination (usually output file name) of actions that
-	 * produce output.
-	 */
-	public static final String OPTION_OUTPUT_DESTINATION = DumpProcessingOutputAction.OPTION_DESTINATION;
-	/**
-	 * Name of the long command line option and configuration file field for
-	 * specifying the compression to use for the output.
-	 */
-	public static final String OPTION_OUTPUT_COMPRESSION = DumpProcessingOutputAction.OPTION_COMPRESSION;
-	/**
-	 * Name of the long command line option and configuration file field for
-	 * directing output to stdout.
-	 */
-	public static final String OPTION_OUTPUT_STDOUT = DumpProcessingOutputAction.OPTION_USE_STDOUT;
-	/**
-	 * Name of the long command line option and configuration file field for
-	 * specifying the tasks for RDF serialization.
-	 */
-	public static final String OPTION_OUTPUT_RDF_TYPE = "rdftasks";
-	/**
-	 * Name of the long command line option and configuration file field for
 	 * defining the path to a local dump file.
 	 */
 	public static final String OPTION_LOCAL_DUMPFILE = "input";
@@ -783,11 +762,6 @@ public class ClientConfiguration {
 								+ actions).withLongOpt(OPTION_ACTION)
 				.create(CMD_OPTION_ACTION);
 
-		Option destination = OptionBuilder.withArgName("path").hasArg()
-				.withDescription("place the output into the file at <path>")
-				.withLongOpt(OPTION_OUTPUT_DESTINATION)
-				.create(CMD_OPTION_OUTPUT_DESTINATION);
-
 		Option dumplocation = OptionBuilder
 				.hasArg()
 				.withArgName("path")
@@ -802,13 +776,6 @@ public class ClientConfiguration {
 				.withDescription(
 						"set a config file; use this to define multiple actions for a single run")
 				.withLongOpt(OPTION_CONFIG_FILE).create(CMD_OPTION_CONFIG_FILE);
-
-		Option rdfdump = OptionBuilder
-				.hasArgs()
-				.withArgName("task")
-				.withDescription(
-						"specify which data to include in RDF dump (use with action \"rdf\"); run with options \"-a rdf -n\" for help")
-				.withLongOpt(OPTION_OUTPUT_RDF_TYPE).create();
 
 		Option filterLanguages = OptionBuilder
 				.hasArgs()
@@ -830,17 +797,6 @@ public class ClientConfiguration {
 				.withDescription(
 						"specifies a list of property ids; if given, only statements for properties in this list will be processed; the value \"-\" denotes the empty list (no statements are processed)")
 				.withLongOpt(OPTION_FILTER_PROPERTIES).create();
-
-		Option compressionExtention = OptionBuilder
-				.hasArg()
-				.withArgName("type")
-				.withDescription(
-						"define a compression format to be used for the output; possible values: "
-								+ DumpProcessingOutputAction.COMPRESS_GZIP
-								+ ", "
-								+ DumpProcessingOutputAction.COMPRESS_BZ2)
-				.withLongOpt(OPTION_OUTPUT_COMPRESSION)
-				.create(CMD_OPTION_OUTPUT_COMPRESSION);
 
 		Option report = OptionBuilder
 				.hasArg()
@@ -865,22 +821,15 @@ public class ClientConfiguration {
 				OPTION_QUIET,
 				false,
 				"perform all actions quietly, without printing status messages to the console; errors/warnings are still printed to stderr");
-		options.addOption(destination);
 		options.addOption(dumplocation);
 		options.addOption(filterLanguages);
 		options.addOption(filterSites);
 		options.addOption(filterProperties);
-		options.addOption(compressionExtention);
 		options.addOption(report);
 		options.addOption(localDump);
-		options.addOption(rdfdump);
 		options.addOption(CMD_OPTION_OFFLINE_MODE, OPTION_OFFLINE_MODE, false,
 				"execute all operations in offline mode, especially do not download new dumps");
 		options.addOption(CMD_OPTION_HELP, OPTION_HELP, false,
 				"print this message");
-
-		options.addOption(CMD_OPTION_OUTPUT_STDOUT, OPTION_OUTPUT_STDOUT,
-				false, "write output to stdout");
-	}
-
+  }
 }
