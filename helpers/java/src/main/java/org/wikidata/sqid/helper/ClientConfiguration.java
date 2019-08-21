@@ -41,8 +41,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.ini4j.Ini;
-import org.ini4j.Profile.Section;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wikidata.wdtk.datamodel.helpers.Datamodel;
@@ -65,10 +63,6 @@ public class ClientConfiguration {
 	 * Short command-line alternative to {@link #OPTION_HELP}.
 	 */
 	public static final String CMD_OPTION_HELP = "h";
-	/**
-	 * Short command-line alternative to {@link #OPTION_CONFIG_FILE}.
-	 */
-	public static final String CMD_OPTION_CONFIG_FILE = "c";
 	/**
 	 * Short command-line alternative to {@link #OPTION_DUMP_LOCATION}.
 	 */
@@ -110,11 +104,6 @@ public class ClientConfiguration {
 	 * Name of the long command line option for printing the help text.
 	 */
 	public static final String OPTION_HELP = "help";
-	/**
-	 * Name of the long command line option for specifying the location of the
-	 * configuration file.
-	 */
-	public static final String OPTION_CONFIG_FILE = "config";
 	/**
 	 * Name of the long command line option and configuration file field for
 	 * specifying the base location of the dump files to use.
@@ -456,57 +445,8 @@ public class ClientConfiguration {
 			}
 		}
 
-		if (cmd.hasOption(CMD_OPTION_CONFIG_FILE)) {
-			try {
-				List<DumpProcessingAction> configFile = readConfigFile(cmd
-						.getOptionValue(CMD_OPTION_CONFIG_FILE));
-				configuration.addAll(configFile);
-			} catch (IOException e) {
-				logger.error("Failed to read configuration file \""
-						+ cmd.getOptionValue(CMD_OPTION_CONFIG_FILE) + "\": "
-						+ e.toString());
-			}
-
-		}
-
 		return configuration;
 
-	}
-
-	/**
-	 *
-	 * Reads the properties defined in a configuration file. Returns a set of
-	 * configuration property blocks stored in {@link DumpProcessingAction}
-	 * objects and call
-	 * {@link ClientConfiguration#handleGlobalArguments(CommandLine)} to
-	 * interpreted the properties from the general section. The first element of
-	 * the list contains general information (about all dumps).
-	 *
-	 * @param path
-	 *            filename and path of the configuration file
-	 * @return the list with configurations for all output dumps
-	 * @throws IOException
-	 */
-	private List<DumpProcessingAction> readConfigFile(String path)
-			throws IOException {
-		List<DumpProcessingAction> result = new ArrayList<>();
-
-		try(FileReader reader = new FileReader(path)) {
-			Ini ini = new Ini(reader);
-
-			for (Section section : ini.values()) {
-				if (section.getName().toLowerCase().equals("general")) {
-					handleGlobalArguments(section);
-				} else {
-					DumpProcessingAction action = handleActionArguments(section);
-					if (action != null) {
-						action.setActionName(section.getName());
-						result.add(action);
-					}
-				}
-			}
-			return result;
-		}
 	}
 
 	/**
@@ -554,50 +494,6 @@ public class ClientConfiguration {
 	}
 
 	/**
-	 * Analyses the content of the general section of an ini configuration file
-	 * and fills out the class arguments with this data.
-	 *
-	 * @param section
-	 *            {@link Section} with name "general"
-	 */
-	private void handleGlobalArguments(Section section) {
-		for (String key : section.keySet()) {
-			switch (key) {
-			case OPTION_OFFLINE_MODE:
-				if (section.get(key).toLowerCase().equals("true")) {
-					this.offlineMode = true;
-				}
-				break;
-			case OPTION_QUIET:
-				if (section.get(key).toLowerCase().equals("true")) {
-					this.quiet = true;
-				}
-				break;
-			case OPTION_CREATE_REPORT:
-				this.reportFilename = section.get(key);
-				break;
-			case OPTION_DUMP_LOCATION:
-				this.dumpDirectoryLocation = section.get(key);
-				break;
-			case OPTION_FILTER_LANGUAGES:
-				setLanguageFilters(section.get(key));
-				break;
-			case OPTION_FILTER_SITES:
-				setSiteFilters(section.get(key));
-				break;
-			case OPTION_FILTER_PROPERTIES:
-				setPropertyFilters(section.get(key));
-				break;
-			case OPTION_LOCAL_DUMPFILE:
-				this.inputDumpLocation = section.get(key);
-				break;
-			default:
-				logger.warn("Unrecognized option: " + key);
-			}
-		}
-	}
-
-	/**
 	 * Analyses the command-line arguments which are relevant for the specific
 	 * action that is to be executed, and returns a corresponding
 	 * {@link DumpProcessingAction} object.
@@ -617,34 +513,6 @@ public class ClientConfiguration {
 
 		for (Option option : cmd.getOptions()) {
 			result.setOption(option.getLongOpt(), option.getValue());
-		}
-
-		checkDuplicateStdOutOutput(result);
-
-		return result;
-	}
-
-	/**
-	 * Analyses the content of a section of an ini configuration file (not the
-	 * "general" section) and fills out the class arguments of an new
-	 * {@link DumpProcessingAction} with this data.
-	 *
-	 * @param section
-	 *            {@link Section} with name "general"
-	 * @return {@link DumpProcessingAction} containing the output parameters
-	 */
-	private DumpProcessingAction handleActionArguments(Section section) {
-		DumpProcessingAction result = makeDumpProcessingAction(section.get(
-				OPTION_ACTION).toLowerCase());
-		if (result == null) {
-			return null;
-		}
-
-		for (String key : section.keySet()) {
-			if (!result.setOption(key.toLowerCase(), section.get(key))
-					&& !OPTION_ACTION.equals(key.toLowerCase())) {
-				logger.warn("Unrecognized option: " + key);
-			}
 		}
 
 		checkDuplicateStdOutOutput(result);
@@ -770,13 +638,6 @@ public class ClientConfiguration {
 				.withLongOpt(OPTION_DUMP_LOCATION)
 				.create(CMD_OPTION_DUMP_LOCATION);
 
-		Option config = OptionBuilder
-				.hasArg()
-				.withArgName("file")
-				.withDescription(
-						"set a config file; use this to define multiple actions for a single run")
-				.withLongOpt(OPTION_CONFIG_FILE).create(CMD_OPTION_CONFIG_FILE);
-
 		Option filterLanguages = OptionBuilder
 				.hasArgs()
 				.withArgName("languages")
@@ -814,7 +675,6 @@ public class ClientConfiguration {
 				.withLongOpt(OPTION_LOCAL_DUMPFILE)
 				.create(CMD_OPTION_LOCAL_DUMPFILE);
 
-		options.addOption(config);
 		options.addOption(action);
 		options.addOption(
 				CMD_OPTION_QUIET,
