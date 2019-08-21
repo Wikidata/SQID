@@ -36,40 +36,31 @@ import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwDumpFile;
 
 public class ClientTest {
-
-	DumpProcessingController mockDpc;
-
-	@BeforeEach
-	public void setup() throws IOException {
-		mockDpc = Mockito.mock(DumpProcessingController.class);
-
-		MwDumpFile mockDump = Mockito.mock(MwDumpFile.class);
-		Mockito.when(mockDump.getProjectName()).thenReturn("wikidata");
-		Mockito.when(mockDump.getDateStamp()).thenReturn("20150303");
-
-		Mockito.when(mockDpc.getMostRecentDump(DumpContentType.JSON))
-				.thenReturn(mockDump);
-
-		Sites mockSites = Mockito.mock(Sites.class);
-		Mockito.when(mockDpc.getSitesInformation()).thenReturn(mockSites);
-	}
-
-	@Test
-	public void testDefaultLoggingConfig() throws ParseException, IOException {
-		String[] args = new String[] {};
-		Client client = new Client(mockDpc, args);
-		client.performActions(); // print help
-
-		assertEquals(Level.INFO, Client.consoleAppender.getThreshold());
-		assertEquals(Level.WARN, Client.errorAppender.getThreshold());
-	}
-
-	@Test
-	public void testQuietLoggingConfig() throws ParseException, IOException {
-		String[] TEST_ARGS = new String[] { "-a", "sqid", "-q" };
-		new Client(mockDpc, TEST_ARGS);
-
-		assertEquals(Level.OFF, Client.consoleAppender.getThreshold());
-		assertEquals(Level.WARN, Client.errorAppender.getThreshold());
-	}
+  DumpProcessingController mockDpc;
+  @BeforeEach
+  public void setup() throws IOException {
+    mockDpc = Mockito.mock(DumpProcessingController.class);
+    MwDumpFile mockDump = Mockito.mock(MwDumpFile.class);
+    Mockito.when(mockDump.getProjectName()).thenReturn("wikidata");
+    Mockito.when(mockDump.getDateStamp()).thenReturn("20150303");
+    Mockito.when(mockDpc.getMostRecentDump(DumpContentType.JSON))
+      .thenReturn(mockDump);
+    Sites mockSites = Mockito.mock(Sites.class);
+    Mockito.when(mockDpc.getSitesInformation()).thenReturn(mockSites);
+  }
+  @Test
+  public void testDefaultLoggingConfig() throws ParseException, IOException {
+    String[] args = new String[] {};
+    Client client = new Client(mockDpc, args);
+    client.performActions(); // print help
+    assertEquals(Level.INFO, Client.consoleAppender.getThreshold());
+    assertEquals(Level.WARN, Client.errorAppender.getThreshold());
+  }
+  @Test
+  public void testQuietLoggingConfig() throws ParseException, IOException {
+    String[] TEST_ARGS = new String[] { "-a", "sqid", "-q" };
+    new Client(mockDpc, TEST_ARGS);
+    assertEquals(Level.OFF, Client.consoleAppender.getThreshold());
+    assertEquals(Level.WARN, Client.errorAppender.getThreshold());
+  }
 }

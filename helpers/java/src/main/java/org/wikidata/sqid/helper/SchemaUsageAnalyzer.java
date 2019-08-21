@@ -1005,6 +1005,6 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   @Override
   public String getDefaultActionName() {
     return "SchemaAnalyzerAction";
-	}
+  }
 
 }
