@@ -11,6 +11,10 @@
   <name>SQID Wikidata browser statistics helper</name>
   <description>This is a command-line tool to derive statistical data from Wikidata data dumps.</description>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <build>
 	<plugins>
       <plugin>
@@ -102,11 +106,17 @@
 	  <artifactId>ini4j</artifactId>
 	  <version>0.5.4</version>
 	</dependency>
-    <dependency>
-	  <groupId>junit</groupId>
-	  <artifactId>junit</artifactId>
-	  <version>4.12</version>
+  <dependency>
+	  <groupId>org.junit.jupiter</groupId>
+	  <artifactId>junit-jupiter-api</artifactId>
+	  <version>5.5.1</version>
 	  <scope>test</scope>
-    </dependency>
+  </dependency>
+  <dependency>
+	  <groupId>org.junit.jupiter</groupId>
+	  <artifactId>junit-jupiter-engine</artifactId>
+	  <version>5.5.1</version>
+	  <scope>test</scope>
+  </dependency>
   </dependencies>
 </project>

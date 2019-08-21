@@ -21,31 +21,25 @@ package org.wikidata.sqid.helper;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Level;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.wikidata.wdtk.datamodel.interfaces.Sites;
 import org.wikidata.wdtk.dumpfiles.DumpContentType;
 import org.wikidata.wdtk.dumpfiles.DumpProcessingController;
 import org.wikidata.wdtk.dumpfiles.MwDumpFile;
-import org.wikidata.wdtk.testing.MockDirectoryManager;
-import org.wikidata.wdtk.util.CompressionType;
-import org.wikidata.wdtk.util.DirectoryManagerFactory;
 
 public class ClientTest {
 
 	DumpProcessingController mockDpc;
 
-	@Before
+	@BeforeEach
 	public void setup() throws IOException {
 		mockDpc = Mockito.mock(DumpProcessingController.class);
 
@@ -87,45 +81,5 @@ public class ClientTest {
 
 		assertEquals(Level.OFF, Client.consoleAppender.getThreshold());
 		assertEquals(Level.WARN, Client.errorAppender.getThreshold());
-	}
-
-	public void testNonReadyActionWithDumps() throws ParseException,
-			IOException {
-		String[] args = new String[] { "-a", "sqid", "--dumps", "/tmp" };
-		Client client = new Client(mockDpc, args);
-		client.performActions(); // print help
-
-		Mockito.verify(mockDpc, Mockito.never()).processDump(
-				Mockito.<MwDumpFile> any());
-		Mockito.verify(mockDpc, Mockito.never()).getSitesInformation();
-		Mockito.verify(mockDpc).setDownloadDirectory("/tmp");
-	}
-
-	@Test
-	public void testSetDumpsDirectoryException() throws ParseException,
-			IOException {
-		Mockito.doThrow(new IOException("Mock exception for testing."))
-				.when(mockDpc).setDownloadDirectory(Mockito.anyString());
-
-		String[] args = new String[] { "-a", "sqid", "--dumps", "/tmp/" };
-		Client client = new Client(mockDpc, args);
-		client.performActions(); // print help
-
-		Mockito.verify(mockDpc, Mockito.never()).processDump(
-				Mockito.<MwDumpFile> any());
-		Mockito.verify(mockDpc, Mockito.never()).getSitesInformation();
-	}
-
-	@Test
-	public void testSitesActionException() throws ParseException, IOException {
-		Mockito.doThrow(new IOException()).when(mockDpc).getSitesInformation();
-
-		String[] args = new String[] { "-a", "sqid" };
-		Client client = new Client(mockDpc, args);
-		client.performActions(); // print help
-
-		Mockito.verify(mockDpc, Mockito.never()).processDump(
-				Mockito.<MwDumpFile> any());
-		Mockito.verify(mockDpc).getSitesInformation();
 	}
 }

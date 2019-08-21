@@ -21,24 +21,16 @@ package org.wikidata.sqid.helper;
  * #L%
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.wikidata.wdtk.datamodel.helpers.Datamodel;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyIdValue;
-import org.wikidata.wdtk.dumpfiles.MwDumpFile;
-import org.wikidata.wdtk.dumpfiles.MwLocalDumpFile;
-import org.wikidata.wdtk.rdf.RdfSerializer;
-import org.wikidata.wdtk.testing.MockDirectoryManager;
-import org.wikidata.wdtk.util.DirectoryManagerFactory;
 
 public class ClientConfigurationTest {
 
