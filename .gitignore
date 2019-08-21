@@ -36,5 +36,9 @@ yarn-error.log*
 *~
 flycheck_*.*
 public/oauth/vendor/
+
 helpers/java/dependency-reduced-pom.xml
 helpers/java/target
+helpers/java/.classpath
+helpers/java/.project
+helpers/java/.settings/

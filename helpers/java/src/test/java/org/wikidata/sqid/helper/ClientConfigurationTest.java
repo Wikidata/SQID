@@ -1,17 +1,18 @@
-package org.wikidata.wdtk.client;
+package org.wikidata.sqid.helper;
 
 /*
  * #%L
- * Wikidata Toolkit Command-line Tool
+ * SQID statistics generation helper
  * %%
  * Copyright (C) 2014 Wikidata Toolkit Developers
+ * Copyright (C) 2019 SQID Developers
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -40,59 +41,6 @@ import org.wikidata.wdtk.testing.MockDirectoryManager;
 import org.wikidata.wdtk.util.DirectoryManagerFactory;
 
 public class ClientConfigurationTest {
-
-	@Test
-	public void testReadConfigFile() throws IOException {
-		String configFile = "src/test/resources/testConf.ini";
-		String[] args = new String[] { "-c", configFile };
-		ClientConfiguration config = new ClientConfiguration(args);
-
-		assertTrue(config.getOfflineMode());
-		assertTrue(config.isQuiet());
-		assertEquals("dumps/wikidata/", config.getDumpDirectoryLocation());
-		assertEquals(Collections.<String> emptySet(),
-				config.getFilterSiteKeys());
-		assertEquals(Collections.singleton(Datamodel
-						.makeWikidataPropertyIdValue("P31")),
-				config.getFilterProperties());
-		Set<String> langFilters = new HashSet<>();
-		langFilters.add("fr");
-		langFilters.add("zh");
-		assertEquals(langFilters, config.getFilterLanguages());
-
-		assertEquals(2, config.getActions().size());
-		assertTrue(config.getActions().get(0) instanceof RdfSerializationAction);
-		assertTrue(config.getActions().get(1) instanceof JsonSerializationAction);
-		RdfSerializationAction rdfAction = (RdfSerializationAction) config
-				.getActions().get(0);
-		JsonSerializationAction jsonAction = (JsonSerializationAction) config
-				.getActions().get(1);
-
-		assertTrue(rdfAction.useStdOut);
-		assertEquals(DumpProcessingOutputAction.COMPRESS_GZIP,
-				rdfAction.compressionType);
-		assertEquals("/tmp/wikidata-items.nt", rdfAction.outputDestination);
-		assertEquals(RdfSerializer.TASK_ITEMS | RdfSerializer.TASK_STATEMENTS
-				| RdfSerializer.TASK_TERMS, rdfAction.tasks);
-
-		assertFalse(jsonAction.useStdOut);
-		assertEquals(DumpProcessingOutputAction.COMPRESS_BZ2,
-				jsonAction.compressionType);
-		assertEquals("/tmp/wikidata-dump.json", jsonAction.outputDestination);
-	}
-
-	@Test
-	public void testReadConfigFile2() throws IOException {
-		String configFile = "src/test/resources/testConf2.ini";
-		String[] args = new String[] { "-c", configFile };
-		ClientConfiguration config = new ClientConfiguration(args);
-
-		assertFalse(config.getOfflineMode());
-		assertFalse(config.isQuiet());
-		assertEquals("testfile.json.gz", config.getInputDumpLocation());
-		assertEquals("report.txt", config.getReportFileName());
-		// remaining content was already tested above
-	}
 
 	@Test
 	public void testDefaultArguments() {
@@ -155,14 +103,14 @@ public class ClientConfigurationTest {
 
 	@Test
 	public void testStdOutOutputArgumentsShort() {
-		String[] args = new String[] { "-a", "json", "-s" };
+		String[] args = new String[] { "-a", "sqid", "-s" };
 		ClientConfiguration config = new ClientConfiguration(args);
 		assertTrue(config.isQuiet());
 	}
 
 	@Test
 	public void testStdOutOutputArgumentsLong() {
-		String[] args = new String[] { "--action", "json", "--stdout" };
+		String[] args = new String[] { "--action", "sqid", "--stdout" };
 		ClientConfiguration config = new ClientConfiguration(args);
 		assertTrue(config.isQuiet());
 	}
@@ -259,38 +207,6 @@ public class ClientConfigurationTest {
 		Set<PropertyIdValue> propFilters = new HashSet<>();
 
 		assertEquals(propFilters, config.getFilterProperties());
-	}
-
-	@Test
-	public void testLocalDumpFileLong() {
-		DirectoryManagerFactory
-				.setDirectoryManagerClass(MockDirectoryManager.class);
-		String[] args = new String[] { "--input", "dumptest.json" };
-		ClientConfiguration config = new ClientConfiguration(args);
-
-		MwDumpFile df = config.getLocalDumpFile();
-
-		assertEquals("dumptest.json", config.getInputDumpLocation());
-		assertTrue(df instanceof MwLocalDumpFile);
-		MwLocalDumpFile ldf = (MwLocalDumpFile) df;
-
-		assertEquals(Paths.get("dumptest.json").toAbsolutePath(), ldf.getPath());
-	}
-
-	@Test
-	public void testLocalDumpFileShort() {
-		DirectoryManagerFactory
-				.setDirectoryManagerClass(MockDirectoryManager.class);
-		String[] args = new String[] { "-i", "dumptest.json" };
-		ClientConfiguration config = new ClientConfiguration(args);
-
-		MwDumpFile df = config.getLocalDumpFile();
-
-		assertEquals("dumptest.json", config.getInputDumpLocation());
-		assertTrue(df instanceof MwLocalDumpFile);
-		MwLocalDumpFile ldf = (MwLocalDumpFile) df;
-
-		assertEquals(Paths.get("dumptest.json").toAbsolutePath(), ldf.getPath());
 	}
 
 }

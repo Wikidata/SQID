@@ -46,7 +46,7 @@
 			<manifest>
 			  <addClasspath>true</addClasspath>
 			  <classpathPrefix>lib/</classpathPrefix>
-			  <mainClass>org.wikidata.wdtk.client.Client</mainClass>
+			  <mainClass>org.wikidata.sqid.helper.Client</mainClass>
 			  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
 			</manifest>
 		  </archive>
