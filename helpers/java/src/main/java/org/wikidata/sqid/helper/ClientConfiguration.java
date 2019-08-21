@@ -35,10 +35,9 @@ import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
@@ -420,7 +419,7 @@ public class ClientConfiguration {
 	 */
 	private List<DumpProcessingAction> handleArguments(String[] args) {
 		CommandLine cmd;
-		CommandLineParser parser = new GnuParser();
+		CommandLineParser parser = new DefaultParser();
 
 		try {
 			cmd = parser.parse(options, args);
@@ -622,58 +621,54 @@ public class ClientConfiguration {
 
 		List<String> actions = new ArrayList<>(KNOWN_ACTIONS.keySet());
 		Collections.sort(actions);
-		Option action = OptionBuilder
-				.hasArg()
-				.withArgName("action")
-				.withDescription(
-						"define the action that should be performed; avaible actions: "
-								+ actions).withLongOpt(OPTION_ACTION)
-				.create(CMD_OPTION_ACTION);
+		Option action = Option.builder(CMD_OPTION_ACTION)
+      .hasArg()
+      .argName("action")
+      .desc("define the action that should be performed; avaible actions: "
+            + actions).longOpt(OPTION_ACTION)
+      .build();
 
-		Option dumplocation = OptionBuilder
-				.hasArg()
-				.withArgName("path")
-				.withDescription(
-						"set the directory where downloaded dump files are stored")
-				.withLongOpt(OPTION_DUMP_LOCATION)
-				.create(CMD_OPTION_DUMP_LOCATION);
+		Option dumplocation = Option.builder(CMD_OPTION_DUMP_LOCATION)
+      .hasArg()
+      .argName("path")
+      .desc("set the directory where downloaded dump files are stored")
+      .longOpt(OPTION_DUMP_LOCATION)
+      .build();
 
-		Option filterLanguages = OptionBuilder
-				.hasArgs()
-				.withArgName("languages")
-				.withDescription(
-						"specifies a list of language codes; if given, only terms in languages in this list will be processed; the value \"-\" denotes the empty list (no terms are processed)")
-				.withLongOpt(OPTION_FILTER_LANGUAGES).create();
+		Option filterLanguages = Option.builder()
+      .hasArgs()
+      .argName("languages")
+      .desc("specifies a list of language codes; if given, only terms in languages in this list will be processed; the value \"-\" denotes the empty list (no terms are processed)")
+      .longOpt(OPTION_FILTER_LANGUAGES)
+      .build();
 
-		Option filterSites = OptionBuilder
-				.hasArgs()
-				.withArgName("sites")
-				.withDescription(
-						"specifies a list of site keys; if given, only site links to sites in this list will be processed; the value \"-\" denotes the empty list (no site links are processed)")
-				.withLongOpt(OPTION_FILTER_SITES).create();
+		Option filterSites = Option.builder()
+      .hasArgs()
+      .argName("sites")
+      .desc("specifies a list of site keys; if given, only site links to sites in this list will be processed; the value \"-\" denotes the empty list (no site links are processed)")
+      .longOpt(OPTION_FILTER_SITES)
+      .build();
 
-		Option filterProperties = OptionBuilder
-				.hasArgs()
-				.withArgName("ids")
-				.withDescription(
-						"specifies a list of property ids; if given, only statements for properties in this list will be processed; the value \"-\" denotes the empty list (no statements are processed)")
-				.withLongOpt(OPTION_FILTER_PROPERTIES).create();
+		Option filterProperties = Option.builder()
+      .hasArgs()
+      .argName("ids")
+      .desc("specifies a list of property ids; if given, only statements for properties in this list will be processed; the value \"-\" denotes the empty list (no statements are processed)")
+      .longOpt(OPTION_FILTER_PROPERTIES)
+      .build();
 
-		Option report = OptionBuilder
-				.hasArg()
-				.withArgName("path")
-				.withDescription(
-						"specifies a path to print a final report after dump generations")
-				.withLongOpt(OPTION_CREATE_REPORT)
-				.create(CMD_OPTION_CREATE_REPORT);
+		Option report = Option.builder(CMD_OPTION_CREATE_REPORT)
+      .hasArg()
+      .argName("path")
+      .desc("specifies a path to print a final report after dump generations")
+      .longOpt(OPTION_CREATE_REPORT)
+      .build();
 
-		Option localDump = OptionBuilder
-				.hasArg()
-				.withArgName("path")
-				.withDescription(
-						"select a dump file for processing; if omitted, then the latest dump from Wikidata will be used (and possibly downloaded)")
-				.withLongOpt(OPTION_LOCAL_DUMPFILE)
-				.create(CMD_OPTION_LOCAL_DUMPFILE);
+		Option localDump = Option.builder(CMD_OPTION_LOCAL_DUMPFILE)
+      .hasArg()
+      .argName("path")
+      .desc("select a dump file for processing; if omitted, then the latest dump from Wikidata will be used (and possibly downloaded)")
+      .longOpt(OPTION_LOCAL_DUMPFILE)
+      .build();
 
 		options.addOption(action);
 		options.addOption(
