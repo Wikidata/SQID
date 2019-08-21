@@ -41,4 +41,5 @@ helpers/java/dependency-reduced-pom.xml
 helpers/java/target
 helpers/java/.classpath
 helpers/java/.project
-helpers/java/.settings/
+helpers/java/.settings
+helpers/java/dumpfiles
