@@ -3,6 +3,7 @@ import json
 import time
 import shutil
 import logging
+import subprocess
 
 from pathlib import Path
 from copy import deepcopy
@@ -111,7 +112,7 @@ def check_new_dump(script_path):
   rebuild the full statistics."""
   dumpdate = get_timestamp('dump')
   basedir = Path(config.DUMP_LOCATION)
-  dates = []
+  dumps = {}
 
   logger.debug("Enumerating dumps in `%s'", basedir)
   for subdir in (path for path in basedir.iterdir() if path.is_dir()):
@@ -121,16 +122,27 @@ def check_new_dump(script_path):
 
     if dumpfile.exists():
       logger.debug("Found dump `%s', dated `%s'", filename, date)
-      dates.append(date)
+      dumps[date] = dumpfile
 
-  latest = sorted(dates)[-1]
+  latest = sorted(dumps.keys())[-1]
   logger.debug("Most recent dump is dated `%s', statistics based on `%s'",
                latest, dumpdate)
 
   if latest > dumpdate:
     logger.info("Found more recent dump `%s'", latest)
 
+    link = Path(config.DUMP_LINK.format(date=latest))
+    link.symlink_to(dumps[latest])
+
+    job = '{script} {args}'.format(script=script_path, args='--only=process-dump')
+    logger.debug("submitting job: `%s'", job)
+    _queue_job(job, config.DUMP_PROCESS_MEMORY)
 
 def process_dump(script_path):
   """Generate statistics from a dump file. After success, move the statistics into place."""
   pass
+
+
+def _queue_job(command, memory):
+  return subprocess.run(config.GRID_SUBMIT.format(command=command,
+                                                  memory=memory))
