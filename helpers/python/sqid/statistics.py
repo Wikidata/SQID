@@ -133,7 +133,8 @@ def check_new_dump(script_path):
 
     link = Path(config.DUMP_LINK.format(date=latest))
     link.parent.mkdir(parents=True, exist_ok=True)
-    link.symlink_to(dumps[latest])
+    if not link.exists():
+      link.symlink_to(dumps[latest])
 
     job = [script_path, '--only=process-dump']
     logger.debug("submitting job: `%s'", repr(job))
