@@ -136,14 +136,37 @@ def check_new_dump(script_path):
     if not link.exists():
       link.symlink_to(dumps[latest])
 
-    job = ['python3', script_path, '--only=process-dump']
+    job = ['python3', script_path, '--only=process-dump', latest]
     logger.debug("submitting job: `%s'", repr(job))
     _queue_job('sqid-process-dump', config.DUMP_PROCESS_MEMORY, *job)
 
 
-def process_dump(script_path):
+def process_dump(script_path, dumpdate):
   """Generate statistics from a dump file. After success, move the statistics into place."""
-  pass
+  job = ['java', *config.JAVA_ARGS]
+  logger.debug("running process: `%s'", repr(job))
+
+  logger.info("Processing dump `%s'", dumpdate)
+  wd = os.getcwd()
+  os.chdir(config.JAVA_BASEDIR)
+  subprocess.run(job, check=True)
+  os.chdir(wd)
+  logger.info("Finished processing dump `%s'", dumpdate)
+
+  results = Path(config.RESULTS_LOCATION.format(dumpdate))
+  paths = [results.joinpath(filename) for filename in config.RESULTS_NAMES]
+
+  if all((path.exists() for path in paths)):
+    logger.info("Copying processing results ...")
+    for path in paths:
+      shutil.copy(path, '.')
+  else:
+    logger.critical('Dump processing failed to produce all expected results')
+    sys.exit(1)
+
+  logger.info("Submitting statistics update ...")
+  job = ['python3', script_path]
+  _queue_job('squid-update-statistics', config.STATISTICS_PROCESS_MEMORY, *job)
 
 
 def _queue_job(name, memory, *args):

@@ -7,3 +7,11 @@ GRID_NAME = '-N'
 GRID_ONCE = '-once'
 DUMP_PROCESS_MEMORY = '20g'
 STATISTICS_PROCESS_MEMORY = '2g'
+JAVA_BASEDIR = '/data/project/sqid/projects'
+JAR = 'org.wikidata.sqid.helper-0.10.0.jar'
+JAVA_MEMORY = '4g'
+JAVA_ARGS = ['-Xmx{memory}'.format(memory=JAVA_MEMORY),
+             '-jar', JAR,
+             '-a', 'sqid', '-n']
+RESULTS_LOCATION = '/data/project/sqid/projects/results/wikidatawiki-{date}'
+RESULTS_NAMES = ['classes.json', 'properties.json', 'statistics.json']

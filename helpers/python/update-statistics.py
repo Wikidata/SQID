@@ -45,7 +45,7 @@ if __name__ == '__main__':
     verb.add_argument('-l', '--loglevel', dest='loglevel', default='INFO',
                       choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO',
                                'DEBUG'], help='Set the log level')
-    args = parser.parse_args()
+    args, rest = parser.parse_known_args()
 
     if args.verbose:
         loglevel = logging.DEBUG
@@ -74,6 +74,6 @@ if __name__ == '__main__':
         if args.only and args.only == 'check-dump':
           sqid.check_new_dump(SCRIPT_PATH)
         if args.only and args.only == 'process-dump':
-          sqid.process_dump(SCRIPT_PATH)
+          sqid.process_dump(SCRIPT_PATH, rest)
     finally:
         os.chdir(wd)            # restore previous working directory
