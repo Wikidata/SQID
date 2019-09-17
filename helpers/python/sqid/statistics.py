@@ -147,5 +147,5 @@ def process_dump(script_path):
 
 def _queue_job(memory, *args):
   return subprocess.run([config.GRID_SUBMIT,
-                         config.GRID_MEMORY.format(memory=memory),
-                         *args])
+                         config.GRID_MEMORY,
+                         memory] + list(args))
