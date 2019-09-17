@@ -132,17 +132,19 @@ def check_new_dump(script_path):
     logger.info("Found more recent dump `%s'", latest)
 
     link = Path(config.DUMP_LINK.format(date=latest))
+    link.parent.mkdir(parents=True, exist_ok=True)
     link.symlink_to(dumps[latest])
 
-    job = '{script} {args}'.format(script=script_path, args='--only=process-dump')
-    logger.debug("submitting job: `%s'", job)
-    _queue_job(job, config.DUMP_PROCESS_MEMORY)
+    job = [script_path, '--only=process-dump']
+    logger.debug("submitting job: `%s'", repr(job))
+    _queue_job(config.DUMP_PROCESS_MEMORY, *job)
 
 def process_dump(script_path):
   """Generate statistics from a dump file. After success, move the statistics into place."""
   pass
 
 
-def _queue_job(command, memory):
-  return subprocess.run(config.GRID_SUBMIT.format(command=command,
-                                                  memory=memory))
+def _queue_job(memory, *args):
+  return subprocess.run([config.GRID_SUBMIT,
+                         config.GRID_MEMORY.format(memory=memory),
+                         *args])
