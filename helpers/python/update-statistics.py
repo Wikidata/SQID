@@ -74,6 +74,8 @@ if __name__ == '__main__':
         if args.only and args.only == 'check-dump':
           sqid.check_new_dump(SCRIPT_PATH)
         if args.only and args.only == 'process-dump':
-          sqid.process_dump(SCRIPT_PATH, rest)
+          if len(rest) != 1:
+            logger.critical('missing dump date')
+          sqid.process_dump(SCRIPT_PATH, rest[0])
     finally:
         os.chdir(wd)            # restore previous working directory
