@@ -136,7 +136,7 @@ def check_new_dump(script_path):
     if not link.exists():
       link.symlink_to(dumps[latest])
 
-    job = [script_path, '--only=process-dump']
+    job = ['python3', script_path, '--only=process-dump']
     logger.debug("submitting job: `%s'", repr(job))
     _queue_job(config.DUMP_PROCESS_MEMORY, *job)
 
