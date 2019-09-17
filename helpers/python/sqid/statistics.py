@@ -138,14 +138,18 @@ def check_new_dump(script_path):
 
     job = ['python3', script_path, '--only=process-dump']
     logger.debug("submitting job: `%s'", repr(job))
-    _queue_job(config.DUMP_PROCESS_MEMORY, *job)
+    _queue_job('sqid-process-dump', config.DUMP_PROCESS_MEMORY, *job)
+
 
 def process_dump(script_path):
   """Generate statistics from a dump file. After success, move the statistics into place."""
   pass
 
 
-def _queue_job(memory, *args):
+def _queue_job(name, memory, *args):
   return subprocess.run([config.GRID_SUBMIT,
+                         config.GRID_ONCE,
+                         config.GRID_NAME,
+                         name,
                          config.GRID_MEMORY,
                          memory] + list(args))
