@@ -1,0 +1,6 @@
+DUMP_BASENAME = 'wikidata-{date}-all.json.gz'
+DUMP_LOCATION = '/public/dumps/public/wikidatawiki/entities/'
+DUMP_LINK = '/data/project/sqid/projects/dumpfiles/wikidatawiki/json-{date}/{date}.json.gz'
+GRID_SUBMIT = '/usr/bin/jsub -mem {memory} {command}'
+DUMP_PROCESS_MEMORY = '20g'
+STATISTICS_PROCESS_MEMORY = '2g'

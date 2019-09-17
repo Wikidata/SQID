@@ -4,12 +4,17 @@ import time
 import shutil
 import logging
 
+from pathlib import Path
 from copy import deepcopy
 from tempfile import NamedTemporaryFile
 from collections import defaultdict
 
+from . import config
+
+
 SEPARATORS = (',', ':')
-TIMESTAMP_KEYS = {'classes': 'classUpdate',
+TIMESTAMP_KEYS = {'dump': 'dumpDate',
+                  'classes': 'classUpdate',
                   'properties': 'propertyUpdate',
                   }
 ISO8601_TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S%z"
@@ -66,8 +71,14 @@ def update_split_json_data(name, data, chunk_size):
         update_json_data('{}-{}'.format(name, index), chunk)
 
 
+def get_timestamp(name):
+  """Retrieves the statistics timestamp `name`."""
+  data = get_json_data('statistics')
+  return data[TIMESTAMP_KEYS[name]]
+
+
 def update_timestamp(name, timestamp):
-    """Updates the statistics `timestamp` for `name`."""
+    """Sets the statistics timestamp `name` to `timestamp`."""
     data = get_json_data('statistics')
     data[TIMESTAMP_KEYS[name]] = timestamp
 
@@ -93,3 +104,33 @@ def merge(old, new, default_others=None):
             merged[key].update(default_others)
 
     return dict(merged)
+
+
+def check_new_dump(script_path):
+  """Check for a new dump file. If present, queue a job on the grid to
+  rebuild the full statistics."""
+  dumpdate = get_timestamp('dump')
+  basedir = Path(config.DUMP_LOCATION)
+  dates = []
+
+  logger.debug("Enumerating dumps in `%s'", basedir)
+  for subdir in (path for path in basedir.iterdir() if path.is_dir()):
+    date = subdir.parts[-1]
+    filename = config.DUMP_BASENAME.format(date=date)
+    dumpfile = subdir.joinpath(filename)
+
+    if dumpfile.exists():
+      logger.debug("Found dump `%s', dated `%s'", filename, date)
+      dates.append(date)
+
+  latest = sorted(dates)[-1]
+  logger.debug("Most recent dump is dated `%s', statistics based on `%s'",
+               latest, dumpdate)
+
+  if latest > dumpdate:
+    logger.info("Found more recent dump `%s'", latest)
+
+
+def process_dump(script_path):
+  """Generate statistics from a dump file. After success, move the statistics into place."""
+  pass

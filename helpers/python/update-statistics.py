@@ -16,7 +16,9 @@ import argparse
 
 import sqid
 
-HELPERS_DIR = os.path.dirname(os.path.abspath(__file__))
+
+SCRIPT_PATH = os.path.abspath(__file__)
+HELPERS_DIR = os.path.dirname(SCRIPT_PATH)
 DATA_DIR = os.path.join(HELPERS_DIR, '..', '..', 'src', 'data')
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='Update statistics data for SQID.')
     parser.add_argument('-o', '--only', dest='only',
-                        choices=['properties', 'classes', 'derived'],
+                        choices=['properties', 'classes', 'derived',
+                                 'check-dump', 'process-dump'],
                         help='only update statistics for KIND')
     parser.add_argument('--version', action='version',
                         version='sqid-2.0-SNAPSHOT')
@@ -68,5 +71,9 @@ if __name__ == '__main__':
             sqid.update_class_records()
         if not args.only or args.only == 'derived':
             sqid.update_derived_records()
+        if args.only and args.only == 'check-dump':
+          sqid.check_new_dump(SCRIPT_PATH)
+        if args.only and args.only == 'process-dump':
+          sqid.process_dump(SCRIPT_PATH)
     finally:
         os.chdir(wd)            # restore previous working directory

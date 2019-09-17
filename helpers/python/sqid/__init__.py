@@ -2,6 +2,8 @@ import logging
 
 from .classes import update_class_records
 from .classes import update_derived_class_records
+from .statistics import process_dump
+from .statistics import check_new_dump
 from .properties import update_property_records
 from .properties import update_derived_property_records
 
