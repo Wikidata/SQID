@@ -159,7 +159,7 @@ def process_dump(script_path, dumpdate):
   if all((path.exists() for path in paths)):
     logger.info("Copying processing results ...")
     for path in paths:
-      shutil.copy(path, '.')
+      shutil.copy(str(path), '.')
   else:
     logger.critical('Dump processing failed to produce all expected results')
     sys.exit(1)
