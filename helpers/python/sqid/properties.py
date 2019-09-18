@@ -120,7 +120,9 @@ def derive_property_classification():
     classification = {}
 
     for pid in data:
-        datatype = data[pid]['d']
+        datatype = None
+        if 'd' in data[pid]:
+          datatype = data[pid]['d']
         classes = set([])
         if 'pc' in data[pid]:
             classes = set(data[pid]['pc'])
