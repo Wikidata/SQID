@@ -153,7 +153,7 @@ def process_dump(script_path, dumpdate):
   os.chdir(wd)
   logger.info("Finished processing dump `%s'", dumpdate)
 
-  results = Path(config.RESULTS_LOCATION.format(dumpdate))
+  results = Path(config.RESULTS_LOCATION.format(date=dumpdate))
   paths = [results.joinpath(filename) for filename in config.RESULTS_NAMES]
 
   if all((path.exists() for path in paths)):
