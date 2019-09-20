@@ -789,8 +789,8 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    */
   private InputStream runSparqlQuery(String query) throws IOException {
     try {
-      String queryString = "query=" + URLEncoder.encode(query, "UTF-8")
-          + "&format=json";
+      final String banner = "#TOOL:SQID-helper, https:/tools.wmflabs.org/sqid/\n";
+      String queryString = "query=" + URLEncoder.encode(banner + query, "UTF-8");
       URL url = new URL("https://query.wikidata.org/sparql?"
           + queryString);
       HttpURLConnection connection = (HttpURLConnection) url
