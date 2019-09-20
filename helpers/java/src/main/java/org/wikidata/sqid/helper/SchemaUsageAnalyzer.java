@@ -613,9 +613,10 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    */
   private void fetchSubclassHierarchy() throws IOException {
     System.out.println("Fetching subclass relationships from SPARQL ...");
-    try (InputStream response = runSparqlQuery("PREFIX ps: <http://www.wikidata.org/prop/statement/>\n"
-        + "PREFIX p: <http://www.wikidata.org/prop/>\n"
-        + "SELECT ?subC ?supC WHERE { ?subC p:P279/ps:P279 ?supC }")) {
+    try (InputStream response = runSparqlQuery("SELECT ?subC ?supC WHERE { \n"
+                                               + "hint:Query hint:optimizer \"None\" .\n"
+                                               + "?subC p:P279/ps:P279 ?supC \n"
+                                               + "}")) {
       System.out.println("Processing subclass relationships ...");
 
       // DEBUG
