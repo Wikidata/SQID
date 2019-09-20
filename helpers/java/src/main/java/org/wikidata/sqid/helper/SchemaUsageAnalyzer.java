@@ -25,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -628,21 +630,21 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       // }
       // System.out.println("*** done ***");
 
-      ObjectMapper mapper = new ObjectMapper();
-      JsonNode root = mapper.readTree(response);
-      JsonNode bindings = root.path("results").path("bindings");
+      BufferedReader br = new BufferedReader(new InputStreamReader(response));
+      String read = br.readLine(); // skip first line
       int count = 0;
-      for (JsonNode binding : bindings) {
+
+      while ((read = br.readLine()) != null) {
         count++;
-        Integer subId = getNumId(binding.path("subC").path("value")
-            .asText(), true);
-        Integer supId = getNumId(binding.path("supC").path("value")
-            .asText(), true);
+        String[] parts = read.split(",");
+        Integer subId = getNumId(parts[0], true);
+        Integer supId = getNumId(parts[1], true);
+
         if (supId == 0 || subId == 0) {
           System.out.println("Ignoring "
-              + binding.path("subC").path("value").asText()
+              + parts[0]
               + " subClassOf "
-              + binding.path("supC").path("value").asText());
+              + parts[1]);
           continue;
         }
         getClassRecord(subId).directSuperClasses.add(supId);
@@ -797,6 +799,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       HttpURLConnection connection = (HttpURLConnection) url
           .openConnection();
       connection.setRequestMethod("GET");
+      connection.addRequestProperty("Accept", "text/csv"); // JSON leads to timeouts
       connection.setRequestProperty("User-Agent", Client.getUserAgent());
 
       return connection.getInputStream();
