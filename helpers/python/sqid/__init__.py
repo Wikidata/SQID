@@ -23,3 +23,4 @@ def update_derived_records():
     """Update derived records for classes and properties."""
     update_derived_property_records()
     update_derived_class_records()
+    logger.info('Finished updating derived information.')
