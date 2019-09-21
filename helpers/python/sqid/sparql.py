@@ -41,7 +41,7 @@ def _retry_sparql_query(query, delay, retries):
         except ValueError as err:
             tries -= 1
             if tries:
-                logger.warning("SPARQL query failed, possibly due to a time outfile. "
+                logger.warning("SPARQL query failed, possibly due to a time out. "
                                 "Waiting for {} seconds ...\n".format(delay))
                 time.sleep(delay)
                 logger.info("Retrying query ...\n")
