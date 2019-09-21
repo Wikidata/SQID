@@ -1,6 +1,0 @@
----
-helper_path: ../java
-helper_version: 0.10.0
-helper_jar: org.wikidata.sqid.helper-{{ helper_version }}.jar
-sqid_path: ../..
-sqid_dist: dist

@@ -2,3 +2,4 @@
 - hosts: localhost
   roles:
     - build
+  tags: [build]

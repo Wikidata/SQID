@@ -1,0 +1,10 @@
+---
+- import_tasks: sqid-helper.yml
+  tags: [helper]
+  become: yes
+- import_tasks: sqid-scripts.yml
+  tags: [scripts]
+  become: yes
+- import_tasks: sqid.yml
+  tags: [sqid]
+  become: yes

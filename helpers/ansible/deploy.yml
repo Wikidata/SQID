@@ -1,0 +1,5 @@
+---
+- hosts: sqid
+  roles:
+    - deploy
+  tags: [deploy]

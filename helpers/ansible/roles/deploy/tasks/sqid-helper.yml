@@ -1,0 +1,5 @@
+---
+- name: Copy sqid-helper JAR.
+  copy:
+    src: "{{ helper_path }}/{{ helper_jar }}"
+    dest: "{{ helper_dest }}"

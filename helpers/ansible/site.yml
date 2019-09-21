@@ -7,4 +7,4 @@
         msg: "You must update Ansible to at least 2.8 to use this playbook."
 
 - import_playbook: build.yml
-# - import_palybook: deploy.yml
+- import_playbook: deploy.yml

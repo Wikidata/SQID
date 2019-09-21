@@ -11,4 +11,4 @@
     module: command mvn package
     args:
       chdir: "{{ helper_path }}"
-      creates: "target/{{ helper_jar }}"
+      creates: "{{ helper_jar }}"

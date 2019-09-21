@@ -166,7 +166,7 @@ def process_dump(script_path, dumpdate):
 
   logger.info("Submitting statistics update ...")
   job = ['python3', script_path]
-  _queue_job('squid-update-statistics', config.STATISTICS_PROCESS_MEMORY, *job)
+  _queue_job('sqid-update-statistics', config.STATISTICS_PROCESS_MEMORY, *job)
 
 
 def _queue_job(name, memory, *args):

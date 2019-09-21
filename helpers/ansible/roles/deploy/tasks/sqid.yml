@@ -1,0 +1,5 @@
+---
+- name: Copy sqid bundle.
+  copy:
+    src: "{{ sqid_path }}/{{ sqid_dist }}/"
+    dest: "{{ sqid_dest }}"
