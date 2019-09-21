@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: sqid
   roles:
     - build
   tags: [build]

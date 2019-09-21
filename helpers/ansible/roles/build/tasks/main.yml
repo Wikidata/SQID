@@ -1,5 +1,7 @@
 ---
 - import_tasks: sqid-helper.yml
   tags: [helper]
+  delegate_to: localhost
 - import_tasks: sqid.yml
   tags: [sqid]
+  delegate_to: localhost
