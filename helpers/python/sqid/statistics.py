@@ -139,6 +139,8 @@ def check_new_dump(script_path):
     job = ['python3', script_path, '--only=process-dump', latest]
     logger.debug("submitting job: `%s'", repr(job))
     _queue_job('sqid-process-dump', config.DUMP_PROCESS_MEMORY, *job)
+  else:
+    logger.info("Dump `%s' is still current.", latest)
 
 
 def process_dump(script_path, dumpdate):
