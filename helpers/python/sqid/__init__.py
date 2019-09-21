@@ -10,6 +10,7 @@ from .properties import update_derived_property_records
 
 SQID_LOG_FORMAT = '[%(asctime)-15s] %(levelname)-8s %(name)s: %(message)s'
 SQID_LOG_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+logger = logging.getLogger(__name__)
 
 
 def _setup_default_logger(loglevel=logging.INFO):

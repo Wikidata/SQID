@@ -1,9 +1,9 @@
 # data files
-public/data/classes.json
-public/data/properties.json
-public/data/statistics.json
-public/data/properties/*.json
-public/data/classes/*.json
+data/classes.json
+data/properties.json
+data/statistics.json
+data/properties/*.json
+data/classes/*.json
 
 # python bytecode cache
 *.pyc
