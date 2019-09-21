@@ -19,7 +19,7 @@ import sqid
 
 SCRIPT_PATH = os.path.abspath(__file__)
 HELPERS_DIR = os.path.dirname(SCRIPT_PATH)
-DATA_DIR = os.path.join(HELPERS_DIR, '..', '..', 'src', 'data')
+DATA_DIR = os.path.join(HELPERS_DIR, '..', 'data')
 logger = logging.getLogger(__name__)
 
 

@@ -3,3 +3,29 @@
   copy:
     src: "{{ sqid_path }}/{{ sqid_dist }}/"
     dest: "{{ sqid_dest }}"
+
+- name: Copy sqid data files.
+  copy:
+    src: "{{ sqid_path }}/{{ sqid_data }}"
+    dest: "{{ scripts_dest }}"
+  tags: [data]
+
+- name: Ensure static files directory exists.
+  file:
+    path: "{{ static_path }}"
+    state: directory
+  tags: [data]
+
+- name: Link data files to static dir.
+  file:
+    path: "{{ data_link }}"
+    src: "{{ scripts_dest }}/{{ sqid_data }}"
+    state: link
+  tags: [data]
+
+- name: Link data files to dynamic dir.
+  file:
+    path: "{{ dynamic_path }}/{{ sqid_data }}"
+    src: "{{ scripts_dest }}/{{ sqid_data }}"
+    state: link
+  tags: [data]
