@@ -1,12 +1,12 @@
 ---
-- name: Clean sqid-helper.
+- name: Clean sqid-helper
   local_action:
     module: command mvn clean
     args:
       chdir: "{{ helper_path }}"
   tags: [never, clean]
 
-- name: Build sqid-helper.
+- name: Build sqid-helper
   local_action:
     module: command mvn package
     args:

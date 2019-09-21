@@ -1,12 +1,12 @@
 ---
-- name: Copy sqid python support scripts.
+- name: Copy sqid python support scripts
   copy:
     src: "{{ scripts_path }}"
     dest: "{{ scripts_dest }}"
 
 # these depend on ansible-2.8.6 to have the cron module
 # lookup crontab from path, instead of defaulting to /usr/bin/crontab
-# - name: Register sqid-update-statistics cron job.
+# - name: Register sqid-update-statistics cron job
 #   cron:
 #     name: sqid-update-statistics
 #     minute: "12"
@@ -15,7 +15,7 @@
 #     state: present
 #   tags: [cron]
 
-# - name: Register sqid-check-dump cron job.
+# - name: Register sqid-check-dump cron job
 #   cron:
 #     name: sqid-check-dump
 #     minute: "37"

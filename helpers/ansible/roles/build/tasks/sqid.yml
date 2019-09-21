@@ -1,5 +1,5 @@
 ---
-- name: Clean sqid.
+- name: Clean sqid
   local_action:
     module: file
     args:
@@ -7,7 +7,7 @@
       state: absent
   tags: [never, clean]
 
-- name: Build sqid.
+- name: Build sqid
   local_action:
     module: command npm run build
     args:
