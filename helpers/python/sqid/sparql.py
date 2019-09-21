@@ -42,9 +42,9 @@ def _retry_sparql_query(query, delay, retries):
             tries -= 1
             if tries:
                 logger.warning("SPARQL query failed, possibly due to a time out. "
-                                "Waiting for {} seconds ...\n".format(delay))
+                                "Waiting for {} seconds ...".format(delay))
                 time.sleep(delay)
-                logger.info("Retrying query ...\n")
+                logger.info("Retrying query ...")
             else:
                 raise err
 
@@ -56,7 +56,7 @@ def sparql_query(query, delay=60, retries=1, fallback=None):
         return _retry_sparql_query(query, delay, retries)
     except ValueError:
         if fallback is not None:
-            logger.warning("Falling back to fallback query.\n")
+            logger.warning("Falling back to fallback query.")
             try:
                 return _retry_sparql_query(fallback, delay, retries)
             except ValueError:
