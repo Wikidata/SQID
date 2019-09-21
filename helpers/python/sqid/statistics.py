@@ -45,9 +45,9 @@ def update_json_data(name, data, timestamp=None):
     """Atomically replaces the data in file "`name'.json"."""
     try:
         with NamedTemporaryFile(mode='w', delete=False) as file:
-            logger.info('Writing new JSON %s data ...', name)
+            logger.debug('Writing new JSON %s data ...', name)
             json.dump(data, file, separators=SEPARATORS)
-            logger.info('Writing new %s JSON file ...', name)
+            logger.debug('Writing new %s JSON file ...', name)
     except RuntimeError as err:
         logger.error('Writing dump failed: %s', err)
     else:
@@ -55,7 +55,7 @@ def update_json_data(name, data, timestamp=None):
         shutil.move(file.name, _json_file_name(name))
         if timestamp is not None:
             update_timestamp(name, timestamp)
-        logger.info('Update for %s complete.', name)
+        logger.debug('Update for %s complete.', name)
 
 
 def update_split_json_data(name, data, chunk_size):
