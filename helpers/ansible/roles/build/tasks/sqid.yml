@@ -1,0 +1,14 @@
+---
+- name: Clean sqid.
+  local_action:
+    module: file
+    args:
+      path: "{{ sqid_path }}/{{ sqid_dist }}"
+      state: absent
+  tags: [never, clean]
+
+- name: Build sqid.
+  local_action:
+    module: command npm run build
+    args:
+      chdir: "{{ sqid_path }}"
