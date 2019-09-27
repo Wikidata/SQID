@@ -608,34 +608,23 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   }
 
   /**
-   * Fetches all subclass relationships (P279) using the SPARQL endpoint, and
-   * uses them to compute direct and indirect superclasses of each class.
+   * Fetches a single page of the subclass hierarchy from SPARQL.
    *
-   * @throws IOException
+   * @param query
+   *           a SPARQL query returning ?subC and ?supC, where
+   *           ?subC is a direct subclass of ?supC.
+   *
+   * @return number of rows resulting from query
    */
-  private void fetchSubclassHierarchy() throws IOException {
-    System.out.println("Fetching subclass relationships from SPARQL ...");
-    try (InputStream response = runSparqlQuery("SELECT ?subC ?supC WHERE { \n"
-                                               + "hint:Query hint:optimizer \"None\" .\n"
-                                               + "?subC p:P279/ps:P279 ?supC \n"
-                                               + "}")) {
+  private int fetchSubclassHierarchyFromQuery(String query) throws IOException {
+    int rows = 0;
+    try (InputStream response = runSparqlQuery(query)) {
       System.out.println("Processing subclass relationships ...");
-
-      // DEBUG
-      // BufferedReader br = new BufferedReader(new InputStreamReader(
-      // response));
-      // String read;
-      // while ((read = br.readLine()) != null) {
-      // System.out.println(read);
-      // }
-      // System.out.println("*** done ***");
-
       BufferedReader br = new BufferedReader(new InputStreamReader(response));
       String read = br.readLine(); // skip first line
-      int count = 0;
 
       while ((read = br.readLine()) != null) {
-        count++;
+        rows++;
         String[] parts = read.split(",");
         Integer subId = getNumId(parts[0], true);
         Integer supId = getNumId(parts[1], true);
@@ -650,30 +639,71 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
         getClassRecord(subId).directSuperClasses.add(supId);
         ClassRecord superClass = getClassRecord(supId);
         superClass.subclassCount++;
-        if (count % 10000 == 0) {
+        if (rows % 10000 == 0) {
           System.out.print("*");
         }
       }
-      System.out.println("Found " + count
-          + " subclass relationships among "
-          + this.classRecords.size() + " Wikidata items.");
 
-      System.out.println("Computing indirect subclass relationships ...");
-      for (ClassRecord classRecord : this.classRecords.values()) {
-        for (Integer superClass : classRecord.directSuperClasses) {
-          addSuperClasses(superClass, classRecord);
-        }
-      }
-
-      System.out.println("Computing total subclass counts ...");
-      for (ClassRecord classRecord : this.classRecords.values()) {
-        for (Integer superClass : classRecord.superClasses) {
-          getClassRecord(superClass).allSubclassCount++;
-        }
-      }
-
-      System.out.println("Preprocessing of class hierarchy complete.");
+      return rows;
     }
+  }
+
+  /**
+   * Fetches all subclass relationships (P279) using the SPARQL endpoint, and
+   * uses them to compute direct and indirect superclasses of each class.
+   *
+   * @throws IOException
+   */
+  private void fetchSubclassHierarchy() throws IOException {
+    int count = 0;
+
+    // first, find all deprecated subclass-of statements
+    count += fetchSubclassHierarchyFromQuery("SELECT ?subC ?supC WHERE {\n"
+                                             + "  ?subC p:P279 ?stmt .\n"
+                                             + "  ?stmt ps:P279 ?supC ;\n"
+                                             + "        wikibase:rank wikibase:DeprecatedRank .\n"
+                                             + "}");
+    try {
+      Thread.sleep(60000);
+    } catch (InterruptedException err) {}
+    // then, find all normal-rank subclass-of statements that are not also best-rank
+    count += fetchSubclassHierarchyFromQuery("SELECT ?subC ?supC WITH {\n"
+                                             + "  SELECT ?subC WHERE {\n"
+                                             + "    ?subC p:P279 ?stmt .\n"
+                                             + "    ?stmt ps:P279 ?supC ;\n"
+                                             + "          wikibase:rank wikibase:PreferredRank .\n"
+                                             + "}} AS %subclasses WHERE {\n"
+                                             + "  include %subclasses . ?subC p:P279 ?stmt .\n"
+                                             + "  ?stmt ps:P279 ?supC ;\n"
+                                             + "        wikibase:rank wikibase:NormalRank .\n"
+                                             + "}");
+    try {
+      Thread.sleep(60000);
+    } catch (InterruptedException err) {}
+    // lastly, find all best-renk statements
+    count += fetchSubclassHierarchyFromQuery("Select ?subC ?supC WHERE {\n"
+                                             + "  ?subC wdt:P279 ?supC\n"
+                                             + "}");
+
+    System.out.println("Found " + count
+                       + " subclass relationships among "
+                       + this.classRecords.size() + " Wikidata items.");
+
+    System.out.println("Computing indirect subclass relationships ...");
+    for (ClassRecord classRecord : this.classRecords.values()) {
+      for (Integer superClass : classRecord.directSuperClasses) {
+        addSuperClasses(superClass, classRecord);
+      }
+    }
+
+    System.out.println("Computing total subclass counts ...");
+    for (ClassRecord classRecord : this.classRecords.values()) {
+      for (Integer superClass : classRecord.superClasses) {
+        getClassRecord(superClass).allSubclassCount++;
+      }
+    }
+
+    System.out.println("Preprocessing of class hierarchy complete.");
   }
 
   /**
@@ -796,6 +826,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       String queryString = "query=" + URLEncoder.encode(banner + query, "UTF-8");
       URL url = new URL("https://query.wikidata.org/sparql?"
           + queryString);
+      System.out.println("Running SPARQL query: `" + url + "'.");
       HttpURLConnection connection = (HttpURLConnection) url
           .openConnection();
       connection.setRequestMethod("GET");
