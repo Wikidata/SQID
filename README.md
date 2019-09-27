@@ -19,7 +19,7 @@ You do not normally need to install this yourself, since it is a Web application
 
 ## Deployment on Wikimedia Toolforge
 
-An ansible playbook for deployment on Toolforge is available in [helpers/ansible](helpers/ansible), run `ansible-playbook -i production site` to build the java helper package and the app bundle, and deploy them to Toolforge. Use `ansible-playbook -i production site --tags all,clean` to also force a clean rebuild.
+An ansible playbook for deployment on Toolforge is available in [helpers/ansible](helpers/ansible), run `ansible-playbook -i production site.yml` to build the java helper package and the app bundle, and deploy them to Toolforge. Use `ansible-playbook -i production site.yml --tags all,clean` to also force a clean rebuild.
 
 ## License
 
