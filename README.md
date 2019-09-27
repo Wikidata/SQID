@@ -17,6 +17,10 @@ You do not normally need to install this yourself, since it is a Web application
 * Get some data. You can copy the example json data files from [src/data/exampleData](src/data/exampleData) to [src/data/](src/data) to get started. You can update these files by running the Python script `update-statistics.py` under [helpers/python](helpers/python) from this directory, but this will not recreate all statistics. You can also [download most recent updated json files](http://tools-static.wmflabs.org/sqid/data/).
 * Optionally recreate all statistics. The program to do this is the java "sqid-helper" under [helpers/java](helpers/java), using [Wikidata Toolkit](https://github.com/Wikidata/Wikidata-Toolkit). The main code is in [SchemaUsageAnalyzer.java](https://github.com/Wikidata/SQID/blob/master/helpers/java/src/main/java/org/wikidata/wdtk/client/SchemaUsageAnalyzer.java). The code is invoked by using the command-line client (running the client will show a help message that includes this action).
 
+## Deployment on Wikimedia Toolforge
+
+An ansible playbook for deployment on Toolforge is available in [helpers/ansible](helpers/ansible), run `ansible-playbook -i production site` to build the java helper package and the app bundle. Use `ansible-playbook -i production site --tags all,clean` to force a clean rebuild.
+
 ## License
 
 The code in this repository is released under the [Apache 2.0](LICENSE) license. External libraries used may have their own licensing terms.
