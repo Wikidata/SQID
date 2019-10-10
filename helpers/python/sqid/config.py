@@ -5,11 +5,11 @@ GRID_SUBMIT = '/usr/bin/jsub'
 GRID_MEMORY = '-mem'
 GRID_NAME = '-N'
 GRID_ONCE = '-once'
-DUMP_PROCESS_MEMORY = '20g'
+DUMP_PROCESS_MEMORY = '21g'
 STATISTICS_PROCESS_MEMORY = '2g'
 JAVA_BASEDIR = '/data/project/sqid/projects'
 JAR = 'org.wikidata.sqid.helper-0.10.0.jar'
-JAVA_MEMORY = '4g'
+JAVA_MEMORY = '5g'
 JAVA_ARGS = ['-Xmx{memory}'.format(memory=JAVA_MEMORY),
              '-jar', JAR,
              '-a', 'sqid', '-n']
