@@ -1,5 +1,6 @@
 ---
 - hosts: sqid
+  gather_facts: no
   roles:
     - deploy
   tags: [deploy]
