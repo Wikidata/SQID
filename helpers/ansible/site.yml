@@ -3,8 +3,8 @@
   pre_tasks:
     - name: Assure minimum ansible version
       assert:
-        that: ansible_version.full is version_compare('2.8', '>=')
-        msg: "You must update Ansible to at least 2.8 to use this playbook."
+        that: ansible_version.full is version_compare('2.8.6', '>=')
+        msg: "You must update Ansible to at least 2.8.6 to use this playbook."
 
 - import_playbook: build.yml
 - import_playbook: deploy.yml
