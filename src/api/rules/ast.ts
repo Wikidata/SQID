@@ -84,6 +84,88 @@ function collectLiterals(ast: ParseResult, children?: Literal[]) {
   }
 }
 
+function collectStrings(ast: ParseResult, children?: string[]) {
+  switch (ast.type) {
+    case 'some-variable':
+    case 'variable':
+    case 'literal':
+    case 'set-variable':
+      return [ast.name]
+
+    case 'star':
+      return ['*']
+
+    case 'plus':
+      return ['+']
+
+    case 'dot':
+      const [fromSpecifier, item] = children || []
+      return [`${fromSpecifier}.${item}`]
+
+    case 'set-term':
+      if (children === undefined) {
+        return ['{}']
+      }
+      return [`{${children.join(', ')}}`]
+
+    case 'closed-specifier':
+      if (children === undefined) {
+        return ['[]']
+      }
+      return [`[${children.join(', ')}]`]
+
+    case 'open-specifier':
+      if (children === undefined) {
+        return ['()']
+      }
+      return [`(${children.join(', ')})`]
+
+    case 'assignment':
+      const [attribute, value] = children || []
+      return [`${attribute} = ${value}`]
+
+    case 'function-term':
+      if (children === undefined) {
+        return [`${ast.name}()`]
+      }
+      return [`${ast.name}(${children.join(', ')})`]
+
+    case 'relational-atom': {
+      const [predicate, left, right, annotation] = children || []
+      const maybeAnnotation = ((annotation.length > 0) ? `@${annotation}` : '')
+      return [`(${left}.${predicate} = ${right})${maybeAnnotation}`]
+    }
+
+    case 'set-atom':
+    case 'specifier-atom':
+      const [set, specifier] = children || []
+      return [`${set}:${specifier}`]
+
+    case 'union': {
+      const [left, right] = children || []
+      return [`(${left} || ${right})`]
+    }
+
+    case 'intersection': {
+      const [left, right] = children || []
+      return [`(${left} && ${right})`]
+    }
+
+    case 'difference': {
+      const [left, right] = children || []
+      return [`(${left} \\ ${right})`]
+    }
+
+    case 'rule':
+      const [head, ...body] = (children || []).reverse()
+      return [`${body.reverse().join(', ')} -> ${head}`]
+
+    default:
+      const _: never = ast
+      return _
+  }
+}
+
 type Named = SomeVariable | Variable | SetVariable | Literal
 
 function isSame(left: Named, right: Named) {
@@ -108,9 +190,9 @@ export function literals(ast: ParseResult | ParseResult[]) {
   return deduplicate(walk(ast, collectLiterals))
 }
 
-// export function print(ast) {
-//   return `FIXME`
-// }
+export function print(ast: ParseResult | ParseResult[]) {
+  return walk(ast, collectStrings).join('')
+}
 
 export function verify(schema: SqidRuleSchema, rule: Rule) {
   const validator = new Ajv()

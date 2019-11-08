@@ -206,6 +206,8 @@ export interface EntityReference {
   subId?: number,
 }
 
+export type SqidRuleSchema = object
+
 export interface SqidEntityStatistics {
   c: number,
   cLabels: number,

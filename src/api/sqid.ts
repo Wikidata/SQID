@@ -1,6 +1,7 @@
 import { http } from '@/http'
 import { Claim, EntityId, ResultList, SqidStatistics,
-         SqidHierarchyRecord, SqidPropertyUsageRecord } from './types'
+         SqidHierarchyRecord, SqidPropertyUsageRecord,
+         SqidRuleSchema } from './types'
 import { ClaimsMap } from '@/store/entity/claims/types'
 import { PropertyClassification, PropertyStatistics } from '@/store/statistics/properties/types'
 import { ClassStatistics } from '@/store/statistics/classes/types'
@@ -55,6 +56,12 @@ export async function getStatistics(lastRefresh: number): Promise<SqidStatistics
   const dumpMonth = dumpDate.slice(4, 6)
   const dumpDay = dumpDate.slice(6, 8)
   response.data.dumpDate = `${dumpYear}-${dumpMonth}-${dumpDay}`
+
+  return response.data
+}
+
+export async function getRuleSchema(lastRefresh: number): Promise<SqidRuleSchema> {
+  const response = await http.get(getDataFileURI('rules.schema', lastRefresh))
 
   return response.data
 }
