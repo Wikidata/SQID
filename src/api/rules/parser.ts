@@ -2,7 +2,7 @@ import P from 'parsimmon'
 import { MARPL, Annotation, Argument, Assignment, Assignments, Atom, Dot,
          FunctionTerm, ObjectTerm, ParseResult, Placeholder, RelationalAtom,
          Rule, SetTerm, SetVariable, SimpleNamed, Specifier, SpecifierAtom, SpecifierTerm,
-         SpecifierType, SpecifierExpressionType, isSetVariable, isSomeVariable,
+         SpecifierType, SpecifierExpressionType, isSetVariable, isSomeVariable, LiteralExpression,
          isRelationalAtom, isSetLikeAtom, isClosedSpecifier, isSpecifier } from './types'
 import { verify } from './ast'
 
@@ -99,6 +99,7 @@ const MARPL = P.createLanguage<MARPL>({
   difference: () => word('\\'),
   intersection: () => word('&&'),
   objectName: () => P.regexp(/[PQ]\d+/),
+  literalExpression: () => P.regexp(/"[^"]*"/),
   variableName: () => P.regexp(/\?[a-zA-Z]\w*/),
   openingBrace: () => word('{'),
   closingBrace: () => word('}'),
@@ -123,10 +124,21 @@ const MARPL = P.createLanguage<MARPL>({
       .desc('an object literal')
       .thru(type('literal'))
   },
+  LiteralExpression: (r: Language) => {
+    return P.seqObj<SimpleNamed>(['name', r.literalExpression])
+      .desc('a quoted literal expression')
+      .thru(type('literal-expression'))
+  },
   ObjectTerm: (r: Language) => {
     return P.alt(
       r.ObjectVariable,
       r.ObjectLiteral,
+    )
+  },
+  ObjectTermOrLiteral: (r: Language) => {
+    return P.alt(
+      r.literalExpression,
+      r.ObjectTerm,
     )
   },
   SetLiteral: (r: Language) => {
@@ -185,13 +197,13 @@ const MARPL = P.createLanguage<MARPL>({
   SimpleRelationalAtom: (r: Language) => {
     return P.seqObj<{ subject: ObjectTerm,
                       predicate: ObjectTerm,
-                      object: ObjectTerm,
+                      object: ObjectTerm | LiteralExpression,
                     }>(r.openingParenthesis,
                        ['subject', r.ObjectTerm],
                        r.dot,
                        ['predicate', r.ObjectTerm],
                        r.equals,
-                       ['object', r.ObjectTerm],
+                       ['object', r.ObjectTermOrLiteral],
                        r.closingParenthesis,
                       ).map((obj) => {
                         return {

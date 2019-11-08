@@ -17,13 +17,17 @@ export interface Literal extends Named {
   type: 'literal',
 }
 
+export interface LiteralExpression extends Named {
+  type: 'literal-expression',
+}
+
 export type ObjectTerm = Variable | Literal
 
 export interface SetVariable extends Named {
   type: 'set-variable',
 }
 
-export type SimpleNamed = SomeVariable | Variable | Literal | SetVariable
+export type SimpleNamed = SomeVariable | Variable | Literal | SetVariable | LiteralExpression
 
 export interface Assigning {
   assignments: Assignment[],
@@ -70,7 +74,7 @@ export interface ClosedSpecifier extends Assigning {
 export interface RelationalAtom {
   type: 'relational-atom',
   predicate: ObjectTerm,
-  arguments: [ObjectTerm, ObjectTerm],
+  arguments: [ObjectTerm, ObjectTerm | LiteralExpression],
   annotation: Annotation,
 }
 
@@ -125,7 +129,7 @@ export type ParseResult = SomeVariable | Variable | Literal |
   SetVariable | SetLiteral | Star | Plus | Assignment | Dot |
   OpenSpecifier | ClosedSpecifier | FunctionTerm | SetAtom |
   SpecifierAtom | Union | Intersection | Difference | Rule |
-  RelationalAtom
+  RelationalAtom | LiteralExpression
 
 export interface MARPL {
   at: string,
@@ -138,6 +142,7 @@ export interface MARPL {
   difference: string,
   intersection: string,
   objectName: string,
+  literalExpression: string,
   variableName: string,
   openingBrace: string,
   closingBrace: string,
@@ -150,7 +155,9 @@ export interface MARPL {
   someVariable: SomeVariable,
   ObjectVariable: Variable,
   ObjectLiteral: Literal,
+  LiteralExpression: LiteralExpression,
   ObjectTerm: ObjectTerm,
+  ObjectTermOrLiteral: ObjectTerm | LiteralExpression,
   SetLiteral: SetLiteral,
   SetVariable: SetVariable,
   SetTerm: SetTerm,

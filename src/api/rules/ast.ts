@@ -14,6 +14,7 @@ function walk<T>(ast: ParseResult | ParseResult[], visit: visitor<T>): T[] {
     case 'some-variable':
     case 'variable':
     case 'literal':
+    case 'literal-expression':
     case 'set-variable':
     case 'star':
     case 'plus':
@@ -91,6 +92,9 @@ function collectStrings(ast: ParseResult, children?: string[]) {
     case 'literal':
     case 'set-variable':
       return [ast.name]
+
+    case 'literal-expression':
+      return [`"${ast.name}"`]
 
     case 'star':
       return ['*']
