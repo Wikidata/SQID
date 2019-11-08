@@ -1,14 +1,7 @@
-export type ResultType = 'some-variable' | 'variable' | 'literal' | 'set-atom' | 'set-term' |
-  'set-variable' | 'assignment' | 'star' | 'plus' | 'dot' | 'open-specifier' | 'closed-specifier' |
-  'relational-atom' | 'specifier-atom' | 'function-term' | 'rule' | SpecifierExpressionType
 export type SpecifierType = 'open' | 'closed'
 export type SpecifierExpressionType = 'union' | 'intersection' | 'difference'
 
-export interface ParseResult {
-  type: ResultType,
-}
-
-export interface Named extends ParseResult {
+export interface Named {
   name: string,
 }
 
@@ -30,49 +23,51 @@ export interface SetVariable extends Named {
   type: 'set-variable',
 }
 
-export interface Assignments extends ParseResult {
-  type: 'set-term' | 'closed-specifier' | 'open-specifier',
+export type SimpleNamed = SomeVariable | Variable | Literal | SetVariable
+
+export interface Assigning {
   assignments: Assignment[],
 }
 
-export interface SetLiteral extends Assignments {
+export interface SetLiteral extends Assigning {
   type: 'set-term',
 }
 
 export type SetTerm = SetVariable | SetLiteral | Specifier
 export type Annotation = SetTerm | ClosedSpecifier | FunctionTerm
+export type Assignments = SetLiteral | OpenSpecifier | ClosedSpecifier
 
-export interface Star extends ParseResult {
+export interface Star {
   type: 'star',
 }
 
-export interface Plus extends ParseResult {
+export interface Plus {
   type: 'plus',
 }
 
 export type Placeholder = Star | Plus
 
-export interface Assignment extends ParseResult {
+export interface Assignment {
   type: 'assignment',
   attribute: ObjectTerm,
   value: ObjectTerm | Dot | Placeholder,
 }
 
-export interface Dot extends ParseResult {
+export interface Dot {
   type: 'dot',
   fromSpecifier: SetVariable,
   item: Literal,
 }
 
-export interface OpenSpecifier extends Assignments {
+export interface OpenSpecifier extends Assigning {
   type: 'open-specifier',
 }
 
-export interface ClosedSpecifier extends Assignments {
+export interface ClosedSpecifier extends Assigning {
   type: 'closed-specifier',
 }
 
-export interface RelationalAtom extends ParseResult {
+export interface RelationalAtom {
   type: 'relational-atom',
   predicate: ObjectTerm,
   arguments: [ObjectTerm, ObjectTerm],
@@ -86,7 +81,7 @@ export interface FunctionTerm extends Named {
   arguments: Argument[],
 }
 
-export interface SetLikeAtom extends ParseResult {
+export interface SetLikeAtom {
   set: SetVariable,
   specifier: SpecifierTerm,
 }
@@ -99,7 +94,7 @@ export interface SpecifierAtom extends SetLikeAtom {
   type: 'specifier-atom',
 }
 
-export interface ComplexSpecifier extends ParseResult {
+export interface ComplexSpecifier {
   type: SpecifierExpressionType,
   specifiers: SpecifierTerm[],
 }
@@ -118,13 +113,19 @@ export interface Difference extends ComplexSpecifier {
 
 export type Specifier = OpenSpecifier | ClosedSpecifier
 export type SpecifierTerm = Specifier | ComplexSpecifier
-export type Atom = RelationalAtom | SetLikeAtom
+export type Atom = RelationalAtom | SetAtom | SpecifierAtom
 
-export interface Rule extends ParseResult {
+export interface Rule {
   type: 'rule',
   head: RelationalAtom,
   body: Atom[],
 }
+
+export type ParseResult = SomeVariable | Variable | Literal |
+  SetVariable | SetLiteral | Star | Plus | Assignment | Dot |
+  OpenSpecifier | ClosedSpecifier | FunctionTerm | SetAtom |
+  SpecifierAtom | Union | Intersection | Difference | Rule |
+  RelationalAtom
 
 export interface MARPL {
   at: string,
@@ -193,7 +194,7 @@ export function isSpecifierAtom(thing: Atom): thing is SpecifierAtom {
   return thing.type === 'specifier-atom'
 }
 
-export function isSetLikeAtom(thing: Atom | SetLikeAtom): thing is SetLikeAtom {
+export function isSetLikeAtom(thing: Atom): thing is SpecifierAtom | SetAtom {
   return isSpecifierAtom(thing) || isSetAtom(thing)
 }
 

@@ -1,7 +1,7 @@
 import P from 'parsimmon'
 import { MARPL, Annotation, Argument, Assignment, Assignments, Atom, Dot,
-         FunctionTerm, Named, ObjectTerm, ParseResult, Placeholder, ResultType,
-         RelationalAtom, Rule, SetTerm, SetVariable, Specifier, SpecifierAtom, SpecifierTerm,
+         FunctionTerm, Named, ObjectTerm, ParseResult, Placeholder, RelationalAtom,
+         Rule, SetTerm, SetVariable, SimpleNamed, Specifier, SpecifierAtom, SpecifierTerm,
          SpecifierType, SpecifierExpressionType, isSetVariable, isSomeVariable,
          isRelationalAtom, isSetLikeAtom, isClosedSpecifier, isSpecifier } from './types'
 import { verify } from './ast'
@@ -19,8 +19,13 @@ function assignment(r: Language, rhs: P.Parser<ObjectTerm | Dot | Placeholder>) 
                              ).thru(type('assignment'))
 }
 
-function specifierType(typeName: SpecifierType): ResultType {
-  return `${typeName}-specifier` as ResultType
+function specifierType(typeName: SpecifierType): 'open-specifier' | 'closed-specifier' {
+  // be a bit verbose to satisfy the type checker
+  if (typeName === 'open') {
+    return 'open-specifier'
+  }
+
+  return 'closed-specifier'
 }
 
 function specifier(r: Language,
@@ -74,7 +79,7 @@ function relationalAtom(r: Language, setTerm: P.Parser<Annotation>): P.Parser<Re
                     })
 }
 
-function type<T extends ParseResult, U extends T>(typeName: ResultType): (parser: P.Parser<T>) => P.Parser<U> {
+function type<T extends ParseResult, U extends T>(typeName: U['type']): (parser: P.Parser<T>) => P.Parser<U> {
   return (parser) => {
     return (parser as P.Parser<U>).map((obj) => {
       obj.type = typeName
@@ -104,13 +109,13 @@ const MARPL = P.createLanguage<MARPL>({
   openingParenthesis: () => word('('),
   closingParenthesis: () => word(')'),
   someVariable: (r: Language) => {
-    return P.seqObj<Named>(['name', r.variableName]).thru(type('some-variable'))
+    return P.seqObj<SimpleNamed>(['name', r.variableName]).thru(type('some-variable'))
   },
   ObjectVariable: (r: Language) => {
-    return P.seqObj<Named>(['name', r.variableName]).thru(type('variable'))
+    return P.seqObj<SimpleNamed>(['name', r.variableName]).thru(type('variable'))
   },
   ObjectLiteral: (r: Language) => {
-    return P.seqObj<Named>(['name', r.objectName]).thru(type('literal'))
+    return P.seqObj<SimpleNamed>(['name', r.objectName]).thru(type('literal'))
   },
   ObjectTerm: (r: Language) => {
     return P.alt(
@@ -125,7 +130,7 @@ const MARPL = P.createLanguage<MARPL>({
                                 ).thru(type('set-term'))
   },
   SetVariable: (r: Language) => {
-    return P.seqObj<Named>(['name', r.variableName]).thru(type('set-variable'))
+    return P.seqObj<SimpleNamed>(['name', r.variableName]).thru(type('set-variable'))
   },
   SetTerm: (r: Language) => {
     return P.alt(
@@ -273,11 +278,11 @@ const MARPL = P.createLanguage<MARPL>({
   },
 })
 
-export function parseRule(rule: string, skipVerification = false) {
+export function parseRule(rule: string, schema?: object) {
   const parsed = Object.freeze(rewrite(MARPL.Rule.tryParse(rule)))
 
-  if (skipVerification !== true) {
-   verify(parsed)
+  if (schema) {
+    verify(schema, parsed)
   }
 
   return parsed
@@ -351,7 +356,7 @@ function rewrite(ast: Rule) {
     if (isRelationalAtom(atom) && isSpecifier(atom.annotation)) {
       const variable = { type: 'set-variable',
                          name: `?_body_spec_for_${atom}`,
-                       } as SetVariable
+                       } as const
 
       atoms.push(specifierAtom(variable, atom.annotation))
       {
