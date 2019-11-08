@@ -1,6 +1,6 @@
 import P from 'parsimmon'
 import { MARPL, Annotation, Argument, Assignment, Assignments, Atom, Dot,
-         FunctionTerm, Named, ObjectTerm, ParseResult, Placeholder, RelationalAtom,
+         FunctionTerm, ObjectTerm, ParseResult, Placeholder, RelationalAtom,
          Rule, SetTerm, SetVariable, SimpleNamed, Specifier, SpecifierAtom, SpecifierTerm,
          SpecifierType, SpecifierExpressionType, isSetVariable, isSomeVariable,
          isRelationalAtom, isSetLikeAtom, isClosedSpecifier, isSpecifier } from './types'
@@ -109,13 +109,19 @@ const MARPL = P.createLanguage<MARPL>({
   openingParenthesis: () => word('('),
   closingParenthesis: () => word(')'),
   someVariable: (r: Language) => {
-    return P.seqObj<SimpleNamed>(['name', r.variableName]).thru(type('some-variable'))
+    return P.seqObj<SimpleNamed>(['name', r.variableName])
+      .desc('a variable')
+      .thru(type('some-variable'))
   },
   ObjectVariable: (r: Language) => {
-    return P.seqObj<SimpleNamed>(['name', r.variableName]).thru(type('variable'))
+    return P.seqObj<SimpleNamed>(['name', r.variableName])
+      .desc('an object variable')
+      .thru(type('variable'))
   },
   ObjectLiteral: (r: Language) => {
-    return P.seqObj<SimpleNamed>(['name', r.objectName]).thru(type('literal'))
+    return P.seqObj<SimpleNamed>(['name', r.objectName])
+      .desc('an object literal')
+      .thru(type('literal'))
   },
   ObjectTerm: (r: Language) => {
     return P.alt(
@@ -127,10 +133,13 @@ const MARPL = P.createLanguage<MARPL>({
     return P.seqObj<Assignments>(r.openingBrace,
                                  ['assignments', P.sepBy(r.Assignment, r.comma)],
                                  r.closingBrace,
-                                ).thru(type('set-term'))
+                                )
+      .thru(type('set-term'))
   },
   SetVariable: (r: Language) => {
-    return P.seqObj<SimpleNamed>(['name', r.variableName]).thru(type('set-variable'))
+    return P.seqObj<SimpleNamed>(['name', r.variableName])
+      .desc('a set variable')
+      .thru(type('set-variable'))
   },
   SetTerm: (r: Language) => {
     return P.alt(
@@ -206,14 +215,14 @@ const MARPL = P.createLanguage<MARPL>({
     return P.alt(
       word('*').map(() => {
         return {
-          type: 'star',
+          type: 'star' as const,
         }
       }),
       word('+').map(() => {
         return {
-          type: 'plus',
+          type: 'plus' as const,
         }
-      }))
+      })).desc('a placeholder')
   },
   Assignment: (r: Language) => {
     return assignment(r, r.ObjectTerm)
