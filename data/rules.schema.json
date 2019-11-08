@@ -1,6 +1,6 @@
 {
 	"$id": "http://iccl.inf.tu-dresden.de/marpl/schema",
-	"$schema": "http://json-schema.org/draft-06/schema#",
+	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "MARPL rules",
 	"definitions": {
 		"object-variable": {
