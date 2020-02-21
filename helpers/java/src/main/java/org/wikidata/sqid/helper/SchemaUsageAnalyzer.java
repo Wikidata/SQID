@@ -45,7 +45,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -83,8 +85,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SchemaUsageAnalyzer implements DumpProcessingAction {
 
-  private static final ItemIdValue ItemGadgetAuthorityControl = Datamodel
-      .makeWikidataItemIdValue("Q22348290");
+  private static final ItemIdValue ItemGadgetAuthorityControl = Datamodel.makeWikidataItemIdValue("Q22348290");
 
   /**
    * Object mapper that is used to serialize JSON.
@@ -147,23 +148,23 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    */
   private abstract class UsageRecord {
     /**
-     * Number of items using this entity. For properties, this is the number
-     * of items with such a property. For class items, this is the number of
-     * direct instances of this class.
+     * Number of items using this entity. For properties, this is the number of
+     * items with such a property. For class items, this is the number of direct
+     * instances of this class.
      */
     @JsonProperty("i")
     @JsonInclude(Include.NON_EMPTY)
     public int itemCount = 0;
     /**
-     * Map that records how many times certain properties are used on items
-     * that use this entity (where "use" has the meaning explained for
+     * Map that records how many times certain properties are used on items that use
+     * this entity (where "use" has the meaning explained for
      * {@link UsageRecord#itemCount}).
      */
     @JsonIgnore
     public HashMap<Integer, Integer> propertyCoCounts = new HashMap<>();
     /**
-     * The label of this item. If there isn't any English label available,
-     * the label is set to null.
+     * The label of this item. If there isn't any English label available, the label
+     * is set to null.
      */
     @JsonProperty("l")
     @JsonInclude(Include.NON_EMPTY)
@@ -178,41 +179,18 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     @JsonProperty("r")
     @JsonInclude(Include.NON_EMPTY)
     public Map<String, Integer> getRelatedProperties() {
-      List<ImmutablePair<Integer, Double>> list = new ArrayList<>(
-          this.propertyCoCounts.size());
-      for (Entry<Integer, Integer> coCountEntry : this.propertyCoCounts
-          .entrySet()) {
-        double otherThisItemRate = (double) coCountEntry.getValue()
-            / this.itemCount;
+      return this.propertyCoCounts.entrySet().stream().map(coCountEntry -> {
+        double otherThisItemRate = (double) coCountEntry.getValue() / this.itemCount;
         double otherGlobalItemRate = (double) SchemaUsageAnalyzer.this.propertyRecords
-            .get(coCountEntry.getKey()).itemCount
-            / SchemaUsageAnalyzer.this.countPropertyEntities;
-        double otherThisItemRateStep = 1 / (1 + Math.exp(6 * (-2
-            * otherThisItemRate + 0.5)));
-        double otherInvGlobalItemRateStep = 1 / (1 + Math.exp(6 * (-2
-            * (1 - otherGlobalItemRate) + 0.5)));
+            .get(coCountEntry.getKey()).itemCount / SchemaUsageAnalyzer.this.countPropertyEntities;
+        double otherThisItemRateStep = 1 / (1 + Math.exp(6 * (-2 * otherThisItemRate + 0.5)));
+        double otherInvGlobalItemRateStep = 1 / (1 + Math.exp(6 * (-2 * (1 - otherGlobalItemRate) + 0.5)));
 
-        list.add(new ImmutablePair<Integer, Double>(coCountEntry
-            .getKey(), otherThisItemRateStep
-            * otherInvGlobalItemRateStep * otherThisItemRate
-            / otherGlobalItemRate));
-      }
+        return new ImmutablePair<Integer, Double>(coCountEntry.getKey(),
+            otherThisItemRateStep * otherInvGlobalItemRateStep * otherThisItemRate / otherGlobalItemRate);
 
-      Collections.sort(list,
-          new Comparator<ImmutablePair<Integer, Double>>() {
-            @Override
-            public int compare(ImmutablePair<Integer, Double> o1,
-                ImmutablePair<Integer, Double> o2) {
-              return o2.getValue().compareTo(o1.getValue());
-            }
-          });
-
-      LinkedHashMap<String, Integer> result = new LinkedHashMap<>();
-      for (ImmutablePair<Integer, Double> entry : list) {
-        result.put(entry.left.toString(), (int) (10 * entry.right));
-      }
-
-      return result;
+      }).sorted(Comparator.comparing(ImmutablePair<Integer, Double>::getValue).reversed())
+          .collect(Collectors.toMap(entry -> entry.left.toString(), entry -> (int) (10 * entry.right)));
     }
   }
 
@@ -254,18 +232,12 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     @JsonProperty("sc")
     @JsonInclude(Include.NON_EMPTY)
     public String[] getSuperClasses() {
-      String[] result = new String[superClasses.size()];
-      int i = 0;
-      for (Integer id : superClasses) {
-        result[i] = id.toString();
-        i++;
-      }
-      return result;
+      return superClasses.stream().map(Object::toString).toArray(String[]::new);
     }
 
     /**
-     * List of direct subclasses of this class that are included in the
-     * export. This is only filled at the end of the processing.
+     * List of direct subclasses of this class that are included in the export. This
+     * is only filled at the end of the processing.
      */
     @JsonProperty("sb")
     @JsonInclude(Include.NON_EMPTY)
@@ -303,36 +275,15 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     @JsonProperty("pc")
     @JsonInclude(Include.NON_EMPTY)
     public List<String> getClasses() {
-      List<String> result = new ArrayList<>();
-      for (Integer i : classes) {
-        result.add(i.toString());
-      }
-      return result;
+      return classes.stream().map(Object::toString).collect(Collectors.toList());
     }
 
     @JsonProperty("qs")
     @JsonInclude(Include.NON_EMPTY)
     public Map<String, Integer> getQualifiers() {
-      List<Map.Entry<Integer, Integer>> list = new ArrayList<>(
-          this.qualifiers.entrySet());
-
-      Collections.sort(list,
-          new Comparator<Map.Entry<Integer, Integer>>() {
-            @Override
-            public int compare(Map.Entry<Integer, Integer> o1,
-                Map.Entry<Integer, Integer> o2) {
-              return o2.getValue().compareTo(o1.getValue());
-            }
-          });
-
-      LinkedHashMap<String, Integer> result = new LinkedHashMap<>();
-      for (Map.Entry<Integer, Integer> entry : list) {
-        result.put(entry.getKey().toString(), entry.getValue());
-      }
-
-      return result;
+      return qualifiers.entrySet().stream().sorted(Comparator.comparing(Entry<Integer, Integer>::getValue).reversed())
+          .collect(Collectors.toMap(entry -> entry.getKey().toString(), entry -> entry.getValue()));
     }
-
   }
 
   private class SiteRecord {
@@ -387,11 +338,9 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   /**
    * Create a directory at the given path if it does not exist yet.
    *
-   * @param path
-   *            the path to the directory
-   * @throws IOException
-   *             if it was not possible to create a directory at the given
-   *             path
+   * @param path the path to the directory
+   * @throws IOException if it was not possible to create a directory at the given
+   *                     path
    */
   private static void createDirectory(Path path) throws IOException {
     try {
@@ -404,20 +353,17 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   }
 
   /**
-   * Opens a new FileOutputStream for a file of the given name in the given
-   * result directory. Any file of this name that exists already will be
-   * replaced. The caller is responsible for eventually closing the stream.
+   * Opens a new FileOutputStream for a file of the given name in the given result
+   * directory. Any file of this name that exists already will be replaced. The
+   * caller is responsible for eventually closing the stream.
    *
-   * @param resultDirectory
-   *            the path to the result directory
-   * @param filename
-   *            the name of the file to write to
+   * @param resultDirectory the path to the result directory
+   * @param filename        the name of the file to write to
    * @return FileOutputStream for the file
-   * @throws IOException
-   *             if the file or example output directory could not be created
+   * @throws IOException if the file or example output directory could not be
+   *                     created
    */
-  public static FileOutputStream openResultFileOuputStream(
-      Path resultDirectory, String filename) throws IOException {
+  public static FileOutputStream openResultFileOuputStream(Path resultDirectory, String filename) throws IOException {
     Path filePath = resultDirectory.resolve(filename);
     return new FileOutputStream(filePath.toFile());
   }
@@ -426,17 +372,14 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   public void processItemDocument(ItemDocument itemDocument) {
     // Record relevant labels:
     Integer itemId = getNumId(itemDocument.getEntityId().getId(), false);
-    if (this.classRecords.containsKey(itemId)) {
-      this.classRecords.get(itemId).label = itemDocument.findLabel("en");
-    }
+    Optional<ClassRecord> classRecord = Optional.ofNullable(this.classRecords.get(itemId));
+    classRecord.ifPresent(record -> record.label = itemDocument.findLabel("en"));
 
     countTerms(itemDocument, itemStatistics);
     processStatementDocument(itemDocument, itemStatistics);
 
     this.countSiteLinks += itemDocument.getSiteLinks().size();
-    for (SiteLink siteLink : itemDocument.getSiteLinks().values()) {
-      countSiteLink(siteLink);
-    }
+    itemDocument.getSiteLinks().values().forEach(this::countSiteLink);
   }
 
   private void countSiteLink(SiteLink siteLink) {
@@ -444,14 +387,11 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       String key = siteLink.getSiteKey();
       String url = this.sites.getPageUrl(key, "$Placeholder12345");
       if (url == null) {
-        System.err
-            .println("Could not find site information for " + key);
+        System.err.println("Could not find site information for " + key);
       } else {
         url = url.replace("%24Placeholder12345", "$1");
       }
-      this.siteRecords.put(key,
-          new SiteRecord(this.sites.getLanguageCode(key), url,
-              this.sites.getGroup(key)));
+      this.siteRecords.put(key, new SiteRecord(this.sites.getLanguageCode(key), url, this.sites.getGroup(key)));
     }
     this.siteRecords.get(siteLink.getSiteKey()).itemCount++;
   }
@@ -463,8 +403,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     pr.label = propertyDocument.findLabel("en");
 
     // Find best URL pattern:
-    StatementGroup urlPatterns = propertyDocument
-        .findStatementGroup("P1630");
+    StatementGroup urlPatterns = propertyDocument.findStatementGroup("P1630");
     if (urlPatterns != null) {
       for (Statement s : urlPatterns) {
         Value v = s.getValue();
@@ -475,17 +414,14 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
         boolean foundGacUrl = false;
         if (pr.urlPattern == null) {
           pr.urlPattern = urlPattern;
-        } else if (!foundGacUrl
-            && s.getRank() == StatementRank.PREFERRED) {
+        } else if (!foundGacUrl && s.getRank() == StatementRank.PREFERRED) {
           pr.urlPattern = urlPattern;
         } else if (!foundGacUrl) {
           Iterator<Snak> snaks = s.getAllQualifiers();
           while (snaks.hasNext()) {
             Snak snak = snaks.next();
-            if (snak instanceof ValueSnak
-                && "P1535".equals(snak.getPropertyId().getId())
-                && ItemGadgetAuthorityControl.equals(((ValueSnak) snak)
-                                                     .getValue())) {
+            if (snak instanceof ValueSnak && "P1535".equals(snak.getPropertyId().getId())
+                && ItemGadgetAuthorityControl.equals(((ValueSnak) snak).getValue())) {
               pr.urlPattern = urlPattern;
               foundGacUrl = true;
               break;
@@ -496,24 +432,17 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     }
 
     // Collect classes that this property is in:
-    StatementGroup instanceClasses = propertyDocument
-        .findStatementGroup("P31");
-    if (instanceClasses != null) {
-      for (Statement s : instanceClasses) {
-        Value v = s.getValue();
-        if (v != null) {
-          pr.classes.add(Integer.parseInt(((ItemIdValue) v).getId()
-              .substring(1)));
-        }
-      }
-    }
+    Optional<StatementGroup> instanceClasses = Optional.ofNullable(propertyDocument.findStatementGroup("P31"));
+    instanceClasses.ifPresent(ics -> ics.forEach(statement -> {
+      Optional<Value> value = Optional.ofNullable(statement.getValue());
+      value.ifPresent(v -> pr.classes.add(Integer.parseInt(((ItemIdValue) v).getId().substring(1))));
+    }));
 
     countTerms(propertyDocument, propertyStatistics);
     processStatementDocument(propertyDocument, propertyStatistics);
   }
 
-  private void processStatementDocument(StatementDocument statementDocument,
-      EntityStatistics entityStatistics) {
+  private void processStatementDocument(StatementDocument statementDocument, EntityStatistics entityStatistics) {
     this.countEntities++;
     entityStatistics.count++;
 
@@ -522,8 +451,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     }
 
     Set<Integer> superClasses = new HashSet<>();
-    StatementGroup instanceOfStatements = statementDocument
-        .findStatementGroup("P31");
+    StatementGroup instanceOfStatements = statementDocument.findStatementGroup("P31");
     if (instanceOfStatements != null) {
       // Compute all superclasses and count direct instances:
       for (Statement s : instanceOfStatements) {
@@ -551,16 +479,13 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       entityStatistics.countStatements += sg.size();
       PropertyRecord propertyRecord = getPropertyRecord(sg.getProperty());
       propertyRecord.itemCount++;
-      countCooccurringProperties(statementDocument, propertyRecord,
-          sg.getProperty());
+      countCooccurringProperties(statementDocument, propertyRecord, sg.getProperty());
 
       for (Statement s : sg) {
         for (SnakGroup snakGroup : s.getQualifiers()) {
-          Integer qualifierId = getNumId(snakGroup.getProperty()
-              .getId(), false);
+          Integer qualifierId = getNumId(snakGroup.getProperty().getId(), false);
           if (propertyRecord.qualifiers.containsKey(qualifierId)) {
-            propertyRecord.qualifiers.put(qualifierId,
-                propertyRecord.qualifiers.get(qualifierId) + 1);
+            propertyRecord.qualifiers.put(qualifierId, propertyRecord.qualifiers.get(qualifierId) + 1);
           } else {
             propertyRecord.qualifiers.put(qualifierId, 1);
           }
@@ -579,40 +504,24 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    * Count the terms (labels, descriptions, aliases) of an item or property
    * document.
    *
-   * @param termedDocument
-   *            document to count the terms of
-   * @param entityStatistics
-   *            record where statistics are counted
+   * @param termedDocument   document to count the terms of
+   * @param entityStatistics record where statistics are counted
    */
-  protected void countTerms(TermedDocument termedDocument,
-      EntityStatistics entityStatistics) {
+  protected void countTerms(TermedDocument termedDocument, EntityStatistics entityStatistics) {
     entityStatistics.countLabels += termedDocument.getLabels().size();
-    // for (MonolingualTextValue mtv : termedDocument.getLabels().values())
-    // {
-    // countKey(usageStatistics.labelCounts, mtv.getLanguageCode(), 1);
-    // }
-
-    entityStatistics.countDescriptions += termedDocument.getDescriptions()
-        .size();
-    // for (MonolingualTextValue mtv : termedDocument.getDescriptions()
-    // .values()) {
-    // countKey(usageStatistics.descriptionCounts, mtv.getLanguageCode(),
-    // 1);
-    // }
+    entityStatistics.countDescriptions += termedDocument.getDescriptions().size();
 
     for (String languageKey : termedDocument.getAliases().keySet()) {
       int count = termedDocument.getAliases().get(languageKey).size();
       entityStatistics.countAliases += count;
-      // countKey(usageStatistics.aliasCounts, languageKey, count);
     }
   }
 
   /**
    * Fetches a single page of the subclass hierarchy from SPARQL.
    *
-   * @param query
-   *           a SPARQL query returning ?subC and ?supC, where
-   *           ?subC is a direct subclass of ?supC.
+   * @param query a SPARQL query returning ?subC and ?supC, where ?subC is a
+   *              direct subclass of ?supC.
    *
    * @return number of rows resulting from query
    */
@@ -630,10 +539,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
         Integer supId = getNumId(parts[1], true);
 
         if (supId == 0 || subId == 0) {
-          System.out.println("Ignoring "
-              + parts[0]
-              + " subClassOf "
-              + parts[1]);
+          System.out.println("Ignoring " + parts[0] + " subClassOf " + parts[1]);
           continue;
         }
         getClassRecord(subId).directSuperClasses.add(supId);
@@ -649,8 +555,8 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   }
 
   /**
-   * Fetches all subclass relationships (P279) using the SPARQL endpoint, and
-   * uses them to compute direct and indirect superclasses of each class.
+   * Fetches all subclass relationships (P279) using the SPARQL endpoint, and uses
+   * them to compute direct and indirect superclasses of each class.
    *
    * @throws IOException
    */
@@ -658,36 +564,27 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     int count = 0;
 
     // first, find all deprecated subclass-of statements
-    count += fetchSubclassHierarchyFromQuery("SELECT ?subC ?supC WHERE {\n"
-                                             + "  ?subC p:P279 ?stmt .\n"
-                                             + "  ?stmt ps:P279 ?supC ;\n"
-                                             + "        wikibase:rank wikibase:DeprecatedRank .\n"
-                                             + "}");
+    count += fetchSubclassHierarchyFromQuery("SELECT ?subC ?supC WHERE {\n" + "  ?subC p:P279 ?stmt .\n"
+        + "  ?stmt ps:P279 ?supC ;\n" + "        wikibase:rank wikibase:DeprecatedRank .\n" + "}");
     try {
       Thread.sleep(60000);
-    } catch (InterruptedException err) {}
+    } catch (InterruptedException err) {
+    }
     // then, find all normal-rank subclass-of statements that are not also best-rank
-    count += fetchSubclassHierarchyFromQuery("SELECT ?subC ?supC WITH {\n"
-                                             + "  SELECT ?subC WHERE {\n"
-                                             + "    ?subC p:P279 ?stmt .\n"
-                                             + "    ?stmt ps:P279 ?supC ;\n"
-                                             + "          wikibase:rank wikibase:PreferredRank .\n"
-                                             + "}} AS %subclasses WHERE {\n"
-                                             + "  include %subclasses . ?subC p:P279 ?stmt .\n"
-                                             + "  ?stmt ps:P279 ?supC ;\n"
-                                             + "        wikibase:rank wikibase:NormalRank .\n"
-                                             + "}");
+    count += fetchSubclassHierarchyFromQuery(
+        "SELECT ?subC ?supC WITH {\n" + "  SELECT ?subC WHERE {\n" + "    ?subC p:P279 ?stmt .\n"
+            + "    ?stmt ps:P279 ?supC ;\n" + "          wikibase:rank wikibase:PreferredRank .\n"
+            + "}} AS %subclasses WHERE {\n" + "  include %subclasses . ?subC p:P279 ?stmt .\n"
+            + "  ?stmt ps:P279 ?supC ;\n" + "        wikibase:rank wikibase:NormalRank .\n" + "}");
     try {
       Thread.sleep(60000);
-    } catch (InterruptedException err) {}
-    // lastly, find all best-renk statements
-    count += fetchSubclassHierarchyFromQuery("Select ?subC ?supC WHERE {\n"
-                                             + "  ?subC wdt:P279 ?supC\n"
-                                             + "}");
+    } catch (InterruptedException err) {
+    }
+    // lastly, find all best-rank statements
+    count += fetchSubclassHierarchyFromQuery("Select ?subC ?supC WHERE {\n" + "  ?subC wdt:P279 ?supC\n" + "}");
 
-    System.out.println("Found " + count
-                       + " subclass relationships among "
-                       + this.classRecords.size() + " Wikidata items.");
+    System.out
+        .println("Found " + count + " subclass relationships among " + this.classRecords.size() + " Wikidata items.");
 
     System.out.println("Computing indirect subclass relationships ...");
     for (ClassRecord classRecord : this.classRecords.values()) {
@@ -709,18 +606,18 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   /**
    * Recursively add indirect subclasses to a class record.
    *
-   * @param directSuperClass
-   *            the superclass to add (together with its own superclasses)
-   * @param subClassRecord
-   *            the subclass to add to
+   * @param directSuperClass the superclass to add (together with its own
+   *                         superclasses)
+   * @param subClassRecord   the subclass to add to
    */
-  private void addSuperClasses(Integer directSuperClass,
-      ClassRecord subClassRecord) {
+  private void addSuperClasses(Integer directSuperClass, ClassRecord subClassRecord) {
     if (subClassRecord.superClasses.contains(directSuperClass)) {
       return;
     }
+
     subClassRecord.superClasses.add(directSuperClass);
     ClassRecord superClassRecord = getClassRecord(directSuperClass);
+
     if (superClassRecord == null) {
       return;
     }
@@ -731,8 +628,8 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   }
 
   /**
-   * Extracts a numeric id from a string, which can be either a Wikidata
-   * entity URI or a short entity or property id.
+   * Extracts a numeric id from a string, which can be either a Wikidata entity
+   * URI or a short entity or property id.
    *
    * @param idString
    * @param isUri
@@ -744,8 +641,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       if (!idString.startsWith("http://www.wikidata.org/entity/")) {
         return 0;
       }
-      numString = idString.substring("http://www.wikidata.org/entity/Q"
-          .length());
+      numString = idString.substring("http://www.wikidata.org/entity/Q".length());
     } else {
       numString = idString.substring(1);
     }
@@ -755,36 +651,24 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   /**
    * Returns record where statistics about a class should be stored.
    *
-   * @param classId
-   *            the numeric id of the class to initialize
+   * @param classId the numeric id of the class to initialize
    * @return the class record
    */
   private ClassRecord getClassRecord(Integer classId) {
-    if (!this.classRecords.containsKey(classId)) {
-      ClassRecord classRecord = new ClassRecord();
-      this.classRecords.put(classId, classRecord);
-      return classRecord;
-    } else {
-      return this.classRecords.get(classId);
-    }
+    this.classRecords.computeIfAbsent(classId, k -> new ClassRecord());
+    return this.classRecords.get(classId);
   }
 
   /**
    * Returns record where statistics about a property should be stored.
    *
-   * @param property
-   *            the property to initialize
+   * @param property the property to initialize
    * @return the property record
    */
   private PropertyRecord getPropertyRecord(PropertyIdValue property) {
-    Integer id = getNumId(property.getId(), false);
-    if (!this.propertyRecords.containsKey(id)) {
-      PropertyRecord propertyRecord = new PropertyRecord();
-      this.propertyRecords.put(id, propertyRecord);
-      return propertyRecord;
-    } else {
-      return this.propertyRecords.get(id);
-    }
+    Integer propertyId = getNumId(property.getId(), false);
+    this.propertyRecords.computeIfAbsent(propertyId, k -> new PropertyRecord());
+    return this.propertyRecords.get(propertyId);
   }
 
   /**
@@ -796,25 +680,22 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    * @param usageRecord
    * @param thisPropertyIdValue
    */
-  private void countCooccurringProperties(
-      StatementDocument statementDocument, UsageRecord usageRecord,
+  private void countCooccurringProperties(StatementDocument statementDocument, UsageRecord usageRecord,
       PropertyIdValue thisPropertyIdValue) {
-    for (StatementGroup sg : statementDocument.getStatementGroups()) {
-      if (!sg.getProperty().equals(thisPropertyIdValue)) {
-        Integer propertyId = getNumId(sg.getProperty().getId(), false);
-        if (!usageRecord.propertyCoCounts.containsKey(propertyId)) {
-          usageRecord.propertyCoCounts.put(propertyId, 1);
-        } else {
-          usageRecord.propertyCoCounts.put(propertyId,
-              usageRecord.propertyCoCounts.get(propertyId) + 1);
+
+    statementDocument.getStatementGroups().forEach(sg -> {
+        if (sg.getProperty().equals(thisPropertyIdValue)) {
+          return;
         }
-      }
-    }
+
+        Integer propertyId = getNumId(sg.getProperty().getId(), false);
+        usageRecord.propertyCoCounts.compute(propertyId, (k, v) -> (v == null) ? 1 : v + 1);
+      });
   }
 
   /**
-   * Executes a given SPARQL query and returns a stream with the result in
-   * JSON format.
+   * Executes a given SPARQL query and returns a stream with the result in JSON
+   * format.
    *
    * @param query
    * @return
@@ -824,11 +705,9 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     try {
       final String banner = "#TOOL:SQID-helper, https:/tools.wmflabs.org/sqid/\n";
       String queryString = "query=" + URLEncoder.encode(banner + query, "UTF-8");
-      URL url = new URL("https://query.wikidata.org/sparql?"
-          + queryString);
+      URL url = new URL("https://query.wikidata.org/sparql?" + queryString);
       System.out.println("Running SPARQL query: `" + url + "'.");
-      HttpURLConnection connection = (HttpURLConnection) url
-          .openConnection();
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
       connection.setRequestMethod("GET");
       connection.addRequestProperty("Accept", "text/csv"); // JSON leads to timeouts
       connection.setRequestProperty("User-Agent", Client.getUserAgent());
@@ -853,13 +732,11 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    * Writes all data that was collected about properties to a json file.
    */
   private void writePropertyData() {
-    try (PrintStream out = new PrintStream(openResultFileOuputStream(
-        resultDirectory, "properties.json"))) {
+    try (PrintStream out = new PrintStream(openResultFileOuputStream(resultDirectory, "properties.json"))) {
       out.println("{");
 
       int count = 0;
-      for (Entry<Integer, PropertyRecord> propertyEntry : this.propertyRecords
-          .entrySet()) {
+      for (Entry<Integer, PropertyRecord> propertyEntry : this.propertyRecords.entrySet()) {
         if (count > 0) {
           out.println(",");
         }
@@ -869,15 +746,13 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       }
       out.println("\n}");
 
-      System.out.println(" Serialized information for " + count
-          + " properties.");
+      System.out.println(" Serialized information for " + count + " properties.");
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public void writeStatisticsData(PrintStream out)
-      throws JsonGenerationException, JsonMappingException, IOException {
+  public void writeStatisticsData(PrintStream out) throws JsonGenerationException, JsonMappingException, IOException {
     out.println(" \"entityCount\": \"" + this.countEntities + "\",");
     out.println(" \"siteLinkCount\": \"" + this.countSiteLinks + "\",");
 
@@ -898,29 +773,23 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
    * Writes all data that was collected about classes to a json file.
    */
   private void writeClassData() {
-    try (PrintStream out = new PrintStream(openResultFileOuputStream(
-        resultDirectory, "classes.json"))) {
+    try (PrintStream out = new PrintStream(openResultFileOuputStream(resultDirectory, "classes.json"))) {
       out.println("{");
 
       // Add direct subclass information:
-      for (Entry<Integer, ClassRecord> classEntry : this.classRecords
-          .entrySet()) {
-        if (classEntry.getValue().subclassCount == 0
-            && classEntry.getValue().itemCount == 0) {
+      for (Entry<Integer, ClassRecord> classEntry : this.classRecords.entrySet()) {
+        if (classEntry.getValue().subclassCount == 0 && classEntry.getValue().itemCount == 0) {
           continue;
         }
         for (Integer superClass : classEntry.getValue().directSuperClasses) {
-          this.classRecords.get(superClass).nonemptyDirectSubclasses
-              .add(classEntry.getKey().toString());
+          this.classRecords.get(superClass).nonemptyDirectSubclasses.add(classEntry.getKey().toString());
         }
       }
 
       int count = 0;
       int countNoLabel = 0;
-      for (Entry<Integer, ClassRecord> classEntry : this.classRecords
-          .entrySet()) {
-        if (classEntry.getValue().subclassCount == 0
-            && classEntry.getValue().itemCount == 0) {
+      for (Entry<Integer, ClassRecord> classEntry : this.classRecords.entrySet()) {
+        if (classEntry.getValue().subclassCount == 0 && classEntry.getValue().itemCount == 0) {
           continue;
         }
 
@@ -937,10 +806,8 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
       }
       out.println("\n}");
 
-      System.out.println(" Serialized information for " + count
-          + " class items.");
-      System.out.println(" -- class items with missing label: "
-          + countNoLabel);
+      System.out.println(" Serialized information for " + count + " class items.");
+      System.out.println(" -- class items with missing label: " + countNoLabel);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -965,8 +832,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
 
   @Override
   public String getReport() {
-    return "Processed " + this.countEntities + " entities:\n"
-        + " * Property documents: " + this.propertyRecords.size()
+    return "Processed " + this.countEntities + " entities:\n" + " * Property documents: " + this.propertyRecords.size()
         + "\n" + " * Class documents: " + this.classRecords.size();
   }
 
@@ -976,8 +842,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
     try {
       // Make output directories for results
       createDirectory(resultDirectory);
-      resultDirectory = resultDirectory.resolve("wikidatawiki-"
-          + dateStamp);
+      resultDirectory = resultDirectory.resolve("wikidatawiki-" + dateStamp);
       createDirectory(resultDirectory);
 
       // Initialise processor object
@@ -990,8 +855,7 @@ public class SchemaUsageAnalyzer implements DumpProcessingAction {
   @Override
   public void close() {
     writeFinalReports();
-    try (PrintStream out = new PrintStream(openResultFileOuputStream(
-        resultDirectory, "statistics.json"))) {
+    try (PrintStream out = new PrintStream(openResultFileOuputStream(resultDirectory, "statistics.json"))) {
       out.println("{ ");
       writeStatisticsData(out);
       out.println(" \"dumpDate\": \"" + dateStamp + "\"");
