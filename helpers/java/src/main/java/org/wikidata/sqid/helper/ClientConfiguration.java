@@ -152,7 +152,8 @@ public class ClientConfiguration {
 
   static final Map<String, Class<? extends DumpProcessingAction>> KNOWN_ACTIONS = new HashMap<>();
   static {
-    KNOWN_ACTIONS.put("sqid", SchemaUsageAnalyzer.class);
+    KNOWN_ACTIONS.put("sqid-classes", ClassHierarchyAnalyzer.class);
+    KNOWN_ACTIONS.put("sqid-schema", SchemaUsageAnalyzer.class);
   }
 
   /**
