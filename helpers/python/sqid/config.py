@@ -8,10 +8,13 @@ GRID_ONCE = '-once'
 DUMP_PROCESS_MEMORY = '21g'
 STATISTICS_PROCESS_MEMORY = '2g'
 JAVA_BASEDIR = '/data/project/sqid/projects'
-JAR = 'org.wikidata.sqid.helper-0.10.0.jar'
+JAR = 'org.wikidata.sqid.helper-0.11.0.jar'
 JAVA_MEMORY = '5g'
-JAVA_ARGS = ['-Xmx{memory}'.format(memory=JAVA_MEMORY),
+JAVA_CLASS_ARGS = ['-Xmx{memory}'.format(memory=JAVA_MEMORY),
              '-jar', JAR,
-             '-a', 'sqid', '-n']
+             '-a', 'sqid-classes', '-n']
+JAVA_STATS_ARGS = ['-Xmx{memory}'.format(memory=JAVA_MEMORY),
+             '-jar', JAR,
+             '-a', 'sqid-schema', '-n']
 RESULTS_LOCATION = '/data/project/sqid/projects/results/wikidatawiki-{date}'
 RESULTS_NAMES = ['classes.json', 'properties.json', 'statistics.json']

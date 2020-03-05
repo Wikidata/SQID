@@ -1,6 +1,6 @@
 ---
 helper_path: ../java
-helper_version: 0.10.0
+helper_version: 0.11.0
 helper_output: target
 helper_jar: "{{ helper_output }}/org.wikidata.sqid.helper-{{ helper_version }}.jar"
 scripts_path: ../python

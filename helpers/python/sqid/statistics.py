@@ -145,7 +145,17 @@ def check_new_dump(script_path):
 
 def process_dump(script_path, dumpdate):
   """Generate statistics from a dump file. After success, move the statistics into place."""
-  job = ['java', *config.JAVA_ARGS]
+  job = ['java', *config.JAVA_CLASS_ARGS]
+  logger.debug("running process: `%s'", repr(job))
+
+  logger.info("Extracting classes from dump `%s'", dumpdate)
+  wd = os.getcwd()
+  os.chdir(config.JAVA_BASEDIR)
+  subprocess.run(job, check=True)
+  os.chdir(wd)
+  logger.info("Finished extracting classes from dump `%s'", dumpdate)
+
+  job = ['java', *config.JAVA_STATS_ARGS]
   logger.debug("running process: `%s'", repr(job))
 
   logger.info("Processing dump `%s'", dumpdate)
