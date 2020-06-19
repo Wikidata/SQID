@@ -20,7 +20,7 @@ function termsMap(terms: Terms,
 }
 
 function fallbackTermsMap(terms: Terms): TermsMap {
-  const lang = i18n.fallbackLocale
+  const lang = i18n.fallbackLocale.toString()
 
   if (!terms.has(lang)) {
     terms.set(lang, new Map<string, string>())

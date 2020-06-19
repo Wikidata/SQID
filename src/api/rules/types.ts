@@ -205,14 +205,14 @@ export function isSetLikeAtom(thing: Atom): thing is SpecifierAtom | SetAtom {
   return isSpecifierAtom(thing) || isSetAtom(thing)
 }
 
-export function isOpenSpecifier(thing: Annotation): thing is OpenSpecifier {
+export function isOpenSpecifier(thing: SpecifierTerm | Annotation): thing is OpenSpecifier {
   return thing.type === 'open-specifier'
 }
 
-export function isClosedSpecifier(thing: Annotation): thing is ClosedSpecifier {
+export function isClosedSpecifier(thing: SpecifierTerm | Annotation): thing is ClosedSpecifier {
   return thing.type === 'closed-specifier'
 }
 
-export function isSpecifier(thing: Annotation): thing is Specifier {
+export function isSpecifier(thing: SpecifierTerm | Annotation): thing is Specifier {
   return isOpenSpecifier(thing) || isClosedSpecifier(thing)
 }

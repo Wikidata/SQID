@@ -3,7 +3,7 @@ import { MARPL, Annotation, Argument, Assignment, Assignments, Atom, Dot,
          FunctionTerm, ObjectTerm, ParseResult, Placeholder, RelationalAtom,
          Rule, SetTerm, SetVariable, SimpleNamed, Specifier, SpecifierAtom, SpecifierTerm,
          SpecifierType, SpecifierExpressionType, isSetVariable, isSomeVariable, LiteralExpression,
-         isRelationalAtom, isSetLikeAtom, isClosedSpecifier, isSpecifier } from './types'
+         isRelationalAtom, isSetAtom, isClosedSpecifier, isSpecifier, isSpecifierAtom } from './types'
 import { verify } from './ast'
 
 type Language = P.TypedLanguage<MARPL>
@@ -339,16 +339,20 @@ function rewrite(ast: Rule) {
                 continue arguments
               }
             }
-          } else if (isSetLikeAtom(atom)) {
+          } else if (isSetAtom(atom)) {
             if (atom.set.name === name) {
               ast.head.annotation.arguments[arg].type = 'set-variable'
               continue arguments
             }
+          } else if (isSpecifierAtom(atom)) {
+            if (atom.set.name === name) {
+              ast.head.annotation.arguments[arg].type = 'set-variable'
+            }
 
-            if (isSpecifier(atom.set)) {
-              for (const assign of atom.set.assignments) {
+            if (isSpecifier(atom.specifier)) {
+              for (const assign of atom.specifier.assignments) {
                 if (assign.attribute.name === name ||
-                    ('name' in assign.value && assign.value.name === name)) {
+                  ('name' in assign.value && assign.value.name === name)) {
                   ast.head.annotation.arguments[arg].type = 'variable'
                   continue arguments
                 }
