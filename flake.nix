@@ -38,6 +38,13 @@
                 pkgs.nodePackages.vscode-html-languageserver-bin
                 pkgs.nodePackages.vue-cli
                 pkgs.bashInteractive
+                pkgs.cargo
+                pkgs.clippy
+                pkgs.rust-analyzer
+                pkgs.rustfmt
+                pkgs.rustc
+                pkgs.python36
+                pkgs.ansible
               ];
             };
       }
