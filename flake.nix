@@ -16,12 +16,14 @@
       url = "github:svanderburg/node2nix";
       flake = false;
     };
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { self, nixpkgs, flake-utils, node2nix, ... }@inputs:
+  outputs = { self, nixpkgs, flake-utils, node2nix, rust-overlay, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs { inherit system overlays; };
       in
       {
         devShell =
@@ -38,11 +40,8 @@
                 pkgs.nodePackages.vscode-html-languageserver-bin
                 pkgs.nodePackages.vue-cli
                 pkgs.bashInteractive
-                pkgs.cargo
-                pkgs.clippy
+                pkgs.rust-bin.stable.latest.default
                 pkgs.rust-analyzer
-                pkgs.rustfmt
-                pkgs.rustc
                 pkgs.python36
                 pkgs.ansible
               ];
