@@ -47,55 +47,188 @@ enum Type {
     TabularData,
 }
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
 struct PropertyRecord {
-    #[serde(rename = "l", default)]
+    #[serde(rename = "l")]
     label: Option<String>,
     #[serde(rename = "d")]
     datatype: Option<Type>,
-    #[serde(rename = "i", default)]
+    #[serde(rename = "i")]
     in_items: usize,
-    #[serde(rename = "s", default)]
+    #[serde(rename = "s")]
     in_statements: usize,
-    #[serde(rename = "q", default)]
+    #[serde(rename = "q")]
     in_qualifiers: usize,
-    #[serde(rename = "e", default)]
+    #[serde(rename = "e")]
     in_references: usize,
-    #[serde(rename = "u", default)]
+    #[serde(rename = "u")]
     url_pattern: Option<String>,
-    #[serde(rename = "pc", default)]
+    #[serde(rename = "pc")]
     instance_of: Vec<Class>,
-    #[serde(rename = "qs", default)]
+    #[serde(rename = "qs")]
     with_qualifiers: HashMap<Qualifier, usize>,
-    #[serde(rename = "r", default)]
+    #[serde(rename = "r")]
     related_properties: HashMap<Property, usize>,
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 struct Properties(HashMap<Property, PropertyRecord>);
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
 struct ClassRecord {
-    #[serde(rename = "l", default)]
+    #[serde(rename = "l")]
     label: Option<String>,
-    #[serde(rename = "i", default)]
+    #[serde(rename = "i")]
     direct_instances: usize,
-    #[serde(rename = "s", default)]
+    #[serde(rename = "s")]
     direct_subclasses: usize,
-    #[serde(rename = "ai", default)]
+    #[serde(rename = "ai")]
     all_instances: usize,
-    #[serde(rename = "as", default)]
+    #[serde(rename = "as")]
     all_subclassces: usize,
-    #[serde(rename = "sc", default)]
+    #[serde(rename = "sc")]
     superclasses: Vec<Class>,
-    #[serde(rename = "sb", default)]
+    #[serde(rename = "sb")]
     non_empty_superclasses: Vec<Class>,
+    #[serde(rename = "r")]
     related_properties: HashMap<Property, usize>,
+}
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+struct Classes(HashMap<Class, ClassRecord>);
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Statistics {
+    #[serde(rename = "propertyUpdate", with = "formats::timestamp")]
+    property_update: DateTime<Utc>,
+    #[serde(rename = "classUpdate", with = "formats::timestamp")]
+    class_update: DateTime<Utc>,
+    #[serde(rename = "dumpDate", with = "formats::date")]
+    dump_date: Date<Utc>,
+}
+
+pub(crate) mod formats {
+    use super::*;
+    use serde::{Deserializer, Serializer};
+
+    pub(crate) mod timestamp {
+        use super::*;
+        use chrono::TimeZone;
+
+        const FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
+
+        pub fn serialize<S>(date: &DateTime<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(&format!("{}", date.format(FORMAT)))
+        }
+
+        pub fn deserialize<'de, D>(deserializer: D) -> Result<DateTime<Utc>, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            Utc.datetime_from_str(&String::deserialize(deserializer)?, FORMAT)
+                .map_err(serde::de::Error::custom)
+        }
+
+        #[cfg(test)]
+        mod test {
+            use chrono::NaiveDate;
+            use test_env_log::test;
+
+            use super::*;
+
+            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+            struct Data(#[serde(with = "super")] DateTime<Utc>);
+
+            const TEXT: &str = r#""2016-04-19T08:23:40""#;
+
+            #[test]
+            fn test_deserialize() {
+                let date =
+                    Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
+                let result: Result<Data, _> = serde_json::from_str(TEXT);
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), Data(date));
+            }
+
+            #[test]
+            fn test_serialize() {
+                let date =
+                    Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
+                let result = serde_json::to_string(&Data(date));
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), TEXT);
+            }
+        }
+    }
+
+    pub(crate) mod date {
+        use chrono::NaiveDate;
+
+        use super::*;
+
+        const FORMAT: &str = "%Y%m%d";
+
+        pub fn serialize<S>(date: &Date<Utc>, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            serializer.serialize_str(&format!("{}", date.format(FORMAT)))
+        }
+
+        pub fn deserialize<'de, D>(deserializer: D) -> Result<Date<Utc>, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            NaiveDate::parse_from_str(&String::deserialize(deserializer)?, FORMAT)
+                .map(|date| Date::from_utc(date, Utc))
+                .map_err(serde::de::Error::custom)
+        }
+
+        #[cfg(test)]
+        mod test {
+            use chrono::{NaiveDate, TimeZone};
+            use test_env_log::test;
+
+            use super::*;
+
+            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+            struct Data(#[serde(with = "super")] Date<Utc>);
+
+            const TEXT: &str = r#""20160419""#;
+
+            #[test]
+            fn test_deserialize() {
+                let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
+                let result = serde_json::from_str::<Data>(TEXT);
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), Data(date));
+            }
+
+            #[test]
+            fn test_serialize() {
+                let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
+                let result = serde_json::to_string(&Data(date));
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), TEXT);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod test {
     use std::{fs::File, io::Read};
+    use test_env_log::test;
 
     use super::*;
 
@@ -113,7 +246,7 @@ mod test {
                  "r": { "214": 0, "1265": 1422, "131": 0, "2530": 21 }
                }"#,
         );
-        println!("{:?}", property);
+        log::debug!("{:?}", property);
 
         let mut qualifiers = HashMap::new();
         qualifiers.insert(Qualifier::new(582), 1);
@@ -153,7 +286,33 @@ mod test {
             .is_ok());
 
         let properties: Result<Properties, _> = serde_json::from_str(&data);
-        println!("{:?}", properties);
+        log::debug!("{:?}", properties);
         assert!(properties.is_ok());
+    }
+
+    #[test]
+    fn deserialise_example_classes() {
+        let mut data = String::new();
+        assert!(File::open("../../data/exampleData/classes.json")
+            .unwrap()
+            .read_to_string(&mut data)
+            .is_ok());
+
+        let classes: Result<Classes, _> = serde_json::from_str(&data);
+        log::debug!("{:?}", classes);
+        assert!(classes.is_ok());
+    }
+
+    #[test]
+    fn deserialise_example_statistics() {
+        let mut data = String::new();
+        assert!(File::open("../../data/exampleData/statistics.json")
+            .unwrap()
+            .read_to_string(&mut data)
+            .is_ok());
+
+        let statistics: Result<Statistics, _> = serde_json::from_str(&data);
+        log::debug!("{:?}", statistics);
+        assert!(statistics.is_ok());
     }
 }

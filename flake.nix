@@ -42,8 +42,11 @@
                 pkgs.bashInteractive
                 pkgs.rust-bin.stable.latest.default
                 pkgs.rust-analyzer
+                pkgs.cargo-audit
+                pkgs.cargo-license
                 pkgs.python36
                 pkgs.ansible
+                pkgs.openssl
               ];
             };
       }
