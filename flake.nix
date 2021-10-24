@@ -47,6 +47,7 @@
                 pkgs.python36
                 pkgs.ansible
                 pkgs.openssl
+                pkgs.pkg-config
               ];
             };
       }
