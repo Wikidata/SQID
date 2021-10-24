@@ -1,10 +1,17 @@
 use std::{path::PathBuf, str::FromStr};
 
+use anyhow::Result;
 use clap::{App, Arg};
 use env_logger::Env;
-use log;
 use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
+use types::Settings;
 
+use crate::properties::update_property_records;
+
+mod properties;
+mod types;
+
+/// Possible actions the tool can perform.
 #[derive(Debug, PartialEq, Eq, EnumIter, EnumString, IntoStaticStr)]
 #[strum(serialize_all = "kebab-case")]
 enum Action {
@@ -15,6 +22,16 @@ enum Action {
     ProcessDump,
 }
 
+impl Action {
+    fn perform(&self, settings: &Settings) -> Result<()> {
+        match self {
+            Self::Properties => update_property_records(settings),
+            _ => todo!("implement actions"),
+        }
+    }
+}
+
+/// Log levels implemented by the tool.
 #[derive(Debug, PartialEq, Eq, EnumIter, EnumString, EnumProperty, IntoStaticStr)]
 #[strum(serialize_all = "UPPERCASE")]
 enum LogLevel {
@@ -121,6 +138,26 @@ fn main() {
 
     if matches.is_present("no-derived") && only == Some(Action::Derived) {
         log::error!("--no-derived and --only=derived are mutually exclusive");
+        std::process::exit(1);
+    }
+
+    let settings = Settings::new(matches.value_of("path").expect("path should be set"));
+    let state = match only {
+        Some(action) => action.perform(&settings),
+        None => Action::iter().try_for_each(|action| match action {
+            Action::Derived => {
+                if matches.is_present("no-derived") {
+                    Ok(())
+                } else {
+                    action.perform(&settings)
+                }
+            }
+            _ => action.perform(&settings),
+        }),
+    };
+
+    if state.is_err() {
+        log::error!("An error occurred. Exiting.");
         std::process::exit(1);
     }
 }
