@@ -9,6 +9,7 @@ use types::Settings;
 use crate::properties::update_property_records;
 
 mod properties;
+mod sparql;
 mod types;
 
 /// Possible actions the tool can perform.

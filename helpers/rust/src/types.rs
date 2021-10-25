@@ -1,9 +1,11 @@
+use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, path::PathBuf};
+use strum::{Display, EnumString};
 
 mod ids;
 
-use ids::*;
+pub use ids::{Entity, Item, Property, Qualifier, Reference};
 
 /// Holds settings given on the command line, particularly the path to
 /// the data directories.
@@ -26,30 +28,86 @@ struct PrefixKey {}
 #[derive(Debug)]
 enum PropertyUsageType {}
 
-#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize)]
-enum Type {
+#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString)]
+pub enum Type {
+    #[strum(
+        to_string = "WikibaseItem",
+        serialize = "http://wikiba.se/ontology#WikibaseItem"
+    )]
     WikibaseItem,
+    #[strum(
+        to_string = "WikibaseProperty",
+        serialize = "http://wikiba.se/ontology#WikibaseProperty"
+    )]
     WikibaseProperty,
+    #[strum(
+        to_string = "WikibaseLexeme",
+        serialize = "http://wikiba.se/ontology#WikibaseLexeme"
+    )]
     WikibaseLexeme,
+    #[strum(
+        to_string = "WikibaseForm",
+        serialize = "http://wikiba.se/ontology#WikibaseForm"
+    )]
     WikibaseForm,
+    #[strum(
+        to_string = "WikibaseSense",
+        serialize = "http://wikiba.se/ontology#WikibaseSense"
+    )]
     WikibaseSense,
+    #[strum(
+        to_string = "WikibaseMediaInfo",
+        serialize = "http://wikiba.se/ontology#WikibaseMediaInfo"
+    )]
     WikibaseMediaInfo,
+    #[strum(to_string = "String", serialize = "http://wikiba.se/ontology#String")]
     String,
+    #[strum(to_string = "Url", serialize = "http://wikiba.se/ontology#Url")]
     Url,
+    #[strum(
+        to_string = "CommonsMedia",
+        serialize = "http://wikiba.se/ontology#CommonsMedia"
+    )]
     CommonsMedia,
+    #[strum(to_string = "Time", serialize = "http://wikiba.se/ontology#Time")]
     Time,
+    #[strum(
+        to_string = "GlobeCoordinate",
+        serialize = "http://wikiba.se/ontology#GlobeCoordinate"
+    )]
     GlobeCoordinate,
+    #[strum(
+        to_string = "Quantity",
+        serialize = "http://wikiba.se/ontology#Quantity"
+    )]
     Quantity,
+    #[strum(
+        to_string = "Monolingualtext",
+        serialize = "http://wikiba.se/ontology#Monolingualtext"
+    )]
     Monolingualtext,
+    #[strum(
+        to_string = "ExternalId",
+        serialize = "http://wikiba.se/ontology#ExternalId"
+    )]
     ExternalId,
+    #[strum(to_string = "Math", serialize = "http://wikiba.se/ontology#Math")]
     Math,
+    #[strum(
+        to_string = "GeoShape",
+        serialize = "http://wikiba.se/ontology#GeoShape"
+    )]
     GeoShape,
+    #[strum(
+        to_string = "TabularData",
+        serialize = "http://wikiba.se/ontology#TabularData"
+    )]
     TabularData,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
-struct PropertyRecord {
+pub struct PropertyRecord {
     #[serde(rename = "l")]
     label: Option<String>,
     #[serde(rename = "d")]
@@ -65,7 +123,7 @@ struct PropertyRecord {
     #[serde(rename = "u")]
     url_pattern: Option<String>,
     #[serde(rename = "pc")]
-    instance_of: Vec<Class>,
+    instance_of: Vec<Item>,
     #[serde(rename = "qs")]
     with_qualifiers: HashMap<Qualifier, usize>,
     #[serde(rename = "r")]
@@ -73,11 +131,11 @@ struct PropertyRecord {
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
-struct Properties(HashMap<Property, PropertyRecord>);
+pub struct Properties(HashMap<Property, PropertyRecord>);
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
-struct ClassRecord {
+pub struct ClassRecord {
     #[serde(rename = "l")]
     label: Option<String>,
     #[serde(rename = "i")]
@@ -89,25 +147,58 @@ struct ClassRecord {
     #[serde(rename = "as")]
     all_subclassces: usize,
     #[serde(rename = "sc")]
-    superclasses: Vec<Class>,
+    superclasses: Vec<Item>,
     #[serde(rename = "sb")]
-    non_empty_superclasses: Vec<Class>,
+    non_empty_superclasses: Vec<Item>,
     #[serde(rename = "r")]
     related_properties: HashMap<Property, usize>,
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
-struct Classes(HashMap<Class, ClassRecord>);
+pub struct Classes(HashMap<Item, ClassRecord>);
+
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct EntityStatistics {
+    #[serde(rename = "cDesc")]
+    descriptions: usize,
+    #[serde(rename = "cStmts")]
+    statements: usize,
+    #[serde(rename = "cLabels")]
+    labels: usize,
+    #[serde(rename = "cAliases")]
+    aliases: usize,
+    #[serde(rename = "c")]
+    count: usize,
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct SiteRecord {
+    #[serde(rename = "u")]
+    url_pattern: Option<String>,
+    #[serde(rename = "g")]
+    group: Option<String>,
+    #[serde(rename = "l")]
+    language: Option<String>,
+    #[serde(rename = "i")]
+    items: usize,
+}
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
-struct Statistics {
+pub struct Statistics {
     #[serde(rename = "propertyUpdate", with = "formats::timestamp")]
     property_update: DateTime<Utc>,
     #[serde(rename = "classUpdate", with = "formats::timestamp")]
     class_update: DateTime<Utc>,
     #[serde(rename = "dumpDate", with = "formats::date")]
     dump_date: Date<Utc>,
+    #[serde(rename = "propertyStatistics")]
+    properties: EntityStatistics,
+    #[serde(rename = "itemStatistics")]
+    items: EntityStatistics,
+    sites: HashMap<String, SiteRecord>,
 }
 
 pub(crate) mod formats {
@@ -152,7 +243,7 @@ pub(crate) mod formats {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result: Result<Data, _> = serde_json::from_str(TEXT);
-                log::debug!("{:?}", result);
+                log::debug!(target: "types::formats::timestamp", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), Data(date));
             }
@@ -162,7 +253,7 @@ pub(crate) mod formats {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result = serde_json::to_string(&Data(date));
-                log::debug!("{:?}", result);
+                log::debug!(target: "types::formats::timestamp", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), TEXT);
             }
@@ -208,7 +299,7 @@ pub(crate) mod formats {
             fn test_deserialize() {
                 let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
                 let result = serde_json::from_str::<Data>(TEXT);
-                log::debug!("{:?}", result);
+                log::debug!(target: "types::formats::date", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), Data(date));
             }
@@ -217,7 +308,7 @@ pub(crate) mod formats {
             fn test_serialize() {
                 let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
                 let result = serde_json::to_string(&Data(date));
-                log::debug!("{:?}", result);
+                log::debug!(target: "types::formats::date", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), TEXT);
             }
@@ -246,7 +337,7 @@ mod test {
                  "r": { "214": 0, "1265": 1422, "131": 0, "2530": 21 }
                }"#,
         );
-        log::debug!("{:?}", property);
+        log::debug!(target: "types", "{:?}", property);
 
         let mut qualifiers = HashMap::new();
         qualifiers.insert(Qualifier::new(582), 1);
@@ -270,7 +361,7 @@ mod test {
                 in_qualifiers: 5,
                 in_references: 0,
                 url_pattern: None,
-                instance_of: vec![Class::new(22965162)],
+                instance_of: vec![Item::new(22965162)],
                 with_qualifiers: qualifiers,
                 related_properties: related,
             }
@@ -286,7 +377,7 @@ mod test {
             .is_ok());
 
         let properties: Result<Properties, _> = serde_json::from_str(&data);
-        log::debug!("{:?}", properties);
+        log::debug!(target: "types", "{:?}", properties);
         assert!(properties.is_ok());
     }
 
@@ -299,7 +390,7 @@ mod test {
             .is_ok());
 
         let classes: Result<Classes, _> = serde_json::from_str(&data);
-        log::debug!("{:?}", classes);
+        log::debug!(target: "types", "{:?}", classes);
         assert!(classes.is_ok());
     }
 
@@ -312,7 +403,7 @@ mod test {
             .is_ok());
 
         let statistics: Result<Statistics, _> = serde_json::from_str(&data);
-        log::debug!("{:?}", statistics);
+        log::debug!(target: "types", "{:?}", statistics);
         assert!(statistics.is_ok());
     }
 }
