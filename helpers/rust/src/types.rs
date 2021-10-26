@@ -1,7 +1,7 @@
 use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, path::PathBuf};
-use strum::{Display, EnumString};
+use strum::{Display, EnumIter, EnumString};
 
 mod ids;
 
@@ -28,80 +28,97 @@ struct PrefixKey {}
 #[derive(Debug)]
 enum PropertyUsageType {}
 
-#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString)]
+#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString, EnumIter)]
 pub enum Type {
     #[strum(
         to_string = "WikibaseItem",
         serialize = "http://wikiba.se/ontology#WikibaseItem"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#WikibaseItem")]
     WikibaseItem,
     #[strum(
         to_string = "WikibaseProperty",
         serialize = "http://wikiba.se/ontology#WikibaseProperty"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#WikibaseProperty")]
     WikibaseProperty,
     #[strum(
         to_string = "WikibaseLexeme",
         serialize = "http://wikiba.se/ontology#WikibaseLexeme"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#WikibaseLexeme")]
     WikibaseLexeme,
     #[strum(
         to_string = "WikibaseForm",
         serialize = "http://wikiba.se/ontology#WikibaseForm"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#WikibaseForm")]
     WikibaseForm,
     #[strum(
         to_string = "WikibaseSense",
         serialize = "http://wikiba.se/ontology#WikibaseSense"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#WikibaseSense")]
     WikibaseSense,
     #[strum(
         to_string = "WikibaseMediaInfo",
         serialize = "http://wikiba.se/ontology#WikibaseMediaInfo"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#WikibaseMediaInfo")]
     WikibaseMediaInfo,
     #[strum(to_string = "String", serialize = "http://wikiba.se/ontology#String")]
+    #[serde(alias = "http://wikiba.se/ontology#String")]
     String,
     #[strum(to_string = "Url", serialize = "http://wikiba.se/ontology#Url")]
+    #[serde(alias = "http://wikiba.se/ontology#Url")]
     Url,
     #[strum(
         to_string = "CommonsMedia",
         serialize = "http://wikiba.se/ontology#CommonsMedia"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#CommonsMedia")]
     CommonsMedia,
     #[strum(to_string = "Time", serialize = "http://wikiba.se/ontology#Time")]
+    #[serde(alias = "http://wikiba.se/ontology#Time")]
     Time,
     #[strum(
         to_string = "GlobeCoordinate",
         serialize = "http://wikiba.se/ontology#GlobeCoordinate"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#GlobeCoordinate")]
     GlobeCoordinate,
     #[strum(
         to_string = "Quantity",
         serialize = "http://wikiba.se/ontology#Quantity"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#Quantity")]
     Quantity,
     #[strum(
         to_string = "Monolingualtext",
         serialize = "http://wikiba.se/ontology#Monolingualtext"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#Monolingualtext")]
     Monolingualtext,
     #[strum(
         to_string = "ExternalId",
         serialize = "http://wikiba.se/ontology#ExternalId"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#ExternalId")]
     ExternalId,
     #[strum(to_string = "Math", serialize = "http://wikiba.se/ontology#Math")]
+    #[serde(alias = "http://wikiba.se/ontology#Math")]
     Math,
     #[strum(
         to_string = "GeoShape",
         serialize = "http://wikiba.se/ontology#GeoShape"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#GeoShape")]
     GeoShape,
     #[strum(
         to_string = "TabularData",
         serialize = "http://wikiba.se/ontology#TabularData"
     )]
+    #[serde(alias = "http://wikiba.se/ontology#TabularData")]
     TabularData,
 }
 
@@ -199,6 +216,34 @@ pub struct Statistics {
     #[serde(rename = "itemStatistics")]
     items: EntityStatistics,
     sites: HashMap<String, SiteRecord>,
+}
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct PropertyLabelAndType {
+    #[serde(rename = "id")]
+    property: Entity,
+    #[serde(rename = "label")]
+    label: String,
+    #[serde(rename = "type")]
+    datatype: Type,
+}
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct PropertyUsage {
+    #[serde(rename = "p")]
+    property: Property,
+    #[serde(rename = "c")]
+    count: usize,
+}
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub struct ClassLabelAndUsage {
+    #[serde(rename = "id")]
+    class: Item,
+    #[serde(rename = "label")]
+    label: String,
+    #[serde(rename = "c")]
+    usage: Option<usize>,
 }
 
 pub(crate) mod formats {
@@ -318,7 +363,9 @@ pub(crate) mod formats {
 
 #[cfg(test)]
 mod test {
+    use indoc::indoc;
     use std::{fs::File, io::Read};
+    use strum::IntoEnumIterator;
     use test_env_log::test;
 
     use super::*;
@@ -405,5 +452,27 @@ mod test {
         let statistics: Result<Statistics, _> = serde_json::from_str(&data);
         log::debug!(target: "types", "{:?}", statistics);
         assert!(statistics.is_ok());
+    }
+
+    #[test]
+    fn deserialise_type() {
+        for variant in Type::iter() {
+            let string = format!(r#""http://wikiba.se/ontology#{}""#, variant);
+            log::trace!(target: "types", "testing {:?} {:?}", variant, string);
+            assert_eq!(serde_json::from_str::<Type>(&string).unwrap(), variant);
+        }
+    }
+
+    #[test]
+    fn deserialise_property_label_and_type() {
+        let data: &str = indoc! {r#"
+          id,label,type
+          http://www.wikidata.org/entity/P4774,biological phase,http://wikiba.se/ontology#WikibaseItem
+          http://www.wikidata.org/entity/P4773,MobyGames company ID,http://wikiba.se/ontology#ExternalId
+        "#};
+
+        let mut rdr = csv::Reader::from_reader(data.as_bytes());
+        let result: Vec<PropertyLabelAndType> = rdr.deserialize().flatten().collect();
+        assert!(result.len() == 2);
     }
 }

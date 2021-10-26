@@ -1,5 +1,6 @@
 use std::num::ParseIntError;
 
+use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
 const ENTITY: &str = "http://www.wikidata.org/entity/";
@@ -34,14 +35,26 @@ impl Entity {
             kind: EntityKind::Property,
         }
     }
+
+    pub fn as_item(&self) -> Option<Item> {
+        match self.kind {
+            EntityKind::Item => Some(Item::new(self.id)),
+            _ => None,
+        }
+    }
+
+    pub fn as_property(&self) -> Option<Property> {
+        match self.kind {
+            EntityKind::Property => Some(Property::new(self.id)),
+            _ => None,
+        }
+    }
 }
 
 impl TryFrom<String> for Entity {
     type Error = anyhow::Error;
 
-    fn try_from(str: String) -> anyhow::Result<Self> {
-        use anyhow::Context;
-
+    fn try_from(str: String) -> Result<Self> {
         let item = format!("{}Q", ENTITY);
         let prop = format!("{}P", ENTITY);
 
@@ -50,7 +63,7 @@ impl TryFrom<String> for Entity {
         } else if let Some(pid) = str.strip_prefix(&prop) {
             Ok(Self::property(pid.parse().context("Failed to parse PID")?))
         } else {
-            anyhow::bail!("Invalid entity prefix")
+            Err(anyhow!("Invalid entity prefix"))
         }
     }
 }

@@ -6,8 +6,9 @@ use env_logger::Env;
 use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
 use types::Settings;
 
-use crate::properties::update_property_records;
+use crate::{classes::update_class_records, properties::update_property_records};
 
+mod classes;
 mod properties;
 mod sparql;
 mod types;
@@ -27,6 +28,7 @@ impl Action {
     fn perform(&self, settings: &Settings) -> Result<()> {
         match self {
             Self::Properties => update_property_records(settings),
+            Self::Classes => update_class_records(settings),
             _ => todo!("implement actions"),
         }
     }
