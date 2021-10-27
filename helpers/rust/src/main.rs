@@ -132,7 +132,7 @@ fn main() {
             .default_filter_or(loglevel.get_str("level").expect("level should be defined")),
     )
     .init();
-    log::debug!("Log level is {:?}", loglevel);
+    log::debug!("Log level is {:?} ({:?})", loglevel, log::max_level());
 
     let only = matches
         .value_of("only")

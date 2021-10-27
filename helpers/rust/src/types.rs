@@ -144,8 +144,49 @@ pub struct PropertyRecord {
     related_properties: HashMap<Property, usize>,
 }
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+impl PropertyRecord {
+    pub fn update_label_and_type(&mut self, label: String, datatype: Type) {
+        self.label = Some(label);
+        self.datatype = Some(datatype);
+    }
+
+    pub fn update_usage(&mut self, usage: &PropertyUsage) {
+        match usage.property {
+            PropertyUsageType::Statement(_) => self.in_statements += usage.count,
+            PropertyUsageType::Qualifier(_) => self.in_qualifiers += usage.count,
+            PropertyUsageType::Reference(_) => self.in_references += usage.count,
+        }
+    }
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Properties(HashMap<Property, PropertyRecord>);
+
+impl Properties {
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    pub(crate) fn update_labels_and_types<I: Iterator<Item = PropertyLabelAndType>>(
+        &mut self,
+        iterator: I,
+    ) {
+        iterator.for_each(|item| {
+            item.property.as_property().and_then(|property| {
+                let entry = self.0.entry(property).or_default();
+                entry.update_label_and_type(item.label, item.datatype);
+                Some(())
+            });
+        });
+    }
+
+    pub(crate) fn update_usage<I: Iterator<Item = PropertyUsage>>(&mut self, iterator: I) {
+        iterator.for_each(|usage| {
+            let entry = self.0.entry(usage.property()).or_default();
+            entry.update_usage(&usage);
+        });
+    }
+}
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
@@ -233,12 +274,28 @@ pub enum PropertyUsageType {
     Reference(Reference),
 }
 
+impl PropertyUsageType {
+    pub fn property(&self) -> Property {
+        match self {
+            Self::Statement(property) => *property,
+            Self::Qualifier(qualifier) => qualifier.to_property(),
+            Self::Reference(reference) => reference.to_property(),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PropertyUsage {
     #[serde(rename = "p")]
     property: PropertyUsageType,
     #[serde(rename = "c")]
     count: usize,
+}
+
+impl PropertyUsage {
+    pub fn property(&self) -> Property {
+        self.property.property()
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -463,7 +520,7 @@ mod test {
     fn deserialise_type() {
         for variant in Type::iter() {
             let string = format!(r#""http://wikiba.se/ontology#{}""#, variant);
-            log::trace!(target: "sqid::types", "testing {:?} {:?}", variant, string);
+            log::debug!(target: "sqid::types", "testing {:?} {:?}", variant, string);
             assert_eq!(serde_json::from_str::<Type>(&string).unwrap(), variant);
         }
     }

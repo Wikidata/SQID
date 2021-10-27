@@ -8,13 +8,13 @@ const PROPERTY: &str = "http://www.wikidata.org/prop/";
 const QUALIFIER: &str = "http://www.wikidata.org/prop/qualifier/";
 const REFERENCE: &str = "http://www.wikidata.org/prop/reference/";
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum EntityKind {
     Item,
     Property,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Entity {
     id: u64,
@@ -95,7 +95,7 @@ impl From<Property> for Entity {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Item(pub(crate) u64);
 
@@ -129,7 +129,7 @@ impl From<u64> for Item {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Property(pub(crate) u64);
 
@@ -163,13 +163,17 @@ impl From<u64> for Property {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Qualifier(pub(crate) u64);
 
 impl Qualifier {
     pub fn new(id: u64) -> Self {
         Self(id)
+    }
+
+    pub(crate) fn to_property(&self) -> Property {
+        Property(self.0)
     }
 }
 
@@ -197,13 +201,17 @@ impl From<u64> for Qualifier {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Reference(pub(crate) u64);
 
 impl Reference {
     pub fn new(id: u64) -> Self {
         Self(id)
+    }
+
+    pub(crate) fn to_property(&self) -> Property {
+        Property(self.0)
     }
 }
 

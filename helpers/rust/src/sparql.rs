@@ -46,8 +46,7 @@ pub fn properties() -> Result<Vec<PropertyLabelAndType>> {
       }"#})?;
 
     let mut reader = csv::Reader::from_reader(response);
-    let result = reader.deserialize().flatten().collect();
-    Ok(result)
+    Ok(reader.deserialize().flatten().collect())
 }
 
 pub fn property_usage() -> Result<Vec<PropertyUsage>> {
