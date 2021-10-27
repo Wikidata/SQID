@@ -9,7 +9,7 @@ pub const USER_AGENT: &str = "SQID/2.0 (https://github.com/Wikidata/SQID)";
 pub const TOOL_BANNER: &str = "#TOOL:SQID Rust Helper\n";
 
 pub(crate) fn query(query: &str) -> Result<Response> {
-    log::trace!(target: "sparql", "query {:?}", query);
+    log::trace!(target: "sqid::sparql", "query {:?}", query);
     let client = Client::builder()
         .timeout(None)
         .user_agent(USER_AGENT)
@@ -24,7 +24,7 @@ pub(crate) fn query(query: &str) -> Result<Response> {
     let response = client
         .execute(request)
         .context("Failed to perform SPARQL query");
-    log::trace!(target: "sparql", "query {:?}, got response {:?}", query, response);
+    log::trace!(target: "sqid::sparql", "query {:?}, got response {:?}", query, response);
     response
 }
 
@@ -127,11 +127,11 @@ mod test {
                                  } ORDER BY ASC(?id)"#});
         assert!(response.is_ok());
         let response = response.unwrap();
-        log::debug!(target: "sparql", "response: {}", response.status());
+        log::debug!(target: "sqid::sparql", "response: {}", response.status());
         assert_eq!(response.status(), 200);
         let mut reader = csv::Reader::from_reader(response);
         let result: Vec<Result> = reader.deserialize().flatten().collect();
-        log::debug!(target: "sparql", "response: {:?}", result);
+        log::debug!(target: "sqid::sparql", "response: {:?}", result);
         assert_eq!(
             result,
             vec![

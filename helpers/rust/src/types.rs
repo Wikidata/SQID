@@ -25,9 +25,6 @@ impl Settings {
 #[derive(Debug)]
 struct PrefixKey {}
 
-#[derive(Debug)]
-enum PropertyUsageType {}
-
 #[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString, EnumIter)]
 pub enum Type {
     #[strum(
@@ -229,9 +226,17 @@ pub struct PropertyLabelAndType {
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum PropertyUsageType {
+    Statement(Property),
+    Qualifier(Qualifier),
+    Reference(Reference),
+}
+
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PropertyUsage {
     #[serde(rename = "p")]
-    property: Property,
+    property: PropertyUsageType,
     #[serde(rename = "c")]
     count: usize,
 }
@@ -288,7 +293,7 @@ pub(crate) mod formats {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result: Result<Data, _> = serde_json::from_str(TEXT);
-                log::debug!(target: "types::formats::timestamp", "{:?}", result);
+                log::debug!(target: "sqid::types::formats::timestamp", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), Data(date));
             }
@@ -298,7 +303,7 @@ pub(crate) mod formats {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result = serde_json::to_string(&Data(date));
-                log::debug!(target: "types::formats::timestamp", "{:?}", result);
+                log::debug!(target: "sqid::types::formats::timestamp", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), TEXT);
             }
@@ -344,7 +349,7 @@ pub(crate) mod formats {
             fn test_deserialize() {
                 let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
                 let result = serde_json::from_str::<Data>(TEXT);
-                log::debug!(target: "types::formats::date", "{:?}", result);
+                log::debug!(target: "sqid::types::formats::date", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), Data(date));
             }
@@ -353,7 +358,7 @@ pub(crate) mod formats {
             fn test_serialize() {
                 let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
                 let result = serde_json::to_string(&Data(date));
-                log::debug!(target: "types::formats::date", "{:?}", result);
+                log::debug!(target: "sqid::types::formats::date", "{:?}", result);
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), TEXT);
             }
@@ -384,7 +389,7 @@ mod test {
                  "r": { "214": 0, "1265": 1422, "131": 0, "2530": 21 }
                }"#,
         );
-        log::debug!(target: "types", "{:?}", property);
+        log::debug!(target: "sqid::types", "{:?}", property);
 
         let mut qualifiers = HashMap::new();
         qualifiers.insert(Qualifier::new(582), 1);
@@ -424,7 +429,7 @@ mod test {
             .is_ok());
 
         let properties: Result<Properties, _> = serde_json::from_str(&data);
-        log::debug!(target: "types", "{:?}", properties);
+        log::debug!(target: "sqid::types", "{:?}", properties);
         assert!(properties.is_ok());
     }
 
@@ -437,7 +442,7 @@ mod test {
             .is_ok());
 
         let classes: Result<Classes, _> = serde_json::from_str(&data);
-        log::debug!(target: "types", "{:?}", classes);
+        log::debug!(target: "sqid::types", "{:?}", classes);
         assert!(classes.is_ok());
     }
 
@@ -450,7 +455,7 @@ mod test {
             .is_ok());
 
         let statistics: Result<Statistics, _> = serde_json::from_str(&data);
-        log::debug!(target: "types", "{:?}", statistics);
+        log::debug!(target: "sqid::types", "{:?}", statistics);
         assert!(statistics.is_ok());
     }
 
@@ -458,7 +463,7 @@ mod test {
     fn deserialise_type() {
         for variant in Type::iter() {
             let string = format!(r#""http://wikiba.se/ontology#{}""#, variant);
-            log::trace!(target: "types", "testing {:?} {:?}", variant, string);
+            log::trace!(target: "sqid::types", "testing {:?} {:?}", variant, string);
             assert_eq!(serde_json::from_str::<Type>(&string).unwrap(), variant);
         }
     }
@@ -471,8 +476,37 @@ mod test {
           http://www.wikidata.org/entity/P4773,MobyGames company ID,http://wikiba.se/ontology#ExternalId
         "#};
 
-        let mut rdr = csv::Reader::from_reader(data.as_bytes());
-        let result: Vec<PropertyLabelAndType> = rdr.deserialize().flatten().collect();
-        assert!(result.len() == 2);
+        let mut reader = csv::Reader::from_reader(data.as_bytes());
+        let result: Vec<Result<PropertyLabelAndType, _>> = reader.deserialize().collect();
+        assert!(result.iter().flatten().count() == 2);
+    }
+
+    #[test]
+    fn deserialise_property_usage() {
+        let data: &str = indoc! { r#"
+          p,c
+          http://www.wikidata.org/prop/P279,3210992
+          http://www.wikidata.org/prop/statement/P279,3210983
+          http://www.wikidata.org/prop/direct/P279,3209980
+          http://www.wikidata.org/prop/qualifier/P279,174
+          http://www.wikidata.org/prop/reference/P279,9"#};
+        let mut reader = csv::Reader::from_reader(data.as_bytes());
+        let usage: Vec<Result<PropertyUsage, _>> = reader.deserialize().collect();
+        usage
+            .iter()
+            .for_each(|result| log::debug!(target: "sqid::types", "result: {:?}", result));
+
+        log::debug!(target: "sqid::types", "{:?}", serde_json::from_str::<PropertyUsage>(r#"{"p": "http://www.wikidata.org/prop/P279", "c": 3210992}"#));
+        log::debug!(target: "sqid::types", "{:?}", serde_json::from_str::<PropertyUsage>(r#"{"p": "http://www.wikidata.org/prop/qualifier/P279", "c": 3210992}"#));
+        log::debug!(target: "sqid::types", "{:?}", serde_json::from_str::<PropertyUsage>(r#"{"p": "http://www.wikidata.org/prop/reference/P279", "c": 3210992}"#));
+
+        let mut reader = csv::Reader::from_reader(data.as_bytes());
+        let headers = reader.headers().unwrap().clone();
+        reader.into_records().for_each(|record| {
+            log::debug!(target: "sqid::types", "record: {:?}", record);
+            log::debug!(target: "sqid::types", "record: {:?}", record.unwrap().deserialize::<PropertyUsage>(Some(&headers)));
+        });
+
+        assert!(usage.iter().flatten().count() == 3);
     }
 }
