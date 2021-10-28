@@ -1,6 +1,6 @@
 use crate::types::Settings;
 use crate::{sparql, types::Properties};
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
     log::info!(target: "sqid::properties", "Fetching property ids, labels and types ...");
@@ -18,7 +18,9 @@ pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
     properties.update_labels_and_types(labels_and_types.into_iter());
     properties.update_usage(usage.into_iter());
     log::trace!(target: "sqid::properties", "{:?}", properties);
+    settings.replace_data_file("properties", &mut |file| {
+        serde_json::to_writer(file, &properties).context("Failed to serialise properties")
+    })?;
     log::info!(target: "sqid::properties", "Augmented current property data.");
-
     Ok(())
 }

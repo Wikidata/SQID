@@ -2,6 +2,7 @@ use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs::File, path::PathBuf};
 use strum::{Display, EnumIter, EnumString};
+use tempfile::NamedTempFile;
 
 mod ids;
 
@@ -21,9 +22,27 @@ impl Settings {
         }
     }
 
+    fn data_file_path(&self, name: &str) -> PathBuf {
+        self.data_directory.join(name).with_extension("json")
+    }
+
     pub fn data_file(&self, name: &str) -> std::io::Result<File> {
-        let path = self.data_directory.join(name).with_extension("json");
-        File::open(path)
+        File::open(self.data_file_path(name))
+    }
+
+    pub fn replace_data_file(
+        &self,
+        name: &str,
+        write: &mut impl FnMut(&mut File) -> anyhow::Result<()>,
+    ) -> anyhow::Result<()> {
+        let path = *self.data_directory.clone();
+        let mut file = NamedTempFile::new_in(path)?;
+
+        write(file.as_file_mut())?;
+
+        file.persist(self.data_file_path(name))?;
+
+        Ok(())
     }
 }
 
@@ -184,11 +203,10 @@ impl Properties {
         iterator: I,
     ) {
         iterator.for_each(|item| {
-            item.property.as_property().and_then(|property| {
+            if let Some(property) = item.property.as_property() {
                 let entry = self.0.entry(property).or_default();
                 entry.update_label_and_type(item.label, item.datatype);
-                Some(())
-            });
+            };
         });
     }
 

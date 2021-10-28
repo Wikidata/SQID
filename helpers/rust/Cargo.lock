@@ -886,6 +886,7 @@ dependencies = [
  "serde_json",
  "serde_test",
  "strum",
+ "tempfile",
  "test-env-log",
 ]
 
