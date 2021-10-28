@@ -53,7 +53,7 @@ enum LogLevel {
 }
 
 fn main() {
-    let default_path = PathBuf::new().join("..").join("data");
+    let default_path = PathBuf::new().join("..").join("..").join("data");
     let actions = Action::iter()
         .map(|action| action.into())
         .collect::<Vec<&'static str>>();
@@ -132,15 +132,16 @@ fn main() {
             .default_filter_or(loglevel.get_str("level").expect("level should be defined")),
     )
     .init();
-    log::debug!("Log level is {:?} ({:?})", loglevel, log::max_level());
+    log::debug!(target: "sqid", "Log level is {:?} ({:?})", loglevel, log::max_level());
 
     let only = matches
         .value_of("only")
         .and_then(|action| Action::from_str(action).ok());
-    log::debug!("Only is {:?}", only);
+    log::debug!(target: "sqid", "Only is {:?}", only);
+    log::debug!(target: "sqid", "Default path: {:?}", default_path);
 
     if matches.is_present("no-derived") && only == Some(Action::Derived) {
-        log::error!("--no-derived and --only=derived are mutually exclusive");
+        log::error!(target: "sqid", "--no-derived and --only=derived are mutually exclusive");
         std::process::exit(1);
     }
 
@@ -160,7 +161,8 @@ fn main() {
     };
 
     if state.is_err() {
-        log::error!("An error occurred. Exiting.");
+        log::error!(target: "sqid", "An error occurred. Exiting.");
+        log::error!(target: "sqid", "{}", state.unwrap_err());
         std::process::exit(1);
     }
 }

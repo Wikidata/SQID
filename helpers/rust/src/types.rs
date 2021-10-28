@@ -1,6 +1,6 @@
 use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, fs::File, path::PathBuf};
 use strum::{Display, EnumIter, EnumString};
 
 mod ids;
@@ -19,6 +19,11 @@ impl Settings {
         Self {
             data_directory: Box::new(data.into()),
         }
+    }
+
+    pub fn data_file(&self, name: &str) -> std::io::Result<File> {
+        let path = self.data_directory.join(name).with_extension("json");
+        File::open(path)
     }
 }
 
@@ -117,6 +122,12 @@ pub enum Type {
     )]
     #[serde(alias = "http://wikiba.se/ontology#TabularData")]
     TabularData,
+    #[strum(
+        to_string = "MusicalNotation",
+        serialize = "http://wikiba.se/ontology#MusicalNotation"
+    )]
+    #[serde(alias = "http://wikiba.se/ontology#MusicalNotation")]
+    MusicalNotation,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -163,6 +174,7 @@ impl PropertyRecord {
 pub struct Properties(HashMap<Property, PropertyRecord>);
 
 impl Properties {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Default::default()
     }
