@@ -172,7 +172,7 @@ impl Qualifier {
         Self(id)
     }
 
-    pub(crate) fn to_property(&self) -> Property {
+    pub(crate) fn to_property(self) -> Property {
         Property(self.0)
     }
 }
@@ -210,7 +210,7 @@ impl Reference {
         Self(id)
     }
 
-    pub(crate) fn to_property(&self) -> Property {
+    pub(crate) fn to_property(self) -> Property {
         Property(self.0)
     }
 }

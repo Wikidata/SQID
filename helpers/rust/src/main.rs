@@ -1,3 +1,18 @@
+#![deny(
+    missing_debug_implementations,
+    missing_copy_implementations,
+    trivial_casts,
+    trivial_numeric_casts,
+    unsafe_code
+)]
+#![warn(
+    missing_docs,
+    unused_import_braces,
+    unused_qualifications,
+    unused_extern_crates,
+    variant_size_differences
+)]
+
 use std::{path::PathBuf, str::FromStr};
 
 use anyhow::Result;
@@ -33,21 +48,26 @@ impl Action {
         }
     }
 }
-
 /// Log levels implemented by the tool.
 #[derive(Debug, PartialEq, Eq, EnumIter, EnumString, EnumProperty, IntoStaticStr)]
 #[strum(serialize_all = "UPPERCASE")]
 enum LogLevel {
+    /// Show only critical output
     #[strum(props(level = "off"))]
     Critical,
+    /// Show only errors
     #[strum(props(level = "error"))]
     Error,
+    /// Show warnings and errors
     #[strum(props(level = "warn"))]
     Warning,
+    /// Show informative output
     #[strum(props(level = "info"))]
     Info,
+    /// Show extra output useful for debugging
     #[strum(props(level = "debug"))]
     Debug,
+    /// Show everything
     #[strum(props(level = "trace"))]
     Trace,
 }
@@ -132,16 +152,16 @@ fn main() {
             .default_filter_or(loglevel.get_str("level").expect("level should be defined")),
     )
     .init();
-    log::debug!(target: "sqid", "Log level is {:?} ({:?})", loglevel, log::max_level());
+    log::debug!("Log level is {:?} ({:?})", loglevel, log::max_level());
 
     let only = matches
         .value_of("only")
         .and_then(|action| Action::from_str(action).ok());
-    log::debug!(target: "sqid", "Only is {:?}", only);
-    log::debug!(target: "sqid", "Default path: {:?}", default_path);
+    log::debug!("Only is {:?}", only);
+    log::debug!("Default path: {:?}", default_path);
 
     if matches.is_present("no-derived") && only == Some(Action::Derived) {
-        log::error!(target: "sqid", "--no-derived and --only=derived are mutually exclusive");
+        log::error!("--no-derived and --only=derived are mutually exclusive");
         std::process::exit(1);
     }
 
@@ -161,8 +181,8 @@ fn main() {
     };
 
     if state.is_err() {
-        log::error!(target: "sqid", "An error occurred. Exiting.");
-        log::error!(target: "sqid", "{}", state.unwrap_err());
+        log::error!("An error occurred. Exiting.");
+        log::error!("{}", state.unwrap_err());
         std::process::exit(1);
     }
 }
