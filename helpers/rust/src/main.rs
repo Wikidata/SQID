@@ -1,3 +1,5 @@
+//! SQID helper, a tool that augments and updates the statistics files used by [SQID](https://sqid.toolforge.org/).
+
 #![deny(
     missing_debug_implementations,
     missing_copy_implementations,
@@ -72,6 +74,12 @@ enum LogLevel {
     Trace,
 }
 
+const NAME: Option<&'static str> = option_env!("CARGO_PKG_NAME");
+const DESCRIPTION: Option<&'static str> = option_env!("CARGO_PKG_DESCRIPTION");
+const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
+const AUTHORS: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
+
+/// The entry point to the whole program.
 fn main() {
     let default_path = PathBuf::new().join("..").join("..").join("data");
     let actions = Action::iter()
@@ -80,10 +88,10 @@ fn main() {
     let log_levels = LogLevel::iter()
         .map(|level| level.into())
         .collect::<Vec<&'static str>>();
-    let matches = App::new("sqid-helper")
-        .version("0.1.0")
-        .author("Maximilian Marx <maximilian.marx@tu-dresden.de>")
-        .about("Update statistics data for SQID, a Wikidata browser")
+    let matches = App::new(NAME.unwrap_or("sqid-helper"))
+        .version(VERSION.unwrap_or("(unknown)"))
+        .author(AUTHORS.unwrap_or("Maximilian Marx <maximilian.marx@tu-dresden.de>"))
+        .about(DESCRIPTION.unwrap_or("Update statistics data for SQID, a Wikidata browser"))
         .arg(
             Arg::with_name("version")
                 .short("V")
