@@ -8,7 +8,9 @@ use super::{
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
 };
 
-#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString, EnumIter)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString, EnumIter,
+)]
 pub enum Type {
     #[strum(
         to_string = "WikibaseItem",

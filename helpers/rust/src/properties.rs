@@ -1,7 +1,10 @@
-use crate::types::{DataFile, Settings};
+use std::collections::HashMap;
+
+use crate::types::{DataFile, PropertyDataFile, Settings};
 use crate::{sparql, types::Properties};
 use anyhow::{Context, Result};
 
+/// Updates statistics for properties.
 pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
     log::info!("Fetching property ids, labels and types ...");
     let labels_and_types = sparql::properties()?;
@@ -21,7 +24,7 @@ pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
     properties.update_labels_and_types(labels_and_types.into_iter());
     properties.update_usage(usage.into_iter());
     log::trace!("{:?}", properties);
-    settings.replace_data_file(DataFile::Properties, &mut |file| {
+    settings.replace_data_file(DataFile::Properties, |file| {
         serde_json::to_writer(file, &properties).context("Failed to serialise properties")
     })?;
     log::info!("Augmented current property data.");
@@ -29,4 +32,94 @@ pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
     settings.update_timestamp(DataFile::Properties)?;
 
     Ok(())
+}
+
+/// Updates all derived property records.
+pub(super) fn update_derived_property_records(settings: &Settings) -> Result<()> {
+    let properties: Properties =
+        serde_json::from_reader(settings.data_file(DataFile::Properties)?)?;
+
+    derive_property_classification(settings, &properties)?;
+    derive_related_properties(settings, &properties)?;
+    derive_url_patters(settings, &properties)?;
+    derive_property_usage(settings, &properties)?;
+    derive_property_datatypes(settings, &properties)?;
+
+    Ok(())
+}
+
+/// Derives the property classification from property statistics.
+fn derive_property_classification(settings: &Settings, properties: &Properties) -> Result<()> {
+    log::info!("Deriving property classification ...");
+    todo!()
+}
+
+/// Derives the list of related properties from property statistics.
+fn derive_related_properties(settings: &Settings, properties: &Properties) -> Result<()> {
+    log::info!("Deriving related properties ...");
+
+    let mut related = HashMap::new();
+    properties.0.iter().for_each(|(pid, property)| {
+        if !property.related_properties.is_empty() {
+            related.insert(pid, &property.related_properties);
+        }
+    });
+
+    settings.replace_data_file(
+        DataFile::SplitProperties(PropertyDataFile::Related),
+        |file| {
+            serde_json::to_writer(file, &related).context("Failed to serialise related properties")
+        },
+    )
+    // todo(mx): also derive chunked related properties
+}
+
+/// Derives the list of URL patterns from property statistics.
+fn derive_url_patters(settings: &Settings, properties: &Properties) -> Result<()> {
+    log::info!("Deriving URL patterns ...");
+
+    let mut patterns = HashMap::new();
+    properties.0.iter().for_each(|(pid, property)| {
+        if property.url_pattern.is_some() {
+            patterns.insert(pid, property.url_pattern.clone().expect("cannot be empty"));
+        }
+    });
+
+    settings.replace_data_file(
+        DataFile::SplitProperties(PropertyDataFile::URLPatterns),
+        |file| serde_json::to_writer(file, &patterns).context("Failed to serialise URL patterns"),
+    )
+}
+
+/// Derives the property usage statistics from property statistics.
+fn derive_property_usage(settings: &Settings, properties: &Properties) -> Result<()> {
+    log::info!("Deriving property usage ...");
+
+    todo!()
+
+    //     let mut usage = HashMap::new();
+    //     properties.0.iter().for_each(|(pid, property)| {});
+
+    //     settings.replace_data_file(DataFile::SplitProperties(PropertyDataFile::Usage), |file| {
+    //         serde_json::to_writer(file, &usage).context("Failed to serialise property usage")
+    //     })
+}
+
+/// Derives the property datatype information from property statistics.
+fn derive_property_datatypes(settings: &Settings, properties: &Properties) -> Result<()> {
+    log::info!("Deriving property datatypes ...");
+
+    let mut types = HashMap::new();
+    properties.0.iter().for_each(|(pid, property)| {
+        if property.datatype.is_some() {
+            types.insert(pid, property.datatype.expect("cannot be empty"));
+        }
+    });
+
+    settings.replace_data_file(
+        DataFile::SplitProperties(PropertyDataFile::Datatypes),
+        |file| {
+            serde_json::to_writer(file, &types).context("Failed to serialise property datatypes")
+        },
+    )
 }

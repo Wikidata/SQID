@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, Utc};
-use std::{fs::File, path::PathBuf};
+use std::{fmt::Display, fs::File, path::PathBuf};
 use strum::Display;
 use tempfile::NamedTempFile;
 
@@ -22,12 +22,29 @@ pub(crate) struct Settings {
     data_directory: Box<PathBuf>,
 }
 
-/// The different data files we use and/or update.
+/// The different kinds of split properties files we use and/or update.
 #[derive(Debug, Display)]
 #[strum(serialize_all = "lowercase")]
+pub enum PropertyDataFile {
+    /// `properties/classification.json`
+    Classification,
+    /// `properties/related.json`
+    Related,
+    /// `properties/urlpatterns.json`
+    URLPatterns,
+    /// `properties/usage.json`
+    Usage,
+    /// `properties/datatypes.json`
+    Datatypes,
+}
+
+/// The different data files we use and/or update.
+#[derive(Debug)]
 pub enum DataFile {
     /// `properties.json`
     Properties,
+    /// `properties/<name>.json`
+    SplitProperties(PropertyDataFile),
     /// `classes.json`
     Classes,
     /// `statistics.json`
@@ -40,6 +57,7 @@ impl DataFile {
             Self::Properties => true,
             Self::Classes => true,
             Self::Statistics => false,
+            Self::SplitProperties(_) => false,
         }
     }
 
@@ -51,8 +69,26 @@ impl DataFile {
         match self {
             Self::Properties => update(&mut statistics.property_update),
             Self::Classes => update(&mut statistics.class_update),
-            Self::Statistics => Ok(()),
+            _ => match self.has_timestamp() {
+                false => Ok(()),
+                true => Err(anyhow!("Data file {:?} has no associated timestamp.")),
+            },
         }
+    }
+}
+
+impl Display for DataFile {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Properties => "properties".to_string(),
+                Self::Classes => "classes".to_string(),
+                Self::Statistics => "statistics".to_string(),
+                Self::SplitProperties(kind) => format!("properties/{}", kind),
+            }
+        )
     }
 }
 
@@ -81,14 +117,19 @@ impl Settings {
     pub fn replace_data_file(
         &self,
         data_file: DataFile,
-        write: &mut impl FnMut(&mut File) -> Result<()>,
+        write: impl FnOnce(&mut File) -> Result<()>,
     ) -> Result<()> {
         let path = *self.data_directory.clone();
         let mut file = NamedTempFile::new_in(path)?;
+        let name = data_file.to_string();
 
+        log::debug!("Writing new JSON data: {} ...", name);
         write(file.as_file_mut())?;
+        log::debug!("Wrote new JSON file: {} ...", name);
 
         file.persist(self.data_file_path(data_file))?;
+
+        log::debug!("Update for {} complete.", name);
 
         Ok(())
     }
@@ -102,7 +143,7 @@ impl Settings {
                 *timestamp = Some(Utc::now());
                 Ok(())
             })?;
-            self.replace_data_file(DataFile::Statistics, &mut |file| {
+            self.replace_data_file(DataFile::Statistics, |file| {
                 serde_json::to_writer(file, &statistics).context("Failed to serialise statistics")
             })
         } else {
@@ -111,5 +152,38 @@ impl Settings {
                 data_file
             ))
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::{DataFile, PropertyDataFile};
+    use test_env_log::test;
+
+    #[test]
+    fn test_data_file_names() {
+        assert_eq!(DataFile::Properties.to_string(), "properties");
+        assert_eq!(DataFile::Classes.to_string(), "classes");
+        assert_eq!(DataFile::Statistics.to_string(), "statistics");
+        assert_eq!(
+            DataFile::SplitProperties(PropertyDataFile::Classification).to_string(),
+            "properties/classification"
+        );
+        assert_eq!(
+            DataFile::SplitProperties(PropertyDataFile::Related).to_string(),
+            "properties/related"
+        );
+        assert_eq!(
+            DataFile::SplitProperties(PropertyDataFile::URLPatterns).to_string(),
+            "properties/urlpatterns"
+        );
+        assert_eq!(
+            DataFile::SplitProperties(PropertyDataFile::Usage).to_string(),
+            "properties/usage"
+        );
+        assert_eq!(
+            DataFile::SplitProperties(PropertyDataFile::Datatypes).to_string(),
+            "properties/datatypes"
+        );
     }
 }

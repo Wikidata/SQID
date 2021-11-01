@@ -23,7 +23,10 @@ use env_logger::Env;
 use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
 use types::Settings;
 
-use crate::{classes::update_class_records, properties::update_property_records};
+use crate::{
+    classes::update_class_records,
+    properties::{update_derived_property_records, update_property_records},
+};
 
 mod classes;
 mod properties;
@@ -46,6 +49,7 @@ impl Action {
         match self {
             Self::Properties => update_property_records(settings),
             Self::Classes => update_class_records(settings),
+            Self::Derived => update_derived_property_records(settings),
             _ => todo!("implement actions"),
         }
     }
