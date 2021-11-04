@@ -82,8 +82,31 @@ fn derive_related_properties(settings: &Settings, properties: &Properties) -> Re
         |file| {
             serde_json::to_writer(file, &related).context("Failed to serialise related properties")
         },
-    )
-    // todo(mx): also derive chunked related properties
+    )?;
+
+    related
+        .iter()
+        .collect::<Vec<_>>()
+        .chunks(10)
+        .enumerate()
+        .map(|(idx, chunk)| {
+            let mut related = HashMap::new();
+
+            chunk.iter().for_each(|(pid, related_properties)| {
+                related.insert(**pid, **related_properties);
+            });
+
+            settings.replace_data_file(
+                DataFile::SplitProperties(PropertyDataFile::RelatedChunk(idx)),
+                |file| {
+                    serde_json::to_writer(file, &related).context(format!(
+                        "Failed to serialise related properties chunk {}",
+                        idx
+                    ))
+                },
+            )
+        })
+        .collect()
 }
 
 /// Derives the list of URL patterns from property statistics.

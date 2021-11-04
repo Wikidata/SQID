@@ -36,6 +36,9 @@ pub enum PropertyDataFile {
     Classification,
     /// `properties/related.json`
     Related,
+    /// `properties/related-<chunk>.json`
+    #[strum(disabled)]
+    RelatedChunk(usize),
     /// `properties/urlpatterns.json`
     URLPatterns,
     /// `properties/usage.json`
@@ -92,6 +95,8 @@ impl Display for DataFile {
                 Self::Properties => "properties".to_string(),
                 Self::Classes => "classes".to_string(),
                 Self::Statistics => "statistics".to_string(),
+                Self::SplitProperties(PropertyDataFile::RelatedChunk(chunk)) =>
+                    format!("properties/related-{}", chunk),
                 Self::SplitProperties(kind) => format!("properties/{}", kind),
             }
         )
