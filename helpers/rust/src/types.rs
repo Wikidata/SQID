@@ -15,6 +15,12 @@ pub use json::{
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
 
+/// Returns true if the value is zero. Used to skip serialisation for
+/// empty counters.
+pub(crate) fn is_zero(value: &usize) -> bool {
+    *value == 0
+}
+
 /// Holds settings given on the command line, particularly the path to
 /// the data directories.
 #[derive(Debug)]

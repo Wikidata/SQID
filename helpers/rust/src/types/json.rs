@@ -5,6 +5,7 @@ use strum::{Display, EnumIter, EnumString};
 
 use super::{
     ids::{Item, Property, Qualifier},
+    is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
 };
 
@@ -110,28 +111,44 @@ pub enum Type {
     MusicalNotation,
 }
 
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+pub enum PropertyClassification {
+    #[serde(rename = "f")]
+    Family,
+    #[serde(rename = "h")]
+    Hierarchy,
+    #[serde(rename = "i")]
+    Ids,
+    #[serde(rename = "m")]
+    Media,
+    #[serde(rename = "o")]
+    Other,
+    #[serde(rename = "w")]
+    Wiki,
+}
+
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct PropertyRecord {
-    #[serde(rename = "l")]
+    #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
     pub(crate) label: Option<String>,
-    #[serde(rename = "d")]
+    #[serde(rename = "d", skip_serializing_if = "Option::is_none")]
     pub(crate) datatype: Option<Type>,
-    #[serde(rename = "i")]
+    #[serde(rename = "i", skip_serializing_if = "is_zero")]
     pub(crate) in_items: usize,
-    #[serde(rename = "s")]
+    #[serde(rename = "s", skip_serializing_if = "is_zero")]
     pub(crate) in_statements: usize,
-    #[serde(rename = "q")]
+    #[serde(rename = "q", skip_serializing_if = "is_zero")]
     pub(crate) in_qualifiers: usize,
-    #[serde(rename = "e")]
+    #[serde(rename = "e", skip_serializing_if = "is_zero")]
     pub(crate) in_references: usize,
-    #[serde(rename = "u")]
+    #[serde(rename = "u", skip_serializing_if = "Option::is_none")]
     pub(crate) url_pattern: Option<String>,
-    #[serde(rename = "pc")]
+    #[serde(rename = "pc", skip_serializing_if = "Vec::is_empty")]
     pub(crate) instance_of: Vec<Item>,
-    #[serde(rename = "qs")]
+    #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
-    #[serde(rename = "r")]
+    #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, usize>,
 }
 
@@ -148,6 +165,71 @@ impl PropertyRecord {
             PropertyUsageType::Reference(_) => self.in_references += usage.count,
         }
     }
+
+    pub fn project_to_usage(&self) -> PropertyUsageRecord {
+        PropertyUsageRecord {
+            label: None,
+            in_items: self.in_items,
+            in_statements: self.in_statements,
+            in_qualifiers: self.in_qualifiers,
+            in_references: self.in_references,
+            instance_of: self.instance_of.clone(),
+            with_qualifiers: self.with_qualifiers.clone(),
+        }
+    }
+
+    fn is_id(&self) -> bool {
+        matches!(self.datatype, Some(Type::ExternalId))
+            || self.instance_of.iter().any(|class| class.is_ids_class())
+    }
+
+    fn is_media(&self) -> bool {
+        matches!(self.datatype, Some(Type::CommonsMedia))
+            || self.instance_of.iter().any(|class| class.is_media_class())
+    }
+
+    fn is_human_relation(&self) -> bool {
+        self.instance_of
+            .iter()
+            .any(|class| class.is_human_relations_class())
+    }
+
+    pub fn classification(&self, property_id: &Property) -> PropertyClassification {
+        if property_id.is_hierarchy_property() {
+            PropertyClassification::Hierarchy
+        } else if self.is_id() {
+            PropertyClassification::Ids
+        } else if self.is_human_relation() {
+            PropertyClassification::Family
+        } else if self.is_media() {
+            PropertyClassification::Media
+        } else if property_id.is_wiki_property()
+            || self.instance_of.iter().any(|class| class.is_wiki_class())
+        {
+            PropertyClassification::Wiki
+        } else {
+            PropertyClassification::Other
+        }
+    }
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(default)]
+pub struct PropertyUsageRecord {
+    #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
+    pub(crate) label: Option<String>,
+    #[serde(rename = "i", skip_serializing_if = "is_zero")]
+    pub(crate) in_items: usize,
+    #[serde(rename = "s", skip_serializing_if = "is_zero")]
+    pub(crate) in_statements: usize,
+    #[serde(rename = "q", skip_serializing_if = "is_zero")]
+    pub(crate) in_qualifiers: usize,
+    #[serde(rename = "e", skip_serializing_if = "is_zero")]
+    pub(crate) in_references: usize,
+    #[serde(rename = "pc", skip_serializing_if = "Vec::is_empty")]
+    pub(crate) instance_of: Vec<Item>,
+    #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
+    pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -182,21 +264,21 @@ impl Properties {
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct ClassRecord {
-    #[serde(rename = "l")]
+    #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
     pub(crate) label: Option<String>,
-    #[serde(rename = "i")]
+    #[serde(rename = "i", skip_serializing_if = "is_zero")]
     pub(crate) direct_instances: usize,
-    #[serde(rename = "s")]
+    #[serde(rename = "s", skip_serializing_if = "is_zero")]
     pub(crate) direct_subclasses: usize,
-    #[serde(rename = "ai")]
+    #[serde(rename = "ai", skip_serializing_if = "is_zero")]
     pub(crate) all_instances: usize,
-    #[serde(rename = "as")]
+    #[serde(rename = "as", skip_serializing_if = "is_zero")]
     pub(crate) all_subclassces: usize,
-    #[serde(rename = "sc")]
+    #[serde(rename = "sc", skip_serializing_if = "Vec::is_empty")]
     pub(crate) superclasses: Vec<Item>,
-    #[serde(rename = "sb")]
+    #[serde(rename = "sb", skip_serializing_if = "Vec::is_empty")]
     pub(crate) non_empty_superclasses: Vec<Item>,
-    #[serde(rename = "r")]
+    #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, usize>,
 }
 
@@ -221,11 +303,11 @@ pub struct EntityStatistics {
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct SiteRecord {
-    #[serde(rename = "u")]
+    #[serde(rename = "u", skip_serializing_if = "Option::is_none")]
     pub(crate) url_pattern: Option<String>,
-    #[serde(rename = "g")]
+    #[serde(rename = "g", skip_serializing_if = "Option::is_none")]
     pub(crate) group: Option<String>,
-    #[serde(rename = "l")]
+    #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
     pub(crate) language: Option<String>,
     #[serde(rename = "i")]
     pub(crate) items: usize,
@@ -234,16 +316,32 @@ pub struct SiteRecord {
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Statistics {
-    #[serde(rename = "propertyUpdate", with = "formats::timestamp", default)]
+    #[serde(
+        rename = "propertyUpdate",
+        with = "formats::timestamp",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub(crate) property_update: Option<DateTime<Utc>>,
-    #[serde(rename = "classUpdate", with = "formats::timestamp", default)]
+    #[serde(
+        rename = "classUpdate",
+        with = "formats::timestamp",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub(crate) class_update: Option<DateTime<Utc>>,
-    #[serde(rename = "dumpDate", with = "formats::date", default)]
+    #[serde(
+        rename = "dumpDate",
+        with = "formats::date",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub(crate) dump_date: Option<Date<Utc>>,
     #[serde(rename = "propertyStatistics")]
     pub(crate) properties: EntityStatistics,
     #[serde(rename = "itemStatistics")]
     pub(crate) items: EntityStatistics,
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub(crate) sites: HashMap<String, SiteRecord>,
 }
 

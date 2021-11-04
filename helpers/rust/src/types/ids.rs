@@ -99,9 +99,70 @@ impl From<Property> for Entity {
 #[serde(try_from = "String", into = "String")]
 pub struct Item(pub(crate) u64);
 
+pub mod classes {
+    use super::Item;
+
+    /// Wikidata property for human relationships
+    pub const HUMAN_RELATIONS: Item = Item(229642321);
+    /// Wikidata property for Commons
+    pub const MEDIA: Item = Item(18610173);
+    /// Wikidata property about Wikimedia categories
+    pub const WIKIMEDIA_CATEGORIES: Item = Item(18667213);
+    /// Wikidata property giving Wikimedia list
+    pub const WIKIMEDIA_LIST: Item = Item(22969221);
+    /// Wikidata property representing a unique identifier
+    pub const UNIQUE_IDENTIFIER: Item = Item(19847637);
+    /// Wikidata property for authority control
+    pub const AUTHORITY_CONTROL: Item = Item(18614948);
+    /// Wikidata property for authority control for people
+    pub const AUTHORITY_CONTROL_PEOPLE: Item = Item(19595382);
+    /// Wikidata property for authority control for places
+    pub const AUTHORITY_CONTROL_PLACES: Item = Item(19829908);
+    /// Wikidata property for authority control for works
+    pub const AUTHORITY_CONTROL_WORKS: Item = Item(19833377);
+    /// Wikidata property for authority control for cultural heritage identification
+    pub const AUTHORITY_CONTROL_HERITAGE: Item = Item(18618628);
+    /// Wikidata property for authority control for organisations
+    pub const AUTHORITY_CONTROL_ORGANISATIONS: Item = Item(21745557);
+    /// Wikidata property for authority control for substances
+    pub const AUTHORITY_CONTROL_SUBSTANCES: Item = Item(19833835);
+    /// Wikidata property for identification in the film industry
+    pub const FILM_INDUSTRY_ID: Item = Item(22964274);
+}
+
 impl Item {
     pub fn new(id: u64) -> Self {
         Self(id)
+    }
+
+    pub fn is_ids_class(&self) -> bool {
+        matches!(
+            *self,
+            classes::UNIQUE_IDENTIFIER
+                | classes::AUTHORITY_CONTROL
+                | classes::AUTHORITY_CONTROL_PEOPLE
+                | classes::AUTHORITY_CONTROL_PLACES
+                | classes::AUTHORITY_CONTROL_WORKS
+                | classes::AUTHORITY_CONTROL_HERITAGE
+                | classes::AUTHORITY_CONTROL_ORGANISATIONS
+                | classes::AUTHORITY_CONTROL_SUBSTANCES
+                | classes::FILM_INDUSTRY_ID
+        )
+    }
+
+    pub fn is_human_relations_class(&self) -> bool {
+        matches!(*self, classes::HUMAN_RELATIONS)
+    }
+
+    pub fn is_media_class(&self) -> bool {
+        matches!(*self, classes::MEDIA)
+    }
+
+    pub fn is_wiki_class(&self) -> bool {
+        matches!(
+            *self,
+            classes::WIKIMEDIA_CATEGORIES | classes::WIKIMEDIA_LIST
+        )
     }
 }
 
@@ -133,9 +194,37 @@ impl From<u64> for Item {
 #[serde(try_from = "String", into = "String")]
 pub struct Property(pub(crate) u64);
 
+pub mod properties {
+    use super::Property;
+
+    /// Instance of
+    pub const INSTANCE_OF: Property = Property(31);
+    /// Subclass of
+    pub const SUBCLASS_OF: Property = Property(279);
+    /// Topic's main category
+    pub const TOPIC_MAIN_CATEGORY: Property = Property(910);
+    /// Topic's Main Wikimedia portal
+    pub const TOPIC_MAIN_WIKIMEDIA_PORTAL: Property = Property(1151);
+    /// Wikipedia portal's main topic
+    pub const PORTAL_MAIN_TOPIC: Property = Property(1204);
+}
+
 impl Property {
     pub fn new(id: u64) -> Self {
         Self(id)
+    }
+
+    pub fn is_hierarchy_property(&self) -> bool {
+        matches!(*self, properties::INSTANCE_OF | properties::SUBCLASS_OF)
+    }
+
+    pub fn is_wiki_property(&self) -> bool {
+        matches!(
+            *self,
+            properties::TOPIC_MAIN_CATEGORY
+                | properties::TOPIC_MAIN_WIKIMEDIA_PORTAL
+                | properties::PORTAL_MAIN_TOPIC
+        )
     }
 }
 

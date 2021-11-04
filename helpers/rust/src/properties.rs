@@ -51,7 +51,19 @@ pub(super) fn update_derived_property_records(settings: &Settings) -> Result<()>
 /// Derives the property classification from property statistics.
 fn derive_property_classification(settings: &Settings, properties: &Properties) -> Result<()> {
     log::info!("Deriving property classification ...");
-    todo!()
+
+    let mut classification = HashMap::new();
+    properties.0.iter().for_each(|(pid, property)| {
+        classification.insert(pid, property.classification(pid));
+    });
+
+    settings.replace_data_file(
+        DataFile::SplitProperties(PropertyDataFile::Classification),
+        |file| {
+            serde_json::to_writer(file, &classification)
+                .context("Failed to serialise property classification")
+        },
+    )
 }
 
 /// Derives the list of related properties from property statistics.
@@ -81,7 +93,13 @@ fn derive_url_patters(settings: &Settings, properties: &Properties) -> Result<()
     let mut patterns = HashMap::new();
     properties.0.iter().for_each(|(pid, property)| {
         if property.url_pattern.is_some() {
-            patterns.insert(pid, property.url_pattern.clone().expect("cannot be empty"));
+            patterns.insert(
+                pid,
+                property
+                    .url_pattern
+                    .clone()
+                    .expect("URL pattern cannot be empty"),
+            );
         }
     });
 
@@ -95,14 +113,14 @@ fn derive_url_patters(settings: &Settings, properties: &Properties) -> Result<()
 fn derive_property_usage(settings: &Settings, properties: &Properties) -> Result<()> {
     log::info!("Deriving property usage ...");
 
-    todo!()
+    let mut usage = HashMap::new();
+    properties.0.iter().for_each(|(pid, property)| {
+        usage.insert(pid, property.project_to_usage());
+    });
 
-    //     let mut usage = HashMap::new();
-    //     properties.0.iter().for_each(|(pid, property)| {});
-
-    //     settings.replace_data_file(DataFile::SplitProperties(PropertyDataFile::Usage), |file| {
-    //         serde_json::to_writer(file, &usage).context("Failed to serialise property usage")
-    //     })
+    settings.replace_data_file(DataFile::SplitProperties(PropertyDataFile::Usage), |file| {
+        serde_json::to_writer(file, &usage).context("Failed to serialise property usage")
+    })
 }
 
 /// Derives the property datatype information from property statistics.
@@ -112,7 +130,7 @@ fn derive_property_datatypes(settings: &Settings, properties: &Properties) -> Re
     let mut types = HashMap::new();
     properties.0.iter().for_each(|(pid, property)| {
         if property.datatype.is_some() {
-            types.insert(pid, property.datatype.expect("cannot be empty"));
+            types.insert(pid, property.datatype.expect("datatype cannot be empty"));
         }
     });
 
