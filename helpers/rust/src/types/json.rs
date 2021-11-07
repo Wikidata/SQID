@@ -7,6 +7,7 @@ use super::{
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
+    ClassLabelAndUsage,
 };
 
 #[derive(
@@ -282,8 +283,29 @@ pub struct ClassRecord {
     pub(crate) related_properties: HashMap<Property, usize>,
 }
 
+impl ClassRecord {
+    pub(crate) fn update_label_and_usage(&mut self, label: String, usage: Option<usize>) {
+        let _ = self.label.insert(label);
+        if let Some(direct_instances) = usage {
+            self.direct_instances = direct_instances
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Classes(pub(crate) HashMap<Item, ClassRecord>);
+
+impl Classes {
+    pub(crate) fn update_labels_and_usage<I: Iterator<Item = ClassLabelAndUsage>>(
+        &mut self,
+        iterator: I,
+    ) {
+        iterator.for_each(|item| {
+            let entry = self.0.entry(item.class).or_default();
+            entry.update_label_and_usage(item.label, item.usage);
+        });
+    }
+}
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]

@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
-use crate::types::{DataFile, PropertyDataFile, Settings};
-use crate::{sparql, types::Properties};
+use crate::{
+    sparql,
+    types::{DataFile, Properties, PropertyDataFile, Settings},
+};
 use anyhow::{Context, Result};
 
 /// Updates statistics for properties.
@@ -29,9 +31,7 @@ pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
     })?;
     log::info!("Augmented current property data.");
 
-    settings.update_timestamp(DataFile::Properties)?;
-
-    Ok(())
+    settings.update_timestamp(DataFile::Properties)
 }
 
 /// Updates all derived property records.
@@ -43,9 +43,7 @@ pub(super) fn update_derived_property_records(settings: &Settings) -> Result<()>
     derive_related_properties(settings, &properties)?;
     derive_url_patters(settings, &properties)?;
     derive_property_usage(settings, &properties)?;
-    derive_property_datatypes(settings, &properties)?;
-
-    Ok(())
+    derive_property_datatypes(settings, &properties)
 }
 
 /// Derives the property classification from property statistics.
