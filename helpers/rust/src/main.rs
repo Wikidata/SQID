@@ -24,7 +24,7 @@ use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr}
 use types::Settings;
 
 use crate::{
-    classes::update_class_records,
+    classes::{update_class_records, update_derived_class_records},
     properties::{update_derived_property_records, update_property_records},
 };
 
@@ -49,7 +49,12 @@ impl Action {
         match self {
             Self::Properties => update_property_records(settings),
             Self::Classes => update_class_records(settings),
-            Self::Derived => update_derived_property_records(settings),
+            Self::Derived => {
+                update_derived_property_records(settings)?;
+                update_derived_class_records(settings)?;
+                log::info!("Finished updating derived information.");
+                Ok(())
+            }
             _ => todo!("implement actions"),
         }
     }

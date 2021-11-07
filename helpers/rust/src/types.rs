@@ -47,6 +47,17 @@ pub enum PropertyDataFile {
     Datatypes,
 }
 
+/// The different kinds of split class files we use and/or update.
+#[derive(Debug, Display)]
+#[strum(serialize_all = "lowercase")]
+pub enum ClassDataFile {
+    /// `classes/hierarchy.json`
+    Hierarchy,
+    /// `classes/hierarchy-<chunk>.json`
+    #[strum(disabled)]
+    HierarchyChunk(usize),
+}
+
 /// The different data files we use and/or update.
 #[derive(Debug)]
 pub enum DataFile {
@@ -56,6 +67,8 @@ pub enum DataFile {
     SplitProperties(PropertyDataFile),
     /// `classes.json`
     Classes,
+    /// `classes/<name>.json`
+    SplitClasses(ClassDataFile),
     /// `statistics.json`
     Statistics,
 }
@@ -67,6 +80,7 @@ impl DataFile {
             Self::Classes => true,
             Self::Statistics => false,
             Self::SplitProperties(_) => false,
+            Self::SplitClasses(_) => false,
         }
     }
 
@@ -97,6 +111,9 @@ impl Display for DataFile {
                 Self::Statistics => "statistics".to_string(),
                 Self::SplitProperties(PropertyDataFile::RelatedChunk(chunk)) =>
                     format!("properties/related-{}", chunk),
+                Self::SplitClasses(ClassDataFile::HierarchyChunk(chunk)) =>
+                    format!("classes/hierarchy-{}", chunk),
+                Self::SplitClasses(kind) => format!("classes/{}", kind),
                 Self::SplitProperties(kind) => format!("properties/{}", kind),
             }
         )

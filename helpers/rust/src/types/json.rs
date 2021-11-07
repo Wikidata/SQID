@@ -290,6 +290,19 @@ impl ClassRecord {
             self.direct_instances = direct_instances
         }
     }
+
+    pub(crate) fn project_to_hierarchy(&self) -> ClassRecord {
+        ClassRecord {
+            label: None,
+            direct_instances: self.direct_instances,
+            direct_subclasses: self.direct_subclasses,
+            all_instances: self.all_instances,
+            all_subclassces: self.all_subclassces,
+            superclasses: self.superclasses.clone(),
+            non_empty_superclasses: self.non_empty_superclasses.clone(),
+            related_properties: self.related_properties.clone(),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
