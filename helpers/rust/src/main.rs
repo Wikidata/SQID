@@ -26,11 +26,13 @@ use types::Settings;
 use crate::{
     classes::{update_class_records, update_derived_class_records},
     properties::{update_derived_property_records, update_property_records},
+    statistics::check_for_new_dump,
 };
 
 mod classes;
 mod properties;
 mod sparql;
+mod statistics;
 mod types;
 
 /// Possible actions the tool can perform.
@@ -55,6 +57,7 @@ impl Action {
                 log::info!("Finished updating derived information.");
                 Ok(())
             }
+            Self::CheckDump => check_for_new_dump(settings),
             _ => todo!("implement actions"),
         }
     }
