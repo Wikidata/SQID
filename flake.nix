@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -19,11 +20,12 @@
     rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = { self, nixpkgs, flake-utils, node2nix, rust-overlay, ... }@inputs:
+  outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils, node2nix, rust-overlay, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
         overlays = [ (import rust-overlay) ];
         pkgs = import nixpkgs { inherit system overlays; };
+        pkgs-unstable = import nixpkgs-unstable { inherit system overlays; };
       in
       {
         devShell =
@@ -41,7 +43,7 @@
                 pkgs.nodePackages.vue-cli
                 pkgs.bashInteractive
                 pkgs.rust-bin.stable.latest.default
-                pkgs.rust-analyzer
+                pkgs-unstable.rust-analyzer
                 pkgs.cargo-audit
                 pkgs.cargo-license
                 pkgs.python36
