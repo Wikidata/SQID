@@ -27,7 +27,7 @@ pub(crate) fn is_zero(value: &usize) -> bool {
 #[derive(Debug)]
 pub(crate) struct Settings {
     data_directory: Box<PathBuf>,
-    dump_directory: Box<PathBuf>,
+    pub(crate) dump_directory: Box<PathBuf>,
 }
 
 /// The different kinds of split properties files we use and/or update.
