@@ -1,6 +1,7 @@
 use anyhow::{anyhow, Context, Result};
-use chrono::{DateTime, Utc};
-use std::{fmt::Display, fs::File, path::PathBuf};
+use chrono::{Date, DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, fmt::Display, fs::File, hash::Hash, path::PathBuf};
 use strum::Display;
 use tempfile::NamedTempFile;
 
@@ -10,8 +11,8 @@ mod sparql;
 
 pub use ids::{Entity, Item, Property, Qualifier, Reference};
 pub use json::{
-    ClassRecord, Classes, EntityStatistics, Properties, PropertyRecord, SiteRecord, Statistics,
-    Type,
+    ClassRecord, Classes, EntityStatistics, Properties, PropertyClassification, PropertyRecord,
+    PropertyUsageRecord, SiteRecord, Statistics, Type,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
 
@@ -26,10 +27,11 @@ pub(crate) fn is_zero(value: &usize) -> bool {
 #[derive(Debug)]
 pub(crate) struct Settings {
     data_directory: Box<PathBuf>,
+    dump_directory: Box<PathBuf>,
 }
 
 /// The different kinds of split properties files we use and/or update.
-#[derive(Debug, Display)]
+#[derive(Copy, Clone, Debug, Display)]
 #[strum(serialize_all = "lowercase")]
 pub enum PropertyDataFile {
     /// `properties/classification.json`
@@ -47,8 +49,21 @@ pub enum PropertyDataFile {
     Datatypes,
 }
 
+impl PropertyDataFile {
+    fn with_chunk(&self, chunk_index: usize) -> Result<Self> {
+        match self {
+            PropertyDataFile::Classification => Err(anyhow!("{} is not chunked", self)),
+            PropertyDataFile::Related => Ok(Self::RelatedChunk(chunk_index)),
+            PropertyDataFile::RelatedChunk(_) => Ok(Self::RelatedChunk(chunk_index)),
+            PropertyDataFile::URLPatterns => Err(anyhow!("{} is not chunked", self)),
+            PropertyDataFile::Usage => Err(anyhow!("{} is not chunked", self)),
+            PropertyDataFile::Datatypes => Err(anyhow!("{} is not chunked", self)),
+        }
+    }
+}
+
 /// The different kinds of split class files we use and/or update.
-#[derive(Debug, Display)]
+#[derive(Copy, Clone, Debug, Display)]
 #[strum(serialize_all = "lowercase")]
 pub enum ClassDataFile {
     /// `classes/hierarchy.json`
@@ -58,8 +73,17 @@ pub enum ClassDataFile {
     HierarchyChunk(usize),
 }
 
+impl ClassDataFile {
+    fn with_chunk(&self, chunk_index: usize) -> Result<Self> {
+        match self {
+            ClassDataFile::Hierarchy => Ok(Self::HierarchyChunk(chunk_index)),
+            ClassDataFile::HierarchyChunk(_) => Ok(Self::HierarchyChunk(chunk_index)),
+        }
+    }
+}
+
 /// The different data files we use and/or update.
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum DataFile {
     /// `properties.json`
     Properties,
@@ -94,8 +118,32 @@ impl DataFile {
             Self::Classes => update(&mut statistics.class_update),
             _ => match self.has_timestamp() {
                 false => Ok(()),
-                true => Err(anyhow!("Data file {:?} has no associated timestamp.")),
+                true => Err(anyhow!("Data file {} has no associated timestamp.", self)),
             },
+        }
+    }
+
+    fn get_timestamp(&self, statistics: &Statistics) -> Result<DateTime<Utc>> {
+        match self {
+            Self::Properties => statistics
+                .property_update
+                .ok_or_else(|| anyhow!("Timestamp is empty")),
+            Self::Classes => statistics
+                .class_update
+                .ok_or_else(|| anyhow!("Timestamp is empty")),
+            _ => Err(anyhow!("Data file {} has no associated timestamp.", self)),
+        }
+    }
+
+    fn with_chunk(&self, chunk_index: usize) -> Result<Self> {
+        match self {
+            DataFile::Properties => Err(anyhow!("{} is not chunked", self)),
+            DataFile::SplitProperties(kind) => {
+                Ok(Self::SplitProperties(kind.with_chunk(chunk_index)?))
+            }
+            DataFile::Classes => Err(anyhow!("{} is not chunked", self)),
+            DataFile::SplitClasses(kind) => Ok(Self::SplitClasses(kind.with_chunk(chunk_index)?)),
+            DataFile::Statistics => Err(anyhow!("{} is not chunked", self)),
         }
     }
 }
@@ -125,6 +173,7 @@ impl Settings {
     pub fn new(data: &str) -> Self {
         Self {
             data_directory: Box::new(data.into()),
+            dump_directory: Box::new("/public/dumps/public/wikidatawiki/entities/".into()),
         }
     }
 
@@ -138,6 +187,14 @@ impl Settings {
     /// Opens the given [`DataFile`].
     pub fn data_file(&self, data_file: DataFile) -> std::io::Result<File> {
         File::open(self.data_file_path(data_file))
+    }
+
+    pub fn get_data<T>(&self, data_file: DataFile) -> Result<T>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        serde_json::from_reader(self.data_file(data_file)?)
+            .context(format!("Failed to deserialise data file {}", data_file))
     }
 
     /// Replaces the given [`DataFile`] atomically, by applying the `write`
@@ -162,24 +219,76 @@ impl Settings {
         Ok(())
     }
 
+    pub fn replace_data<T>(&self, data_file: DataFile, value: &T) -> Result<()>
+    where
+        T: Serialize,
+    {
+        self.replace_data_file(data_file, |file| {
+            serde_json::to_writer(file, value)
+                .context(format!("Failed to serialise data file {}", data_file))
+        })
+    }
+
+    pub fn replace_chunked_data<K, V>(
+        &self,
+        data_file: DataFile,
+        value: &HashMap<K, V>,
+        chunk_size: usize,
+    ) -> Result<()>
+    where
+        K: Eq + Hash + Serialize,
+        V: Serialize,
+    {
+        value
+            .iter()
+            .collect::<Vec<_>>()
+            .chunks(chunk_size)
+            .enumerate()
+            .try_for_each(|(idx, chunk)| {
+                let items: HashMap<&K, &V> =
+                    HashMap::from_iter(chunk.iter().map(|(id, item)| (*id, *item)));
+                self.replace_data(data_file.with_chunk(idx)?, &items)
+            })
+    }
+
     /// Update the timestamp for [`DataFile`] `data_file`.
     pub fn update_timestamp(&self, data_file: DataFile) -> Result<()> {
         log::debug!("Updating timestamp for {}", data_file);
         if data_file.has_timestamp() {
-            let mut statistics = serde_json::from_reader(self.data_file(DataFile::Statistics)?)?;
+            let mut statistics = self.get_data(DataFile::Statistics)?;
             data_file.with_timestamp(&mut statistics, |timestamp| {
                 *timestamp = Some(Utc::now());
                 Ok(())
             })?;
-            self.replace_data_file(DataFile::Statistics, |file| {
-                serde_json::to_writer(file, &statistics).context("Failed to serialise statistics")
-            })
+            self.replace_data(DataFile::Statistics, &statistics)
         } else {
             Err(anyhow!(
                 "Data file {} has no associated timestamp.",
                 data_file
             ))
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn get_timestamp(&self, data_file: DataFile) -> Result<DateTime<Utc>> {
+        log::debug!("Looking up timestamp for {}", data_file);
+        if data_file.has_timestamp() {
+            let statistics = self.get_data(DataFile::Statistics)?;
+            data_file.get_timestamp(&statistics)
+        } else {
+            Err(anyhow!(
+                "Data file {} has no associated timestamp.",
+                data_file
+            ))
+        }
+    }
+
+    pub fn get_dump_date(&self) -> Result<Date<Utc>> {
+        log::debug!("Looking up dump date");
+        let statistics: Statistics = self.get_data(DataFile::Statistics)?;
+        statistics
+            .dump_date
+            .ok_or_else(|| anyhow!("No dump date available"))
     }
 }
 
