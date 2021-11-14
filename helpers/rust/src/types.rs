@@ -123,14 +123,10 @@ impl DataFile {
         }
     }
 
-    fn get_timestamp(&self, statistics: &Statistics) -> Result<DateTime<Utc>> {
+    fn get_timestamp(&self, statistics: &Statistics) -> Result<Option<DateTime<Utc>>> {
         match self {
-            Self::Properties => statistics
-                .property_update
-                .ok_or_else(|| anyhow!("Timestamp is empty")),
-            Self::Classes => statistics
-                .class_update
-                .ok_or_else(|| anyhow!("Timestamp is empty")),
+            Self::Properties => Ok(statistics.property_update),
+            Self::Classes => Ok(statistics.class_update),
             _ => Err(anyhow!("Data file {} has no associated timestamp.", self)),
         }
     }
@@ -270,7 +266,7 @@ impl Settings {
     }
 
     #[allow(dead_code)]
-    pub fn get_timestamp(&self, data_file: DataFile) -> Result<DateTime<Utc>> {
+    pub fn get_timestamp(&self, data_file: DataFile) -> Result<Option<DateTime<Utc>>> {
         log::debug!("Looking up timestamp for {}", data_file);
         if data_file.has_timestamp() {
             let statistics = self.get_data(DataFile::Statistics)?;
@@ -283,12 +279,10 @@ impl Settings {
         }
     }
 
-    pub fn get_dump_date(&self) -> Result<Date<Utc>> {
+    pub fn get_dump_date(&self) -> Result<Option<Date<Utc>>> {
         log::debug!("Looking up dump date");
         let statistics: Statistics = self.get_data(DataFile::Statistics)?;
-        statistics
-            .dump_date
-            .ok_or_else(|| anyhow!("No dump date available"))
+        Ok(statistics.dump_date)
     }
 }
 

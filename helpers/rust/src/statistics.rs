@@ -1,12 +1,15 @@
 use crate::types::Settings;
-use anyhow::Result;
-use chrono::{Date, Utc};
+use anyhow::{Context, Result};
+use chrono::{Date, TimeZone, Utc};
 use std::fs;
 
 /// Check for a new dump file. If present, queue a job on the grid to
 /// rebuild the full statistics.
 pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
-    let last_dump = settings.get_dump_date()?;
+    let last_dump = settings
+        .get_dump_date()?
+        .unwrap_or_else(|| Utc.ymd(1970, 1, 1));
+
     log::info!(
         "Current dump is dated {}, checking for new dump ...",
         last_dump
@@ -16,7 +19,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         "Enumerating dumps in {}",
         settings.dump_directory.to_str().unwrap()
     );
-    fs::read_dir(&settings.dump_directory.as_ref())?
+    let mut dumps = fs::read_dir(&settings.dump_directory.as_ref())?
         .filter(|entry| {
             entry
                 .as_ref()
@@ -24,9 +27,17 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
                 .unwrap_or(false)
         })
         .into_iter()
-        .for_each(|subdir| {
-            log::debug!("Found dump: {:?}", subdir.map(|sd| sd.file_name()));
-        });
+        .filter_map(|entry| {
+            entry
+                .map(|direntry| direntry.file_name().into_string().ok())
+                .unwrap_or(None)
+        })
+        .collect::<Vec<String>>();
+    dumps.sort_unstable();
+    let latest = Utc
+        .datetime_from_str(dumps.last().context("Could not find any dumps")?, "%Y%M%d")?
+        .date();
+    log::info!("Latest dump is dated {}", latest);
 
     todo!()
 }
