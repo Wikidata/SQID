@@ -35,7 +35,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         .collect::<Vec<String>>();
     dumps.sort_unstable();
     let latest: Date<Utc> = Date::from_utc(
-        NaiveDate::parse_from_str(dumps.last().context("Could not find any dumps")?, "%Y%M%d")?,
+        NaiveDate::parse_from_str(dumps.last().context("Could not find any dumps")?, "%Y%m%d")?,
         Utc,
     );
 
