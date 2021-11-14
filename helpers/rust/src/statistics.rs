@@ -1,6 +1,6 @@
 use crate::types::Settings;
 use anyhow::{Context, Result};
-use chrono::{Date, TimeZone, Utc};
+use chrono::{Date, NaiveDate, TimeZone, Utc};
 use std::fs;
 
 /// Check for a new dump file. If present, queue a job on the grid to
@@ -34,9 +34,11 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         })
         .collect::<Vec<String>>();
     dumps.sort_unstable();
-    let latest = Utc
-        .datetime_from_str(dumps.last().context("Could not find any dumps")?, "%Y%M%d")?
-        .date();
+    let latest: Date<Utc> = Date::from_utc(
+        NaiveDate::parse_from_str(dumps.last().context("Could not find any dumps")?, "%Y%M%d")?,
+        Utc,
+    );
+
     log::info!("Latest dump is dated {}", latest);
 
     todo!()
