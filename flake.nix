@@ -2,8 +2,7 @@
   description = "SQID, a data browser for Wikidata";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.05";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -17,22 +16,39 @@
       url = "github:svanderburg/node2nix";
       flake = false;
     };
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, flake-utils, node2nix, rust-overlay, ... }@inputs:
+  outputs = { self, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        overlays = [ (import rust-overlay) ];
-        pkgs = import nixpkgs { inherit system overlays; };
-        pkgs-unstable = import nixpkgs-unstable { inherit system overlays; };
+        overlays = [
+          (import inputs.rust-overlay)
+          (final: prev: {
+            cargo = final.pkgs.rust-bin.stable.latest.default;
+            rustc = final.pkgs.rust-bin.stable.latest.default;
+          })
+          (import ./nix { inherit (inputs) gitignoresrc; })
+        ];
+        pkgs = import inputs.nixpkgs { inherit system overlays; };
       in
-      {
+      rec {
+        packages = flake-utils.lib.flattenTree {
+          inherit (pkgs) sqid-helper;
+        };
+        defaultPackage = packages.sqid-helper;
+        apps.sqid-helper = flake-utils.lib.mkApp { drv = packages.sqid-helper; };
+        defaultApp = apps.sqid-helper;
         devShell =
           pkgs.mkShell
             {
+              RUST_LOG = "debug";
+              RUST_BACKTRACE = "1";
               buildInputs = [
-                node2nix
+                inputs.node2nix
                 pkgs.nodejs-12_x
                 pkgs.nodePackages.eslint
                 pkgs.nodePackages.typescript
@@ -43,10 +59,10 @@
                 pkgs.nodePackages.vue-cli
                 pkgs.bashInteractive
                 pkgs.rust-bin.stable.latest.default
-                pkgs-unstable.rust-analyzer
+                pkgs.rust-analyzer
                 pkgs.cargo-audit
                 pkgs.cargo-license
-                pkgs.python36
+                pkgs.python37
                 pkgs.ansible
                 pkgs.openssl
                 pkgs.pkg-config
