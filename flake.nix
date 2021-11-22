@@ -47,6 +47,7 @@
             {
               RUST_LOG = "debug";
               RUST_BACKTRACE = "1";
+
               buildInputs = [
                 inputs.node2nix
                 pkgs.nodejs-12_x
@@ -58,6 +59,7 @@
                 pkgs.nodePackages.vscode-html-languageserver-bin
                 pkgs.nodePackages.vue-cli
                 pkgs.bashInteractive
+                pkgs.rust-bin.nightly.latest.rustfmt
                 pkgs.rust-bin.stable.latest.default
                 pkgs.rust-analyzer
                 pkgs.cargo-audit
