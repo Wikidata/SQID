@@ -38,12 +38,21 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         NaiveDate::parse_from_str(dumps.last().context("Could not find any dumps")?, "%Y%m%d")?,
         Utc,
     );
+    let order = last_dump.cmp(&latest);
 
-    log::info!("Latest dump is dated {}", latest);
+    log::info!(
+        "Latest dump is dated {}, which is {}",
+        latest,
+        match order {
+            std::cmp::Ordering::Less => "newer",
+            std::cmp::Ordering::Equal => "still current",
+            std::cmp::Ordering::Greater => "older",
+        }
+    );
 
     todo!()
 }
 
-pub(super) fn process_dump(_settings: &Settings, _new_dump: Date<Utc>) -> Result<()> {
+pub(super) fn process_dump(settings: &Settings, dump: DumpInfo) -> Result<()> {
     todo!()
 }

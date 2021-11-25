@@ -30,6 +30,12 @@ pub(crate) struct Settings {
     pub(crate) dump_directory: Box<PathBuf>,
 }
 
+#[derive(Debug)]
+pub(crate) struct DumpInfo {
+    date: Date<Utc>,
+    path: Box<PathBuf>,
+}
+
 /// The different kinds of split properties files we use and/or update.
 #[derive(Copy, Clone, Debug, Display)]
 #[strum(serialize_all = "lowercase")]

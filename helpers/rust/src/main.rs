@@ -17,9 +17,10 @@
 
 use std::{path::PathBuf, str::FromStr};
 
-use anyhow::Result;
-use clap::{App, Arg};
+use anyhow::{anyhow, Result};
+use clap::{App, Arg, ArgMatches};
 use env_logger::Env;
+use statistics::process_dump;
 use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
 use types::Settings;
 
@@ -47,7 +48,7 @@ enum Action {
 }
 
 impl Action {
-    fn perform(&self, settings: &Settings) -> Result<()> {
+    fn perform(&self, settings: &Settings, matches: &ArgMatches) -> Result<()> {
         match self {
             Self::Properties => update_property_records(settings),
             Self::Classes => update_class_records(settings),
@@ -58,7 +59,7 @@ impl Action {
                 Ok(())
             }
             Self::CheckDump => check_for_new_dump(settings),
-            _ => todo!("implement actions"),
+            Self::ProcessDump => process_dump(settings, matches.value_of("dump").ok_or(anyhow!("expected dump file wasn't present")?)),
         }
     }
 }
@@ -152,6 +153,12 @@ fn main() {
                 .possible_values(&log_levels)
                 .default_value("INFO"),
         )
+        .arg(
+            Arg::with_name("dump")
+                .hidden(true)
+                .last(true)
+                .required_if("only", "process-dump"),
+        )
         .get_matches();
 
     let loglevel = if matches.is_present("quiet") {
@@ -185,18 +192,23 @@ fn main() {
         std::process::exit(1);
     }
 
+    if matches.is_present("dump") && only != Some(Action::ProcessDump) {
+        log::error!("a dump file can only be specified together with --only=process-dump");
+        std::process::exit(1);
+    }
+
     let settings = Settings::new(matches.value_of("path").expect("path should be set"));
     let state = match only {
-        Some(action) => action.perform(&settings),
+        Some(action) => action.perform(&settings, &matches),
         None => Action::iter().try_for_each(|action| match action {
             Action::Derived => {
                 if matches.is_present("no-derived") {
                     Ok(())
                 } else {
-                    action.perform(&settings)
+                    action.perform(&settings, &matches)
                 }
             }
-            _ => action.perform(&settings),
+            _ => action.perform(&settings, &matches),
         }),
     };
 
