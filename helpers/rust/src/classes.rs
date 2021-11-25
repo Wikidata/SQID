@@ -4,7 +4,7 @@ use crate::{
     sparql,
     types::{ClassDataFile, ClassRecord, Classes, DataFile, Item, Settings},
 };
-use anyhow::{Context, Result};
+use anyhow::Result;
 
 pub(super) fn update_class_records(settings: &Settings) -> Result<()> {
     log::info!("Fetching class ids and labels for classes with direct instances ...");

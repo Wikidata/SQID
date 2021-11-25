@@ -333,7 +333,7 @@ mod test {
     use super::*;
     use std::convert::TryInto;
 
-    use test_env_log::test;
+    use test_log::test;
 
     #[test]
     fn entity_from_string() {

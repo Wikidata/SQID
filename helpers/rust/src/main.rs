@@ -17,8 +17,8 @@
 
 use std::{path::PathBuf, str::FromStr};
 
-use anyhow::{anyhow, Result};
-use clap::{App, Arg, ArgMatches};
+use anyhow::Result;
+use clap::{App, Arg};
 use env_logger::Env;
 use statistics::process_dump;
 use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
@@ -28,6 +28,7 @@ use crate::{
     classes::{update_class_records, update_derived_class_records},
     properties::{update_derived_property_records, update_property_records},
     statistics::check_for_new_dump,
+    types::DumpInfo,
 };
 
 mod classes;
@@ -48,7 +49,7 @@ enum Action {
 }
 
 impl Action {
-    fn perform(&self, settings: &Settings, matches: &ArgMatches) -> Result<()> {
+    fn perform(&self, settings: &Settings) -> Result<()> {
         match self {
             Self::Properties => update_property_records(settings),
             Self::Classes => update_class_records(settings),
@@ -59,7 +60,7 @@ impl Action {
                 Ok(())
             }
             Self::CheckDump => check_for_new_dump(settings),
-            Self::ProcessDump => process_dump(settings, matches.value_of("dump").ok_or(anyhow!("expected dump file wasn't present")?)),
+            Self::ProcessDump => process_dump(settings),
         }
     }
 }
@@ -154,6 +155,13 @@ fn main() {
                 .default_value("INFO"),
         )
         .arg(
+            Arg::with_name("date")
+                .long("date")
+                .takes_value(true)
+                .hidden(true)
+                .required_if("only", "process-dump"),
+        )
+        .arg(
             Arg::with_name("dump")
                 .hidden(true)
                 .last(true)
@@ -197,18 +205,38 @@ fn main() {
         std::process::exit(1);
     }
 
-    let settings = Settings::new(matches.value_of("path").expect("path should be set"));
+    if matches.is_present("date") && only != Some(Action::ProcessDump) {
+        log::error!("a dump date can only be specified together with --only=process-dump");
+        std::process::exit(1);
+    }
+
+    let mut settings = Settings::new(matches.value_of("path").expect("path should be set"));
+
+    if let Some(Action::ProcessDump) = only {
+        let date = matches.value_of("date").expect("date should be set");
+        settings.dump_info = Some(DumpInfo {
+            date: types::utc_from_str(date).expect("date should parse"),
+            path: Box::new(
+                matches
+                    .value_of("dump")
+                    .expect("dump path should be set")
+                    .into(),
+            ),
+        });
+    }
+
     let state = match only {
-        Some(action) => action.perform(&settings, &matches),
+        Some(action) => action.perform(&settings),
         None => Action::iter().try_for_each(|action| match action {
             Action::Derived => {
                 if matches.is_present("no-derived") {
                     Ok(())
                 } else {
-                    action.perform(&settings, &matches)
+                    action.perform(&settings)
                 }
             }
-            _ => action.perform(&settings, &matches),
+            Action::ProcessDump => Ok(()),
+            _ => action.perform(&settings),
         }),
     };
 

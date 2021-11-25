@@ -1,7 +1,11 @@
 use crate::types::Settings;
 use anyhow::{Context, Result};
 use chrono::{Date, NaiveDate, TimeZone, Utc};
-use std::fs;
+use flate2::read::GzDecoder;
+use std::{
+    fs::{self, File},
+    io::{BufRead, BufReader},
+};
 
 /// Check for a new dump file. If present, queue a job on the grid to
 /// rebuild the full statistics.
@@ -53,6 +57,41 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     todo!()
 }
 
-pub(super) fn process_dump(settings: &Settings, dump: DumpInfo) -> Result<()> {
+pub(super) fn process_dump(settings: &Settings) -> Result<()> {
+    let dump_info = settings
+        .dump_info
+        .as_ref()
+        .context("dump info should be set")?;
+    log::info!(
+        "Processing dump {}, dated {}",
+        dump_info.path.to_str().context("dump path should parse")?,
+        dump_info.date
+    );
+
+    let dump = File::open(dump_info.path.as_path())?;
+    let decoder = GzDecoder::new(dump);
+    let mut reader = BufReader::new(decoder);
+    let mut line = String::new();
+
+    reader.read_line(&mut line)?;
+    assert_eq!(line, "[\n");
+
+    let mut count: usize = 0;
+    loop {
+        count += 1;
+        line.clear();
+        reader.read_line(&mut line)?;
+
+        if count % 100 == 0 {
+            log::debug!("line {}", count);
+        }
+
+        if line.starts_with("]") {
+            break;
+        };
+    }
+
+    assert_eq!(line, "]\n");
+
     todo!()
 }

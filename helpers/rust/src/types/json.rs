@@ -422,7 +422,7 @@ pub(crate) mod formats {
         #[cfg(test)]
         mod test {
             use chrono::NaiveDate;
-            use test_env_log::test;
+            use test_log::test;
 
             use super::*;
 
@@ -465,11 +465,15 @@ pub(crate) mod formats {
     }
 
     pub(crate) mod date {
-        use chrono::NaiveDate;
+        use chrono::{NaiveDate, ParseError};
 
         use super::*;
 
         const FORMAT: &str = "%Y%m%d";
+
+        pub fn utc_from_str(s: &str) -> Result<Date<Utc>, ParseError> {
+            NaiveDate::parse_from_str(s, FORMAT).map(|date| Date::from_utc(date, Utc))
+        }
 
         pub fn serialize<S>(date: &Option<Date<Utc>>, serializer: S) -> Result<S::Ok, S::Error>
         where
@@ -487,11 +491,7 @@ pub(crate) mod formats {
         {
             let s: Option<String> = Option::deserialize(deserializer)?;
             match s {
-                Some(s) => Ok(Some(
-                    NaiveDate::parse_from_str(&s, FORMAT)
-                        .map(|date| Date::from_utc(date, Utc))
-                        .map_err(serde::de::Error::custom)?,
-                )),
+                Some(ref s) => Ok(Some(utc_from_str(s).map_err(serde::de::Error::custom)?)),
                 None => Ok(None),
             }
         }
@@ -499,7 +499,7 @@ pub(crate) mod formats {
         #[cfg(test)]
         mod test {
             use chrono::{NaiveDate, TimeZone};
-            use test_env_log::test;
+            use test_log::test;
 
             use super::*;
 
@@ -534,7 +534,7 @@ mod test {
     use indoc::indoc;
     use std::{fs::File, io::Read};
     use strum::IntoEnumIterator;
-    use test_env_log::test;
+    use test_log::test;
 
     use super::*;
 

@@ -105,7 +105,7 @@ pub fn classes_fallback() -> Result<Vec<ClassLabelAndUsage>> {
 mod test {
     use super::*;
     use indoc::indoc;
-    use test_env_log::test;
+    use test_log::test;
 
     #[test]
     fn simple_query() {

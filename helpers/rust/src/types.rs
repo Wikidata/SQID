@@ -11,8 +11,8 @@ mod sparql;
 
 pub use ids::{Entity, Item, Property, Qualifier, Reference};
 pub use json::{
-    ClassRecord, Classes, EntityStatistics, Properties, PropertyClassification, PropertyRecord,
-    PropertyUsageRecord, SiteRecord, Statistics, Type,
+    formats::date::utc_from_str, ClassRecord, Classes, EntityStatistics, Properties,
+    PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
 
@@ -28,12 +28,14 @@ pub(crate) fn is_zero(value: &usize) -> bool {
 pub(crate) struct Settings {
     data_directory: Box<PathBuf>,
     pub(crate) dump_directory: Box<PathBuf>,
+    pub(crate) dump_info: Option<DumpInfo>,
 }
 
+/// Holds information on the current dump file to process.
 #[derive(Debug)]
 pub(crate) struct DumpInfo {
-    date: Date<Utc>,
-    path: Box<PathBuf>,
+    pub(crate) date: Date<Utc>,
+    pub(crate) path: Box<PathBuf>,
 }
 
 /// The different kinds of split properties files we use and/or update.
@@ -176,6 +178,7 @@ impl Settings {
         Self {
             data_directory: Box::new(data.into()),
             dump_directory: Box::new("/public/dumps/public/wikidatawiki/entities/".into()),
+            dump_info: None,
         }
     }
 
@@ -295,7 +298,7 @@ impl Settings {
 #[cfg(test)]
 mod test {
     use super::{DataFile, PropertyDataFile};
-    use test_env_log::test;
+    use test_log::test;
 
     #[test]
     fn test_data_file_names() {
