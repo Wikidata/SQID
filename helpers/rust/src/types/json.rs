@@ -433,7 +433,7 @@ pub(crate) mod formats {
             const TEXT_WITH_TIMEZONE: &str = r#""2016-04-19T08:23:40+0000""#;
 
             #[test]
-            fn test_deserialize() {
+            fn deserialize() {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result: Result<Data, _> = serde_json::from_str(TEXT);
@@ -443,7 +443,7 @@ pub(crate) mod formats {
             }
 
             #[test]
-            fn test_deserialize_with_timezone() {
+            fn deserialize_with_timezone() {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result: Result<Data, _> = serde_json::from_str(TEXT_WITH_TIMEZONE);
@@ -453,7 +453,7 @@ pub(crate) mod formats {
             }
 
             #[test]
-            fn test_serialize() {
+            fn serialize() {
                 let date =
                     Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
                 let result = serde_json::to_string(&Data(Some(date)));
@@ -509,7 +509,7 @@ pub(crate) mod formats {
             const TEXT: &str = r#""20160419""#;
 
             #[test]
-            fn test_deserialize() {
+            fn deserialize() {
                 let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
                 let result = serde_json::from_str::<Data>(TEXT);
                 log::debug!("{:?}", result);
@@ -518,7 +518,7 @@ pub(crate) mod formats {
             }
 
             #[test]
-            fn test_serialize() {
+            fn serialize() {
                 let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
                 let result = serde_json::to_string(&Data(Some(date)));
                 log::debug!("{:?}", result);
