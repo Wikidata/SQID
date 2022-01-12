@@ -8,6 +8,7 @@ use tempfile::NamedTempFile;
 mod ids;
 mod json;
 mod sparql;
+mod statistics;
 
 pub use ids::{Entity, Item, Property, Qualifier, Reference};
 pub use json::{
@@ -15,6 +16,7 @@ pub use json::{
     PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
+pub use statistics::DumpStatistics;
 
 /// Returns true if the value is zero. Used to skip serialisation for
 /// empty counters.

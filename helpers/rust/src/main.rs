@@ -240,9 +240,11 @@ fn main() {
         }),
     };
 
-    if state.is_err() {
+    if let Err(error) = state {
         log::error!("An error occurred. Exiting.");
-        log::error!("{}", state.unwrap_err());
+        for cause in error.chain() {
+            log::error!("{}", cause);
+        }
         std::process::exit(1);
     }
 }

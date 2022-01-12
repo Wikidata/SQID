@@ -1,5 +1,5 @@
-use crate::types::Settings;
 use anyhow::{Context, Result};
+use crate::types::{Settings, DumpStatistics};
 use chrono::{Date, NaiveDate, TimeZone, Utc};
 use flate2::read::GzDecoder;
 use std::{
@@ -77,6 +77,7 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     assert_eq!(line, "[\n");
 
     let mut count: usize = 0;
+    let mut statistics = DumpStatistics::new();
     loop {
         count += 1;
         line.clear();
@@ -86,9 +87,11 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
             log::debug!("line {}", count);
         }
 
-        if line.starts_with("]") {
+        if line.starts_with(']') {
             break;
         };
+
+        statistics.process_line(&line)?;
     }
 
     assert_eq!(line, "]\n");

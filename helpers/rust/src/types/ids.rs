@@ -1,4 +1,7 @@
-use std::num::ParseIntError;
+use std::{
+    convert::{TryFrom, TryInto},
+    num::ParseIntError,
+};
 
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
@@ -12,6 +15,9 @@ const REFERENCE: &str = "http://www.wikidata.org/prop/reference/";
 pub enum EntityKind {
     Item,
     Property,
+    Lexeme,
+    Sense(Lexeme),
+    Form(Lexeme),
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
@@ -36,6 +42,27 @@ impl Entity {
         }
     }
 
+    pub fn lexeme(id: u64) -> Self {
+        Self {
+            id,
+            kind: EntityKind::Lexeme,
+        }
+    }
+
+    pub fn sense(sense: Sense) -> Self {
+        Self {
+            id: sense.1,
+            kind: EntityKind::Sense(sense.0),
+        }
+    }
+
+    pub fn form(form: Form) -> Self {
+        Self {
+            id: form.1,
+            kind: EntityKind::Form(form.0),
+        }
+    }
+
     pub fn as_item(&self) -> Option<Item> {
         match self.kind {
             EntityKind::Item => Some(Item::new(self.id)),
@@ -49,6 +76,27 @@ impl Entity {
             _ => None,
         }
     }
+
+    pub fn as_lexeme(&self) -> Option<Lexeme> {
+        match self.kind {
+            EntityKind::Lexeme => Some(Lexeme::new(self.id)),
+            _ => None,
+        }
+    }
+
+    pub fn as_sense(&self) -> Option<Sense> {
+        match self.kind {
+            EntityKind::Sense(lexeme) => Some(Sense::new(lexeme, self.id)),
+            _ => None,
+        }
+    }
+
+    pub fn as_form(&self) -> Option<Form> {
+        match self.kind {
+            EntityKind::Form(lexeme) => Some(Form::new(lexeme, self.id)),
+            _ => None,
+        }
+    }
 }
 
 impl TryFrom<String> for Entity {
@@ -57,13 +105,24 @@ impl TryFrom<String> for Entity {
     fn try_from(str: String) -> Result<Self> {
         let item = format!("{}Q", ENTITY);
         let prop = format!("{}P", ENTITY);
+        let lex = format!("{}P", ENTITY);
 
-        if let Some(qid) = str.strip_prefix(&item) {
+        if let Some(qid) = str.strip_prefix(&item).or_else(|| str.strip_prefix('Q')) {
             Ok(Self::item(qid.parse().context("Failed to parse QID")?))
-        } else if let Some(pid) = str.strip_prefix(&prop) {
+        } else if let Some(pid) = str.strip_prefix(&prop).or_else(|| str.strip_prefix('P')) {
             Ok(Self::property(pid.parse().context("Failed to parse PID")?))
+        } else if let Some(lid) = str.strip_prefix(&lex).or_else(|| str.strip_prefix('L')) {
+            if let Ok(lid) = lid.parse() {
+                Ok(Self::lexeme(lid))
+            } else if let Ok(sense) = Sense::try_from(lid.to_string()) {
+                Ok(Self::sense(sense))
+            } else if let Ok(form) = Form::try_from(lid.to_string()) {
+                Ok(Self::form(form))
+            } else {
+                Err(anyhow!("Failed to parse LID"))
+            }
         } else {
-            Err(anyhow!("Invalid entity prefix"))
+            Err(anyhow!("Invalid entity prefix: {:?}", str))
         }
     }
 }
@@ -73,6 +132,9 @@ impl From<Entity> for String {
         match entity.kind {
             EntityKind::Item => format!("Q{}", entity.id),
             EntityKind::Property => format!("P{}", entity.id),
+            EntityKind::Lexeme => format!("L{}", entity.id),
+            EntityKind::Sense(lexeme) => format!("L{}-S{}", lexeme.0, entity.id),
+            EntityKind::Form(lexeme) => format!("L{}-F{}", lexeme.0, entity.id),
         }
     }
 }
@@ -172,6 +234,7 @@ impl TryFrom<String> for Item {
     fn try_from(str: String) -> Result<Self, Self::Error> {
         Ok(Self(
             str.strip_prefix(&format!("{}Q", ENTITY))
+                .or_else(|| str.strip_prefix('Q'))
                 .unwrap_or(&str)
                 .parse()?,
         ))
@@ -234,6 +297,7 @@ impl TryFrom<String> for Property {
     fn try_from(str: String) -> Result<Self, Self::Error> {
         Ok(Self(
             str.strip_prefix(&format!("{}P", PROPERTY))
+                .or_else(|| str.strip_prefix('P'))
                 .unwrap_or(&str)
                 .parse()?,
         ))
@@ -325,6 +389,97 @@ impl From<Reference> for String {
 impl From<u64> for Reference {
     fn from(id: u64) -> Self {
         Self(id)
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(try_from = "String", into = "String")]
+pub struct Lexeme(pub(crate) u64);
+
+impl Lexeme {
+    fn new(id: u64) -> Self {
+        Self(id)
+    }
+}
+
+impl TryFrom<String> for Lexeme {
+    type Error = ParseIntError;
+
+    fn try_from(str: String) -> Result<Self, Self::Error> {
+        Ok(Self(
+            str.strip_prefix(&format!("{}L", ENTITY))
+                .or_else(|| str.strip_prefix('L'))
+                .unwrap_or(&str)
+                .parse()?,
+        ))
+    }
+}
+
+impl From<Lexeme> for String {
+    fn from(lexeme: Lexeme) -> Self {
+        format!("{}", lexeme.0)
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(try_from = "String", into = "String")]
+pub struct Sense(pub(crate) Lexeme, pub(crate) u64);
+
+impl Sense {
+    fn new(lexeme: Lexeme, id: u64) -> Self {
+        Self(lexeme, id)
+    }
+}
+
+impl TryFrom<String> for Sense {
+    type Error = anyhow::Error;
+
+    fn try_from(str: String) -> Result<Self, Self::Error> {
+        let (lexeme, sense) = str.rsplit_once('-').context("Failed splitting sense ID")?;
+        Ok(Self(
+            lexeme
+                .to_string()
+                .try_into()
+                .context("Failed to parse lexeme ID")?,
+            sense.strip_prefix('S').unwrap_or(sense).parse()?,
+        ))
+    }
+}
+
+impl From<Sense> for String {
+    fn from(sense: Sense) -> Self {
+        format!("{}-S{}", sense.0 .0, sense.1)
+    }
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[serde(try_from = "String", into = "String")]
+pub struct Form(pub(crate) Lexeme, pub(crate) u64);
+
+impl Form {
+    fn new(lexeme: Lexeme, id: u64) -> Self {
+        Self(lexeme, id)
+    }
+}
+
+impl TryFrom<String> for Form {
+    type Error = anyhow::Error;
+
+    fn try_from(str: String) -> Result<Self, Self::Error> {
+        let (lexeme, form) = str.rsplit_once('-').context("Failed splitting form ID")?;
+        Ok(Self(
+            lexeme
+                .to_string()
+                .try_into()
+                .context("Failed to parse lexeme ID")?,
+            form.strip_prefix('F').unwrap_or(form).parse()?,
+        ))
+    }
+}
+
+impl From<Form> for String {
+    fn from(sense: Form) -> Self {
+        format!("{}-F{}", sense.0 .0, sense.1)
     }
 }
 

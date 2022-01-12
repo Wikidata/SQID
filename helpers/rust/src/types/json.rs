@@ -1,5 +1,6 @@
 use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::collections::HashMap;
 use strum::{Display, EnumIter, EnumString};
 
@@ -18,97 +19,130 @@ pub enum Type {
         to_string = "WikibaseItem",
         serialize = "http://wikiba.se/ontology#WikibaseItem"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#WikibaseItem")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#WikibaseItem",
+        alias = "wikibase-item"
+    )]
     WikibaseItem,
     #[strum(
         to_string = "WikibaseProperty",
         serialize = "http://wikiba.se/ontology#WikibaseProperty"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#WikibaseProperty")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#WikibaseProperty",
+        alias = "wikibase-property"
+    )]
     WikibaseProperty,
     #[strum(
         to_string = "WikibaseLexeme",
         serialize = "http://wikiba.se/ontology#WikibaseLexeme"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#WikibaseLexeme")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#WikibaseLexeme",
+        alias = "wikibase-lexeme"
+    )]
     WikibaseLexeme,
     #[strum(
         to_string = "WikibaseForm",
         serialize = "http://wikiba.se/ontology#WikibaseForm"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#WikibaseForm")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#WikibaseForm",
+        alias = "wikibase-form"
+    )]
     WikibaseForm,
     #[strum(
         to_string = "WikibaseSense",
         serialize = "http://wikiba.se/ontology#WikibaseSense"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#WikibaseSense")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#WikibaseSense",
+        alias = "wikibase-sense"
+    )]
     WikibaseSense,
     #[strum(
         to_string = "WikibaseMediaInfo",
         serialize = "http://wikiba.se/ontology#WikibaseMediaInfo"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#WikibaseMediaInfo")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#WikibaseMediaInfo",
+        alias = "wikibase-media-info"
+    )]
     WikibaseMediaInfo,
     #[strum(to_string = "String", serialize = "http://wikiba.se/ontology#String")]
-    #[serde(alias = "http://wikiba.se/ontology#String")]
+    #[serde(alias = "http://wikiba.se/ontology#String", alias = "string")]
     String,
     #[strum(to_string = "Url", serialize = "http://wikiba.se/ontology#Url")]
-    #[serde(alias = "http://wikiba.se/ontology#Url")]
+    #[serde(alias = "http://wikiba.se/ontology#Url", alias = "url")]
     Url,
     #[strum(
         to_string = "CommonsMedia",
         serialize = "http://wikiba.se/ontology#CommonsMedia"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#CommonsMedia")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#CommonsMedia",
+        alias = "commonsMedia"
+    )]
     CommonsMedia,
     #[strum(to_string = "Time", serialize = "http://wikiba.se/ontology#Time")]
-    #[serde(alias = "http://wikiba.se/ontology#Time")]
+    #[serde(alias = "http://wikiba.se/ontology#Time", alias = "time")]
     Time,
     #[strum(
         to_string = "GlobeCoordinate",
         serialize = "http://wikiba.se/ontology#GlobeCoordinate"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#GlobeCoordinate")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#GlobeCoordinate",
+        alias = "globe-coordinate"
+    )]
     GlobeCoordinate,
     #[strum(
         to_string = "Quantity",
         serialize = "http://wikiba.se/ontology#Quantity"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#Quantity")]
+    #[serde(alias = "http://wikiba.se/ontology#Quantity", alias = "quantity")]
     Quantity,
     #[strum(
         to_string = "Monolingualtext",
         serialize = "http://wikiba.se/ontology#Monolingualtext"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#Monolingualtext")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#Monolingualtext",
+        alias = "monolingualtext"
+    )]
     Monolingualtext,
     #[strum(
         to_string = "ExternalId",
         serialize = "http://wikiba.se/ontology#ExternalId"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#ExternalId")]
+    #[serde(alias = "http://wikiba.se/ontology#ExternalId", alias = "external-id")]
     ExternalId,
     #[strum(to_string = "Math", serialize = "http://wikiba.se/ontology#Math")]
-    #[serde(alias = "http://wikiba.se/ontology#Math")]
+    #[serde(alias = "http://wikiba.se/ontology#Math", alias = "math")]
     Math,
     #[strum(
         to_string = "GeoShape",
         serialize = "http://wikiba.se/ontology#GeoShape"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#GeoShape")]
+    #[serde(alias = "http://wikiba.se/ontology#GeoShape", alias = "geo-shape")]
     GeoShape,
     #[strum(
         to_string = "TabularData",
         serialize = "http://wikiba.se/ontology#TabularData"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#TabularData")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#TabularData",
+        alias = "tabular-data"
+    )]
     TabularData,
     #[strum(
         to_string = "MusicalNotation",
         serialize = "http://wikiba.se/ontology#MusicalNotation"
     )]
-    #[serde(alias = "http://wikiba.se/ontology#MusicalNotation")]
+    #[serde(
+        alias = "http://wikiba.se/ontology#MusicalNotation",
+        alias = "musical-notation"
+    )]
     MusicalNotation,
 }
 
@@ -378,6 +412,238 @@ pub struct Statistics {
     pub(crate) items: EntityStatistics,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub(crate) sites: HashMap<String, SiteRecord>,
+}
+
+pub(crate) mod dump {
+    use super::*;
+    use crate::types::ids::Entity;
+
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase", tag = "type")]
+    pub enum Record {
+        Item {
+            id: Item,
+            sitelinks: HashMap<String, Sitelink>,
+            #[serde(flatten)]
+            common: CommonData,
+        },
+        Property {
+            id: Property,
+            datatype: Type,
+            #[serde(flatten)]
+            common: CommonData,
+        },
+    }
+
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct CommonData {
+        #[serde(skip_serializing_if = "HashMap::is_empty")]
+        labels: HashMap<String, LanguageValue>,
+        #[serde(skip_serializing_if = "HashMap::is_empty")]
+        descriptions: HashMap<String, LanguageValue>,
+        #[serde(skip_serializing_if = "HashMap::is_empty")]
+        aliases: HashMap<String, Vec<LanguageValue>>,
+        #[serde(skip_serializing_if = "HashMap::is_empty")]
+        claims: HashMap<Property, Vec<Statement>>,
+        lastrevid: usize,
+        #[serde(
+            with = "formats::timestamp",
+            default,
+            skip_serializing_if = "Option::is_none"
+        )]
+        modified: Option<DateTime<Utc>>,
+    }
+
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase", tag = "type")]
+    pub enum Statement {
+        Statement {
+            id: String,
+            mainsnak: Snak,
+            #[serde(default)]
+            rank: Rank,
+            #[serde(default)]
+            qualifiers: HashMap<Property, Vec<Snak>>,
+            #[serde(default, skip_serializing_if = "Vec::is_empty")]
+            qualifiers_order: Vec<Property>,
+            #[serde(default, skip_serializing_if = "Vec::is_empty")]
+            references: Vec<Reference>,
+        },
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct Sitelink {
+        site: String,
+        title: String,
+        badges: Vec<Item>,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct LanguageValue {
+        language: String,
+        value: String,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub enum Rank {
+        Normal,
+        Preferred,
+        Deprecated,
+    }
+
+    impl Default for Rank {
+        fn default() -> Self {
+            Self::Normal
+        }
+    }
+
+    #[allow(variant_size_differences)]
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "lowercase", tag = "snaktype")]
+    pub enum Snak {
+        Value {
+            property: Property,
+            datatype: Type,
+            datavalue: DataValue,
+        },
+        SomeValue {
+            property: Property,
+        },
+        NoValue {
+            property: Property,
+        },
+    }
+
+    #[derive(Default, Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "kebab-case")]
+    pub struct Reference {
+        hash: String,
+        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        snaks_order: Vec<Property>,
+        #[serde(skip_serializing_if = "HashMap::is_empty")]
+        snaks: HashMap<Property, Vec<Snak>>,
+    }
+
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "kebab-case", tag = "type")]
+    pub enum DataValue {
+        String {
+            value: String,
+        },
+        WikibaseEntityid {
+            value: EntityId,
+        },
+        #[serde(rename = "globecoordinate")]
+        GlobeCoordinate {
+            value: GlobeCoordinate,
+        },
+        Quantity {
+            value: Quantity,
+        },
+        Time {
+            value: Time,
+        },
+        #[serde(rename = "monolingualtext")]
+        MonolingualText {
+            value: MonolingualText,
+        },
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "kebab-case")]
+    pub struct EntityId {
+        entity_type: EntityType,
+        id: Entity,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        numeric_id: Option<u64>,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "lowercase")]
+    pub enum EntityType {
+        Item,
+        Property,
+        Lexeme,
+        Sense,
+        Form,
+    }
+
+    #[derive(Debug, PartialEq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct GlobeCoordinate {
+        latitude: f64,
+        longitude: f64,
+        #[serde(default = "GlobeCoordinate::default_globe")]
+        globe: Item,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        altitude: Option<f64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        precision: Option<f64>,
+    }
+
+    impl GlobeCoordinate {
+        fn default_globe() -> Item {
+            Item::new(2)
+        }
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct Quantity {
+        amount: String,
+        unit: Item,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        upperbound: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        lowerbound: Option<String>,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    pub struct Time {
+        #[serde(
+            skip, // FIXME
+            with = "formats::dump_timestamp",
+            default,
+            skip_serializing_if = "Option::is_none"
+        )]
+        time: Option<DateTime<Utc>>,
+        timezone: i16,
+        before: u64,
+        after: u64,
+        precision: TimePrecision,
+        calendarmodel: Item,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[serde(rename_all = "camelCase")]
+    pub struct MonolingualText {
+        language: String,
+        text: String,
+    }
+
+    #[derive(Debug, PartialEq, Eq, Deserialize_repr, Serialize_repr)]
+    #[repr(u8)]
+    pub enum TimePrecision {
+        BillionYears = 0,
+        HundredMillionYears = 1,
+        TenMillionYears = 2,
+        MillionYears = 3,
+        HundredThousandYears = 4,
+        TenThousandYears = 5,
+        Millenium = 6,
+        Century = 7,
+        Decade = 8,
+        Year = 9,
+        Month = 10,
+        Day = 11,
+        Hour = 12,
+        Minute = 13,
+        Second = 14,
+    }
 }
 
 pub(crate) mod formats {
