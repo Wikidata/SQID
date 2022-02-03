@@ -50,11 +50,11 @@
 
               buildInputs = [
                 inputs.node2nix
-                pkgs.nodejs-12_x
+                pkgs.nodejs-14_x
                 pkgs.nodePackages.eslint
                 pkgs.nodePackages.typescript
                 pkgs.nodePackages.typescript-language-server
-                pkgs.nodePackages.vue-language-server
+                pkgs.nodePackages.vls
                 pkgs.nodePackages.vscode-css-languageserver-bin
                 pkgs.nodePackages.vscode-html-languageserver-bin
                 pkgs.nodePackages.vue-cli
