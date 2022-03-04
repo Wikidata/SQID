@@ -7,6 +7,7 @@ use tempfile::NamedTempFile;
 
 mod ids;
 mod json;
+mod php;
 mod sparql;
 mod statistics;
 
