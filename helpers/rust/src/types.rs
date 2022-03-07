@@ -9,6 +9,7 @@ mod ids;
 mod json;
 mod php;
 mod sparql;
+mod sql;
 mod statistics;
 
 pub use ids::{Entity, Item, Property, Qualifier, Reference};
@@ -17,6 +18,7 @@ pub use json::{
     PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
+pub use sql::{query_sites, Credentials};
 pub use statistics::DumpStatistics;
 
 /// Returns true if the value is zero. Used to skip serialisation for

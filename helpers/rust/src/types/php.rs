@@ -64,6 +64,17 @@ pub struct SitePaths {
     page: String,
 }
 
+impl SitePaths {
+    pub fn page_url(&self) -> &str {
+        &self.page
+    }
+
+    #[allow(dead_code)]
+    pub fn file_url(&self) -> &str {
+        &self.file
+    }
+}
+
 impl FromStr for SitePaths {
     type Err = anyhow::Error;
 

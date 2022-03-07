@@ -11,6 +11,8 @@ use super::{
     ClassLabelAndUsage,
 };
 
+const ENGLISH: &str = "en";
+
 #[derive(
     Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize, Serialize, Display, EnumString, EnumIter,
 )]
@@ -382,7 +384,18 @@ pub struct SiteRecord {
     pub(crate) items: usize,
 }
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+impl SiteRecord {
+    pub fn new(group: String, language: String, url_pattern: String) -> Self {
+        Self {
+            group: Some(group),
+            language: Some(language),
+            url_pattern: Some(url_pattern),
+            items: 0,
+        }
+    }
+}
+
+#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Statistics {
     #[serde(
@@ -439,13 +452,13 @@ pub(crate) mod dump {
     #[serde(rename_all = "camelCase")]
     pub struct CommonData {
         #[serde(skip_serializing_if = "HashMap::is_empty")]
-        labels: HashMap<String, LanguageValue>,
+        pub(crate) labels: HashMap<String, LanguageValue>,
         #[serde(skip_serializing_if = "HashMap::is_empty")]
-        descriptions: HashMap<String, LanguageValue>,
+        pub(crate) descriptions: HashMap<String, LanguageValue>,
         #[serde(skip_serializing_if = "HashMap::is_empty")]
-        aliases: HashMap<String, Vec<LanguageValue>>,
+        pub(crate) aliases: HashMap<String, Vec<LanguageValue>>,
         #[serde(skip_serializing_if = "HashMap::is_empty")]
-        claims: HashMap<Property, Vec<Statement>>,
+        pub(crate) claims: HashMap<Property, Vec<Statement>>,
         lastrevid: usize,
         #[serde(
             with = "formats::timestamp",
@@ -453,6 +466,16 @@ pub(crate) mod dump {
             skip_serializing_if = "Option::is_none"
         )]
         modified: Option<DateTime<Utc>>,
+    }
+
+    impl CommonData {
+        pub(crate) fn label_for(&self, language: &str) -> Option<String> {
+            self.labels.get(language).map(|label| label.value.clone())
+        }
+
+        pub(crate) fn label(&self) -> Option<String> {
+            self.label_for(ENGLISH)
+        }
     }
 
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -501,7 +524,7 @@ pub(crate) mod dump {
         }
     }
 
-    #[allow(variant_size_differences)]
+    #[allow(variant_size_differences, clippy::enum_variant_names)]
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     #[serde(rename_all = "lowercase", tag = "snaktype")]
     pub enum Snak {

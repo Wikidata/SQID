@@ -17,18 +17,17 @@
 
 use std::{path::PathBuf, str::FromStr};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use clap::{App, Arg};
 use env_logger::Env;
 use statistics::process_dump;
 use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
-use types::Settings;
 
 use crate::{
     classes::{update_class_records, update_derived_class_records},
     properties::{update_derived_property_records, update_property_records},
     statistics::check_for_new_dump,
-    types::DumpInfo,
+    types::{query_sites, Credentials, DumpInfo, Settings},
 };
 
 mod classes;
@@ -46,6 +45,7 @@ enum Action {
     Derived,
     CheckDump,
     ProcessDump,
+    Sites,
 }
 
 impl Action {
@@ -61,6 +61,16 @@ impl Action {
             }
             Self::CheckDump => check_for_new_dump(settings),
             Self::ProcessDump => process_dump(settings),
+            Self::Sites => {
+                let creds = Credentials::from_replica_my_cnf()
+                    .context(anyhow::anyhow!("Failed to get credential information"))?;
+                log::info!("Credentials: {}", creds.to_string());
+
+                let sites = query_sites(&creds).context("failed to query for sites")?;
+                sites.for_each(|(site, record)| log::info!("Site: {} -> {:?}", site, record));
+
+                Ok(())
+            }
         }
     }
 }

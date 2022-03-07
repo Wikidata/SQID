@@ -57,6 +57,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     todo!()
 }
 
+/// Actually process the dump file to gather statistics
 pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     let dump_info = settings
         .dump_info
