@@ -427,6 +427,15 @@ pub struct Statistics {
     pub(crate) sites: HashMap<String, SiteRecord>,
 }
 
+impl Statistics {
+    pub(crate) fn update_sitelinks(
+        &mut self,
+        sitelinks: impl Iterator<Item = (String, SiteRecord)>,
+    ) {
+        todo!()
+    }
+}
+
 pub(crate) mod dump {
     use super::*;
     use crate::types::ids::Entity;

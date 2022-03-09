@@ -27,6 +27,7 @@ impl DumpStatistics {
     pub fn with_sites(sites: &mut impl Iterator<Item = (String, SiteRecord)>) -> Self {
         let mut result = Self::new();
         result.sitelinks = sites.collect();
+        log::info!("Got {} sitelink records", result.sitelinks.len());
 
         result
     }

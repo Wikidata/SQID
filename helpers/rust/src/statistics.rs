@@ -1,5 +1,5 @@
+use crate::types::{sitelinks, DataFile, DumpStatistics, Settings, Statistics};
 use anyhow::{Context, Result};
-use crate::types::{Settings, DumpStatistics};
 use chrono::{Date, NaiveDate, TimeZone, Utc};
 use flate2::read::GzDecoder;
 use std::{
@@ -57,12 +57,26 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     todo!()
 }
 
+pub(super) fn update_sitelinks(settings: &Settings) -> Result<()> {
+    log::info!("Fetching sitelink information");
+    let sitelinks = sitelinks()?;
+
+    log::info!("Reading old sitelink data ...");
+    let mut statistics: Statistics = settings.get_data(DataFile::Statistics)?;
+
+    log::info!("Augmenting current sitelink data ...");
+    statistics.update_sitelinks(sitelinks);
+    log::info!("Augmented current sitelink data.");
+    Ok(())
+}
+
 /// Actually process the dump file to gather statistics
 pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     let dump_info = settings
         .dump_info
         .as_ref()
         .context("dump info should be set")?;
+
     log::info!(
         "Processing dump {}, dated {}",
         dump_info.path.to_str().context("dump path should parse")?,
@@ -77,8 +91,9 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     reader.read_line(&mut line)?;
     assert_eq!(line, "[\n");
 
+    let mut stats: Statistics = settings.get_data(DataFile::Statistics)?;
     let mut count: usize = 0;
-    let mut statistics = DumpStatistics::new();
+    let mut statistics = DumpStatistics::with_sites(&mut stats.sites.into_iter());
     loop {
         count += 1;
         line.clear();

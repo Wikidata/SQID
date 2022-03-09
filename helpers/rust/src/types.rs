@@ -18,7 +18,7 @@ pub use json::{
     PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
-pub use sql::{query_sites, Credentials};
+pub use sql::sitelinks;
 pub use statistics::DumpStatistics;
 
 /// Returns true if the value is zero. Used to skip serialisation for

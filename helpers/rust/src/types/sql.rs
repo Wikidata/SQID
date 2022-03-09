@@ -46,9 +46,7 @@ impl ToString for Credentials {
     }
 }
 
-pub fn query_sites(
-    credentials: &Credentials,
-) -> Result<impl Iterator<Item = (String, SiteRecord)>> {
+fn query_sites(credentials: &Credentials) -> Result<impl Iterator<Item = (String, SiteRecord)>> {
     let opts =
         Opts::from_url(&credentials.to_string()).context("failed to parse connection URL")?;
     let pool = Pool::new(opts).context("failed to create connection pool")?;
@@ -72,6 +70,12 @@ pub fn query_sites(
     Ok(result.into_iter().flatten())
 }
 
+pub fn sitelinks() -> Result<impl Iterator<Item = (String, SiteRecord)>> {
+    let credentials = Credentials::from_replica_my_cnf()
+        .context(anyhow::anyhow!("Failed to get credential information"))?;
+    query_sites(&credentials).context("failed to query for sites")
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -85,7 +89,7 @@ mod test {
 
         assert_eq!(
             creds.to_string(),
-            format!("MySQL://test:pass@{}/{}", HOST, DATABASE)
+            format!("mysql://test:pass@{}/{}", HOST, DATABASE)
         );
     }
 }
