@@ -432,7 +432,9 @@ impl Statistics {
         &mut self,
         sitelinks: impl Iterator<Item = (String, SiteRecord)>,
     ) {
-        todo!()
+        sitelinks.for_each(|(site, record)| {
+            *self.sites.entry(site).or_default() = record;
+        });
     }
 }
 
