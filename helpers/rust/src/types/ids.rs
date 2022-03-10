@@ -330,6 +330,12 @@ impl Qualifier {
     }
 }
 
+impl From<Property> for Qualifier {
+    fn from(prop: Property) -> Self {
+        Self(prop.0)
+    }
+}
+
 impl TryFrom<String> for Qualifier {
     type Error = ParseIntError;
 

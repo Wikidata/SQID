@@ -506,6 +506,34 @@ pub(crate) mod dump {
         },
     }
 
+    impl Statement {
+        pub fn mainsnak(&self) -> &Snak {
+            match self {
+                Statement::Statement {
+                    id: _,
+                    mainsnak,
+                    rank: _,
+                    qualifiers: _,
+                    qualifiers_order: _,
+                    references: _,
+                } => mainsnak,
+            }
+        }
+
+        pub fn qualifiers(&self) -> impl Iterator<Item = (&Property, &Vec<Snak>)> {
+            match self {
+                Statement::Statement {
+                    id: _,
+                    mainsnak: _,
+                    rank: _,
+                    qualifiers,
+                    qualifiers_order: _,
+                    references: _,
+                } => qualifiers.iter(),
+            }
+        }
+    }
+
     #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
     #[serde(rename_all = "camelCase")]
     pub struct Sitelink {
@@ -552,6 +580,19 @@ pub(crate) mod dump {
         },
     }
 
+    impl Snak {
+        pub fn as_data_value(&self) -> Option<&DataValue> {
+            match self {
+                Snak::Value {
+                    property: _,
+                    datatype: _,
+                    datavalue,
+                } => Some(datavalue),
+                _ => None,
+            }
+        }
+    }
+
     #[derive(Default, Debug, PartialEq, Deserialize, Serialize)]
     #[serde(rename_all = "kebab-case")]
     pub struct Reference {
@@ -587,11 +628,20 @@ pub(crate) mod dump {
         },
     }
 
+    impl DataValue {
+        pub fn as_entity_id(&self) -> Option<&EntityId> {
+            match self {
+                DataValue::WikibaseEntityid { value } => Some(value),
+                _ => None,
+            }
+        }
+    }
+
     #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
     #[serde(rename_all = "kebab-case")]
     pub struct EntityId {
-        entity_type: EntityType,
-        id: Entity,
+        pub(crate) entity_type: EntityType,
+        pub(crate) id: Entity,
         #[serde(skip_serializing_if = "Option::is_none")]
         numeric_id: Option<u64>,
     }

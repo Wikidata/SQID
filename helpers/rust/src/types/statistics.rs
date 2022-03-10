@@ -1,5 +1,7 @@
 use anyhow::{bail, Context, Result};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+use crate::types::ids::properties;
 
 use super::{
     ids::{EntityKind, Item, Property},
@@ -17,9 +19,13 @@ pub struct DumpStatistics {
     sitelinks: HashMap<String, SiteRecord>,
     statistics: Statistics,
     total_sitelinks: usize,
+    total_entities: usize,
+    entities_with_properties: usize,
 }
 
 impl DumpStatistics {
+    const REPORT_INTERVAL: usize = 100000;
+
     pub fn new() -> Self {
         Default::default()
     }
@@ -117,10 +123,58 @@ impl DumpStatistics {
     }
 
     fn process_claims(&mut self, common: &CommonData, target: EntityKind) -> Result<()> {
-        match target {
-            EntityKind::Item => todo!(),
-            EntityKind::Property => todo!(),
+        self.total_entities += 1;
+        let mut stats = match target {
+            EntityKind::Item => &mut self.statistics.items,
+            EntityKind::Property => &mut self.statistics.properties,
             _ => bail!("Unsupported entity kind {:?}", target),
+        };
+
+        stats.count += 1;
+
+        if !common.claims.is_empty() {
+            self.entities_with_properties += 1;
         }
+
+        let mut superclasses = HashSet::new();
+        if let Some(statements) = common.claims.get(&properties::INSTANCE_OF) {
+            statements.iter().for_each(|statement| {
+                if let Some(class_id) = statement
+                    .mainsnak()
+                    .as_data_value()
+                    .and_then(|value| value.as_entity_id())
+                    .and_then(|id| id.id.as_item())
+                {
+                    superclasses.insert(class_id);
+                    let mut superclass = self.classes.entry(class_id).or_default();
+                    superclass.direct_instances += 1;
+                    superclasses.extend(superclass.superclasses.iter());
+                }
+            });
+
+            superclasses.iter().for_each(|&class_id| {
+                self.classes.entry(class_id).or_default().all_instances += 1;
+                // @TODO(mx): count co-occurring properties
+            });
+        };
+
+        common.claims.iter().for_each(|(&property, statements)| {
+            stats.statements += statements.len();
+            let mut prop = self.properties.entry(property).or_default();
+            prop.in_items += 1;
+            // @TODO(mx): count co-occurring properties
+
+            statements.iter().for_each(|statement| {
+                statement.qualifiers().for_each(|(&qualifier, _)| {
+                    *prop.with_qualifiers.entry(qualifier.into()).or_default() += 1;
+                });
+            });
+        });
+
+        if self.total_entities % Self::REPORT_INTERVAL == 0 {
+            log::info!("Processed {} entities", self.total_entities);
+        }
+
+        Ok(())
     }
 }
