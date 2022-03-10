@@ -67,7 +67,7 @@ pub(super) fn update_sitelinks(settings: &Settings) -> Result<()> {
     log::info!("Augmenting current sitelink data ...");
     statistics.update_sitelinks(sitelinks);
     log::info!("Augmented current sitelink data.");
-    Ok(())
+    settings.replace_data(DataFile::Statistics, &statistics)
 }
 
 /// Actually process the dump file to gather statistics
