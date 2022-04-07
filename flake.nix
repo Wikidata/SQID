@@ -20,16 +20,19 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    rust-analyzer.url = "github:NixOS/nixpkgs/e905ff84a5aa262415919c6436cf04bb916c7341";
   };
 
   outputs = { self, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
+        rust-analyzer = import inputs.rust-analyzer { inherit system; };
         overlays = [
           (import inputs.rust-overlay)
           (final: prev: {
             cargo = final.pkgs.rust-bin.stable.latest.default;
             rustc = final.pkgs.rust-bin.stable.latest.default;
+            inherit (rust-analyzer.pkgs) rust-analyzer-unwrapped rust-analyzer;
           })
           (import ./nix { inherit (inputs) gitignoresrc; })
         ];

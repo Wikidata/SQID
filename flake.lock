@@ -101,7 +101,24 @@
         "gitignoresrc": "gitignoresrc",
         "nixpkgs": "nixpkgs",
         "node2nix": "node2nix",
+        "rust-analyzer": "rust-analyzer",
         "rust-overlay": "rust-overlay"
+      }
+    },
+    "rust-analyzer": {
+      "locked": {
+        "lastModified": 1649276380,
+        "narHash": "sha256-oqp0hT71ZIyqgGV74oBh6oXMzcdwELTPpmGIf72OTFc=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e905ff84a5aa262415919c6436cf04bb916c7341",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e905ff84a5aa262415919c6436cf04bb916c7341",
+        "type": "github"
       }
     },
     "rust-overlay": {
