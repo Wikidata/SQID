@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -20,19 +21,18 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    rust-analyzer.url = "github:NixOS/nixpkgs/e905ff84a5aa262415919c6436cf04bb916c7341";
   };
 
   outputs = { self, flake-utils, ... }@inputs:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        rust-analyzer = import inputs.rust-analyzer { inherit system; };
+        unstable = (import inputs.nixpkgs-unstable { inherit system; });
         overlays = [
           (import inputs.rust-overlay)
           (final: prev: {
             cargo = final.pkgs.rust-bin.stable.latest.default;
             rustc = final.pkgs.rust-bin.stable.latest.default;
-            inherit (rust-analyzer.pkgs) rust-analyzer-unwrapped rust-analyzer;
+            inherit (unstable.pkgs) rust-analyzer-unwrapped rust-analyzer;
           })
           (import ./nix { inherit (inputs) gitignoresrc; })
         ];
