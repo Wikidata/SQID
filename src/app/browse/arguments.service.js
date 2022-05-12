@@ -9,11 +9,11 @@ define([
 
 angular.module('browse').factory('arguments', ['$http', '$route', 'util', 'i18n', function($http, $route, util, i18n){
 	  var filterLimits = {
-		  'instances': 10E6,
-		  'subclasses': 5E6,
-		  'statements': 100E6,
-		  'qualifiers': 50E6,
-		  'references': 20E6,
+		  'instances': 10E7,
+		  'subclasses': 5E7,
+		  'statements': 10E9,
+		  'qualifiers': 50E7,
+		  'references': 20E7,
 	  };
 
 	  var args = {};
