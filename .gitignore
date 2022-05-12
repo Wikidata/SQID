@@ -47,3 +47,4 @@ helpers/rust/target
 /.project
 .log
 /target/
+/.direnv/
