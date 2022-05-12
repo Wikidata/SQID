@@ -14,8 +14,12 @@ rustPlatform.buildRustPackage rec {
   src = gitignoreSource ../../helpers/rust;
 
   cargoLock = {
-    lockFile = ../../helpers/rust/Cargo.lock;
+    lockFile = ../../Cargo.lock;
   };
+
+  postPatch = ''
+    cp ${../../Cargo.lock} Cargo.lock
+  '';
 
   nativeBuildInputs = [
     rustc
