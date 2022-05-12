@@ -4,75 +4,90 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-21.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
+
+    utils.url = "github:gytis-ivaskevicius/flake-utils-plus";
+
     gitignoresrc = {
       url = "github:hercules-ci/gitignore.nix";
       flake = false;
     };
+
     node2nix = {
       url = "github:svanderburg/node2nix";
       flake = false;
     };
+
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "utils";
+      };
     };
   };
 
-  outputs = { self, flake-utils, ... }@inputs:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
-        unstable = (import inputs.nixpkgs-unstable { inherit system; });
-        overlays = [
-          (import inputs.rust-overlay)
+  outputs = inputs@{ self, utils, ... }:
+    let
+      sqid-overlay = import ./nix { inherit (inputs) gitignoresrc; };
+    in
+    utils.lib.mkFlake
+      {
+        inherit self inputs;
+
+        supportedSystems = [ "x86_64-linux" ];
+
+        channels.nixpkgs.overlaysBuilder = channels: [
+          inputs.rust-overlay.overlay
           (final: prev: {
             cargo = final.pkgs.rust-bin.stable.latest.default;
             rustc = final.pkgs.rust-bin.stable.latest.default;
-            inherit (unstable.pkgs) rust-analyzer-unwrapped rust-analyzer;
+            inherit (channels.nixpkgs-unstable) rust-analyzer rust-analyzer-unwrapped;
           })
-          (import ./nix { inherit (inputs) gitignoresrc; })
+          sqid-overlay
         ];
-        pkgs = import inputs.nixpkgs { inherit system overlays; };
-      in
-      rec {
-        packages = flake-utils.lib.flattenTree {
-          inherit (pkgs) sqid-helper;
-        };
-        defaultPackage = packages.sqid-helper;
-        apps.sqid-helper = flake-utils.lib.mkApp { drv = packages.sqid-helper; };
-        defaultApp = apps.sqid-helper;
-        devShell =
-          pkgs.mkShell
-            {
+
+        overlays.default = sqid-overlay;
+
+        outputsBuilder = channels:
+          {
+            packages = rec {
+              sqid-helper = channels.nixpkgs.sqid-helper;
+              default = sqid-helper;
+            };
+
+            apps = rec {
+              sqid-helper = utils.lib.mkApp {
+                drv = channels.nixpkgs.sqid-helper;
+              };
+              default = sqid-helper;
+            };
+
+            devShell = channels.nixpkgs.mkShell {
               RUST_LOG = "debug";
               RUST_BACKTRACE = "1";
 
-              buildInputs = [
+              buildInputs = with channels.nixpkgs; [
                 inputs.node2nix
-                pkgs.nodejs-14_x
-                pkgs.nodePackages.eslint
-                pkgs.nodePackages.typescript
-                pkgs.nodePackages.typescript-language-server
-                pkgs.nodePackages.vls
-                pkgs.nodePackages.vscode-css-languageserver-bin
-                pkgs.nodePackages.vscode-html-languageserver-bin
-                pkgs.nodePackages.vue-cli
-                pkgs.bashInteractive
-                pkgs.rust-bin.nightly.latest.rustfmt
-                pkgs.rust-bin.stable.latest.default
-                pkgs.rust-analyzer
-                pkgs.cargo-audit
-                pkgs.cargo-license
-                pkgs.python37
-                pkgs.ansible
-                pkgs.openssl
-                pkgs.pkg-config
+                nodejs-16_x
+                nodePackages.eslint
+                nodePackages.typescript
+                nodePackages.typescript-language-server
+                nodePackages.vls
+                nodePackages.vscode-css-languageserver-bin
+                nodePackages.vscode-html-languageserver-bin
+                nodePackages.vue-cli
+                bashInteractive
+                rust-bin.nightly.latest.rustfmt
+                rust-bin.stable.latest.default
+                rust-analyzer
+                cargo-audit
+                cargo-license
+                python37
+                ansible
+                openssl
+                pkg-config
               ];
             };
-      }
-    );
+          };
+      };
 }

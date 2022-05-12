@@ -1,4 +1,4 @@
-{ gitignoresrc }: final: prev:
+{ gitignoresrc, ... }: final: prev:
 
 let
   gitignoreSource = (import gitignoresrc { inherit (final.pkgs) lib; }).gitignoreSource;
