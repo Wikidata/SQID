@@ -92,7 +92,8 @@
     "rust-overlay": {
       "inputs": {
         "flake-utils": [
-          "utils"
+          "utils",
+          "flake-utils"
         ],
         "nixpkgs": [
           "nixpkgs"
