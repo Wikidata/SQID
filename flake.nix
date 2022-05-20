@@ -34,8 +34,6 @@
       {
         inherit self inputs;
 
-        supportedSystems = [ "x86_64-linux" ];
-
         channels.nixpkgs.overlaysBuilder = channels: [
           inputs.rust-overlay.overlay
           (final: prev: {
