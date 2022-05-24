@@ -270,6 +270,9 @@ pub mod properties {
     pub const TOPIC_MAIN_WIKIMEDIA_PORTAL: Property = Property(1151);
     /// Wikipedia portal's main topic
     pub const PORTAL_MAIN_TOPIC: Property = Property(1204);
+    /// Formatter URL, a URI template in which `$1` can be
+    /// automatically replaced with the property value on items.
+    pub const FORMATTER_URL: Property = Property(1630);
 }
 
 impl Property {

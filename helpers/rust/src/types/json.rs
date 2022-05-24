@@ -314,7 +314,7 @@ pub struct ClassRecord {
     #[serde(rename = "sc", skip_serializing_if = "Vec::is_empty")]
     pub(crate) superclasses: Vec<Item>,
     #[serde(rename = "sb", skip_serializing_if = "Vec::is_empty")]
-    pub(crate) non_empty_superclasses: Vec<Item>,
+    pub(crate) non_empty_subclasses: Vec<Item>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, usize>,
 }
@@ -335,7 +335,7 @@ impl ClassRecord {
             all_instances: self.all_instances,
             all_subclassces: self.all_subclassces,
             superclasses: self.superclasses.clone(),
-            non_empty_superclasses: self.non_empty_superclasses.clone(),
+            non_empty_subclasses: self.non_empty_subclasses.clone(),
             related_properties: self.related_properties.clone(),
         }
     }
@@ -532,6 +532,19 @@ pub(crate) mod dump {
                 } => qualifiers.iter(),
             }
         }
+
+        pub fn rank(&self) -> Rank {
+            match self {
+                Statement::Statement {
+                    id: _,
+                    mainsnak: _,
+                    rank,
+                    qualifiers: _,
+                    qualifiers_order: _,
+                    references: _,
+                } => *rank,
+            }
+        }
     }
 
     #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -549,7 +562,7 @@ pub(crate) mod dump {
         value: String,
     }
 
-    #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+    #[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
     #[serde(rename_all = "camelCase")]
     pub enum Rank {
         Normal,

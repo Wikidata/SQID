@@ -1,8 +1,9 @@
-use crate::types::{sitelinks, DataFile, DumpStatistics, Settings, Statistics};
+use crate::types::{sitelinks, ClassRecord, DataFile, DumpStatistics, Item, Settings, Statistics};
 use anyhow::{Context, Result};
 use chrono::{Date, NaiveDate, TimeZone, Utc};
 use flate2::read::GzDecoder;
 use std::{
+    collections::HashMap,
     fs::{self, File},
     io::{BufRead, BufReader},
 };
@@ -91,9 +92,11 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     reader.read_line(&mut line)?;
     assert_eq!(line, "[\n");
 
-    let mut stats: Statistics = settings.get_data(DataFile::Statistics)?;
+    let stats: Statistics = settings.get_data(DataFile::Statistics)?;
+    let classes: HashMap<Item, ClassRecord> = settings.get_data(DataFile::Classes)?;
     let mut count: usize = 0;
-    let mut statistics = DumpStatistics::with_sites(&mut stats.sites.into_iter());
+    let mut statistics =
+        DumpStatistics::with_classes_and_sites(classes, &mut stats.sites.into_iter());
     loop {
         count += 1;
         line.clear();

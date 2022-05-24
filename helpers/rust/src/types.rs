@@ -12,7 +12,7 @@ mod sparql;
 mod sql;
 mod statistics;
 
-pub use ids::{Entity, Item, Property, Qualifier, Reference};
+pub use ids::{properties, Entity, Item, Property, Qualifier, Reference};
 pub use json::{
     formats::date::utc_from_str, ClassRecord, Classes, EntityStatistics, Properties,
     PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,

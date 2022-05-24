@@ -1,12 +1,12 @@
 use anyhow::{bail, Context, Result};
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::types::ids::properties;
 
 use super::{
     ids::{EntityKind, Item, Property},
     json::{
-        dump::{CommonData, Record, Sitelink},
+        dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
     SiteRecord, Statistics, Type,
@@ -30,12 +30,36 @@ impl DumpStatistics {
         Default::default()
     }
 
-    pub fn with_sites(sites: &mut impl Iterator<Item = (String, SiteRecord)>) -> Self {
+    pub fn with_classes_and_sites(
+        classes: HashMap<Item, ClassRecord>,
+        sites: &mut impl Iterator<Item = (String, SiteRecord)>,
+    ) -> Self {
         let mut result = Self::new();
+        result.classes = classes;
+        log::info!("Got {} class records", result.classes.len());
+        let added = result.close_subclasses();
+        log::info!("Added {} indirect subclass relationships", added);
+
         result.sitelinks = sites.collect();
         log::info!("Got {} sitelink records", result.sitelinks.len());
 
         result
+    }
+
+    fn close_subclasses(&mut self) -> usize {
+        let mut added = 0;
+        let mut class_queue = self.classes.keys().cloned().collect::<VecDeque<_>>();
+
+        while let Some(class) = class_queue.pop_front() {
+            let mut class_record = self.classes.entry(class).or_default();
+            class_record.d
+
+
+            class_queue.extend(class_record.superclasses.iter());
+            todo!()
+        }
+
+        added
     }
 
     pub(crate) fn process_line(&mut self, line: &str) -> Result<()> {
@@ -71,9 +95,7 @@ impl DumpStatistics {
         sitelinks: &HashMap<String, Sitelink>,
         common: &CommonData,
     ) -> Result<()> {
-        self.classes
-            .entry(item)
-            .and_modify(|class| class.label = common.label());
+        self.classes.entry(item).or_default().label = common.label();
 
         self.total_sitelinks += sitelinks.len();
         sitelinks
@@ -92,7 +114,41 @@ impl DumpStatistics {
         datatype: Type,
         common: &CommonData,
     ) -> Result<()> {
-        todo!()
+        let mut record = &mut self.properties.entry(property).or_default();
+        record.label = common.label();
+        record.datatype = Some(datatype);
+
+        // find best URL pattern
+        let mut pattern = None;
+        if let Some(claims) = common.claims.get(&properties::FORMATTER_URL) {
+            for claim in claims {
+                if let Some(value) = claim.mainsnak().as_data_value() {
+                    if pattern.is_none() || claim.rank() == Rank::Preferred {
+                        pattern = Some(value);
+                    }
+                }
+            }
+        }
+
+        // collect classes this property belongs to
+        if let Some(claims) = common.claims.get(&properties::INSTANCE_OF) {
+            claims.iter().for_each(|claim| {
+                if let Some(class) = claim
+                    .mainsnak()
+                    .as_data_value()
+                    .and_then(|value| value.as_entity_id())
+                {
+                    record
+                        .instance_of
+                        .push(class.id.as_item().expect("class Id should be an Item"))
+                }
+            });
+        }
+
+        self.process_terms(common, EntityKind::Property)
+            .context("Failed to process the terms")?;
+        self.process_claims(common, EntityKind::Property)
+            .context("Failed to process the claims")
     }
 
     fn process_sitelink(&mut self, site: &str, _sitelink: &Sitelink) -> Result<()> {
