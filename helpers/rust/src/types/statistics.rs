@@ -52,8 +52,7 @@ impl DumpStatistics {
 
         while let Some(class) = class_queue.pop_front() {
             let mut class_record = self.classes.entry(class).or_default();
-            class_record.d
-
+            //class_record
 
             class_queue.extend(class_record.superclasses.iter());
             todo!()
