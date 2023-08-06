@@ -63,10 +63,9 @@
             nodePackages.eslint
             nodePackages.typescript
             nodePackages.typescript-language-server
-            nodePackages.vls
+            nodePackages.volar
             nodePackages.vscode-css-languageserver-bin
             nodePackages.vscode-html-languageserver-bin
-            nodePackages.vue-cli
             cargo-audit
             cargo-license
             python310
