@@ -35,6 +35,7 @@ yarn-error.log*
 #*#
 *~
 flycheck_*.*
+
 public/oauth/vendor/
 
 helpers/java/dependency-reduced-pom.xml
@@ -44,7 +45,9 @@ helpers/java/.project
 helpers/java/.settings
 helpers/java/dumpfiles
 helpers/rust/target
-/.project
+
 .log
-/target/
+/.project
 /.direnv/
+/target/
+/components.d.ts

@@ -1,7 +1,7 @@
 import { sparqlRequest } from './index'
 import { sparqlEndpoint, MAX_SIMULTANEOUS_SPARQL_REQUESTS } from './endpoints'
-import { EntityId, Rank, SparqlValue, SparqlBinding, SqidStatement } from './types'
-import { TaskQueue } from 'cwait'
+import type { EntityId, Rank, SparqlValue, SparqlBinding, SqidStatement } from './types'
+import PQueue from 'p-queue'
 
 export const MAX_RELATED_BATCH = 101
 
@@ -48,17 +48,22 @@ function statementValue(binding: SparqlValue) {
 }
 
 export async function sparqlQuery(query: string): Promise<SparqlBinding[]> {
-  const response = await sparqlRequest(sparqlEndpoint,
-                                     `#TOOL:SQID, https://tools.wmflabs.org/sqid/
-${query}`)
+  const response = await sparqlRequest(
+    sparqlEndpoint,
+    `#TOOL:SQID, https://tools.wmflabs.org/sqid/
+${query}`,
+  )
   return response.results.bindings
 }
 
 export async function sparqlQueries(queries: string[]): Promise<SparqlBinding[][]> {
-  const queue = new TaskQueue(Promise, MAX_SIMULTANEOUS_SPARQL_REQUESTS)
-  const query = queue.wrap(sparqlQuery)
+  const queue = new PQueue({ concurrency: MAX_SIMULTANEOUS_SPARQL_REQUESTS })
 
-  return Promise.all(queries.map(query))
+  return await queue.addAll(
+    queries.map((query) => {
+      return () => sparqlQuery(query)
+    }),
+  )
 }
 
 export async function getRelatedStatements(entityId: EntityId): Promise<SqidStatement[]> {
@@ -70,16 +75,17 @@ export async function getRelatedStatements(entityId: EntityId): Promise<SqidStat
   } else {
     // there might be more, fetch each property individually
     const properties = await getRelatingProperties(entityId)
-    const results = await sparqlQueries(properties.map((propertyId) => {
-      return relatingStatementsForPropertyQuery(entityId, propertyId, MAX_RELATED_BATCH)
-    }))
+    const results = await sparqlQueries(
+      properties.map((propertyId) => {
+        return relatingStatementsForPropertyQuery(entityId, propertyId, MAX_RELATED_BATCH)
+      }),
+    )
 
     return results.flatMap(statementsFromBindings)
   }
 }
 
-async function getRelatingStatements(entityId: EntityId, limit: number):
-Promise<SqidStatement[]> {
+async function getRelatingStatements(entityId: EntityId, limit: number): Promise<SqidStatement[]> {
   const result = await sparqlQuery(`SELECT DISTINCT ?it ?s ?p ?r WHERE {
   ?p wikibase:statementProperty ?ps ;
   wikibase:claim ?pc .
@@ -92,10 +98,12 @@ Promise<SqidStatement[]> {
   return statementsFromBindings(result)
 }
 
-function relatingStatementsForPropertyQuery(entityId: EntityId,
-                                            propertyId: EntityId,
-                                            limit: number): string {
-return `SELECT DISTINCT ?it ?s ?p ?r WHERE {
+function relatingStatementsForPropertyQuery(
+  entityId: EntityId,
+  propertyId: EntityId,
+  limit: number,
+): string {
+  return `SELECT DISTINCT ?it ?s ?p ?r WHERE {
 BIND(wd:${propertyId} AS ?p) .
 ?s ps:${propertyId} wd:${entityId} ;
   wikibase:rank ?r .
@@ -115,14 +123,14 @@ async function getRelatingProperties(entityId: EntityId): Promise<EntityId[]> {
   })
 }
 
-function propertySubjectsQuery(propertyId: EntityId,
-                               lang: string,
-                               object?: EntityId,
-                               limit?: number,
-                               resultVariable = 'p'): string {
-  const obj = (object
-               ? `wd:${object}`
-               : '[]')
+function propertySubjectsQuery(
+  propertyId: EntityId,
+  lang: string,
+  object?: EntityId,
+  limit?: number,
+  resultVariable = 'p',
+): string {
+  const obj = object ? `wd:${object}` : '[]'
   const limitClause = limit ? ` LIMIT ${limit} ` : ''
 
   return `SELECT ?${resultVariable} ?${resultVariable}Label WHERE {{
@@ -133,24 +141,27 @@ function propertySubjectsQuery(propertyId: EntityId,
 }`
 }
 
-export async function getPropertySubjects(propertyId: EntityId, lang: string, limit: number, entityId?: EntityId) {
+export async function getPropertySubjects(
+  propertyId: EntityId,
+  lang: string,
+  limit: number,
+  entityId?: EntityId,
+) {
   const result = await sparqlQuery(propertySubjectsQuery(propertyId, lang, entityId, limit))
 
   return result.map((binding) => {
-    return { entityId: entityValue(binding.p),
-             label: binding.pLabel.value,
-           }
+    return { entityId: entityValue(binding.p), label: binding.pLabel.value }
   })
 }
 
-function propertyObjectsQuery(propertyId: EntityId,
-                              lang: string,
-                              subject?: EntityId,
-                              limit?: number,
-                              resultVariable = 'p'): string {
-  const subj = (subject
-                ? `wd:${subject}`
-                : '[]')
+function propertyObjectsQuery(
+  propertyId: EntityId,
+  lang: string,
+  subject?: EntityId,
+  limit?: number,
+  resultVariable = 'p',
+): string {
+  const subj = subject ? `wd:${subject}` : '[]'
   const limitClause = limit ? ` LIMIT ${limit} ` : ''
 
   return `SELECT ?${resultVariable} ?${resultVariable}Label WHERE {{
@@ -161,12 +172,15 @@ function propertyObjectsQuery(propertyId: EntityId,
 }`
 }
 
-export async function getPropertyObjects(propertyId: EntityId, lang: string, limit: number, entityId?: EntityId) {
+export async function getPropertyObjects(
+  propertyId: EntityId,
+  lang: string,
+  limit: number,
+  entityId?: EntityId,
+) {
   const result = await sparqlQuery(propertyObjectsQuery(propertyId, lang, entityId, limit))
 
   return result.map((binding) => {
-    return { entityId: entityValue(binding.p),
-             label: binding.pLabel.value,
-           }
+    return { entityId: entityValue(binding.p), label: binding.pLabel.value }
   })
 }

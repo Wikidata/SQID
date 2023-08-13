@@ -1,5 +1,5 @@
-import { Literal, Rule, ParseResult, SomeVariable, Variable, SetVariable } from './types'
-import { SqidRuleSchema } from '@/api/types'
+import type { Literal, Rule, ParseResult, SomeVariable, Variable, SetVariable } from './types'
+import type { SqidRuleSchema } from '@/api/types'
 import Ajv from 'ajv'
 
 type visitor<T> = (node: ParseResult, children?: T[]) => T[]
@@ -10,7 +10,7 @@ function walk<T>(ast: ParseResult | ParseResult[], visit: visitor<T>): T[] {
   }
 
   switch (ast.type) {
-      // leaf nodes
+    // leaf nodes
     case 'some-variable':
     case 'variable':
     case 'literal':
@@ -26,44 +26,51 @@ function walk<T>(ast: ParseResult | ParseResult[], visit: visitor<T>): T[] {
     case 'open-specifier':
       return visit(ast, walk(ast.assignments, visit))
 
-    case 'assignment':
+    case 'assignment': {
       const attribute = walk(ast.attribute, visit)
       const value = walk(ast.value, visit)
       return visit(ast, [attribute, value].flat())
+    }
 
     case 'function-term':
       return visit(ast, walk(ast.arguments, visit))
 
-    case 'relational-atom':
+    case 'relational-atom': {
       const predicate = walk(ast.predicate, visit)
       const args = walk(ast.arguments, visit)
       const annotation = walk(ast.annotation, visit)
       return visit(ast, [predicate, args, annotation].flat())
+    }
 
     case 'set-atom':
-    case 'specifier-atom':
+    case 'specifier-atom': {
       const set = walk(ast.set, visit)
       const specifier = walk(ast.specifier, visit)
       return visit(ast, [set, specifier].flat())
+    }
 
     case 'union':
     case 'intersection':
     case 'difference':
       return visit(ast, walk(ast.specifiers, visit))
 
-    case 'rule':
+    case 'rule': {
       const body = walk(ast.body, visit)
       const head = walk(ast.head, visit)
       return visit(ast, [body, head].flat())
+    }
 
-    default:
+    default: {
       const _: never = ast
       return _
+    }
   }
 }
 
-function collectVariables(ast: ParseResult,
-                          children?: Array<SomeVariable | Variable | SetVariable>) {
+function collectVariables(
+  ast: ParseResult,
+  children?: Array<SomeVariable | Variable | SetVariable>,
+) {
   switch (ast.type) {
     case 'some-variable':
     case 'variable':
@@ -102,9 +109,10 @@ function collectStrings(ast: ParseResult, children?: string[]) {
     case 'plus':
       return ['+']
 
-    case 'dot':
+    case 'dot': {
       const [fromSpecifier, item] = children || []
       return [`${fromSpecifier}.${item}`]
+    }
 
     case 'set-term':
       if (children === undefined) {
@@ -124,10 +132,10 @@ function collectStrings(ast: ParseResult, children?: string[]) {
       }
       return [`(${children.join(', ')})`]
 
-    case 'assignment':
+    case 'assignment': {
       const [attribute, value] = children || []
       return [`${attribute} = ${value}`]
-
+    }
     case 'function-term':
       if (children === undefined) {
         return [`${ast.name}()`]
@@ -136,14 +144,15 @@ function collectStrings(ast: ParseResult, children?: string[]) {
 
     case 'relational-atom': {
       const [predicate, left, right, annotation] = children || []
-      const maybeAnnotation = ((annotation.length > 0) ? `@${annotation}` : '')
+      const maybeAnnotation = annotation.length > 0 ? `@${annotation}` : ''
       return [`(${left}.${predicate} = ${right})${maybeAnnotation}`]
     }
 
     case 'set-atom':
-    case 'specifier-atom':
+    case 'specifier-atom': {
       const [set, specifier] = children || []
       return [`${set}:${specifier}`]
+    }
 
     case 'union': {
       const [left, right] = children || []
@@ -160,13 +169,15 @@ function collectStrings(ast: ParseResult, children?: string[]) {
       return [`(${left} \\ ${right})`]
     }
 
-    case 'rule':
+    case 'rule': {
       const [head, ...body] = (children || []).reverse()
       return [`${body.reverse().join(', ')} -> ${head}`]
+    }
 
-    default:
+    default: {
       const _: never = ast
       return _
+    }
   }
 }
 

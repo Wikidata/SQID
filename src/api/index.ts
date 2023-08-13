@@ -1,5 +1,5 @@
 import { http } from '@/http'
-import { ApiResult, SparqlResult } from './types'
+import type { ApiResult, SparqlResult } from './types'
 
 export async function apiRequest(endpoint: string, query: any): Promise<ApiResult> {
   const response = await http.get(endpoint, {

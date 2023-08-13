@@ -33,4 +33,5 @@ const app = createApp(App)
   .use(router)
   .use(i18n)
   .component('font-awesome-icon', FontAwesomeIcon)
-  .mount('#app')
+
+app.mount('#app')

@@ -26,23 +26,23 @@ export interface SparqlList<T> {
 }
 
 export interface SparqlValue {
-  type: 'uri',
-  value: string,
+  type: 'uri'
+  value: string
 }
 
 export interface SparqlBinding {
-  [key: string]: SparqlValue,
+  [key: string]: SparqlValue
 }
 
 export interface SparqlResults {
-  bindings: SparqlBinding[],
+  bindings: SparqlBinding[]
 }
 
 export type SparqlHead = SparqlList<string>
 
 export interface SparqlResult {
-  head: SparqlHead,
-  results: SparqlResults,
+  head: SparqlHead
+  results: SparqlResults
 }
 
 export type PageResult = ImagePageResult
@@ -69,14 +69,14 @@ export interface ImageInfo {
 }
 
 export interface EntityResult {
-  type: EntityKind,
-  id: EntityId,
-  datatype?: WBDatatype,
-  labels?: ResultList<TermResult>,
-  descriptions?: ResultList<TermResult>,
-  aliases?: ResultList<TermResult>,
-  claims?: ResultList<Claim>,
-  sitelinks?: ResultList<EntitySiteLink>,
+  type: EntityKind
+  id: EntityId
+  datatype?: WBDatatype
+  labels?: ResultList<TermResult>
+  descriptions?: ResultList<TermResult>
+  aliases?: ResultList<TermResult>
+  claims?: ResultList<Claim>
+  sitelinks?: ResultList<EntitySiteLink>
 }
 
 export interface TermResult {
@@ -97,10 +97,18 @@ export interface Claim {
   references: Reference[]
 }
 
-export type SnakType = 'value'
-export type WBDatatype = 'wikibase-item' | 'wikibase-property' |
-  'wikibase-lexeme' | 'wikibase-form' | 'wikibase-sense' |
-  'globe-coordinate' | 'time' | 'monolingualtext' | 'quantity' | 'commonsMedia'
+export type SnakType = 'value' | 'somevalue' | 'novalue'
+export type WBDatatype =
+  | 'wikibase-item'
+  | 'wikibase-property'
+  | 'wikibase-lexeme'
+  | 'wikibase-form'
+  | 'wikibase-sense'
+  | 'globe-coordinate'
+  | 'time'
+  | 'monolingualtext'
+  | 'quantity'
+  | 'commonsMedia'
 
 export interface Snak {
   snaktype: SnakType
@@ -110,7 +118,13 @@ export interface Snak {
   datatype: WBDatatype
 }
 
-export type DatavalueKind = 'wikibase-entityid' | 'time' | 'globecoordinate' | 'string' | 'monolingualtext' | 'quantity'
+export type DatavalueKind =
+  | 'wikibase-entityid'
+  | 'time'
+  | 'globecoordinate'
+  | 'string'
+  | 'monolingualtext'
+  | 'quantity'
 
 export interface Datavalue {
   type: DatavalueKind
@@ -138,32 +152,42 @@ export interface TimeDataValue extends Datavalue {
 }
 
 export interface TimeValue {
-  time: string,
-  precision: number,
-  calendarmodel: string,
+  time: string
+  precision: number
+  calendarmodel: string
 }
 
 export interface GlobeCoordinateValue extends Datavalue {
-  type: 'globecoordinate',
-  value: GlobeCoordinate,
+  type: 'globecoordinate'
+  value: GlobeCoordinate
 }
 
 export interface GlobeCoordinate {
-  latitude: number,
-  longitude: number,
-  precision: number,
-  globe: string,
-  altitude?: null,
+  latitude: number
+  longitude: number
+  precision: number
+  globe: string
+  altitude?: null
 }
 
 export interface QuantityDataValue extends Datavalue {
-  type: 'quantity',
-  value: QuantityValue,
+  type: 'quantity'
+  value: QuantityValue
 }
 
 export interface QuantityValue {
-  amount: string,
-  unit?: '1' | EntityId,
+  amount: string
+  unit?: '1' | EntityId
+}
+
+export interface MonolingualTextDataValue extends Datavalue {
+  type: 'monolingualtext'
+  value: MonolingualTextValue
+}
+
+export interface MonolingualTextValue {
+  text: string
+  language: string
 }
 
 export interface Reference {
@@ -201,78 +225,78 @@ export type EntityKind = 'item' | 'property' | 'lexeme' | 'form' | 'sense'
 export type EntityId = string
 export type StatementId = string
 export interface EntityReference {
-  id: number,
-  kind: EntityKind,
-  subId?: number,
+  id: number
+  kind: EntityKind
+  subId?: number
 }
 
 export type SqidRuleSchema = object
 
 export interface SqidEntityStatistics {
-  c: number,
-  cLabels: number,
-  cStmts: number,
-  cDesc: number,
-  cAliases: number,
+  c: number
+  cLabels: number
+  cStmts: number
+  cDesc: number
+  cAliases: number
 }
 
 export interface SqidHierarchyRecord {
-  i?: number,
-  s?: number,
-  ai?: number,
-  as?: number,
-  sc?: EntityId[],
-  sb?: EntityId[],
-  r?: ResultList<number>,
+  i?: number
+  s?: number
+  ai?: number
+  as?: number
+  sc?: EntityId[]
+  sb?: EntityId[]
+  r?: ResultList<number>
 }
 
 export interface SqidPropertyUsageRecord {
-  i?: number,
-  s?: number,
-  q?: number,
-  e?: number,
-  qs?: ResultList<number>,
-  pc?: EntityId[],
+  i?: number
+  s?: number
+  q?: number
+  e?: number
+  qs?: ResultList<number>
+  pc?: EntityId[]
 }
 
 export interface SqidStatistics {
-  dumpDate: string,
-  classUpdate: string,
-  propertyUpdate: string,
-  propertyStatistics: SqidEntityStatistics,
-  itemStatistics: SqidEntityStatistics,
-  siteLinkCount: number,
-  sites: ResultList<SqidSiteLink>,
+  dumpDate: string
+  classUpdate: string
+  propertyUpdate: string
+  propertyStatistics: SqidEntityStatistics
+  itemStatistics: SqidEntityStatistics
+  siteLinkCount: number
+  sites: ResultList<SqidSiteLink>
 }
 
 export interface EntitySiteLink {
-  site: string,
-  title: string,
-  url?: string,
-  badges: EntityId[],
+  site: string
+  title: string
+  url?: string
+  badges: EntityId[]
 }
 
 export type SiteName = string
 export interface SqidSiteLink {
-  l: string,
-  i: number,
-  u: string,
-  g: string,
+  l: string
+  i: number
+  u: string
+  g: string
 }
 
 export type SiteLinkMap = Map<SiteName, SqidSiteLink>
 
 export interface SqidStatement {
-  item: EntityId,
-  statement: StatementId,
-  property: EntityId,
-  rank: Rank,
+  item: EntityId
+  statement: StatementId
+  property: EntityId
+  rank: Rank
 }
 
 export interface QualifiedEntityValue {
-  value: EntityIdValue,
-  qualifiers: Map<EntityId, Snak[]>,
-  id: string,
+  value: EntityIdValue
+  qualifiers: Map<EntityId, Snak[]>
+  id: string
 }
 
 export class MalformedEntityIdError extends Error {
@@ -288,7 +312,7 @@ export class MalformedEntityIdError extends Error {
   }
 }
 
-export class EntityMissingError extends Error { // tslint:disable-line:max-classes-per-file
+export class EntityMissingError extends Error {
   private entity: EntityId
 
   constructor(entityId: EntityId) {

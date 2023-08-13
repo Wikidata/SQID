@@ -1,21 +1,48 @@
-import { EntityReference, EntityId, EntityIdDataValue, EntityKind,
-         EntityResult, SearchResult, ResultList, TermResult,
-         Claim, WBApiResult, EntitySiteLink, TimeDataValue,
-         GlobeCoordinateValue, QualifiedEntityValue,
-         EntityMissingError, MalformedEntityIdError } from './types'
+import {
+  type EntityReference,
+  type EntityId,
+  type EntityIdDataValue,
+  type EntityKind,
+  type EntityResult,
+  type SearchResult,
+  type ResultList,
+  type TermResult,
+  type Claim,
+  type WBApiResult,
+  type EntitySiteLink,
+  type TimeDataValue,
+  type GlobeCoordinateValue,
+  type QualifiedEntityValue,
+  EntityMissingError,
+  MalformedEntityIdError,
+} from './types'
 import { apiRequest } from './index'
-import { wikidataEndpoint, MAX_SIMULTANEOUS_API_REQUESTS, MAX_ENTITIES_PER_API_REQUEST } from './endpoints'
+import {
+  wikidataEndpoint,
+  MAX_SIMULTANEOUS_API_REQUESTS,
+  MAX_ENTITIES_PER_API_REQUEST,
+} from './endpoints'
 import { ENTITY_PREFIX_LEN } from './sparql'
 import { i18n } from '@/i18n'
-import { ClaimsMap } from '@/store/entity/claims/types'
-import { TaskQueue } from 'cwait'
+import type { ClaimsMap } from '@/stores/entities-claims'
+import PQueue from 'p-queue'
 
-type Props = 'info' | 'sitelinks' | 'sitelinks/urls' | 'aliases' | 'labels' | 'descriptions' | 'claims' | 'datatype'
+type Props =
+  | 'info'
+  | 'sitelinks'
+  | 'sitelinks/urls'
+  | 'aliases'
+  | 'labels'
+  | 'descriptions'
+  | 'claims'
+  | 'datatype'
 
-export async function getEntities(entityIds: string[],
-                                  props: Props[],
-                                  lang?: string,
-                                  fallback = true): Promise<ResultList<EntityResult>> {
+export async function getEntities(
+  entityIds: string[],
+  props: Props[],
+  lang?: string,
+  fallback = true,
+): Promise<ResultList<EntityResult>> {
   const chunks = []
   const ids = entityIds.length
 
@@ -28,12 +55,13 @@ export async function getEntities(entityIds: string[],
     }
   }
 
-  const queue = new TaskQueue(Promise, MAX_SIMULTANEOUS_API_REQUESTS)
-  const getChunk = queue.wrap(getEntityChunk)
+  const queue = new PQueue({ concurrency: MAX_SIMULTANEOUS_API_REQUESTS })
 
-  const results = await Promise.all(chunks.map((chunk) => {
-    return getChunk(chunk, props, lang, fallback)
-  }))
+  const results = await queue.addAll(
+    chunks.map((chunk) => {
+      return () => getEntityChunk(chunk, props, lang, fallback)
+    }),
+  )
   const entities: ResultList<EntityResult> = {}
 
   for (const chunk of results) {
@@ -47,31 +75,35 @@ export async function getEntities(entityIds: string[],
   return entities
 }
 
-async function getEntityChunk(entityIds: string[],
-                              props: Props[],
-                              lang?: string,
-                              fallback = true): Promise<ResultList<EntityResult>> {
-  const langCode = lang || i18n.locale
-  const response = await apiRequest(wikidataEndpoint, {
+async function getEntityChunk(
+  entityIds: string[],
+  props: Props[],
+  lang?: string,
+  fallback = true,
+): Promise<ResultList<EntityResult>> {
+  const langCode = lang || i18n.global.locale.value
+  const response = (await apiRequest(wikidataEndpoint, {
     action: 'wbgetentities',
     ids: entityIds.join('|'),
     props: props.join('|'),
     languages: langCode,
     languagefallback: fallback,
-  }) as WBApiResult
+  })) as WBApiResult
 
   return response.entities!
 }
 
+export type LabelsPromise = ReturnType<typeof getLabels>
+
 export async function getLabels(entityIds: string[], lang?: string, fallback = true) {
   const entities = await getEntities(entityIds, ['labels'], lang, fallback)
-  const langCode = lang || i18n.locale
+  const langCode = lang || i18n.global.locale.value
   const labels = new Map<string, Map<string, string>>()
   const nativeLabels = new Map<string, string>()
   labels.set(langCode, nativeLabels)
 
   for (const [entityId, entity] of Object.entries(entities)) {
-    const { kind } = parseEntityId(entityId)
+    parseEntityId(entityId)
 
     let label
 
@@ -102,7 +134,7 @@ export async function getLabels(entityIds: string[], lang?: string, fallback = t
 }
 
 function parseAliases(entityId: string, data: ResultList<TermResult>, lang?: string) {
-  const langCode = lang || i18n.locale
+  const langCode = lang || i18n.global.locale.value
   const aliases = new Map<string, Map<string, string[]>>()
   const nativeAliases = new Map<string, string[]>()
   aliases.set(langCode, nativeAliases)
@@ -138,7 +170,7 @@ function parseAliases(entityId: string, data: ResultList<TermResult>, lang?: str
 }
 
 function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: string) {
-  const langCode = lang || i18n.locale
+  const langCode = lang || i18n.global.locale.value
   const terms = new Map<string, Map<string, string>>()
   const nativeTerms = new Map<string, string>()
   terms.set(langCode, nativeTerms)
@@ -162,26 +194,26 @@ function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: strin
 }
 
 export async function getEntityInfo(entityId: EntityId) {
-  try {
-    const _id = parseEntityId(entityId)
-  } catch (err) {
-    throw err
-  }
+  parseEntityId(entityId)
 
-  const entities = await getEntities([entityId], ['info']) || []
+  const entities = (await getEntities([entityId], ['info'])) || []
 
-  if (!(entityId in entities) ||
-      ('missing' in entities[entityId])) {
+  if (!(entityId in entities) || 'missing' in entities[entityId]) {
     throw new EntityMissingError(entityId)
   }
+
+  return entities[entityId]
 }
 
+export type EntityDataPromise = ReturnType<typeof getEntityData>
+
 export async function getEntityData(entityId: EntityId, lang?: string, fallback = true) {
-  const entities = await getEntities([entityId],
-                                     ['aliases', 'labels', 'descriptions', 'info',
-                                      'claims', 'datatype', 'sitelinks'],
-                                     lang,
-                                     fallback)
+  const entities = await getEntities(
+    [entityId],
+    ['aliases', 'labels', 'descriptions', 'info', 'claims', 'datatype', 'sitelinks'],
+    lang,
+    fallback,
+  )
 
   if ('missing' in entities[entityId]) {
     throw new EntityMissingError(entityId)
@@ -195,8 +227,7 @@ export async function getEntityData(entityId: EntityId, lang?: string, fallback 
   const links = entities[entityId].sitelinks || {}
   const sitelinks = new Map<string, EntitySiteLink>(Object.entries(links))
   const datatype = entity.datatype
-  claims.set(entityId,
-             new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
+  claims.set(entityId, new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
 
   return {
     labels,
@@ -276,15 +307,17 @@ export function parseEntityId(entityId: string): EntityReference {
   }
 }
 
-export async function searchEntities(search: string,
-                                     options: {
-                                       lang?: string
-                                       kind?: EntityKind,
-                                       limit?: number,
-                                       offset?: number,
-                                       fallback?: boolean,
-                                     }): Promise<ResultList<SearchResult>> {
-  const langCode = options.lang || i18n.locale
+export async function searchEntities(
+  search: string,
+  options: {
+    lang?: string
+    kind?: EntityKind
+    limit?: number
+    offset?: number
+    fallback?: boolean
+  },
+): Promise<ResultList<SearchResult>> {
+  const langCode = options.lang || i18n.global.locale.value
   const params = {
     action: 'wbsearchentities',
     search,
@@ -307,7 +340,7 @@ export async function searchEntities(search: string,
     params.strictlanguage = true
   }
 
-  const response = await apiRequest(wikidataEndpoint, params) as WBApiResult
+  const response = (await apiRequest(wikidataEndpoint, params)) as WBApiResult
 
   return response.search!
 }
@@ -338,9 +371,11 @@ export function relatedEntityIds(claims: ClaimsMap) {
       const mainsnak = claim.mainsnak
       entityIds.add(mainsnak.property)
 
-      if (mainsnak.snaktype === 'value' &&
-          ['wikibase-item', 'wikibase-property', 'wikibase-lexeme'].includes(mainsnak.datatype)) {
-        const datavalue = (mainsnak.datavalue as EntityIdDataValue)
+      if (
+        mainsnak.snaktype === 'value' &&
+        ['wikibase-item', 'wikibase-property', 'wikibase-lexeme'].includes(mainsnak.datatype)
+      ) {
+        const datavalue = mainsnak.datavalue as EntityIdDataValue
 
         entityIds.add(datavalue.value.id)
       }
@@ -350,9 +385,8 @@ export function relatedEntityIds(claims: ClaimsMap) {
           for (const [propId, snaks] of Object.entries(reference.snaks)) {
             entityIds.add(propId)
             for (const snak of snaks) {
-              if (snak.snaktype === 'value' &&
-                  snak.datatype === 'wikibase-item') {
-                const datavalue = (snak.datavalue as EntityIdDataValue)
+              if (snak.snaktype === 'value' && snak.datatype === 'wikibase-item') {
+                const datavalue = snak.datavalue as EntityIdDataValue
                 entityIds.add(datavalue.value.id)
               }
             }
@@ -365,9 +399,8 @@ export function relatedEntityIds(claims: ClaimsMap) {
           entityIds.add(propId)
 
           for (const snak of snaks) {
-            if (snak.snaktype === 'value' &&
-                snak.datatype === 'wikibase-item') {
-              const datavalue = (snak.datavalue as EntityIdDataValue)
+            if (snak.snaktype === 'value' && snak.datatype === 'wikibase-item') {
+              const datavalue = snak.datavalue as EntityIdDataValue
               entityIds.add(datavalue.value.id)
             }
           }
@@ -396,6 +429,8 @@ function makeComponentValid(component: string) {
   return component
 }
 
+export type Timestamp = ReturnType<typeof dateFromTimeData>
+
 export function dateFromTimeData(data: TimeDataValue) {
   let timestring = data.value.time
   const precision = data.value.precision
@@ -415,12 +450,12 @@ export function dateFromTimeData(data: TimeDataValue) {
   if (timestring.endsWith('Z')) {
     timestring = timestring.slice(0, timestring.length - 1)
   } else {
-    [ timestring, TZ ] = timestring.split('+')
+    ;[timestring, TZ] = timestring.split('+')
   }
 
-  const [ date, time ] = timestring.split('T')
-  let [ year, month, day ] = date.split('-')
-  const [ hour, minute, second ] = time.split(':')
+  const [date, time] = timestring.split('T')
+  let [year, month, day] = date.split('-')
+  const [hour, minute, second] = time.split(':')
 
   if (['0000', '+0000', '-0000'].includes(year)) {
     year = '0001'
@@ -432,17 +467,19 @@ export function dateFromTimeData(data: TimeDataValue) {
 
   const result = new Date(`${prefix}${year}-${month}-${day}T${hour}:${minute}:${second}${TZ}`)
 
-  return { time: result,
-           format: `precision-${precision}`,
-           calendar,
-           year,
-           month,
-           day,
-           hour,
-           minute,
-           second,
-           negative,
-         }
+  return {
+    time: result,
+    format: `precision-${precision}`,
+    calendar,
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    second,
+    negative,
+    precision,
+  }
 }
 
 function extractCoordinateComponents(value: number) {
@@ -455,10 +492,7 @@ function extractCoordinateComponents(value: number) {
 
   const seconds = Math.floor(value * 60)
 
-  return { degrees,
-           minutes,
-           seconds,
-         }
+  return { degrees, minutes, seconds }
 }
 
 export function coordinateFromGlobeCoordinate(data: GlobeCoordinateValue) {
@@ -468,12 +502,12 @@ export function coordinateFromGlobeCoordinate(data: GlobeCoordinateValue) {
 
   const latitude = data.value.latitude
   const lat = Math.abs(latitude).toFixed(places)
-  const ns = (latitude >= 0) ? 'N' : 'S'
+  const ns = latitude >= 0 ? 'N' : 'S'
   const { degrees: lad, minutes: lam, seconds: las } = extractCoordinateComponents(Number(lat))
 
   const longitude = Number(data.value.longitude)
   const lon = Math.abs(longitude).toFixed(places)
-  const we = (longitude >= 0) ? 'W' : 'E'
+  const we = longitude >= 0 ? 'W' : 'E'
   const { degrees: lod, minutes: lom, seconds: los } = extractCoordinateComponents(Number(lon))
 
   const coordinate = `(${lad}°${lam}'${las}" ${ns}, ${lod}°${lom}'${los}" ${we})`

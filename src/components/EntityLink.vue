@@ -1,52 +1,39 @@
 <template>
-  <router-link :to="destination"
-               :title="tooltip"
-               @click.native="$event.stopImmediatePropagation()">
+  <router-link :to="destination" :title="tooltip" @click="$event.stopImmediatePropagation()">
     {{ label }}
   </router-link>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Watch, Vue } from 'vue-property-decorator'
-import { Action } from 'vuex-class'
-import { EntityId } from '@/store/entity/claims/types'
-import { i18n } from '@/i18n'
+<script setup lang="ts">
+import { ref, computed, watchEffect } from 'vue'
+import { useI18n } from 'vue-i18n'
+import type { EntityId } from '@/api/types'
+import { useEntitiesTermsStore } from '@/stores/entities-terms'
 
-@Component
-export default class EntityLink extends Vue {
-  @Prop({ required: true }) private entityId!: EntityId
-  @Action private getLabel: any
-  private label: string = this.entityId
+const { locale } = useI18n()
+const entitiesTerms = useEntitiesTermsStore()
 
-  private get destination() {
-    return { name: 'entity',
-             params: { id: this.entityId },
-           }
+const props = defineProps<{ entityId: EntityId }>()
+
+const label = ref<EntityId>('')
+
+watchEffect(async () => {
+  label.value = props.entityId
+  label.value = await entitiesTerms.getLabel({ entityId: props.entityId })
+})
+
+const language = computed(() => {
+  return locale
+})
+
+const destination = computed(() => {
+  return {
+    name: 'entity',
+    params: { id: props.entityId },
   }
+})
 
-  private get tooltip() {
-    return `${this.label} (${this.entityId})`
-  }
-
-  private get language() {
-    return i18n.locale
-  }
-
-  private async updateLabel() {
-    this.label = await this.getLabel({
-      entityId: this.entityId,
-      lang: this.language,
-    })
-  }
-
-  private created() {
-    this.updateLabel()
-  }
-
-  @Watch('entityId')
-  @Watch('language')
-  private onEntityIdChanged() {
-    this.updateLabel()
-  }
-}
+const tooltip = computed(() => {
+  return `${label.value} (${props.entityId})`
+})
 </script>
