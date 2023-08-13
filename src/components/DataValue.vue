@@ -57,6 +57,8 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+import { computed, ref, watchEffect } from 'vue'
 import type {
   EntityId,
   Datavalue,
@@ -67,12 +69,12 @@ import type {
   EntityIdDataValue,
   MonolingualTextDataValue,
 } from '@/api/types'
-import { dateFromTimeData, coordinateFromGlobeCoordinate, type Timestamp } from '@/api/wikidata'
 import { entityValue } from '@/api/sparql'
-import { useI18n } from 'vue-i18n'
-import { computed, ref, watchEffect } from 'vue'
+import { dateFromTimeData, coordinateFromGlobeCoordinate, type Timestamp } from '@/api/wikidata'
+import { useStatisticsPropertiesStore } from '@/stores/statistics-properties'
 
 const { t, d } = useI18n()
+const { getPropertyDatatypes, getUrlPattern } = useStatisticsPropertiesStore()
 
 interface Props {
   value: Datavalue
@@ -84,14 +86,14 @@ const props = withDefaults(defineProps<Props>(), {
   short: false,
 })
 
-const datatype = ref<string | null>(null)
-const urlPattern = ref<string | null>(null)
+const datatype = ref<string | undefined>(undefined)
+const urlPattern = ref<string | undefined>(undefined)
 
 watchEffect(async () => {
   if (props.value.type === 'string') {
-    const datatypes = new Map() // await getPropertyDatatypes([props.propertyId])
+    const datatypes = await getPropertyDatatypes([props.propertyId])
     datatype.value = datatypes?.get(props.propertyId)
-    urlPattern.value = null // await getUrlPattern(props.popertyId)
+    urlPattern.value = await getUrlPattern(props.propertyId)
   }
 })
 
