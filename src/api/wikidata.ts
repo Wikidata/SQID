@@ -81,7 +81,7 @@ async function getEntityChunk(
   lang?: string,
   fallback = true,
 ): Promise<ResultList<EntityResult>> {
-  const langCode = lang || i18n.global.locale.value
+  const langCode = lang ?? i18n.global.locale.value
   const response = (await apiRequest(wikidataEndpoint, {
     action: 'wbgetentities',
     ids: entityIds.join('|'),
@@ -97,7 +97,7 @@ export type LabelsPromise = ReturnType<typeof getLabels>
 
 export async function getLabels(entityIds: string[], lang?: string, fallback = true) {
   const entities = await getEntities(entityIds, ['labels'], lang, fallback)
-  const langCode = lang || i18n.global.locale.value
+  const langCode = lang ?? i18n.global.locale.value
   const labels = new Map<string, Map<string, string>>()
   const nativeLabels = new Map<string, string>()
   labels.set(langCode, nativeLabels)
@@ -134,7 +134,7 @@ export async function getLabels(entityIds: string[], lang?: string, fallback = t
 }
 
 function parseAliases(entityId: string, data: ResultList<TermResult>, lang?: string) {
-  const langCode = lang || i18n.global.locale.value
+  const langCode = lang ?? i18n.global.locale.value
   const aliases = new Map<string, Map<string, string[]>>()
   const nativeAliases = new Map<string, string[]>()
   aliases.set(langCode, nativeAliases)
@@ -157,7 +157,7 @@ function parseAliases(entityId: string, data: ResultList<TermResult>, lang?: str
       }
 
       const fallbackAliases = aliases.get(alias.language)!
-      const otherAliases = fallbackAliases.get(entityId) || []
+      const otherAliases = fallbackAliases.get(entityId) ?? []
       otherAliases.push(alias.value)
 
       fallbackAliases.set(entityId, otherAliases)
@@ -170,7 +170,7 @@ function parseAliases(entityId: string, data: ResultList<TermResult>, lang?: str
 }
 
 function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: string) {
-  const langCode = lang || i18n.global.locale.value
+  const langCode = lang ?? i18n.global.locale.value
   const terms = new Map<string, Map<string, string>>()
   const nativeTerms = new Map<string, string>()
   terms.set(langCode, nativeTerms)
@@ -196,7 +196,7 @@ function parseTerms(entityId: string, data: ResultList<TermResult>, lang?: strin
 export async function getEntityInfo(entityId: EntityId) {
   parseEntityId(entityId)
 
-  const entities = (await getEntities([entityId], ['info'])) || []
+  const entities = (await getEntities([entityId], ['info'])) ?? []
 
   if (!(entityId in entities) || 'missing' in entities[entityId]) {
     throw new EntityMissingError(entityId)
@@ -224,7 +224,7 @@ export async function getEntityData(entityId: EntityId, lang?: string, fallback 
   const aliases = parseAliases(entityId, entity.aliases!)
   const descriptions = parseTerms(entityId, entity.descriptions!)
   const claims = new Map<string, Map<string, Claim>>()
-  const links = entities[entityId].sitelinks || {}
+  const links = entities[entityId].sitelinks ?? {}
   const sitelinks = new Map<string, EntitySiteLink>(Object.entries(links))
   const datatype = entity.datatype
   claims.set(entityId, new Map<string, Claim>(Object.entries(entities[entityId].claims!)))
@@ -317,7 +317,7 @@ export async function searchEntities(
     fallback?: boolean
   },
 ): Promise<ResultList<SearchResult>> {
-  const langCode = options.lang || i18n.global.locale.value
+  const langCode = options.lang ?? i18n.global.locale.value
   const params = {
     action: 'wbsearchentities',
     search,
@@ -413,10 +413,7 @@ export function relatedEntityIds(claims: ClaimsMap) {
 }
 
 export function wikidataUrl(entityId: EntityId, lang?: string) {
-  let forceLang = ''
-  if (lang !== undefined) {
-    forceLang = `?uselang=${lang}`
-  }
+  const forceLang = lang !== undefined ? `?uselang=${lang}` : ''
 
   return `https://www.wikidata.org/entity/${entityId}${forceLang}`
 }

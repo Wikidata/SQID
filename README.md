@@ -1,7 +1,7 @@
 # SQID
 (a.k.a. Wikidata Class Browser)
 
-This repository contains the code for the [SQID Wikidata Browser](http://tools.wmflabs.org/sqid/).
+This repository contains the code for the [SQID Wikidata Browser](http://sqid.toolforge.org/).
 You can use the application online without installing anything.
 
 ## Submitting comments, bug reports, feature requests

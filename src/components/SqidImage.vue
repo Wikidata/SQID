@@ -12,37 +12,22 @@ img {
 }
 </style>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import { computed, ref, watchEffect } from 'vue'
 import { getImageData } from '@/api/commons'
-import { ImageInfo } from '@/api/types'
+import type { ImageInfo } from '@/api/types'
 
-@Component
-export default class SqidImage extends Vue {
-  @Prop({ required: true }) private file!: string
-  @Prop({ required: true }) private width!: number
+const props = defineProps<{
+  file: string
+  width: number
+}>()
 
-  private imageInfo: ImageInfo | null = null
+const imageInfo = ref<ImageInfo | null>(null)
 
-  private get descriptionUrl() {
-    if (this.imageInfo !== null) {
-      return this.imageInfo.descriptionurl
-    }
-    return undefined
-  }
+const descriptionUrl = computed(() => imageInfo.value?.descriptionurl)
+const thumbUrl = computed(() => imageInfo.value?.thumburl ?? imageInfo.value?.url)
 
-  private get thumbUrl() {
-    if (this.imageInfo !== null) {
-      if (this.imageInfo.thumburl !== undefined) {
-        return this.imageInfo.thumburl
-      }
-      return this.imageInfo.url
-    }
-    return undefined
-  }
-
-  private created() {
-    getImageData(this.file, this.width).then((info) => this.imageInfo = info)
-  }
-}
+watchEffect(async () => {
+  imageInfo.value = await getImageData(props.file, props.width)
+})
 </script>

@@ -20,11 +20,11 @@ type Store = ReturnType<typeof useStatisticsStore>
 function shouldCheckForUpdate(store: Store) {
   const now = new Date().getTime()
   const lastUpdate = Math.max(
-    store.dumpTimestamp,
-    store.classesTimestamp,
-    store.propertiesTimestamp,
+    store.dumpDate.getTime(),
+    store.classesDate.getTime(),
+    store.propertiesDate.getTime(),
   )
-  const timeSinceLastRefresh = now - store.lastRefresh
+  const timeSinceLastRefresh = now - store.refreshedDate.getTime()
   const timeSinceLastUpdate = now - lastUpdate
 
   return shouldRefresh(timeSinceLastRefresh, timeSinceLastUpdate)
@@ -38,28 +38,34 @@ export const useStatisticsStore = defineStore('statistics', () => {
   const sitelinks = ref(0)
   const sites = ref<SiteLinkMap>(new Map())
 
-  const dumpTimestamp = computed(() => dumpDate.value.getTime())
-  const classesTimestamp = computed(() => classesDate.value.getTime())
-  const propertiesTimestamp = computed(() => propertiesDate.value.getTime())
-  const lastRefresh = computed(() => refreshedDate.value.getTime())
-
   const siteLinkUrl = computed(() => (wikiname: string) => sites.value.get(wikiname)?.u)
+
+  function $reset(this: Store) {
+    this.$patch({
+      dumpDate: new Date(0),
+      classesDate: new Date(0),
+      refreshedDate: new Date(0),
+      propertiesDate: new Date(0),
+      sitelinks: new Date(0),
+      sites: new Map(),
+    })
+  }
 
   async function refresh(this: Store) {
     if (!shouldCheckForUpdate(this)) {
       return
     }
 
-    const response = await getStatistics(this.lastRefresh)
+    const response = await getStatistics(this.refreshedDate.getTime())
 
     const dumpDate = Date.parse(response.dumpDate)
     const classesDate = Date.parse(response.classUpdate)
     const propertiesDate = Date.parse(response.propertyUpdate)
 
     if (
-      dumpDate > this.dumpTimestamp ||
-      classesDate > this.classesTimestamp ||
-      propertiesDate > this.propertiesTimestamp
+      dumpDate > this.dumpDate.getTime() ||
+      classesDate > this.classesDate.getTime() ||
+      propertiesDate > this.propertiesDate.getTime()
     ) {
       // have new data, update everything
       this.$patch({
@@ -84,12 +90,9 @@ export const useStatisticsStore = defineStore('statistics', () => {
     sitelinks,
     sites,
 
-    dumpTimestamp,
-    classesTimestamp,
-    propertiesTimestamp,
-    lastRefresh,
     siteLinkUrl,
 
+    $reset,
     refresh,
   }
 })

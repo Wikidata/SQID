@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 import type { Claim, EntityId } from '@/api/types'

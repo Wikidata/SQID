@@ -8,6 +8,6 @@ const SECRET_CERTIFICATE = SECRET_DIR . '/certificate';
 
 const API = 'https://www.wikidata.org/w/api.php';
 const ENDPOINT = 'https://www.wikidata.org/w/index.php?title=Special:OAuth';
-const CALLBACK = 'https://tools.wmflabs.org/sqid/';
+const CALLBACK = 'https://sqid.toolforge.org/';
 
 ?>

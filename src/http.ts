@@ -9,14 +9,17 @@ http.interceptors.request.use((config) => {
   return config
 })
 
-http.interceptors.response.use((response) => {
-  Progress.done()
+http.interceptors.response.use(
+  (response) => {
+    Progress.done()
 
-  return response
-}, (error) => {
-  Progress.done()
+    return response
+  },
+  (error) => {
+    Progress.done()
 
-  return Promise.reject(error)
-})
+    return Promise.reject(error)
+  },
+)
 
 export default http

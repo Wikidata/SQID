@@ -72,9 +72,11 @@ import type {
 import { entityValue } from '@/api/sparql'
 import { dateFromTimeData, coordinateFromGlobeCoordinate, type Timestamp } from '@/api/wikidata'
 import { useStatisticsPropertiesStore } from '@/stores/statistics-properties'
+import { useEntitiesStore } from '@/stores/entities'
 
 const { t, d } = useI18n()
-const { getPropertyDatatypes, getUrlPattern } = useStatisticsPropertiesStore()
+const entities = useEntitiesStore()
+const properties = useStatisticsPropertiesStore()
 
 interface Props {
   value: Datavalue
@@ -91,9 +93,9 @@ const urlPattern = ref<string | undefined>(undefined)
 
 watchEffect(async () => {
   if (props.value.type === 'string') {
-    const datatypes = await getPropertyDatatypes([props.propertyId])
+    const datatypes = await entities.getPropertyDatatypes([props.propertyId])
     datatype.value = datatypes?.get(props.propertyId)
-    urlPattern.value = await getUrlPattern(props.propertyId)
+    urlPattern.value = await properties.getUrlPattern(props.propertyId)
   }
 })
 

@@ -206,62 +206,69 @@ export const useEntitiesTermsStore = defineStore('entities-terms', () => {
     })
   }
 
-  const entityLabel = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      getTerm(labels.value, entityId, lang, fallback)
-  })
+  const entityLabel = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        getTerm(labels.value, entityId, lang, fallback),
+  )
 
-  const entityAliases = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      getTerm(aliases.value, entityId, lang, fallback)
-  })
+  const entityAliases = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        getTerm(aliases.value, entityId, lang, fallback),
+  )
 
-  const entityDescription = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      getTerm(descriptions.value, entityId, lang, fallback)
-  })
+  const entityDescription = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        getTerm(descriptions.value, entityId, lang, fallback),
+  )
 
-  const entityTerms = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) => {
-      return {
-        label: getTerm(labels.value, entityId, lang, fallback),
-        aliases: getTerm(aliases.value, entityId, lang, fallback),
-        description: getTerm(descriptions.value, entityId, lang, fallback),
-      }
+  const entityTerms = computed(() => (entityId: EntityId, lang?: LangCode, fallback = true) => {
+    return {
+      label: getTerm(labels.value, entityId, lang, fallback),
+      aliases: getTerm(aliases.value, entityId, lang, fallback),
+      description: getTerm(descriptions.value, entityId, lang, fallback),
     }
   })
 
-  const hasEntityLabel = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      hasTerm(labels.value, entityId, lang, fallback)
-  })
+  const hasEntityLabel = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        hasTerm(labels.value, entityId, lang, fallback),
+  )
 
-  const hasAliases = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      hasTerm(aliases.value, entityId, lang, fallback)
-  })
+  const hasAliases = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        hasTerm(aliases.value, entityId, lang, fallback),
+  )
 
-  const hasDescription = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      hasTerm(descriptions.value, entityId, lang, fallback)
-  })
+  const hasDescription = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        hasTerm(descriptions.value, entityId, lang, fallback),
+  )
 
-  const hasTerms = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      hasTerm(labels.value, entityId, lang, fallback) &&
-      hasTerm(aliases.value, entityId, lang, fallback) &&
-      hasTerm(descriptions.value, entityId, lang, fallback)
-  })
+  const hasTerms = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        hasTerm(labels.value, entityId, lang, fallback) &&
+        hasTerm(aliases.value, entityId, lang, fallback) &&
+        hasTerm(descriptions.value, entityId, lang, fallback),
+  )
 
-  const isLabelInflight = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      hasPromise(inflightLabels.value, entityId, lang, fallback)
-  })
+  const isLabelInflight = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        hasPromise(inflightLabels.value, entityId, lang, fallback),
+  )
 
-  const isTermsInflight = computed(() => {
-    return (entityId: EntityId, lang?: LangCode, fallback = true) =>
-      hasPromise(inflightTerms.value, entityId, lang, fallback)
-  })
+  const isTermsInflight = computed(
+    () =>
+      (entityId: EntityId, lang?: LangCode, fallback = true) =>
+        hasPromise(inflightTerms.value, entityId, lang, fallback),
+  )
 
   function addLabels(this: Store, labels: MultilingualTermsMap) {
     this.$patch({

@@ -50,7 +50,7 @@ function statementValue(binding: SparqlValue) {
 export async function sparqlQuery(query: string): Promise<SparqlBinding[]> {
   const response = await sparqlRequest(
     sparqlEndpoint,
-    `#TOOL:SQID, https://tools.wmflabs.org/sqid/
+    `#TOOL:SQID, https://sqid.toolforge.org/
 ${query}`,
   )
   return response.results.bindings
@@ -102,7 +102,7 @@ function relatingStatementsForPropertyQuery(
   entityId: EntityId,
   propertyId: EntityId,
   limit: number,
-): string {
+) {
   return `SELECT DISTINCT ?it ?s ?p ?r WHERE {
 BIND(wd:${propertyId} AS ?p) .
 ?s ps:${propertyId} wd:${entityId} ;
@@ -129,7 +129,7 @@ function propertySubjectsQuery(
   object?: EntityId,
   limit?: number,
   resultVariable = 'p',
-): string {
+) {
   const obj = object ? `wd:${object}` : '[]'
   const limitClause = limit ? ` LIMIT ${limit} ` : ''
 
@@ -160,7 +160,7 @@ function propertyObjectsQuery(
   subject?: EntityId,
   limit?: number,
   resultVariable = 'p',
-): string {
+) {
   const subj = subject ? `wd:${subject}` : '[]'
   const limitClause = limit ? ` LIMIT ${limit} ` : ''
 

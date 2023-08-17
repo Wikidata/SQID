@@ -1,14 +1,21 @@
 import { http } from '@/http'
-import { Claim, EntityId, ResultList, SqidStatistics,
-         SqidHierarchyRecord, SqidPropertyUsageRecord,
-         SqidRuleSchema } from './types'
-import { ClaimsMap } from '@/store/entity/claims/types'
-import { PropertyClassification, PropertyStatistics } from '@/store/statistics/properties/types'
-import { ClassStatistics } from '@/store/statistics/classes/types'
+import type {
+  Claim,
+  EntityId,
+  ResultList,
+  SqidStatistics,
+  SqidHierarchyRecord,
+  SqidPropertyUsageRecord,
+  SqidRuleSchema,
+} from './types'
+import type { ClaimsMap } from '@/stores/entities-claims'
+import type { PropertyClassification, PropertyStatistics } from '@/stores/statistics-properties'
+import type { ClassStatistics } from '@/stores/statistics-classes'
 import { getPropertySubjects, getPropertyObjects } from './sparql'
 import { parseEntityId } from './wikidata'
 
 export const RELATED_PROPERTIES_THRESHOLD = 5
+export const RELATED_PROPERTIES_CHUNK_SIZE = 10
 export const MAX_EXAMPLE_INSTANCES = 20
 export const MAX_DIRECT_SUBCLASSES = 10
 export const MAX_EXAMPLE_SUBCLASSES = 10
@@ -35,14 +42,15 @@ function pifyNumericId(entityId: string) {
   return ifyNumericId(entityId, 'P')
 }
 
-export function shouldRefresh(timeSinceLastRefresh: number,
-                              timeSinceLastUpdate?: number) {
+export function shouldRefresh(timeSinceLastRefresh: number, timeSinceLastUpdate?: number) {
   if (timeSinceLastRefresh > MAX_STATISTICS_AGE) {
     return true
   }
 
-  if ((timeSinceLastUpdate !== undefined) &&
-      (timeSinceLastUpdate > MAX_STATISTICS_AGE + SCRIPT_RUNTIME_SLACK)) {
+  if (
+    timeSinceLastUpdate !== undefined &&
+    timeSinceLastUpdate > MAX_STATISTICS_AGE + SCRIPT_RUNTIME_SLACK
+  ) {
     return true
   }
 
@@ -66,12 +74,14 @@ export async function getRuleSchema(lastRefresh: number): Promise<SqidRuleSchema
   return response.data
 }
 
+export type RelatednessMap = Map<EntityId, Map<EntityId, number>>
+
 export interface RelatednessMapping {
-  [key: string]: RelatednessScores,
+  [key: string]: RelatednessScores
 }
 
 export interface RelatednessScores {
-  [key: string]: number,
+  [key: string]: number
 }
 
 export function getChunkId(entityId: EntityId, chunkSize: number) {
@@ -79,46 +89,45 @@ export function getChunkId(entityId: EntityId, chunkSize: number) {
   return Math.floor(id / chunkSize)
 }
 
-export async function getRelatedPropertiesChunk(chunkId: number, lastRefresh: number) {
+function relatedPropertiesFromResponse(response: RelatednessMapping) {
+  const result = new Map()
+
+  for (const [entityId, related] of Object.entries(response)) {
+    const scores = new Map()
+
+    for (const [relatedId, score] of Object.entries(related as RelatednessScores)) {
+      scores.set(pifyNumericId(relatedId), score)
+    }
+
+    result.set(pifyNumericId(entityId), scores)
+  }
+
+  return result
+}
+
+export async function getRelatedPropertiesChunk(
+  chunkId: number,
+  lastRefresh: number,
+): Promise<RelatednessMap> {
   let response
   try {
     response = await http.get(getDataFileURI(`properties/related-${chunkId}`, lastRefresh))
   } catch {
-    return {}
-  }
-  const chunk: RelatednessMapping = {}
-
-  for (const [entityId, related] of Object.entries(response.data)) {
-    const scores: RelatednessScores = {}
-
-    for (const [relatedId, score] of Object.entries(related as RelatednessScores)) {
-      scores[pifyNumericId(relatedId)] = score
-    }
-
-    chunk[pifyNumericId(entityId)] = scores
+    return new Map()
   }
 
-  return Object.freeze(chunk)
+  return relatedPropertiesFromResponse(response.data)
 }
 
-export async function getRelatedProperties(lastRefresh: number): Promise<RelatednessMapping> {
+export async function getRelatedProperties(lastRefresh: number): Promise<RelatednessMap> {
   const response = await http.get(getDataFileURI('properties/related', lastRefresh))
-  const scores: RelatednessMapping = {}
 
-  for (const [entityId, related] of Object.entries(response.data)) {
-    const relatedScores: RelatednessScores = {}
-
-    for (const [relatedId, score] of Object.entries(related as RelatednessScores)) {
-      relatedScores[`P${relatedId}`] = score
-    }
-
-    scores[`P${entityId}`] = relatedScores
-  }
-
-  return Object.freeze(scores)
+  return relatedPropertiesFromResponse(response.data)
 }
 
-export async function getPropertyClassification(lastRefresh: number): Promise<Map<EntityId, PropertyClassification>> {
+export async function getPropertyClassification(
+  lastRefresh: number,
+): Promise<Map<EntityId, PropertyClassification>> {
   const response = await http.get(getDataFileURI('properties/classification', lastRefresh))
   const classification = new Map<EntityId, PropertyClassification>()
 
@@ -131,10 +140,11 @@ export async function getPropertyClassification(lastRefresh: number): Promise<Ma
 
 export type PropertyClassifier = (entityId: EntityId) => PropertyClassification
 
-export function groupClaims(claims: ClaimsMap,
-                            propertyGroups: PropertyClassifier,
-                            relatedScores: RelatednessMapping):
-Map<PropertyClassification, ClaimsMap> {
+export function groupClaims(
+  claims: ClaimsMap,
+  propertyGroups: PropertyClassifier,
+  relatedScores: RelatednessMapping,
+): Map<PropertyClassification, ClaimsMap> {
   const groupedClaims = new Map<PropertyClassification, ClaimsMap>()
   const scores = new Map<EntityId, number>()
   const properties = []
@@ -146,14 +156,14 @@ Map<PropertyClassification, ClaimsMap> {
       scores.set(propertyId, 0)
     } else {
       for (const [relatedId, score] of Object.entries(relatedScores[propertyId])) {
-        scores.set(relatedId, score + (scores.get(relatedId) || 0))
+        scores.set(relatedId, score + (scores.get(relatedId) ?? 0))
       }
     }
   }
 
   const sortedProperties = properties.sort((left, right) => {
-    const lhs = scores.get(left) || 0
-    const rhs = scores.get(right) || 0
+    const lhs = scores.get(left) ?? 0
+    const rhs = scores.get(right) ?? 0
 
     if (lhs < rhs) {
       return 1
@@ -202,10 +212,12 @@ export async function getClassHierarchyChunk(chunkId: number, lastRefresh: numbe
     return chunk
   }
 
-  for (const [entityId, data] of Object.entries(response.data as { [key: string]: SqidHierarchyRecord })) {
-    const superClasses = data.sc || []
-    const nonemptySubClasses = data.sb || []
-    const related: RelatednessScores = data.r || {}
+  for (const [entityId, data] of Object.entries(
+    response.data as { [key: string]: SqidHierarchyRecord },
+  )) {
+    const superClasses = data.sc ?? []
+    const nonemptySubClasses = data.sb ?? []
+    const related: RelatednessScores = data.r ?? {}
 
     const sortedProperties = Object.entries(related)
       .filter((property) => property[1] > RELATED_PROPERTIES_THRESHOLD)
@@ -222,10 +234,10 @@ export async function getClassHierarchyChunk(chunkId: number, lastRefresh: numbe
     const relatedProperties = sortedProperties.map((property) => pifyNumericId(property[0]))
 
     const record = {
-      directInstances: data.i || 0,
-      directSubclasses: data.s || 0,
-      allInstances: data.ai || 0,
-      allSubclasses: data.as || 0,
+      directInstances: data.i ?? 0,
+      directSubclasses: data.s ?? 0,
+      allInstances: data.ai ?? 0,
+      allSubclasses: data.as ?? 0,
       superClasses: superClasses.map(qifyNumericId),
       nonemptySubClasses: nonemptySubClasses.map(qifyNumericId),
       relatedProperties,
@@ -268,18 +280,18 @@ export async function getPropertyUsage(lastRefresh: number) {
   const usage: { [key: string]: PropertyStatistics } = {}
   const response = await http.get(getDataFileURI('properties/usage', lastRefresh))
 
-  for (const [propertyId, record] of Object.entries(response.data as
-                                                    ResultList<SqidPropertyUsageRecord>)) {
-
-    const classes = record.pc || []
+  for (const [propertyId, record] of Object.entries(
+    response.data as ResultList<SqidPropertyUsageRecord>,
+  )) {
+    const classes = record.pc ?? []
 
     const usageRecord = {
-      items: record.i || 0,
-      statements: record.s || 0,
-      inQualifiers: record.q || 0,
-      inReferences: record.e || 0,
+      items: record.i ?? 0,
+      statements: record.s ?? 0,
+      inQualifiers: record.q ?? 0,
+      inReferences: record.e ?? 0,
       classes: classes.map(qifyNumericId),
-      qualifiers: new Map<EntityId, number>(),
+      qualifiers: new Map(),
     }
 
     if ('qs' in record) {
