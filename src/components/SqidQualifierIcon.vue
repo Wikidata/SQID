@@ -11,30 +11,19 @@
   </span>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { EntityId, Snak } from '@/api/types'
-import SnakValue from './SnakValue.vue'
+<script setup lang="ts">
+import { computed } from 'vue'
+import type { EntityId, Snak } from '@/api/types'
 
-@Component({
-  components: {
-    'snak-value': SnakValue,
-  },
-})
-export default class SqidQualifierIcon extends Vue {
-  @Prop({ required: true }) private claim!: {
-    qualifiers: Map<EntityId, Snak[]>,
-    id: string,
-  }
+const props = defineProps<{
+  claim: { qualifiers: Map<EntityId, Array<Snak>>; id: EntityId }
+}>()
 
-  private get tooltipId() {
-    return `qualifier-tooltip-${this.claim.id}`
-  }
-}
+const tooltipId = computed(() => `qualifier-tooltip-${props.claim.id}`)
 </script>
 
-<style lang="less" scoped>
+<style scoped lang="less">
 svg {
-  margin-left: .25em;
+  margin-left: 0.25em;
 }
 </style>
