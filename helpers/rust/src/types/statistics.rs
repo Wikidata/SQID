@@ -47,11 +47,11 @@ impl DumpStatistics {
     }
 
     fn close_subclasses(&mut self) -> usize {
-        let mut added = 0;
+        let added = 0;
         let mut class_queue = self.classes.keys().cloned().collect::<VecDeque<_>>();
 
         while let Some(class) = class_queue.pop_front() {
-            let mut class_record = self.classes.entry(class).or_default();
+            let class_record = self.classes.entry(class).or_default();
             //class_record
 
             class_queue.extend(class_record.superclasses.iter());
@@ -113,7 +113,7 @@ impl DumpStatistics {
         datatype: Type,
         common: &CommonData,
     ) -> Result<()> {
-        let mut record = &mut self.properties.entry(property).or_default();
+        let record = &mut self.properties.entry(property).or_default();
         record.label = common.label();
         record.datatype = Some(datatype);
 
@@ -161,7 +161,7 @@ impl DumpStatistics {
     }
 
     fn process_terms(&mut self, common: &CommonData, target: EntityKind) -> Result<()> {
-        let mut stats = match target {
+        let stats = match target {
             EntityKind::Item => &mut self.statistics.items,
             EntityKind::Property => &mut self.statistics.properties,
             _ => bail!("Unsupported entity kind {:?}", target),
@@ -179,7 +179,7 @@ impl DumpStatistics {
 
     fn process_claims(&mut self, common: &CommonData, target: EntityKind) -> Result<()> {
         self.total_entities += 1;
-        let mut stats = match target {
+        let stats = match target {
             EntityKind::Item => &mut self.statistics.items,
             EntityKind::Property => &mut self.statistics.properties,
             _ => bail!("Unsupported entity kind {:?}", target),
@@ -201,7 +201,7 @@ impl DumpStatistics {
                     .and_then(|id| id.id.as_item())
                 {
                     superclasses.insert(class_id);
-                    let mut superclass = self.classes.entry(class_id).or_default();
+                    let superclass = self.classes.entry(class_id).or_default();
                     superclass.direct_instances += 1;
                     superclasses.extend(superclass.superclasses.iter());
                 }
@@ -215,7 +215,7 @@ impl DumpStatistics {
 
         common.claims.iter().for_each(|(&property, statements)| {
             stats.statements += statements.len();
-            let mut prop = self.properties.entry(property).or_default();
+            let prop = self.properties.entry(property).or_default();
             prop.in_items += 1;
             // @TODO(mx): count co-occurring properties
 

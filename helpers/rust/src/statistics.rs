@@ -24,14 +24,13 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         "Enumerating dumps in {}",
         settings.dump_directory.to_str().unwrap()
     );
-    let mut dumps = fs::read_dir(&settings.dump_directory.as_ref())?
+    let mut dumps = fs::read_dir(settings.dump_directory.as_ref())?
         .filter(|entry| {
             entry
                 .as_ref()
                 .map(|entry| entry.path().is_dir())
                 .unwrap_or(false)
         })
-        .into_iter()
         .filter_map(|entry| {
             entry
                 .map(|direntry| direntry.file_name().into_string().ok())
