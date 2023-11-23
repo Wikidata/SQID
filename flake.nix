@@ -39,14 +39,7 @@
     utils.lib.mkFlake {
       inherit self inputs;
 
-      channels.nixpkgs.overlaysBuilder = channels: let
-        pkgs = channels.nixpkgs;
-        toolchain = mkToolchain channels.nixpkgs;
-        rustPlatform = pkgs.makeRustPlatform {
-          cargo = toolchain;
-          rustc = toolchain;
-        };
-      in [
+      channels.nixpkgs.overlaysBuilder = channels: [
         inputs.rust-overlay.overlays.default
         sqid-overlay
       ];
