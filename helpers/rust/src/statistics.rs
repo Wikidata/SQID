@@ -3,10 +3,20 @@ use anyhow::{Context, Result};
 use chrono::{Date, NaiveDate, TimeZone, Utc};
 use flate2::read::GzDecoder;
 use std::{
+    cmp::Ordering,
     collections::HashMap,
     fs::{self, File},
     io::{BufRead, BufReader},
 };
+
+fn into_description(ordering: Ordering) -> String {
+    match ordering {
+        Ordering::Less => "newer",
+        Ordering::Equal => "still current",
+        Ordering::Greater => "older",
+    }
+    .into()
+}
 
 /// Check for a new dump file. If present, queue a job on the grid to
 /// rebuild the full statistics.
@@ -47,14 +57,14 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     log::info!(
         "Latest dump is dated {}, which is {}",
         latest,
-        match order {
-            std::cmp::Ordering::Less => "newer",
-            std::cmp::Ordering::Equal => "still current",
-            std::cmp::Ordering::Greater => "older",
-        }
+        into_description(order)
     );
 
-    todo!()
+    if order == Ordering::Less {
+        todo!("schedule k8s job to process new dump");
+    }
+
+    Ok(())
 }
 
 pub(super) fn update_sitelinks(settings: &Settings) -> Result<()> {
@@ -114,5 +124,5 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
 
     assert_eq!(line, "]\n");
 
-    todo!()
+    todo!("write statistics")
 }

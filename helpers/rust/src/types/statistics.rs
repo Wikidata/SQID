@@ -55,7 +55,7 @@ impl DumpStatistics {
             //class_record
 
             class_queue.extend(class_record.superclasses.iter());
-            todo!()
+            todo!("close for subclass inclusion")
         }
 
         added
@@ -209,7 +209,7 @@ impl DumpStatistics {
 
             superclasses.iter().for_each(|&class_id| {
                 self.classes.entry(class_id).or_default().all_instances += 1;
-                // @TODO(mx): count co-occurring properties
+                todo!("count co-occurring properties");
             });
         };
 
@@ -217,7 +217,7 @@ impl DumpStatistics {
             stats.statements += statements.len();
             let prop = self.properties.entry(property).or_default();
             prop.in_items += 1;
-            // @TODO(mx): count co-occurring properties
+            todo!("count co-occurring properties");
 
             statements.iter().for_each(|statement| {
                 statement.qualifiers().for_each(|(&qualifier, _)| {
