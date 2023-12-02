@@ -1,4 +1,7 @@
-use crate::types::{sitelinks, ClassRecord, DataFile, DumpStatistics, Item, Settings, Statistics};
+use crate::{
+    jobs::schedule_dump_processing,
+    types::{sitelinks, ClassRecord, DataFile, DumpStatistics, Item, Settings, Statistics},
+};
 use anyhow::{Context, Result};
 use chrono::{Date, NaiveDate, TimeZone, Utc};
 use flate2::read::GzDecoder;
@@ -21,13 +24,13 @@ fn into_description(ordering: Ordering) -> String {
 /// Check for a new dump file. If present, queue a job on the grid to
 /// rebuild the full statistics.
 pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
-    let last_dump = settings
+    let last_processed_dump = settings
         .get_dump_date()?
         .unwrap_or_else(|| Utc.ymd(1970, 1, 1));
 
     log::info!(
         "Current dump is dated {}, checking for new dump ...",
-        last_dump
+        last_processed_dump
     );
 
     log::debug!(
@@ -48,11 +51,11 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         })
         .collect::<Vec<String>>();
     dumps.sort_unstable();
-    let latest: Date<Utc> = Date::from_utc(
-        NaiveDate::parse_from_str(dumps.last().context("Could not find any dumps")?, "%Y%m%d")?,
-        Utc,
-    );
-    let order = last_dump.cmp(&latest);
+
+    let latest_dump = dumps.last().context("Could not find any dumps")?;
+
+    let latest: Date<Utc> = Date::from_utc(NaiveDate::parse_from_str(latest_dump, "%Y%m%d")?, Utc);
+    let order = last_processed_dump.cmp(&latest);
 
     log::info!(
         "Latest dump is dated {}, which is {}",
@@ -61,7 +64,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     );
 
     if order == Ordering::Less {
-        todo!("schedule k8s job to process new dump");
+        schedule_dump_processing(latest_dump, &latest)?;
     }
 
     Ok(())

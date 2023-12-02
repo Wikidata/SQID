@@ -32,6 +32,7 @@ use crate::{
 };
 
 mod classes;
+mod jobs;
 mod properties;
 mod rules;
 mod sparql;
