@@ -9,7 +9,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    SiteRecord, Statistics, Type,
+    Entity, EntityStatistics, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -21,6 +21,7 @@ pub struct DumpStatistics {
     total_sitelinks: usize,
     total_entities: usize,
     entities_with_properties: usize,
+    cooccurences: HashMap<Entity, usize>,
 }
 
 impl DumpStatistics {
@@ -179,13 +180,7 @@ impl DumpStatistics {
 
     fn process_claims(&mut self, common: &CommonData, target: EntityKind) -> Result<()> {
         self.total_entities += 1;
-        let stats = match target {
-            EntityKind::Item => &mut self.statistics.items,
-            EntityKind::Property => &mut self.statistics.properties,
-            _ => bail!("Unsupported entity kind {:?}", target),
-        };
-
-        stats.count += 1;
+        self.stats_for_entity_kind(target)?.count += 1;
 
         if !common.claims.is_empty() {
             self.entities_with_properties += 1;
@@ -207,29 +202,52 @@ impl DumpStatistics {
                 }
             });
 
-            superclasses.iter().for_each(|&class_id| {
+            for class_id in superclasses {
                 self.classes.entry(class_id).or_default().all_instances += 1;
-                todo!("count co-occurring properties");
-            });
+                self.count_cooccurring_properties(common, &Entity::from(class_id), None);
+            }
         };
 
-        common.claims.iter().for_each(|(&property, statements)| {
-            stats.statements += statements.len();
-            let prop = self.properties.entry(property).or_default();
+        for (property, statements) in common.claims.iter() {
+            self.stats_for_entity_kind(target)?.statements += statements.len();
+            self.count_cooccurring_properties(common, &Entity::from(*property), Some(property));
+            let prop = self.properties.entry(*property).or_default();
             prop.in_items += 1;
-            todo!("count co-occurring properties");
 
             statements.iter().for_each(|statement| {
                 statement.qualifiers().for_each(|(&qualifier, _)| {
                     *prop.with_qualifiers.entry(qualifier.into()).or_default() += 1;
                 });
             });
-        });
+        }
 
         if self.total_entities % Self::REPORT_INTERVAL == 0 {
             log::info!("Processed {} entities", self.total_entities);
         }
 
         Ok(())
+    }
+
+    fn stats_for_entity_kind(&mut self, entity_kind: EntityKind) -> Result<&mut EntityStatistics> {
+        match entity_kind {
+            EntityKind::Item => Ok(&mut self.statistics.items),
+            EntityKind::Property => Ok(&mut self.statistics.properties),
+            _ => bail!("Unsupported entity kind {:?}", entity_kind),
+        }
+    }
+
+    fn count_cooccurring_properties(
+        &mut self,
+        common: &CommonData,
+        entity: &Entity,
+        this_property: Option<&Property>,
+    ) {
+        for property in common.claims.keys() {
+            if Some(property) == this_property {
+                return;
+            }
+
+            *self.cooccurences.entry(*entity).or_default() += 1;
+        }
     }
 }
