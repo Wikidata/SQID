@@ -127,5 +127,5 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
 
     assert_eq!(line, "]\n");
 
-    todo!("write statistics")
+    statistics.finalise(settings)
 }

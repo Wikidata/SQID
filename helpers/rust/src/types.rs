@@ -37,7 +37,7 @@ pub(crate) struct Settings {
 }
 
 /// Holds information on the current dump file to process.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct DumpInfo {
     pub(crate) date: Date<Utc>,
     pub(crate) path: Box<PathBuf>,

@@ -1,7 +1,7 @@
 use anyhow::{bail, Context, Result};
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::types::ids::properties;
+use crate::types::{ids::properties, DataFile};
 
 use super::{
     ids::{EntityKind, Item, Property},
@@ -9,7 +9,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    Entity, EntityStatistics, SiteRecord, Statistics, Type,
+    Entity, EntityStatistics, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -249,5 +249,28 @@ impl DumpStatistics {
 
             *self.cooccurences.entry(*entity).or_default() += 1;
         }
+    }
+
+    fn compute_related_properties_for_classes(&mut self) {
+        todo!("compute related properties for classes");
+    }
+
+    fn compute_related_properties_for_properties(&mut self) {
+        todo!("compute related properties for properties");
+    }
+
+    pub(crate) fn finalise(mut self, settings: &Settings) -> Result<()> {
+        self.compute_related_properties_for_classes();
+        self.compute_related_properties_for_properties();
+
+        settings.replace_data(DataFile::Properties, &self.properties)?;
+        settings.update_timestamp(DataFile::Properties)?;
+
+        settings.replace_data(DataFile::Classes, &self.classes)?;
+        settings.update_timestamp(DataFile::Classes)?;
+
+        let dump_info = settings.dump_info.clone().expect("dump info should be set");
+        self.statistics.dump_date = Some(dump_info.date);
+        settings.replace_data(DataFile::Statistics, &self.statistics)
     }
 }
