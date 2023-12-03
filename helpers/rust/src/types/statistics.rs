@@ -9,7 +9,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    Entity, EntityStatistics, Settings, SiteRecord, Statistics, Type,
+    EntityStatistics, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -21,7 +21,6 @@ pub struct DumpStatistics {
     total_sitelinks: usize,
     total_entities: usize,
     entities_with_properties: usize,
-    cooccurences: HashMap<Entity, usize>,
 }
 
 impl DumpStatistics {
@@ -204,13 +203,21 @@ impl DumpStatistics {
 
             for class_id in superclasses {
                 self.classes.entry(class_id).or_default().all_instances += 1;
-                self.count_cooccurring_properties(common, &Entity::from(class_id), None);
+                Self::count_cooccurring_properties(
+                    common,
+                    &mut self.classes.entry(class_id).or_default().cooccurrences,
+                    None,
+                );
             }
         };
 
         for (property, statements) in common.claims.iter() {
             self.stats_for_entity_kind(target)?.statements += statements.len();
-            self.count_cooccurring_properties(common, &Entity::from(*property), Some(property));
+            Self::count_cooccurring_properties(
+                common,
+                &mut self.properties.entry(*property).or_default().cooccurrences,
+                Some(property),
+            );
             let prop = self.properties.entry(*property).or_default();
             prop.in_items += 1;
 
@@ -237,9 +244,8 @@ impl DumpStatistics {
     }
 
     fn count_cooccurring_properties(
-        &mut self,
         common: &CommonData,
-        entity: &Entity,
+        cooccurrences: &mut HashMap<Property, usize>,
         this_property: Option<&Property>,
     ) {
         for property in common.claims.keys() {
@@ -247,21 +253,80 @@ impl DumpStatistics {
                 return;
             }
 
-            *self.cooccurences.entry(*entity).or_default() += 1;
+            *cooccurrences.entry(*property).or_default() += 1;
         }
     }
 
-    fn compute_related_properties_for_classes(&mut self) {
-        todo!("compute related properties for classes");
+    fn related_properties(
+        &self,
+        count: usize,
+        cooccurrences: &HashMap<Property, usize>,
+    ) -> Result<HashMap<Property, usize>> {
+        Ok(cooccurrences
+            .iter()
+            .map(|(property, cooccurrences)| {
+                let item_count = count as f64;
+                let other_this_item_rate = (*cooccurrences as f64) / item_count;
+                let other_global_item_rate = self
+                    .properties
+                    .get(property)
+                    .map(|record| record.in_items as f64)
+                    .unwrap_or(0.0)
+                    / (self.entities_with_properties as f64);
+                let other_this_item_rate_step =
+                    1.0 / (1.0 + f64::exp(6.0 * (-2.0 * other_this_item_rate + 0.5)));
+                let other_inv_global_item_rate_step =
+                    1.0 / (1.0 + f64::exp(6.0 * (-2.0 * (1.0 - other_global_item_rate) + 0.5)));
+
+                let score = other_this_item_rate_step
+                    * other_inv_global_item_rate_step
+                    * other_this_item_rate
+                    / other_global_item_rate;
+
+                (*property, ((10.0 * score) as usize))
+            })
+            .collect())
     }
 
-    fn compute_related_properties_for_properties(&mut self) {
-        todo!("compute related properties for properties");
+    fn compute_related_properties(&mut self) -> Result<()> {
+        let related_properties = self
+            .properties
+            .iter()
+            .flat_map(|(property, record)| {
+                Ok::<_, anyhow::Error>((
+                    *property,
+                    self.related_properties(record.in_items, &record.cooccurrences),
+                ))
+            })
+            .collect::<HashMap<_, _>>();
+
+        for (property, related_properties) in related_properties {
+            self.properties
+                .entry(property)
+                .or_default()
+                .related_properties = related_properties?;
+        }
+
+        let related_properties = self
+            .classes
+            .iter()
+            .flat_map(|(class, record)| {
+                Ok::<_, anyhow::Error>((
+                    *class,
+                    self.related_properties(record.direct_instances, &record.cooccurrences),
+                ))
+            })
+            .collect::<HashMap<_, _>>();
+
+        for (class, related_properties) in related_properties {
+            self.classes.entry(class).or_default().related_properties = related_properties?;
+        }
+
+        Ok(())
     }
 
     pub(crate) fn finalise(mut self, settings: &Settings) -> Result<()> {
-        self.compute_related_properties_for_classes();
-        self.compute_related_properties_for_properties();
+        self.compute_related_properties()?;
 
         settings.replace_data(DataFile::Properties, &self.properties)?;
         settings.update_timestamp(DataFile::Properties)?;

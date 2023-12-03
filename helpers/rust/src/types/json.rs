@@ -187,6 +187,8 @@ pub struct PropertyRecord {
     pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, usize>,
+    #[serde(skip)]
+    pub(crate) cooccurrences: HashMap<Property, usize>,
 }
 
 impl PropertyRecord {
@@ -317,6 +319,8 @@ pub struct ClassRecord {
     pub(crate) non_empty_subclasses: Vec<Item>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, usize>,
+    #[serde(skip)]
+    pub(crate) cooccurrences: HashMap<Property, usize>,
 }
 
 impl ClassRecord {
@@ -337,6 +341,7 @@ impl ClassRecord {
             superclasses: self.superclasses.clone(),
             non_empty_subclasses: self.non_empty_subclasses.clone(),
             related_properties: self.related_properties.clone(),
+            cooccurrences: HashMap::new(),
         }
     }
 }
