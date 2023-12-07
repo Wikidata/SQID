@@ -1,7 +1,7 @@
 use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use strum::{Display, EnumIter, EnumString};
 
 use super::{
@@ -312,15 +312,17 @@ pub struct ClassRecord {
     #[serde(rename = "ai", skip_serializing_if = "is_zero")]
     pub(crate) all_instances: usize,
     #[serde(rename = "as", skip_serializing_if = "is_zero")]
-    pub(crate) all_subclassces: usize,
-    #[serde(rename = "sc", skip_serializing_if = "Vec::is_empty")]
-    pub(crate) superclasses: Vec<Item>,
-    #[serde(rename = "sb", skip_serializing_if = "Vec::is_empty")]
-    pub(crate) non_empty_subclasses: Vec<Item>,
+    pub(crate) all_subclasses: usize,
+    #[serde(rename = "sc", skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) superclasses: HashSet<Item>,
+    #[serde(rename = "sb", skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) non_empty_subclasses: HashSet<Item>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, usize>,
     #[serde(skip)]
     pub(crate) cooccurrences: HashMap<Property, usize>,
+    #[serde(skip)]
+    pub(crate) direct_superclasses: HashSet<Item>,
 }
 
 impl ClassRecord {
@@ -337,11 +339,12 @@ impl ClassRecord {
             direct_instances: self.direct_instances,
             direct_subclasses: self.direct_subclasses,
             all_instances: self.all_instances,
-            all_subclassces: self.all_subclassces,
+            all_subclasses: self.all_subclasses,
             superclasses: self.superclasses.clone(),
             non_empty_subclasses: self.non_empty_subclasses.clone(),
             related_properties: self.related_properties.clone(),
             cooccurrences: HashMap::new(),
+            direct_superclasses: HashSet::new(),
         }
     }
 }

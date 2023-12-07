@@ -1,7 +1,10 @@
 use anyhow::{bail, Context, Result};
 use std::collections::{HashMap, HashSet, VecDeque};
 
-use crate::types::{ids::properties, DataFile};
+use crate::{
+    classes::derive_class_hierarchy,
+    types::{ids::properties, DataFile},
+};
 
 use super::{
     ids::{EntityKind, Item, Property},
@@ -9,7 +12,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    EntityStatistics, Settings, SiteRecord, Statistics, Type,
+    Classes, EntityStatistics, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -46,19 +49,92 @@ impl DumpStatistics {
         result
     }
 
+    pub fn clear_counters(&mut self) {
+        for class in self.classes.values_mut() {
+            class.direct_instances = 0;
+            class.direct_subclasses = 0; // where do we fill this?
+            class.all_instances = 0;
+            class.all_subclasses = 0;
+            class.related_properties.clear();
+        }
+
+        for property in self.properties.values_mut() {
+            property.in_items = 0;
+            property.in_statements = 0;
+            property.in_qualifiers = 0;
+            property.in_references = 0;
+            property.with_qualifiers.clear();
+            property.related_properties.clear();
+        }
+
+        todo!("clear all relevant counters that we increment");
+    }
+
     fn close_subclasses(&mut self) -> usize {
-        let added = 0;
+        let mut added = 0;
+        let direct_superclasses = self
+            .classes
+            .iter()
+            .map(|(class, record)| (*class, record.direct_superclasses.clone()))
+            .collect::<HashMap<_, _>>();
         let mut class_queue = self.classes.keys().cloned().collect::<VecDeque<_>>();
 
         while let Some(class) = class_queue.pop_front() {
-            let class_record = self.classes.entry(class).or_default();
-            //class_record
+            let record = self.classes.entry(class).or_default();
+            let mut superclasses = record
+                .direct_superclasses
+                .iter()
+                .cloned()
+                .collect::<VecDeque<_>>();
 
-            class_queue.extend(class_record.superclasses.iter());
-            todo!("close for subclass inclusion")
+            while let Some(superclass) = superclasses.pop_front() {
+                record.superclasses.insert(superclass);
+                added += 1;
+
+                if let Some(new_superclasses) = direct_superclasses.get(&superclass) {
+                    superclasses.extend(new_superclasses.iter().cloned());
+                }
+            }
         }
 
         added
+    }
+
+    fn compute_nonempty_subclasses(&mut self) {
+        let _ = self.close_subclasses();
+
+        let classes = self
+            .classes
+            .iter()
+            .filter_map(|(class, record)| {
+                (record.direct_subclasses > 0 || record.direct_instances > 0)
+                    .then_some((*class, record.direct_superclasses.clone()))
+            })
+            .collect::<Vec<_>>();
+
+        for (class, superclasses) in classes {
+            for super_class in superclasses {
+                self.classes
+                    .entry(super_class)
+                    .or_default()
+                    .non_empty_subclasses
+                    .insert(class);
+            }
+        }
+
+        let classes = self
+            .classes
+            .values()
+            .map(|record| record.superclasses.clone())
+            .collect::<Vec<_>>();
+
+        for superclasses in classes {
+            for super_class in superclasses {
+                if let Some(record) = self.classes.get_mut(&super_class) {
+                    record.all_subclasses += 1;
+                }
+            }
+        }
     }
 
     pub(crate) fn process_line(&mut self, line: &str) -> Result<()> {
@@ -95,6 +171,23 @@ impl DumpStatistics {
         common: &CommonData,
     ) -> Result<()> {
         self.classes.entry(item).or_default().label = common.label();
+
+        if let Some(claims) = common.claims.get(&properties::SUBCLASS_OF) {
+            for claim in claims {
+                if let Some(class_id) = claim
+                    .mainsnak()
+                    .as_data_value()
+                    .and_then(|value| value.as_entity_id())
+                    .and_then(|entity| entity.id.as_item())
+                {
+                    self.classes
+                        .entry(item)
+                        .or_default()
+                        .direct_superclasses
+                        .insert(class_id);
+                }
+            }
+        }
 
         self.total_sitelinks += sitelinks.len();
         sitelinks
@@ -295,7 +388,7 @@ impl DumpStatistics {
             .flat_map(|(property, record)| {
                 Ok::<_, anyhow::Error>((
                     *property,
-                    self.related_properties(record.in_items, &record.cooccurrences),
+                    self.related_properties(record.in_items, &record.cooccurrences)?,
                 ))
             })
             .collect::<HashMap<_, _>>();
@@ -304,7 +397,7 @@ impl DumpStatistics {
             self.properties
                 .entry(property)
                 .or_default()
-                .related_properties = related_properties?;
+                .related_properties = related_properties;
         }
 
         let related_properties = self
@@ -313,13 +406,13 @@ impl DumpStatistics {
             .flat_map(|(class, record)| {
                 Ok::<_, anyhow::Error>((
                     *class,
-                    self.related_properties(record.direct_instances, &record.cooccurrences),
+                    self.related_properties(record.direct_instances, &record.cooccurrences)?,
                 ))
             })
             .collect::<HashMap<_, _>>();
 
         for (class, related_properties) in related_properties {
-            self.classes.entry(class).or_default().related_properties = related_properties?;
+            self.classes.entry(class).or_default().related_properties = related_properties;
         }
 
         Ok(())
@@ -327,12 +420,15 @@ impl DumpStatistics {
 
     pub(crate) fn finalise(mut self, settings: &Settings) -> Result<()> {
         self.compute_related_properties()?;
+        self.compute_nonempty_subclasses();
 
         settings.replace_data(DataFile::Properties, &self.properties)?;
         settings.update_timestamp(DataFile::Properties)?;
 
         settings.replace_data(DataFile::Classes, &self.classes)?;
         settings.update_timestamp(DataFile::Classes)?;
+
+        derive_class_hierarchy(settings, &Classes(self.classes))?;
 
         let dump_info = settings.dump_info.clone().expect("dump info should be set");
         self.statistics.dump_date = Some(dump_info.date);

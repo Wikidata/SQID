@@ -52,6 +52,8 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         .collect::<Vec<String>>();
     dumps.sort_unstable();
 
+    todo!("make sure the directory actually corresponds to a dump");
+
     let latest_dump = dumps.last().context("Could not find any dumps")?;
 
     let latest: Date<Utc> = Date::from_utc(NaiveDate::parse_from_str(latest_dump, "%Y%m%d")?, Utc);
@@ -109,6 +111,9 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     let mut count: usize = 0;
     let mut statistics =
         DumpStatistics::with_classes_and_sites(classes, &mut stats.sites.into_iter());
+
+    statistics.clear_counters();
+
     loop {
         count += 1;
         line.clear();
