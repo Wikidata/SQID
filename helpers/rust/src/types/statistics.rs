@@ -140,6 +140,10 @@ impl DumpStatistics {
             .strip_suffix(',')
             .unwrap_or(line);
 
+        if raw_record.is_empty() {
+            return Ok(());
+        }
+
         let record: Record =
             serde_json::from_str(raw_record).context("Failed parsing the record")?;
 
