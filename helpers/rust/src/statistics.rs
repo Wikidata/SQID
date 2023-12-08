@@ -124,7 +124,7 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
         line.clear();
         reader.read_line(&mut line)?;
 
-        if count % 100 == 0 {
+        if count % 1_000_000_000 == 0 {
             log::debug!("line {}", count);
         }
 
