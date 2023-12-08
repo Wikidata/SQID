@@ -1,7 +1,13 @@
 use anyhow::{anyhow, Context, Result};
 use chrono::{Date, DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt::Display, fs::File, hash::Hash, path::PathBuf};
+use std::{
+    collections::HashMap,
+    fmt::Display,
+    fs::{metadata, File},
+    hash::Hash,
+    path::PathBuf,
+};
 use strum::Display;
 use tempfile::NamedTempFile;
 
@@ -297,6 +303,21 @@ impl Settings {
         log::debug!("Looking up dump date");
         let statistics: Statistics = self.get_data(DataFile::Statistics)?;
         Ok(statistics.dump_date)
+    }
+
+    pub(crate) fn dump_file(&self, directory: &String) -> PathBuf {
+        let mut result = *self.dump_directory.clone();
+
+        result.push(directory);
+        result.push(format!("wikidata-{directory}-all.json.gz"));
+
+        result
+    }
+
+    pub(crate) fn is_usable_dump(&self, directory: &String) -> bool {
+        let metadata = metadata(self.dump_file(directory));
+
+        metadata.map(|metadata| metadata.is_file()).unwrap_or(false)
     }
 }
 

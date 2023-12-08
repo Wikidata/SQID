@@ -48,11 +48,10 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
             entry
                 .map(|direntry| direntry.file_name().into_string().ok())
                 .unwrap_or(None)
+                .filter(|directory| settings.is_usable_dump(directory))
         })
         .collect::<Vec<String>>();
     dumps.sort_unstable();
-
-    todo!("make sure the directory actually corresponds to a dump");
 
     let latest_dump = dumps.last().context("Could not find any dumps")?;
 
