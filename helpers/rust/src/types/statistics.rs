@@ -52,7 +52,7 @@ impl DumpStatistics {
     pub fn clear_counters(&mut self) {
         for class in self.classes.values_mut() {
             class.direct_instances = 0;
-            class.direct_subclasses = 0; // where do we fill this?
+            class.direct_subclasses = 0;
             class.all_instances = 0;
             class.all_subclasses = 0;
             class.related_properties.clear();
@@ -66,8 +66,6 @@ impl DumpStatistics {
             property.with_qualifiers.clear();
             property.related_properties.clear();
         }
-
-        todo!("clear all relevant counters that we increment");
     }
 
     fn close_subclasses(&mut self) -> usize {
@@ -114,11 +112,9 @@ impl DumpStatistics {
 
         for (class, superclasses) in classes {
             for super_class in superclasses {
-                self.classes
-                    .entry(super_class)
-                    .or_default()
-                    .non_empty_subclasses
-                    .insert(class);
+                let record = self.classes.entry(super_class).or_default();
+                record.direct_subclasses += 1;
+                record.non_empty_subclasses.insert(class);
             }
         }
 
@@ -187,6 +183,10 @@ impl DumpStatistics {
                         .insert(class_id);
                 }
             }
+        }
+
+        for property in common.claims.keys() {
+            self.properties.entry(*property).or_default().in_items += 1;
         }
 
         self.total_sitelinks += sitelinks.len();
@@ -311,12 +311,28 @@ impl DumpStatistics {
                 &mut self.properties.entry(*property).or_default().cooccurrences,
                 Some(property),
             );
-            let prop = self.properties.entry(*property).or_default();
-            prop.in_items += 1;
 
             statements.iter().for_each(|statement| {
+                self.properties.entry(*property).or_default().in_statements += 1;
+
+                statement.references().for_each(|reference| {
+                    for reference_property in reference.snaks.keys() {
+                        self.properties
+                            .entry(*reference_property)
+                            .or_default()
+                            .in_references += 1;
+                    }
+                });
+
                 statement.qualifiers().for_each(|(&qualifier, _)| {
-                    *prop.with_qualifiers.entry(qualifier.into()).or_default() += 1;
+                    *self
+                        .properties
+                        .entry(*property)
+                        .or_default()
+                        .with_qualifiers
+                        .entry(qualifier.into())
+                        .or_default() += 1;
+                    self.properties.entry(qualifier).or_default().in_qualifiers += 1;
                 });
             });
         }

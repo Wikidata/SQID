@@ -517,40 +517,25 @@ pub(crate) mod dump {
     impl Statement {
         pub fn mainsnak(&self) -> &Snak {
             match self {
-                Statement::Statement {
-                    id: _,
-                    mainsnak,
-                    rank: _,
-                    qualifiers: _,
-                    qualifiers_order: _,
-                    references: _,
-                } => mainsnak,
+                Statement::Statement { mainsnak, .. } => mainsnak,
             }
         }
 
         pub fn qualifiers(&self) -> impl Iterator<Item = (&Property, &Vec<Snak>)> {
             match self {
-                Statement::Statement {
-                    id: _,
-                    mainsnak: _,
-                    rank: _,
-                    qualifiers,
-                    qualifiers_order: _,
-                    references: _,
-                } => qualifiers.iter(),
+                Statement::Statement { qualifiers, .. } => qualifiers.iter(),
+            }
+        }
+
+        pub fn references(&self) -> impl Iterator<Item = &Reference> {
+            match self {
+                Statement::Statement { references, .. } => references.iter(),
             }
         }
 
         pub fn rank(&self) -> Rank {
             match self {
-                Statement::Statement {
-                    id: _,
-                    mainsnak: _,
-                    rank,
-                    qualifiers: _,
-                    qualifiers_order: _,
-                    references: _,
-                } => *rank,
+                Statement::Statement { rank, .. } => *rank,
             }
         }
     }
@@ -621,7 +606,7 @@ pub(crate) mod dump {
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         snaks_order: Vec<Property>,
         #[serde(skip_serializing_if = "HashMap::is_empty")]
-        snaks: HashMap<Property, Vec<Snak>>,
+        pub(crate) snaks: HashMap<Property, Vec<Snak>>,
     }
 
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
