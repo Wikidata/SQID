@@ -108,6 +108,8 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     reader.read_line(&mut line)?;
     assert_eq!(line, "[\n");
 
+    log::info!("starting to process dump");
+
     let stats: Statistics = settings.get_data(DataFile::Statistics)?;
     let classes: HashMap<Item, ClassRecord> = settings.get_data(DataFile::Classes)?;
     let mut statistics =
@@ -127,6 +129,8 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     }
 
     assert_eq!(line, "]\n");
+
+    log::info!("processed dump, finalising");
 
     statistics.finalise(settings)
 }
