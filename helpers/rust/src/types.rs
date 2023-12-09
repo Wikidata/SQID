@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Context, Result};
-use chrono::{Date, DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -20,7 +20,7 @@ mod statistics;
 
 pub use ids::{properties, Entity, Item, Property, Qualifier, Reference};
 pub use json::{
-    formats::date::utc_from_str, ClassRecord, Classes, EntityStatistics, Properties,
+    formats::date::date_from_str, ClassRecord, Classes, EntityStatistics, Properties,
     PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
@@ -45,7 +45,7 @@ pub(crate) struct Settings {
 /// Holds information on the current dump file to process.
 #[derive(Debug, Clone)]
 pub(crate) struct DumpInfo {
-    pub(crate) date: Date<Utc>,
+    pub(crate) date: NaiveDate,
     pub(crate) path: Box<PathBuf>,
 }
 
@@ -185,9 +185,9 @@ impl Display for DataFile {
 
 impl Settings {
     /// Constructs a new settings object with data directory set to `path`.
-    pub fn new(data: &str) -> Self {
+    pub fn new(data: PathBuf) -> Self {
         Self {
-            data_directory: Box::new(data.into()),
+            data_directory: Box::new(data),
             dump_directory: Box::new("/public/dumps/public/wikidatawiki/entities/".into()),
             dump_info: None,
         }
@@ -299,7 +299,7 @@ impl Settings {
         }
     }
 
-    pub fn get_dump_date(&self) -> Result<Option<Date<Utc>>> {
+    pub fn get_dump_date(&self) -> Result<Option<NaiveDate>> {
         log::debug!("Looking up dump date");
         let statistics: Statistics = self.get_data(DataFile::Statistics)?;
         Ok(statistics.dump_date)

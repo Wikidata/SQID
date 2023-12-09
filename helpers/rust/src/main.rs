@@ -15,14 +15,14 @@
     variant_size_differences
 )]
 
-use std::{path::PathBuf, str::FromStr};
+use std::path::PathBuf;
 
 use anyhow::Result;
-use clap::{App, Arg};
+use clap::{Args, Parser};
 use env_logger::Env;
 use rules::update_rules;
 use statistics::process_dump;
-use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator, IntoStaticStr};
+use strum::{EnumIter, EnumProperty, EnumString, IntoEnumIterator};
 
 use crate::{
     classes::{update_class_records, update_derived_class_records},
@@ -40,7 +40,7 @@ mod statistics;
 mod types;
 
 /// Possible actions the tool can perform.
-#[derive(Debug, PartialEq, Eq, EnumIter, EnumString, IntoStaticStr)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumIter, EnumString)]
 #[strum(serialize_all = "kebab-case")]
 enum Action {
     Properties,
@@ -72,7 +72,7 @@ impl Action {
 }
 
 /// Log levels implemented by the tool.
-#[derive(Debug, PartialEq, Eq, EnumIter, EnumString, EnumProperty, IntoStaticStr)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumString, EnumProperty)]
 #[strum(serialize_all = "UPPERCASE")]
 enum LogLevel {
     /// Show only critical output
@@ -95,148 +95,114 @@ enum LogLevel {
     Trace,
 }
 
-const NAME: Option<&'static str> = option_env!("CARGO_PKG_NAME");
-const DESCRIPTION: Option<&'static str> = option_env!("CARGO_PKG_DESCRIPTION");
-const VERSION: Option<&'static str> = option_env!("CARGO_PKG_VERSION");
-const AUTHORS: Option<&'static str> = option_env!("CARGO_PKG_AUTHORS");
+fn get_default_data_path() -> PathBuf {
+    PathBuf::new().join("..").join("..").join("data")
+}
+
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[command(flatten)]
+    verbosity: Verbosity,
+
+    /// Only update statistics for KIND
+    #[arg(short, long, value_name = "KIND")]
+    only: Option<Action>,
+
+    /// Path to data files
+    #[arg(long = "data-path", value_name = "DIR", default_value = get_default_data_path().into_os_string())]
+    path: PathBuf,
+
+    /// Do not compute derived records
+    #[arg(long = "no-derived")]
+    no_derived: bool,
+
+    /// Date of the dump to be processed
+    #[arg(long, required_if_eq("only", "process-dump"))]
+    date: Option<String>,
+
+    /// Path to the dump to be processed
+    #[arg(last = true, required_if_eq("only", "process-dump"))]
+    dump: Option<PathBuf>,
+}
+
+#[derive(Args)]
+#[group(required = false, multiple = false)]
+struct Verbosity {
+    /// Increase verbosity
+    #[arg(short, long)]
+    verbose: bool,
+
+    /// Suppress (some) output
+    #[arg(short, long)]
+    quiet: bool,
+
+    /// Set the log level
+    #[arg(short, long = "loglevel", default_value = "INFO")]
+    log_level: LogLevel,
+}
+
+impl Verbosity {
+    fn get(&self) -> LogLevel {
+        if self.quiet {
+            LogLevel::Warning
+        } else if self.verbose {
+            LogLevel::Debug
+        } else {
+            self.log_level
+        }
+    }
+}
 
 /// The entry point to the whole program.
 fn main() {
-    let default_path = PathBuf::new().join("..").join("..").join("data");
-    let actions = Action::iter()
-        .map(|action| action.into())
-        .collect::<Vec<&'static str>>();
-    let log_levels = LogLevel::iter()
-        .map(|level| level.into())
-        .collect::<Vec<&'static str>>();
-    let matches = App::new(NAME.unwrap_or("sqid-helper"))
-        .version(VERSION.unwrap_or("(unknown)"))
-        .author(AUTHORS.unwrap_or("Maximilian Marx <maximilian.marx@tu-dresden.de>"))
-        .about(DESCRIPTION.unwrap_or("Update statistics data for SQID, a Wikidata browser"))
-        .arg(
-            Arg::with_name("version")
-                .short("V")
-                .long("version")
-                .help("Shows the version of sqid-helper"),
-        )
-        .arg(
-            Arg::with_name("only")
-                .short("o")
-                .long("only")
-                .value_name("KIND")
-                .possible_values(&actions)
-                .help("only update statistics for KIND"),
-        )
-        .arg(
-            Arg::with_name("path")
-                .long("data-path")
-                .value_name("DIR")
-                .help("path to data files")
-                .default_value(default_path.to_str().expect("fixed path should not fail")),
-        )
-        .arg(
-            Arg::with_name("no-derived")
-                .long("no-derived")
-                .help("do not compute derived records"),
-        )
-        .arg(
-            Arg::with_name("verbose")
-                .short("v")
-                .long("verbose")
-                .help("increase verbosity")
-                .conflicts_with_all(&["loglevel", "quiet"]),
-        )
-        .arg(
-            Arg::with_name("quiet")
-                .short("q")
-                .long("quiet")
-                .help("suppress (some) output")
-                .conflicts_with_all(&["loglevel", "verbose"]),
-        )
-        .arg(
-            Arg::with_name("loglevel")
-                .short("l")
-                .long("loglevel")
-                .help("sets the log level")
-                .possible_values(&log_levels)
-                .default_value("INFO"),
-        )
-        .arg(
-            Arg::with_name("date")
-                .long("date")
-                .takes_value(true)
-                .hidden(true)
-                .required_if("only", "process-dump"),
-        )
-        .arg(
-            Arg::with_name("dump")
-                .hidden(true)
-                .last(true)
-                .required_if("only", "process-dump"),
-        )
-        .get_matches();
+    let cli = Cli::parse();
 
-    let loglevel = if matches.is_present("quiet") {
-        LogLevel::Warning
-    } else if matches.is_present("verbose") {
-        LogLevel::Debug
-    } else {
-        LogLevel::from_str(
-            matches
-                .value_of("loglevel")
-                .expect("default value should be present"),
-        )
-        .expect("should be one of the allowed values")
-    };
+    let loglevel = cli.verbosity.get();
 
     env_logger::Builder::from_env(
         Env::default()
             .default_filter_or(loglevel.get_str("level").expect("level should be defined")),
     )
     .init();
-    log::debug!("Log level is {:?} ({:?})", loglevel, log::max_level());
+    log::debug!(
+        "Log level is {loglevel:?} (set level is {:?})",
+        log::max_level()
+    );
 
-    let only = matches
-        .value_of("only")
-        .and_then(|action| Action::from_str(action).ok());
-    log::debug!("Only is {:?}", only);
-    log::debug!("Default path: {:?}", default_path);
+    log::debug!("Only is {:?}", cli.only);
 
-    if matches.is_present("no-derived") && only == Some(Action::Derived) {
+    if cli.no_derived && cli.only == Some(Action::Derived) {
         log::error!("--no-derived and --only=derived are mutually exclusive");
         std::process::exit(1);
     }
 
-    if matches.is_present("dump") && only != Some(Action::ProcessDump) {
+    if cli.dump.is_some() && cli.only != Some(Action::ProcessDump) {
         log::error!("a dump file can only be specified together with --only=process-dump");
         std::process::exit(1);
     }
 
-    if matches.is_present("date") && only != Some(Action::ProcessDump) {
+    if cli.date.is_some() && cli.only != Some(Action::ProcessDump) {
         log::error!("a dump date can only be specified together with --only=process-dump");
         std::process::exit(1);
     }
 
-    let mut settings = Settings::new(matches.value_of("path").expect("path should be set"));
+    let mut settings = Settings::new(cli.path);
 
-    if let Some(Action::ProcessDump) = only {
-        let date = matches.value_of("date").expect("date should be set");
+    if let Some(Action::ProcessDump) = cli.only {
+        let date = cli.date.expect("date should be set");
+        log::trace!("parsing dump date: {date:?}");
         settings.dump_info = Some(DumpInfo {
-            date: types::utc_from_str(date).expect("date should parse"),
-            path: Box::new(
-                matches
-                    .value_of("dump")
-                    .expect("dump path should be set")
-                    .into(),
-            ),
+            date: types::date_from_str(&date).expect("date should parse"),
+            path: Box::new(cli.dump.expect("dump path should be set")),
         });
     }
 
-    let state = match only {
+    let state = match cli.only {
         Some(action) => action.perform(&settings),
         None => Action::iter().try_for_each(|action| match action {
             Action::Derived => {
-                if matches.is_present("no-derived") {
+                if cli.no_derived {
                     Ok(())
                 } else {
                     action.perform(&settings)

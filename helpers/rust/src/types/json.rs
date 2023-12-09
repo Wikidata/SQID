@@ -1,4 +1,4 @@
-use chrono::{Date, DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_repr::{Deserialize_repr, Serialize_repr};
 use std::collections::{HashMap, HashSet};
@@ -426,7 +426,7 @@ pub struct Statistics {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub(crate) dump_date: Option<Date<Utc>>,
+    pub(crate) dump_date: Option<NaiveDate>,
     #[serde(rename = "propertyStatistics")]
     pub(crate) properties: EntityStatistics,
     #[serde(rename = "itemStatistics")]
@@ -742,7 +742,7 @@ pub(crate) mod formats {
 
     pub(crate) mod timestamp {
         use super::*;
-        use chrono::TimeZone;
+        use chrono::NaiveDateTime;
 
         const FORMAT: &str = "%Y-%m-%dT%H:%M:%S";
         const EXTENDED: &str = "%Y-%m-%dT%H:%M:%S%z";
@@ -764,90 +764,15 @@ pub(crate) mod formats {
             let s: Option<String> = Option::deserialize(deserializer)?;
             match s {
                 Some(s) => {
-                    let default = Utc.datetime_from_str(&s, FORMAT);
-                    let extended = Utc.datetime_from_str(&s, EXTENDED);
+                    let default = NaiveDateTime::parse_from_str(&s, FORMAT)
+                        .map(|date| DateTime::from_naive_utc_and_offset(date, Utc));
+                    let extended =
+                        DateTime::parse_from_str(&s, EXTENDED).map(|date| date.with_timezone(&Utc));
 
                     Ok(Some(
                         default.or(extended).map_err(serde::de::Error::custom)?,
                     ))
                 }
-                None => Ok(None),
-            }
-        }
-
-        #[cfg(test)]
-        mod test {
-            use chrono::NaiveDate;
-            use test_log::test;
-
-            use super::*;
-
-            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
-            struct Data(#[serde(with = "super")] Option<DateTime<Utc>>);
-
-            const TEXT: &str = r#""2016-04-19T08:23:40""#;
-            const TEXT_WITH_TIMEZONE: &str = r#""2016-04-19T08:23:40+0000""#;
-
-            #[test]
-            fn deserialize() {
-                let date =
-                    Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
-                let result: Result<Data, _> = serde_json::from_str(TEXT);
-                log::debug!("{:?}", result);
-                assert!(result.is_ok());
-                assert_eq!(result.unwrap(), Data(Some(date)));
-            }
-
-            #[test]
-            fn deserialize_with_timezone() {
-                let date =
-                    Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
-                let result: Result<Data, _> = serde_json::from_str(TEXT_WITH_TIMEZONE);
-                log::debug!("{:?}", result);
-                assert!(result.is_ok());
-                assert_eq!(result.unwrap(), Data(Some(date)));
-            }
-
-            #[test]
-            fn serialize() {
-                let date =
-                    Utc.from_utc_datetime(&NaiveDate::from_ymd(2016, 4, 19).and_hms(8, 23, 40));
-                let result = serde_json::to_string(&Data(Some(date)));
-                log::debug!("{:?}", result);
-                assert!(result.is_ok());
-                assert_eq!(result.unwrap(), TEXT);
-            }
-        }
-    }
-
-    pub(crate) mod date {
-        use chrono::{NaiveDate, ParseError};
-
-        use super::*;
-
-        const FORMAT: &str = "%Y%m%d";
-
-        pub fn utc_from_str(s: &str) -> Result<Date<Utc>, ParseError> {
-            NaiveDate::parse_from_str(s, FORMAT).map(|date| Date::from_utc(date, Utc))
-        }
-
-        pub fn serialize<S>(date: &Option<Date<Utc>>, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
-        {
-            match date {
-                Some(date) => serializer.serialize_str(&format!("{}", date.format(FORMAT))),
-                None => serializer.serialize_none(),
-            }
-        }
-
-        pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Date<Utc>>, D::Error>
-        where
-            D: Deserializer<'de>,
-        {
-            let s: Option<String> = Option::deserialize(deserializer)?;
-            match s {
-                Some(ref s) => Ok(Some(utc_from_str(s).map_err(serde::de::Error::custom)?)),
                 None => Ok(None),
             }
         }
@@ -860,13 +785,102 @@ pub(crate) mod formats {
             use super::*;
 
             #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
-            struct Data(#[serde(with = "super")] Option<Date<Utc>>);
+            struct Data(#[serde(with = "super")] Option<DateTime<Utc>>);
+
+            const TEXT: &str = r#""2016-04-19T08:23:40""#;
+            const TEXT_WITH_TIMEZONE: &str = r#""2016-04-19T08:23:40+0000""#;
+
+            #[test]
+            fn deserialize() {
+                let date = Utc.from_utc_datetime(
+                    &NaiveDate::from_ymd_opt(2016, 4, 19)
+                        .unwrap()
+                        .and_hms_opt(8, 23, 40)
+                        .unwrap(),
+                );
+                let result: Result<Data, _> = serde_json::from_str(TEXT);
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), Data(Some(date)));
+            }
+
+            #[test]
+            fn deserialize_with_timezone() {
+                let date = Utc.from_utc_datetime(
+                    &NaiveDate::from_ymd_opt(2016, 4, 19)
+                        .unwrap()
+                        .and_hms_opt(8, 23, 40)
+                        .unwrap(),
+                );
+                let result: Result<Data, _> = serde_json::from_str(TEXT_WITH_TIMEZONE);
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), Data(Some(date)));
+            }
+
+            #[test]
+            fn serialize() {
+                let date = Utc.from_utc_datetime(
+                    &NaiveDate::from_ymd_opt(2016, 4, 19)
+                        .unwrap()
+                        .and_hms_opt(8, 23, 40)
+                        .unwrap(),
+                );
+                let result = serde_json::to_string(&Data(Some(date)));
+                log::debug!("{:?}", result);
+                assert!(result.is_ok());
+                assert_eq!(result.unwrap(), TEXT);
+            }
+        }
+    }
+
+    pub(crate) mod date {
+        use chrono::ParseError;
+
+        use super::*;
+
+        const FORMAT: &str = "%Y%m%d";
+
+        pub fn date_from_str(s: &str) -> Result<NaiveDate, ParseError> {
+            NaiveDate::parse_from_str(s, FORMAT)
+        }
+
+        pub fn serialize<S>(date: &Option<NaiveDate>, serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: Serializer,
+        {
+            match date {
+                Some(date) => serializer.serialize_str(&format!("{}", date.format(FORMAT))),
+                None => serializer.serialize_none(),
+            }
+        }
+
+        pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<NaiveDate>, D::Error>
+        where
+            D: Deserializer<'de>,
+        {
+            let s: Option<String> = Option::deserialize(deserializer)?;
+            match s {
+                Some(ref s) => Ok(Some(date_from_str(s).map_err(serde::de::Error::custom)?)),
+                None => Ok(None),
+            }
+        }
+
+        #[cfg(test)]
+        mod test {
+            use chrono::NaiveDate;
+            use test_log::test;
+
+            use super::*;
+
+            #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
+            struct Data(#[serde(with = "super")] Option<NaiveDate>);
 
             const TEXT: &str = r#""20160419""#;
 
             #[test]
             fn deserialize() {
-                let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
+                let date = NaiveDate::from_ymd_opt(2016, 4, 19).unwrap();
                 let result = serde_json::from_str::<Data>(TEXT);
                 log::debug!("{:?}", result);
                 assert!(result.is_ok());
@@ -875,7 +889,7 @@ pub(crate) mod formats {
 
             #[test]
             fn serialize() {
-                let date = Utc.from_utc_date(&NaiveDate::from_ymd(2016, 4, 19));
+                let date = NaiveDate::from_ymd_opt(2016, 4, 19).unwrap();
                 let result = serde_json::to_string(&Data(Some(date)));
                 log::debug!("{:?}", result);
                 assert!(result.is_ok());
@@ -935,6 +949,7 @@ mod test {
                 instance_of: vec![Item::new(22965162)],
                 with_qualifiers: qualifiers,
                 related_properties: related,
+                cooccurrences: HashMap::new(),
             }
         );
     }

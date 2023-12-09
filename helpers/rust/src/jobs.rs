@@ -1,7 +1,7 @@
 use std::{env::current_exe, process::Command};
 
 use anyhow::{Context, Result};
-use chrono::{Date, Utc};
+use chrono::NaiveDate;
 use strum::Display;
 
 #[derive(Debug, Display, Default, Copy, Clone, PartialEq, Eq)]
@@ -21,7 +21,7 @@ const DUMP_MEM_GB: Option<usize> = Some(4);
 const DUMP_CPU: Option<usize> = Some(1);
 const DUMP_NOTIFICATIONS: Notifications = Notifications::OnFailure;
 
-pub(super) fn schedule_dump_processing(dump_file: &str, dump_date: &Date<Utc>) -> Result<()> {
+pub(super) fn schedule_dump_processing(dump_file: &str, dump_date: &NaiveDate) -> Result<()> {
     let sqid = current_exe().context("failed to get executable path")?;
     let sqid = sqid.to_str().expect("should be valid UTF-8");
     let mut command = Command::new("toolforge");
