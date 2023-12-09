@@ -119,16 +119,14 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
 
     loop {
         line.clear();
-        reader.read_line(&mut line)?;
+        let read = reader.read_line(&mut line)?;
 
-        if line.starts_with(']') {
+        if read == 0 || line.starts_with(']') {
             break;
-        };
+        }
 
         statistics.process_line(&line)?;
     }
-
-    assert_eq!(line, "]\n");
 
     log::info!("processed dump, finalising");
 
