@@ -24,10 +24,11 @@ pub struct DumpStatistics {
     total_sitelinks: usize,
     total_entities: usize,
     entities_with_properties: usize,
+    processed_lines: usize,
 }
 
 impl DumpStatistics {
-    const REPORT_INTERVAL: usize = 100000;
+    const REPORT_INTERVAL: usize = 100_000;
 
     pub fn new() -> Self {
         Default::default()
@@ -144,8 +145,16 @@ impl DumpStatistics {
             return Ok(());
         }
 
+        log::trace!("parsing record: {raw_record:?}");
+
         let record: Record =
             serde_json::from_str(raw_record).context("Failed parsing the record")?;
+
+        self.processed_lines += 1;
+
+        if self.processed_lines % Self::REPORT_INTERVAL == 0 {
+            log::debug!("processed {} lines so far", self.processed_lines);
+        }
 
         match record {
             Record::Item {

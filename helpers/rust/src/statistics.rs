@@ -110,20 +110,14 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
 
     let stats: Statistics = settings.get_data(DataFile::Statistics)?;
     let classes: HashMap<Item, ClassRecord> = settings.get_data(DataFile::Classes)?;
-    let mut count: usize = 0;
     let mut statistics =
         DumpStatistics::with_classes_and_sites(classes, &mut stats.sites.into_iter());
 
     statistics.clear_counters();
 
     loop {
-        count += 1;
         line.clear();
         reader.read_line(&mut line)?;
-
-        if count % 1_000_000_000 == 0 {
-            log::debug!("line {}", count);
-        }
 
         if line.starts_with(']') {
             break;
