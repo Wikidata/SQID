@@ -165,12 +165,6 @@ fn main() {
             .default_filter_or(loglevel.get_str("level").expect("level should be defined")),
     )
     .init();
-    log::debug!(
-        "Log level is {loglevel:?} (set level is {:?})",
-        log::max_level()
-    );
-
-    log::debug!("Only is {:?}", cli.only);
 
     if cli.no_derived && cli.only == Some(Action::Derived) {
         log::error!("--no-derived and --only=derived are mutually exclusive");
