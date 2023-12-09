@@ -3,7 +3,8 @@ use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::{
     classes::derive_class_hierarchy,
-    types::{ids::properties, DataFile},
+    properties::derive_related_properties,
+    types::{ids::properties, DataFile, Properties},
 };
 
 use super::{
@@ -447,6 +448,9 @@ impl DumpStatistics {
 
         settings.replace_data(DataFile::Classes, &self.classes)?;
         settings.update_timestamp(DataFile::Classes)?;
+
+        log::info!("Deriving updated property data");
+        derive_related_properties(settings, &Properties(self.properties))?;
 
         log::info!("Deriving updated class hierarchy");
         derive_class_hierarchy(settings, &Classes(self.classes))?;
