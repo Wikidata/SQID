@@ -3,7 +3,7 @@ use crate::{
     types::{self, sitelinks, ClassRecord, DataFile, DumpStatistics, Item, Settings, Statistics},
 };
 use anyhow::{Context, Result};
-use flate2::read::GzDecoder;
+use flate2::read::MultiGzDecoder;
 use std::{
     cmp::Ordering,
     collections::HashMap,
@@ -101,7 +101,7 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     );
 
     let dump = File::open(dump_info.path.as_path())?;
-    let decoder = GzDecoder::new(dump);
+    let decoder = MultiGzDecoder::new(dump);
     let mut reader = BufReader::new(decoder);
     let mut line = String::new();
 
@@ -121,9 +121,9 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
 
     loop {
         line.clear();
-        let read = reader.read_line(&mut line)?;
+        let read_bytes = reader.read_line(&mut line)?;
 
-        if read == 0 || line.starts_with(']') {
+        if read_bytes == 0 || line.starts_with(']') {
             break;
         }
 
