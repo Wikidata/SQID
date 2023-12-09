@@ -437,7 +437,9 @@ impl DumpStatistics {
     }
 
     pub(crate) fn finalise(mut self, settings: &Settings) -> Result<()> {
+        log::info!("Computing related properties");
         self.compute_related_properties()?;
+        log::info!("Finding non-empty subclasses");
         self.compute_nonempty_subclasses();
 
         settings.replace_data(DataFile::Properties, &self.properties)?;
@@ -446,8 +448,10 @@ impl DumpStatistics {
         settings.replace_data(DataFile::Classes, &self.classes)?;
         settings.update_timestamp(DataFile::Classes)?;
 
+        log::info!("Deriving updated class hierarchy");
         derive_class_hierarchy(settings, &Classes(self.classes))?;
 
+        log::info!("Updating dump date");
         let dump_info = settings.dump_info.clone().expect("dump info should be set");
         self.statistics.dump_date = Some(dump_info.date);
         settings.replace_data(DataFile::Statistics, &self.statistics)
