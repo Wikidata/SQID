@@ -108,7 +108,7 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     reader.read_line(&mut line)?;
     assert_eq!(line, "[\n");
 
-    log::info!("starting to process dump");
+    log::info!("Preparing statistics");
 
     let stats: Statistics = settings.get_data(DataFile::Statistics)?;
     let classes: HashMap<Item, ClassRecord> = settings.get_data(DataFile::Classes)?;
@@ -116,6 +116,8 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
         DumpStatistics::with_classes_and_sites(classes, &mut stats.sites.into_iter());
 
     statistics.clear_counters();
+
+    log::info!("starting to process dump");
 
     loop {
         line.clear();
