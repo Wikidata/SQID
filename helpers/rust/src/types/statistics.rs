@@ -135,11 +135,7 @@ impl DumpStatistics {
     }
 
     pub(crate) fn process_line(&mut self, line: &str) -> Result<()> {
-        let raw_record = line
-            .strip_suffix('\n')
-            .unwrap_or(line)
-            .strip_suffix(',')
-            .unwrap_or(line);
+        let raw_record = line.trim_end_matches(&['\n', ',']);
 
         if raw_record.is_empty() {
             return Ok(());

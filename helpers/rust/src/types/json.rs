@@ -752,7 +752,7 @@ pub(crate) mod formats {
             S: Serializer,
         {
             match date {
-                Some(date) => serializer.serialize_str(&format!("{}", date.format(FORMAT))),
+                Some(date) => serializer.serialize_str(&date.to_rfc3339().to_string()),
                 None => serializer.serialize_none(),
             }
         }
@@ -768,9 +768,18 @@ pub(crate) mod formats {
                         .map(|date| DateTime::from_naive_utc_and_offset(date, Utc));
                     let extended =
                         DateTime::parse_from_str(&s, EXTENDED).map(|date| date.with_timezone(&Utc));
+                    let rfc_3339 =
+                        DateTime::parse_from_rfc3339(&s).map(|date| date.with_timezone(&Utc));
+
+                    log::trace!("default: {default:?} ({s:?})");
+                    log::trace!("extended: {extended:?} ({s:?})");
+                    log::trace!("rfc_3339: {rfc_3339:?} ({s:?})");
 
                     Ok(Some(
-                        default.or(extended).map_err(serde::de::Error::custom)?,
+                        default
+                            .or(extended)
+                            .or(rfc_3339)
+                            .map_err(serde::de::Error::custom)?,
                     ))
                 }
                 None => Ok(None),
