@@ -401,6 +401,20 @@ impl SiteRecord {
             items: 0,
         }
     }
+
+    pub fn shrink_to_fit(&mut self) {
+        if let Some(url_pattern) = &mut self.url_pattern {
+            url_pattern.shrink_to_fit();
+        }
+
+        if let Some(group) = &mut self.group {
+            group.shrink_to_fit();
+        }
+
+        if let Some(language) = &mut self.language {
+            language.shrink_to_fit();
+        }
+    }
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -467,6 +481,23 @@ pub(crate) mod dump {
         },
     }
 
+    impl Record {
+        pub fn shrink_to_fit(&mut self) {
+            match self {
+                Self::Item {
+                    sitelinks, common, ..
+                } => {
+                    sitelinks.shrink_to_fit();
+                    sitelinks
+                        .values_mut()
+                        .for_each(|sitelink| sitelink.shrink_to_fit());
+                    common.shrink_to_fit();
+                }
+                Self::Property { common, .. } => common.shrink_to_fit(),
+            }
+        }
+    }
+
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
     #[serde(rename_all = "camelCase")]
     pub struct CommonData {
@@ -488,6 +519,27 @@ pub(crate) mod dump {
     }
 
     impl CommonData {
+        pub fn shrink_to_fit(&mut self) {
+            self.labels.shrink_to_fit();
+            self.labels
+                .values_mut()
+                .for_each(|label| label.shrink_to_fit());
+            self.descriptions.shrink_to_fit();
+            self.descriptions
+                .values_mut()
+                .for_each(|description| description.shrink_to_fit());
+            self.aliases.shrink_to_fit();
+            self.aliases.values_mut().for_each(|aliases| {
+                aliases.shrink_to_fit();
+                aliases.iter_mut().for_each(|alias| alias.shrink_to_fit());
+            });
+            self.claims.shrink_to_fit();
+            self.claims.values_mut().for_each(|claims| {
+                claims.shrink_to_fit();
+                claims.iter_mut().for_each(|claim| claim.shrink_to_fit());
+            });
+        }
+
         pub(crate) fn label_for(&self, language: &str) -> Option<String> {
             self.labels.get(language).map(|label| label.value.clone())
         }
@@ -501,12 +553,14 @@ pub(crate) mod dump {
     #[serde(rename_all = "camelCase", tag = "type")]
     pub enum Statement {
         Statement {
+            #[cfg(feature = "full-json-model")]
             id: String,
             mainsnak: Snak,
             #[serde(default)]
             rank: Rank,
             #[serde(default)]
             qualifiers: HashMap<Property, Vec<Snak>>,
+            #[cfg(feature = "full-json-model")]
             #[serde(default, skip_serializing_if = "Vec::is_empty")]
             qualifiers_order: Vec<Property>,
             #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -515,6 +569,38 @@ pub(crate) mod dump {
     }
 
     impl Statement {
+        pub fn shrink_to_fit(&mut self) {
+            match self {
+                Self::Statement {
+                    #[cfg(feature = "full-json-model")]
+                    id,
+                    mainsnak,
+                    qualifiers,
+                    references,
+                    #[cfg(feature = "full-json-model")]
+                    qualifiers_order,
+                    ..
+                } => {
+                    #[cfg(feature = "full-json-model")]
+                    id.shrink_to_fit();
+                    mainsnak.shrink_to_fit();
+                    qualifiers.shrink_to_fit();
+                    qualifiers.values_mut().for_each(|qualifiers| {
+                        qualifiers.shrink_to_fit();
+                        qualifiers
+                            .iter_mut()
+                            .for_each(|qualifier| qualifier.shrink_to_fit());
+                    });
+                    references.shrink_to_fit();
+                    references
+                        .iter_mut()
+                        .for_each(|reference| reference.shrink_to_fit());
+                    #[cfg(feature = "full-json-model")]
+                    qualifiers_order.shrink_to_fit();
+                }
+            }
+        }
+
         pub fn mainsnak(&self) -> &Snak {
             match self {
                 Statement::Statement { mainsnak, .. } => mainsnak,
@@ -548,11 +634,26 @@ pub(crate) mod dump {
         badges: Vec<Item>,
     }
 
+    impl Sitelink {
+        pub fn shrink_to_fit(&mut self) {
+            self.site.shrink_to_fit();
+            self.title.shrink_to_fit();
+            self.badges.shrink_to_fit();
+        }
+    }
+
     #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
     #[serde(rename_all = "camelCase")]
     pub struct LanguageValue {
         language: String,
         value: String,
+    }
+
+    impl LanguageValue {
+        pub fn shrink_to_fit(&mut self) {
+            self.language.shrink_to_fit();
+            self.value.shrink_to_fit();
+        }
     }
 
     #[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -587,6 +688,13 @@ pub(crate) mod dump {
     }
 
     impl Snak {
+        pub fn shrink_to_fit(&mut self) {
+            match self {
+                Self::Value { datavalue, .. } => datavalue.shrink_to_fit(),
+                Self::SomeValue { .. } | Self::NoValue { .. } => (),
+            }
+        }
+
         pub fn as_data_value(&self) -> Option<&DataValue> {
             match self {
                 Snak::Value {
@@ -602,11 +710,28 @@ pub(crate) mod dump {
     #[derive(Default, Debug, PartialEq, Deserialize, Serialize)]
     #[serde(rename_all = "kebab-case")]
     pub struct Reference {
+        #[cfg(feature = "full-json-model")]
         hash: String,
+        #[cfg(feature = "full-json-model")]
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         snaks_order: Vec<Property>,
         #[serde(skip_serializing_if = "HashMap::is_empty")]
         pub(crate) snaks: HashMap<Property, Vec<Snak>>,
+    }
+
+    impl Reference {
+        pub fn shrink_to_fit(&mut self) {
+            #[cfg(feature = "full-json-model")]
+            {
+                self.hash.shrink_to_fit();
+                self.snaks_order.shrink_to_fit();
+            }
+            self.snaks.shrink_to_fit();
+            self.snaks.values_mut().for_each(|snaks| {
+                snaks.shrink_to_fit();
+                snaks.iter_mut().for_each(|snak| snak.shrink_to_fit());
+            });
+        }
     }
 
     #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -635,6 +760,17 @@ pub(crate) mod dump {
     }
 
     impl DataValue {
+        pub fn shrink_to_fit(&mut self) {
+            match self {
+                DataValue::String { value } => value.shrink_to_fit(),
+                DataValue::Quantity { value } => value.shrink_to_fit(),
+                DataValue::MonolingualText { value } => value.shrink_to_fit(),
+                DataValue::WikibaseEntityid { .. }
+                | DataValue::GlobeCoordinate { .. }
+                | DataValue::Time { .. } => (),
+            }
+        }
+
         pub fn as_entity_id(&self) -> Option<&EntityId> {
             match self {
                 DataValue::WikibaseEntityid { value } => Some(value),
@@ -648,8 +784,9 @@ pub(crate) mod dump {
     pub struct EntityId {
         pub(crate) entity_type: EntityType,
         pub(crate) id: Entity,
+        #[cfg(feature = "full-json-model")]
         #[serde(skip_serializing_if = "Option::is_none")]
-        numeric_id: Option<u64>,
+        numeric_id: Option<u32>,
     }
 
     #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -692,6 +829,18 @@ pub(crate) mod dump {
         lowerbound: Option<String>,
     }
 
+    impl Quantity {
+        pub fn shrink_to_fit(&mut self) {
+            if let Some(bound) = self.upperbound.as_mut() {
+                bound.shrink_to_fit()
+            }
+
+            if let Some(bound) = self.lowerbound.as_mut() {
+                bound.shrink_to_fit()
+            }
+        }
+    }
+
     #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
     pub struct Time {
         #[serde(
@@ -713,6 +862,13 @@ pub(crate) mod dump {
     pub struct MonolingualText {
         language: String,
         text: String,
+    }
+
+    impl MonolingualText {
+        pub fn shrink_to_fit(&mut self) {
+            self.language.shrink_to_fit();
+            self.text.shrink_to_fit();
+        }
     }
 
     #[derive(Debug, PartialEq, Eq, Deserialize_repr, Serialize_repr)]

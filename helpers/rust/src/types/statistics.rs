@@ -44,6 +44,12 @@ impl DumpStatistics {
         log::info!("Added {} indirect subclass relationships", added);
 
         result.statistics.sites = sites.collect();
+        result.statistics.sites.shrink_to_fit();
+        result
+            .statistics
+            .sites
+            .values_mut()
+            .for_each(|sitelink| sitelink.shrink_to_fit());
         log::info!("Got {} sitelink records", result.statistics.sites.len());
 
         result
@@ -142,8 +148,9 @@ impl DumpStatistics {
 
         log::trace!("parsing record: {raw_record:?}");
 
-        let record: Record =
+        let mut record: Record =
             serde_json::from_str(raw_record).context("Failed parsing the record")?;
+        record.shrink_to_fit();
 
         match record {
             Record::Item {
