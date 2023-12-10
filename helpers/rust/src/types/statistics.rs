@@ -20,7 +20,6 @@ use super::{
 pub struct DumpStatistics {
     classes: HashMap<Item, ClassRecord>,
     properties: HashMap<Property, PropertyRecord>,
-    sitelinks: HashMap<String, SiteRecord>,
     statistics: Statistics,
     total_sitelinks: usize,
     total_entities: usize,
@@ -44,8 +43,8 @@ impl DumpStatistics {
         let added = result.close_subclasses();
         log::info!("Added {} indirect subclass relationships", added);
 
-        result.sitelinks = sites.collect();
-        log::info!("Got {} sitelink records", result.sitelinks.len());
+        result.statistics.sites = sites.collect();
+        log::info!("Got {} sitelink records", result.statistics.sites.len());
 
         result
     }
@@ -197,7 +196,7 @@ impl DumpStatistics {
             .iter()
             .try_for_each(|(site, sitelink)| self.process_sitelink(site, sitelink))
             .context("Failed to process the sitelinks")?;
-        self.process_terms(common, EntityKind::Item)
+        self.process_terms(&common, EntityKind::Item)
             .context("Failed to process the terms")?;
         self.process_claims(common, EntityKind::Item)
             .context("Failed to process the claims")
@@ -235,7 +234,7 @@ impl DumpStatistics {
                 {
                     record
                         .instance_of
-                        .push(class.id.as_item().expect("class Id should be an Item"))
+                        .insert(class.id.as_item().expect("class Id should be an Item"));
                 }
             });
         }
@@ -247,7 +246,7 @@ impl DumpStatistics {
     }
 
     fn process_sitelink(&mut self, site: &str, _sitelink: &Sitelink) -> Result<()> {
-        match self.sitelinks.get_mut(site) {
+        match self.statistics.sites.get_mut(site) {
             Some(link) => {
                 link.items += 1;
                 Ok(())

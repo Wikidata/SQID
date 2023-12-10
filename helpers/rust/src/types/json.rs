@@ -181,8 +181,8 @@ pub struct PropertyRecord {
     pub(crate) in_references: usize,
     #[serde(rename = "u", skip_serializing_if = "Option::is_none")]
     pub(crate) url_pattern: Option<String>,
-    #[serde(rename = "pc", skip_serializing_if = "Vec::is_empty")]
-    pub(crate) instance_of: Vec<Item>,
+    #[serde(rename = "pc", skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) instance_of: HashSet<Item>,
     #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
@@ -265,8 +265,8 @@ pub struct PropertyUsageRecord {
     pub(crate) in_qualifiers: usize,
     #[serde(rename = "e", skip_serializing_if = "is_zero")]
     pub(crate) in_references: usize,
-    #[serde(rename = "pc", skip_serializing_if = "Vec::is_empty")]
-    pub(crate) instance_of: Vec<Item>,
+    #[serde(rename = "pc", skip_serializing_if = "HashSet::is_empty")]
+    pub(crate) instance_of: HashSet<Item>,
     #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
 }
@@ -798,6 +798,7 @@ pub(crate) mod formats {
 
             const TEXT: &str = r#""2016-04-19T08:23:40""#;
             const TEXT_WITH_TIMEZONE: &str = r#""2016-04-19T08:23:40+0000""#;
+            const TEXT_WITH_TIMEZONE_AND_COLON: &str = r#""2016-04-19T08:23:40+00:00""#;
 
             #[test]
             fn deserialize() {
@@ -838,7 +839,7 @@ pub(crate) mod formats {
                 let result = serde_json::to_string(&Data(Some(date)));
                 log::debug!("{:?}", result);
                 assert!(result.is_ok());
-                assert_eq!(result.unwrap(), TEXT);
+                assert_eq!(result.unwrap(), TEXT_WITH_TIMEZONE_AND_COLON);
             }
         }
     }
@@ -955,7 +956,7 @@ mod test {
                 in_qualifiers: 5,
                 in_references: 0,
                 url_pattern: None,
-                instance_of: vec![Item::new(22965162)],
+                instance_of: HashSet::from([Item::new(22965162)]),
                 with_qualifiers: qualifiers,
                 related_properties: related,
                 cooccurrences: HashMap::new(),
