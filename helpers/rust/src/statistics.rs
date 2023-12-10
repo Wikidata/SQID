@@ -11,6 +11,10 @@ use std::{
     io::{BufRead, BufReader},
 };
 
+/// Default capacity for the line, to avoid resizing; 128k ought to be
+/// enough for any entity.
+const LINE_CAPACITY: usize = 128 * 1024;
+
 fn into_description(ordering: Ordering) -> String {
     match ordering {
         Ordering::Less => "newer",
@@ -103,7 +107,7 @@ pub(super) fn process_dump(settings: &Settings) -> Result<()> {
     let dump = File::open(dump_info.path.as_path())?;
     let decoder = MultiGzDecoder::new(dump);
     let mut reader = BufReader::new(decoder);
-    let mut line = String::new();
+    let mut line = String::with_capacity(LINE_CAPACITY);
 
     reader.read_line(&mut line)?;
     assert_eq!(line, "[\n");
