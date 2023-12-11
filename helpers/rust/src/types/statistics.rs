@@ -175,7 +175,11 @@ impl DumpStatistics {
         sitelinks: &HashMap<String, Sitelink>,
         common: &CommonData,
     ) -> Result<()> {
-        self.classes.entry(item).or_default().label = common.label();
+        if let Some(class) = self.classes.get_mut(&item) {
+            // only keep the label if we know this is a class, to keep
+            // memory consumption manageable.
+            class.label = common.label();
+        }
 
         if let Some(claims) = common.claims.get(&properties::SUBCLASS_OF) {
             for claim in claims {
