@@ -148,8 +148,16 @@ impl DumpStatistics {
 
         log::trace!("parsing record: {raw_record:?}");
 
-        let mut record: Record =
-            serde_json::from_str(raw_record).context("Failed parsing the record")?;
+        let record = serde_json::from_str::<Record>(raw_record);
+
+        if let Err(error) = record {
+            log::warn!("Failed to parse record: {error}");
+            log::debug!("{raw_record:?}");
+
+            return Ok(());
+        }
+
+        let mut record = record?;
         record.shrink_to_fit();
 
         match record {
