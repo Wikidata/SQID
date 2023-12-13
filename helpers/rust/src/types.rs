@@ -37,7 +37,7 @@ pub(crate) fn is_zero(value: &usize) -> bool {
 /// the data directories.
 #[derive(Debug)]
 pub(crate) struct Settings {
-    data_directory: Box<PathBuf>,
+    pub(crate) data_directory: Box<PathBuf>,
     pub(crate) dump_directory: Box<PathBuf>,
     pub(crate) dump_info: Option<DumpInfo>,
 }

@@ -66,13 +66,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     );
 
     if order == Ordering::Less {
-        do_dump_processing(
-            settings
-                .dump_file(latest_dump)
-                .to_str()
-                .expect("valid UTF-8"),
-            &latest,
-        )?;
+        do_dump_processing(settings, latest_dump, &latest)?;
     }
 
     Ok(())
