@@ -18,10 +18,10 @@ pub(super) fn do_dump_processing(dump_file: &str, dump_date: &NaiveDate) -> Resu
     log::info!("executing: {command:?}");
 
     let output = command
-        .output()
+        .status()
         .context("failed to start the dump processing")?;
 
-    if output.status.success() {
+    if output.success() {
         log::info!("successfully processed dump");
     } else {
         log::error!("failed to start dump processing");
