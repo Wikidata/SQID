@@ -1,0 +1,6 @@
+From rust:bookworm AS builder
+COPY . /
+RUN cargo build --release
+
+FROM debian:bookworm
+COPY --from=builder /target/release/sqid-helper .
