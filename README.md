@@ -14,8 +14,8 @@ github to report issues and to find out if your issue is already known or even b
 You do not normally need to install this yourself, since it is a Web application that you can use in your browser. Developers who want to change the code should have a local copy that runs though. This is farily easy:
 
 * Download the files. To install dependencies, run `npm install`. For local development, use `npm run serve`, which will start a local web server serving the application. For production builds, use `npm run build` and make the `dist/` directory available using your local web server.
-* Get some data. You can copy the example json data files from [src/data/exampleData](src/data/exampleData) to [src/data/](src/data) to get started. You can update these files by running the Python script `update-statistics.py` under [helpers/python](helpers/python) from this directory, but this will not recreate all statistics. You can also [download most recent updated json files](http://tools-static.wmflabs.org/sqid/data/).
-* Optionally recreate all statistics. The program to do this is the java "sqid-helper" under [helpers/java](helpers/java), using [Wikidata Toolkit](https://github.com/Wikidata/Wikidata-Toolkit). The main code is in [SchemaUsageAnalyzer.java](https://github.com/Wikidata/SQID/blob/master/helpers/java/src/main/java/org/wikidata/wdtk/client/SchemaUsageAnalyzer.java). The code is invoked by using the command-line client (running the client will show a help message that includes this action).
+* Get some data. You can copy the example json data files from [src/data/exampleData](src/data/exampleData) to [src/data/](src/data) to get started. You can update these files by running `sqid-helper` under [helpers/rust](helpers/rust) from this directory, but this will not recreate all statistics. You can also [download the most recently updated json files](http://tools-static.wmflabs.org/sqid/data/).
+* Optionally recreate all statistics. This is also done using `sqid-helper`, by specifing `--only=process-dump` and providing arguments as directed by the help message.
 
 ## Deployment on Wikimedia Toolforge
 

@@ -1,5 +1,5 @@
 ---
-- name: Copy sqid-helper JAR
+- name: Copy sqid-helper bin
   copy:
-    src: "{{ helper_path }}/{{ helper_jar }}"
-    dest: "{{ helper_dest }}"
+    src: '{{ helper_path }}/{{ helper_bin }}'
+    dest: '{{ helper_dest }}'

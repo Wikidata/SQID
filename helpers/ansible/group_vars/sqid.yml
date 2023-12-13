@@ -1,16 +1,16 @@
 ---
-helper_path: ../java
-helper_version: 0.11.0
+helper_path: ../rust
+helper_version: 0.1.0
 helper_output: target
-helper_jar: "{{ helper_output }}/org.wikidata.sqid.helper-{{ helper_version }}.jar"
+helper_bin: '{{ helper_output }}/release/sqid-helper'
 scripts_path: ../python
 sqid_path: ../..
 sqid_dist: dist
 sqid_data: data
-helper_dest: ~/projects
+helper_dest: ~/
 scripts_dest: ~/projects/sqid
 dynamic_path: ~/public_html
-sqid_dest: "{{ dynamic_path }}/sqid-ng"
-data_dest: "{{ scripts_dest }}"
+sqid_dest: '{{ dynamic_path }}/sqid-ng'
+data_dest: '{{ scripts_dest }}'
 static_path: ~/www/static
-data_link: "{{ static_path }}/data"
+data_link: '{{ static_path }}/data'

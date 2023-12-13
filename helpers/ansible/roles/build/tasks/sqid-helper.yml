@@ -1,14 +1,14 @@
 ---
 - name: Clean sqid-helper
   local_action:
-    module: command mvn clean
+    module: command cargo clean
     args:
-      chdir: "{{ helper_path }}"
+      chdir: '{{ helper_path }}'
   tags: [never, clean]
 
 - name: Build sqid-helper
   local_action:
-    module: command mvn package
+    module: command cargo build --release
     args:
-      chdir: "{{ helper_path }}"
-      creates: "{{ helper_jar }}"
+      chdir: '{{ helper_path }}'
+      creates: '{{ helper_bin }}'
