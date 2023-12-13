@@ -75,6 +75,8 @@ impl DumpStatistics {
     }
 
     fn close_subclasses(&mut self) -> usize {
+        log::info!("Computing subclass closure");
+
         let mut added = 0;
         let direct_superclasses = self
             .classes
@@ -85,6 +87,7 @@ impl DumpStatistics {
 
         while let Some(class) = class_queue.pop_front() {
             let record = self.classes.entry(class).or_default();
+            let mut done = HashSet::new();
             let mut superclasses = record
                 .direct_superclasses
                 .iter()
@@ -93,10 +96,16 @@ impl DumpStatistics {
 
             while let Some(superclass) = superclasses.pop_front() {
                 record.superclasses.insert(superclass);
+                done.insert(superclass);
                 added += 1;
 
                 if let Some(new_superclasses) = direct_superclasses.get(&superclass) {
-                    superclasses.extend(new_superclasses.iter().cloned());
+                    superclasses.extend(
+                        new_superclasses
+                            .iter()
+                            .filter(|superclass| !done.contains(superclass))
+                            .cloned(),
+                    );
                 }
             }
         }
@@ -115,6 +124,8 @@ impl DumpStatistics {
                     .then_some((*class, record.direct_superclasses.clone()))
             })
             .collect::<Vec<_>>();
+
+        log::info!("Found {} non-empty classes", classes.len());
 
         for (class, superclasses) in classes {
             for super_class in superclasses {

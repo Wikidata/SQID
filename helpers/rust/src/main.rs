@@ -166,6 +166,8 @@ fn main() {
     )
     .init();
 
+    log::info!("Log level set to {}", log::max_level());
+
     if cli.no_derived && cli.only == Some(Action::Derived) {
         log::error!("--no-derived and --only=derived are mutually exclusive");
         std::process::exit(1);
