@@ -204,7 +204,9 @@ fn main() {
                     action.perform(&settings)
                 }
             }
-            Action::ProcessDump => Ok(()),
+            Action::ProcessDump => Ok(()), // needs special arguments
+            Action::CheckDump => Ok(()), // will kick off dump-processing, don't run as default action
+            Action::Rules => Ok(()), // todo(mx): remove this once we've implemented rule fetching
             _ => action.perform(&settings),
         }),
     };

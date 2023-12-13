@@ -1,5 +1,5 @@
 use crate::{
-    jobs::schedule_dump_processing,
+    jobs::do_dump_processing,
     types::{self, sitelinks, ClassRecord, DataFile, DumpStatistics, Item, Settings, Statistics},
 };
 use anyhow::{Context, Result};
@@ -66,7 +66,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     );
 
     if order == Ordering::Less {
-        schedule_dump_processing(
+        do_dump_processing(
             settings
                 .dump_file(latest_dump)
                 .to_str()
