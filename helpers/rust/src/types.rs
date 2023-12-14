@@ -35,7 +35,7 @@ pub(crate) fn is_zero(value: &usize) -> bool {
 
 /// Holds settings given on the command line, particularly the path to
 /// the data directories.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub(crate) struct Settings {
     pub(crate) data_directory: Box<PathBuf>,
     pub(crate) dump_directory: Box<PathBuf>,

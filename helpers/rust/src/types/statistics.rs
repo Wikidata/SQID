@@ -226,7 +226,7 @@ impl DumpStatistics {
             .iter()
             .try_for_each(|(site, sitelink)| self.process_sitelink(site, sitelink))
             .context("Failed to process the sitelinks")?;
-        self.process_terms(&common, EntityKind::Item)
+        self.process_terms(common, EntityKind::Item)
             .context("Failed to process the terms")?;
         self.process_claims(common, EntityKind::Item)
             .context("Failed to process the claims")

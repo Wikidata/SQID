@@ -1,6 +1,5 @@
-use crate::{
-    jobs::do_dump_processing,
-    types::{self, sitelinks, ClassRecord, DataFile, DumpStatistics, Item, Settings, Statistics},
+use crate::types::{
+    self, sitelinks, ClassRecord, DataFile, DumpInfo, DumpStatistics, Item, Settings, Statistics,
 };
 use anyhow::{Context, Result};
 use flate2::read::MultiGzDecoder;
@@ -66,7 +65,13 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
     );
 
     if order == Ordering::Less {
-        do_dump_processing(settings, latest_dump, &latest)?;
+        let mut settings = settings.clone();
+        settings.dump_info = Some(DumpInfo {
+            date: latest,
+            path: Box::new(latest_dump.into()),
+        });
+
+        return process_dump(&settings);
     }
 
     Ok(())
