@@ -135,6 +135,8 @@ impl DumpStatistics {
             }
         }
 
+        log::info!("Collecting subclasses");
+
         let mut classes = self
             .classes
             .values()
@@ -142,6 +144,8 @@ impl DumpStatistics {
                 (!record.superclasses.is_empty()).then_some(record.superclasses.clone())
             })
             .collect::<VecDeque<_>>();
+
+        log::info!("Found {} subclasses", classes.len());
 
         while let Some(superclasses) = classes.pop_front() {
             for super_class in superclasses {
@@ -475,6 +479,8 @@ impl DumpStatistics {
         self.compute_related_properties()?;
         log::info!("Finding non-empty subclasses");
         self.compute_nonempty_subclasses();
+
+        log::info!("Writing results");
 
         settings.replace_data(DataFile::Properties, &self.properties)?;
         settings.update_timestamp(DataFile::Properties)?;
