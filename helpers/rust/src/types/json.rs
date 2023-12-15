@@ -553,14 +553,12 @@ pub(crate) mod dump {
     #[serde(rename_all = "camelCase", tag = "type")]
     pub enum Statement {
         Statement {
-            #[cfg(feature = "full-json-model")]
             id: String,
             mainsnak: Snak,
             #[serde(default)]
             rank: Rank,
             #[serde(default)]
             qualifiers: HashMap<Property, Vec<Snak>>,
-            #[cfg(feature = "full-json-model")]
             #[serde(default, skip_serializing_if = "Vec::is_empty")]
             qualifiers_order: Vec<Property>,
             #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -572,16 +570,13 @@ pub(crate) mod dump {
         pub fn shrink_to_fit(&mut self) {
             match self {
                 Self::Statement {
-                    #[cfg(feature = "full-json-model")]
                     id,
                     mainsnak,
                     qualifiers,
                     references,
-                    #[cfg(feature = "full-json-model")]
                     qualifiers_order,
                     ..
                 } => {
-                    #[cfg(feature = "full-json-model")]
                     id.shrink_to_fit();
                     mainsnak.shrink_to_fit();
                     qualifiers.shrink_to_fit();
@@ -595,7 +590,6 @@ pub(crate) mod dump {
                     references
                         .iter_mut()
                         .for_each(|reference| reference.shrink_to_fit());
-                    #[cfg(feature = "full-json-model")]
                     qualifiers_order.shrink_to_fit();
                 }
             }
@@ -710,9 +704,7 @@ pub(crate) mod dump {
     #[derive(Default, Debug, PartialEq, Deserialize, Serialize)]
     #[serde(rename_all = "kebab-case")]
     pub struct Reference {
-        #[cfg(feature = "full-json-model")]
         hash: String,
-        #[cfg(feature = "full-json-model")]
         #[serde(default, skip_serializing_if = "Vec::is_empty")]
         snaks_order: Vec<Property>,
         #[serde(skip_serializing_if = "HashMap::is_empty")]
@@ -721,11 +713,8 @@ pub(crate) mod dump {
 
     impl Reference {
         pub fn shrink_to_fit(&mut self) {
-            #[cfg(feature = "full-json-model")]
-            {
-                self.hash.shrink_to_fit();
-                self.snaks_order.shrink_to_fit();
-            }
+            self.hash.shrink_to_fit();
+            self.snaks_order.shrink_to_fit();
             self.snaks.shrink_to_fit();
             self.snaks.values_mut().for_each(|snaks| {
                 snaks.shrink_to_fit();
@@ -784,7 +773,6 @@ pub(crate) mod dump {
     pub struct EntityId {
         pub(crate) entity_type: EntityType,
         pub(crate) id: Entity,
-        #[cfg(feature = "full-json-model")]
         #[serde(skip_serializing_if = "Option::is_none")]
         numeric_id: Option<u32>,
     }

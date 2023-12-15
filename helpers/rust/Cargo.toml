@@ -6,9 +6,6 @@ authors = ["Maximilian Marx <maximilian.marx@tu-dresden.de>"]
 edition = "2021"
 license = "Apache-2.0"
 
-[features]
-full-json-model = []
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
