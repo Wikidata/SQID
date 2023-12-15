@@ -6,6 +6,8 @@ use std::{
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 
+use super::Id;
+
 const ENTITY: &str = "http://www.wikidata.org/entity/";
 const PROPERTY: &str = "http://www.wikidata.org/prop/";
 const QUALIFIER: &str = "http://www.wikidata.org/prop/qualifier/";
@@ -23,26 +25,26 @@ pub enum EntityKind {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Entity {
-    id: u32,
+    id: Id,
     kind: EntityKind,
 }
 
 impl Entity {
-    pub fn item(id: u32) -> Self {
+    pub fn item(id: Id) -> Self {
         Self {
             id,
             kind: EntityKind::Item,
         }
     }
 
-    pub fn property(id: u32) -> Self {
+    pub fn property(id: Id) -> Self {
         Self {
             id,
             kind: EntityKind::Property,
         }
     }
 
-    pub fn lexeme(id: u32) -> Self {
+    pub fn lexeme(id: Id) -> Self {
         Self {
             id,
             kind: EntityKind::Lexeme,
@@ -159,7 +161,7 @@ impl From<Property> for Entity {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Item(pub(crate) u32);
+pub struct Item(pub(crate) Id);
 
 pub mod classes {
     use super::Item;
@@ -193,7 +195,7 @@ pub mod classes {
 }
 
 impl Item {
-    pub fn new(id: u32) -> Self {
+    pub fn new(id: Id) -> Self {
         Self(id)
     }
 
@@ -247,15 +249,15 @@ impl From<Item> for String {
     }
 }
 
-impl From<u32> for Item {
-    fn from(id: u32) -> Self {
+impl From<Id> for Item {
+    fn from(id: Id) -> Self {
         Self(id)
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Property(pub(crate) u32);
+pub struct Property(pub(crate) Id);
 
 pub mod properties {
     use super::Property;
@@ -276,7 +278,7 @@ pub mod properties {
 }
 
 impl Property {
-    pub fn new(id: u32) -> Self {
+    pub fn new(id: Id) -> Self {
         Self(id)
     }
 
@@ -313,18 +315,18 @@ impl From<Property> for String {
     }
 }
 
-impl From<u32> for Property {
-    fn from(id: u32) -> Self {
+impl From<Id> for Property {
+    fn from(id: Id) -> Self {
         Self(id)
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Qualifier(pub(crate) u32);
+pub struct Qualifier(pub(crate) Id);
 
 impl Qualifier {
-    pub fn new(id: u32) -> Self {
+    pub fn new(id: Id) -> Self {
         Self(id)
     }
 
@@ -357,18 +359,18 @@ impl From<Qualifier> for String {
     }
 }
 
-impl From<u32> for Qualifier {
-    fn from(id: u32) -> Self {
+impl From<Id> for Qualifier {
+    fn from(id: Id) -> Self {
         Self(id)
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Reference(pub(crate) u32);
+pub struct Reference(pub(crate) Id);
 
 impl Reference {
-    pub fn new(id: u32) -> Self {
+    pub fn new(id: Id) -> Self {
         Self(id)
     }
 
@@ -395,18 +397,18 @@ impl From<Reference> for String {
     }
 }
 
-impl From<u32> for Reference {
-    fn from(id: u32) -> Self {
+impl From<Id> for Reference {
+    fn from(id: Id) -> Self {
         Self(id)
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Lexeme(pub(crate) u32);
+pub struct Lexeme(pub(crate) Id);
 
 impl Lexeme {
-    fn new(id: u32) -> Self {
+    fn new(id: Id) -> Self {
         Self(id)
     }
 }
@@ -432,10 +434,10 @@ impl From<Lexeme> for String {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Sense(pub(crate) Lexeme, pub(crate) u32);
+pub struct Sense(pub(crate) Lexeme, pub(crate) Id);
 
 impl Sense {
-    fn new(lexeme: Lexeme, id: u32) -> Self {
+    fn new(lexeme: Lexeme, id: Id) -> Self {
         Self(lexeme, id)
     }
 }
@@ -463,10 +465,10 @@ impl From<Sense> for String {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Form(pub(crate) Lexeme, pub(crate) u32);
+pub struct Form(pub(crate) Lexeme, pub(crate) Id);
 
 impl Form {
-    fn new(lexeme: Lexeme, id: u32) -> Self {
+    fn new(lexeme: Lexeme, id: Id) -> Self {
         Self(lexeme, id)
     }
 }

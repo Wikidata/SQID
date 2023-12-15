@@ -27,10 +27,13 @@ pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, Proper
 pub use sql::sitelinks;
 pub use statistics::DumpStatistics;
 
+type Id = u32;
+type Count = u32;
+
 /// Returns true if the value is zero. Used to skip serialisation for
 /// empty counters.
-pub(crate) fn is_zero(value: &usize) -> bool {
-    *value == 0
+pub(crate) fn is_zero<T: PartialEq<T> + From<u8>>(value: &T) -> bool {
+    *value == 0.into()
 }
 
 /// Holds settings given on the command line, particularly the path to

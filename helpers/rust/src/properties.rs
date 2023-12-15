@@ -69,7 +69,7 @@ pub(super) fn derive_related_properties(
 ) -> Result<()> {
     log::info!("Deriving related properties ...");
 
-    let related: HashMap<Property, &HashMap<Property, usize>> = HashMap::from_iter(
+    let related: HashMap<Property, &HashMap<Property, _>> = HashMap::from_iter(
         properties
             .0
             .iter()

@@ -13,7 +13,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    Classes, EntityStatistics, Settings, SiteRecord, Statistics, Type,
+    Classes, Count, EntityStatistics, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -293,13 +293,14 @@ impl DumpStatistics {
             EntityKind::Property => &mut self.statistics.properties,
             _ => bail!("Unsupported entity kind {:?}", target),
         };
-        stats.labels += common.labels.len();
-        stats.descriptions += common.descriptions.len();
+        stats.labels += Count::try_from(common.labels.len()).expect("should fit");
+        stats.descriptions += Count::try_from(common.descriptions.len()).expect("should fit");
         stats.aliases += common
             .aliases
             .values()
             .map(|aliases| aliases.len())
-            .sum::<usize>();
+            .filter_map(|count| Count::try_from(count).ok())
+            .sum::<Count>();
 
         Ok(())
     }
@@ -339,7 +340,8 @@ impl DumpStatistics {
         };
 
         for (property, statements) in common.claims.iter() {
-            self.stats_for_entity_kind(target)?.statements += statements.len();
+            self.stats_for_entity_kind(target)?.statements +=
+                Count::try_from(statements.len()).expect("should fit");
             Self::count_cooccurring_properties(
                 common,
                 &mut self.properties.entry(*property).or_default().cooccurrences,
@@ -388,7 +390,7 @@ impl DumpStatistics {
 
     fn count_cooccurring_properties(
         common: &CommonData,
-        cooccurrences: &mut HashMap<Property, usize>,
+        cooccurrences: &mut HashMap<Property, Count>,
         this_property: Option<&Property>,
     ) {
         for property in common.claims.keys() {
@@ -402,9 +404,9 @@ impl DumpStatistics {
 
     fn related_properties(
         &self,
-        count: usize,
-        cooccurrences: &HashMap<Property, usize>,
-    ) -> Result<HashMap<Property, usize>> {
+        count: Count,
+        cooccurrences: &HashMap<Property, Count>,
+    ) -> Result<HashMap<Property, Count>> {
         Ok(cooccurrences
             .iter()
             .map(|(property, cooccurrences)| {
@@ -426,7 +428,7 @@ impl DumpStatistics {
                     * other_this_item_rate
                     / other_global_item_rate;
 
-                (*property, ((10.0 * score) as usize))
+                (*property, ((10.0 * score) as Count))
             })
             .collect())
     }

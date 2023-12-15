@@ -8,7 +8,7 @@ use super::{
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    ClassLabelAndUsage,
+    ClassLabelAndUsage, Count,
 };
 
 const ENGLISH: &str = "en";
@@ -172,23 +172,23 @@ pub struct PropertyRecord {
     #[serde(rename = "d", skip_serializing_if = "Option::is_none")]
     pub(crate) datatype: Option<Type>,
     #[serde(rename = "i", skip_serializing_if = "is_zero")]
-    pub(crate) in_items: usize,
+    pub(crate) in_items: Count,
     #[serde(rename = "s", skip_serializing_if = "is_zero")]
-    pub(crate) in_statements: usize,
+    pub(crate) in_statements: Count,
     #[serde(rename = "q", skip_serializing_if = "is_zero")]
-    pub(crate) in_qualifiers: usize,
+    pub(crate) in_qualifiers: Count,
     #[serde(rename = "e", skip_serializing_if = "is_zero")]
-    pub(crate) in_references: usize,
+    pub(crate) in_references: Count,
     #[serde(rename = "u", skip_serializing_if = "Option::is_none")]
     pub(crate) url_pattern: Option<String>,
     #[serde(rename = "pc", skip_serializing_if = "HashSet::is_empty")]
     pub(crate) instance_of: HashSet<Item>,
     #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
-    pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
+    pub(crate) with_qualifiers: HashMap<Qualifier, Count>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
-    pub(crate) related_properties: HashMap<Property, usize>,
+    pub(crate) related_properties: HashMap<Property, Count>,
     #[serde(skip)]
-    pub(crate) cooccurrences: HashMap<Property, usize>,
+    pub(crate) cooccurrences: HashMap<Property, Count>,
 }
 
 impl PropertyRecord {
@@ -258,17 +258,17 @@ pub struct PropertyUsageRecord {
     #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
     pub(crate) label: Option<String>,
     #[serde(rename = "i", skip_serializing_if = "is_zero")]
-    pub(crate) in_items: usize,
+    pub(crate) in_items: Count,
     #[serde(rename = "s", skip_serializing_if = "is_zero")]
-    pub(crate) in_statements: usize,
+    pub(crate) in_statements: Count,
     #[serde(rename = "q", skip_serializing_if = "is_zero")]
-    pub(crate) in_qualifiers: usize,
+    pub(crate) in_qualifiers: Count,
     #[serde(rename = "e", skip_serializing_if = "is_zero")]
-    pub(crate) in_references: usize,
+    pub(crate) in_references: Count,
     #[serde(rename = "pc", skip_serializing_if = "HashSet::is_empty")]
     pub(crate) instance_of: HashSet<Item>,
     #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
-    pub(crate) with_qualifiers: HashMap<Qualifier, usize>,
+    pub(crate) with_qualifiers: HashMap<Qualifier, Count>,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -306,27 +306,27 @@ pub struct ClassRecord {
     #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
     pub(crate) label: Option<String>,
     #[serde(rename = "i", skip_serializing_if = "is_zero")]
-    pub(crate) direct_instances: usize,
+    pub(crate) direct_instances: Count,
     #[serde(rename = "s", skip_serializing_if = "is_zero")]
-    pub(crate) direct_subclasses: usize,
+    pub(crate) direct_subclasses: Count,
     #[serde(rename = "ai", skip_serializing_if = "is_zero")]
-    pub(crate) all_instances: usize,
+    pub(crate) all_instances: Count,
     #[serde(rename = "as", skip_serializing_if = "is_zero")]
-    pub(crate) all_subclasses: usize,
+    pub(crate) all_subclasses: Count,
     #[serde(rename = "sc", skip_serializing_if = "HashSet::is_empty")]
     pub(crate) superclasses: HashSet<Item>,
     #[serde(rename = "sb", skip_serializing_if = "HashSet::is_empty")]
     pub(crate) non_empty_subclasses: HashSet<Item>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
-    pub(crate) related_properties: HashMap<Property, usize>,
+    pub(crate) related_properties: HashMap<Property, Count>,
     #[serde(skip)]
-    pub(crate) cooccurrences: HashMap<Property, usize>,
+    pub(crate) cooccurrences: HashMap<Property, Count>,
     #[serde(skip)]
     pub(crate) direct_superclasses: HashSet<Item>,
 }
 
 impl ClassRecord {
-    pub(crate) fn update_label_and_usage(&mut self, label: String, usage: Option<usize>) {
+    pub(crate) fn update_label_and_usage(&mut self, label: String, usage: Option<Count>) {
         let _ = self.label.insert(label);
         if let Some(direct_instances) = usage {
             self.direct_instances = direct_instances
@@ -368,15 +368,15 @@ impl Classes {
 #[serde(default)]
 pub struct EntityStatistics {
     #[serde(rename = "cDesc")]
-    pub(crate) descriptions: usize,
+    pub(crate) descriptions: Count,
     #[serde(rename = "cStmts")]
-    pub(crate) statements: usize,
+    pub(crate) statements: Count,
     #[serde(rename = "cLabels")]
-    pub(crate) labels: usize,
+    pub(crate) labels: Count,
     #[serde(rename = "cAliases")]
-    pub(crate) aliases: usize,
+    pub(crate) aliases: Count,
     #[serde(rename = "c")]
-    pub(crate) count: usize,
+    pub(crate) count: Count,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -389,7 +389,7 @@ pub struct SiteRecord {
     #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
     pub(crate) language: Option<String>,
     #[serde(rename = "i")]
-    pub(crate) items: usize,
+    pub(crate) items: Count,
 }
 
 impl SiteRecord {

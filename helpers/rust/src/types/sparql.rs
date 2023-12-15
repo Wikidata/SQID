@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::{
     ids::{Entity, Item, Property, Qualifier, Reference},
     json::Type,
+    Count,
 };
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -38,7 +39,7 @@ pub struct PropertyUsage {
     #[serde(rename = "p")]
     pub(crate) property: PropertyUsageType,
     #[serde(rename = "c")]
-    pub(crate) count: usize,
+    pub(crate) count: Count,
 }
 
 impl PropertyUsage {
@@ -54,5 +55,5 @@ pub struct ClassLabelAndUsage {
     #[serde(rename = "label")]
     pub(crate) label: String,
     #[serde(rename = "c")]
-    pub(crate) usage: Option<usize>,
+    pub(crate) usage: Option<Count>,
 }
