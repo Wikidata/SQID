@@ -6,6 +6,7 @@ use std::{
     fmt::Display,
     fs::{metadata, File},
     hash::Hash,
+    io::BufWriter,
     path::PathBuf,
 };
 use strum::Display;
@@ -244,8 +245,8 @@ impl Settings {
         T: Serialize,
     {
         self.replace_data_file(data_file, |file| {
-            serde_json::to_writer(file, value)
-                .context(format!("Failed to serialise data file {}", data_file))
+            serde_json::to_writer(BufWriter::new(file), value)
+                .context(format!("Failed to serialise data file {data_file}"))
         })
     }
 
