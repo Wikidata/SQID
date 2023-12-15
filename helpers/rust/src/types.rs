@@ -7,6 +7,7 @@ use std::{
     fs::{metadata, File},
     hash::Hash,
     io::BufWriter,
+    os::unix::prelude::PermissionsExt,
     path::PathBuf,
 };
 use strum::Display;
@@ -27,6 +28,8 @@ pub use json::{
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
 pub use sql::sitelinks;
 pub use statistics::DumpStatistics;
+
+const DATA_FILE_MODE: u32 = 0o0644;
 
 type Id = u32;
 type Count = u32;
@@ -233,7 +236,8 @@ impl Settings {
         write(file.as_file_mut())?;
         log::debug!("Wrote new JSON file: {} ...", name);
 
-        file.persist(self.data_file_path(data_file))?;
+        let file = file.persist(self.data_file_path(data_file))?;
+        file.set_permissions(PermissionsExt::from_mode(DATA_FILE_MODE))?;
 
         log::debug!("Update for {} complete.", name);
 
