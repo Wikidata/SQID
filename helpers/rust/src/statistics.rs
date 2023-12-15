@@ -68,7 +68,7 @@ pub(super) fn check_for_new_dump(settings: &Settings) -> Result<()> {
         let mut settings = settings.clone();
         settings.dump_info = Some(DumpInfo {
             date: latest,
-            path: Box::new(settings.dump_file(latest_dump).into()),
+            path: Box::new(settings.dump_file(latest_dump)),
         });
 
         return process_dump(&settings);

@@ -116,18 +116,18 @@ impl DumpStatistics {
     fn compute_nonempty_subclasses(&mut self) {
         let _ = self.close_subclasses();
 
-        let classes = self
+        let mut classes = self
             .classes
             .iter()
             .filter_map(|(class, record)| {
                 (record.direct_subclasses > 0 || record.direct_instances > 0)
                     .then_some((*class, record.direct_superclasses.clone()))
             })
-            .collect::<Vec<_>>();
+            .collect::<VecDeque<_>>();
 
         log::info!("Found {} non-empty classes", classes.len());
 
-        for (class, superclasses) in classes {
+        while let Some((class, superclasses)) = classes.pop_front() {
             for super_class in superclasses {
                 let record = self.classes.entry(super_class).or_default();
                 record.direct_subclasses += 1;
@@ -135,13 +135,15 @@ impl DumpStatistics {
             }
         }
 
-        let classes = self
+        let mut classes = self
             .classes
             .values()
-            .map(|record| record.superclasses.clone())
-            .collect::<Vec<_>>();
+            .filter_map(|record| {
+                (!record.superclasses.is_empty()).then_some(record.superclasses.clone())
+            })
+            .collect::<VecDeque<_>>();
 
-        for superclasses in classes {
+        while let Some(superclasses) = classes.pop_front() {
             for super_class in superclasses {
                 if let Some(record) = self.classes.get_mut(&super_class) {
                     record.all_subclasses += 1;
