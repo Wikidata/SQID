@@ -13,7 +13,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    Classes, Count, EntityStatistics, Settings, SiteRecord, Statistics, Type,
+    Classes, Count, EntityStatistics, LargeCount, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -293,14 +293,14 @@ impl DumpStatistics {
             EntityKind::Property => &mut self.statistics.properties,
             _ => bail!("Unsupported entity kind {:?}", target),
         };
-        stats.labels += Count::try_from(common.labels.len()).expect("should fit");
-        stats.descriptions += Count::try_from(common.descriptions.len()).expect("should fit");
+        stats.labels += LargeCount::try_from(common.labels.len()).expect("should fit");
+        stats.descriptions += LargeCount::try_from(common.descriptions.len()).expect("should fit");
         stats.aliases += common
             .aliases
             .values()
             .map(|aliases| aliases.len())
-            .filter_map(|count| Count::try_from(count).ok())
-            .sum::<Count>();
+            .filter_map(|count| LargeCount::try_from(count).ok())
+            .sum::<LargeCount>();
 
         Ok(())
     }
@@ -341,7 +341,7 @@ impl DumpStatistics {
 
         for (property, statements) in common.claims.iter() {
             self.stats_for_entity_kind(target)?.statements +=
-                Count::try_from(statements.len()).expect("should fit");
+                LargeCount::try_from(statements.len()).expect("should fit");
             Self::count_cooccurring_properties(
                 common,
                 &mut self.properties.entry(*property).or_default().cooccurrences,

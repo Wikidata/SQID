@@ -29,6 +29,7 @@ pub use statistics::DumpStatistics;
 
 type Id = u32;
 type Count = u32;
+type LargeCount = u64;
 
 /// Returns true if the value is zero. Used to skip serialisation for
 /// empty counters.

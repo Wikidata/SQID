@@ -8,7 +8,7 @@ use super::{
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    ClassLabelAndUsage, Count,
+    ClassLabelAndUsage, Count, LargeCount,
 };
 
 const ENGLISH: &str = "en";
@@ -174,17 +174,17 @@ pub struct PropertyRecord {
     #[serde(rename = "i", skip_serializing_if = "is_zero")]
     pub(crate) in_items: Count,
     #[serde(rename = "s", skip_serializing_if = "is_zero")]
-    pub(crate) in_statements: Count,
+    pub(crate) in_statements: LargeCount,
     #[serde(rename = "q", skip_serializing_if = "is_zero")]
-    pub(crate) in_qualifiers: Count,
+    pub(crate) in_qualifiers: LargeCount,
     #[serde(rename = "e", skip_serializing_if = "is_zero")]
-    pub(crate) in_references: Count,
+    pub(crate) in_references: LargeCount,
     #[serde(rename = "u", skip_serializing_if = "Option::is_none")]
     pub(crate) url_pattern: Option<String>,
     #[serde(rename = "pc", skip_serializing_if = "HashSet::is_empty")]
     pub(crate) instance_of: HashSet<Item>,
     #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
-    pub(crate) with_qualifiers: HashMap<Qualifier, Count>,
+    pub(crate) with_qualifiers: HashMap<Qualifier, LargeCount>,
     #[serde(rename = "r", skip_serializing_if = "HashMap::is_empty")]
     pub(crate) related_properties: HashMap<Property, Count>,
     #[serde(skip)]
@@ -260,15 +260,15 @@ pub struct PropertyUsageRecord {
     #[serde(rename = "i", skip_serializing_if = "is_zero")]
     pub(crate) in_items: Count,
     #[serde(rename = "s", skip_serializing_if = "is_zero")]
-    pub(crate) in_statements: Count,
+    pub(crate) in_statements: LargeCount,
     #[serde(rename = "q", skip_serializing_if = "is_zero")]
-    pub(crate) in_qualifiers: Count,
+    pub(crate) in_qualifiers: LargeCount,
     #[serde(rename = "e", skip_serializing_if = "is_zero")]
-    pub(crate) in_references: Count,
+    pub(crate) in_references: LargeCount,
     #[serde(rename = "pc", skip_serializing_if = "HashSet::is_empty")]
     pub(crate) instance_of: HashSet<Item>,
     #[serde(rename = "qs", skip_serializing_if = "HashMap::is_empty")]
-    pub(crate) with_qualifiers: HashMap<Qualifier, Count>,
+    pub(crate) with_qualifiers: HashMap<Qualifier, LargeCount>,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -368,15 +368,15 @@ impl Classes {
 #[serde(default)]
 pub struct EntityStatistics {
     #[serde(rename = "cDesc")]
-    pub(crate) descriptions: Count,
+    pub(crate) descriptions: LargeCount,
     #[serde(rename = "cStmts")]
-    pub(crate) statements: Count,
+    pub(crate) statements: LargeCount,
     #[serde(rename = "cLabels")]
-    pub(crate) labels: Count,
+    pub(crate) labels: LargeCount,
     #[serde(rename = "cAliases")]
-    pub(crate) aliases: Count,
+    pub(crate) aliases: LargeCount,
     #[serde(rename = "c")]
-    pub(crate) count: Count,
+    pub(crate) count: LargeCount,
 }
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]

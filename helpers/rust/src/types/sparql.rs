@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::{
     ids::{Entity, Item, Property, Qualifier, Reference},
     json::Type,
-    Count,
+    Count, LargeCount,
 };
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -39,7 +39,7 @@ pub struct PropertyUsage {
     #[serde(rename = "p")]
     pub(crate) property: PropertyUsageType,
     #[serde(rename = "c")]
-    pub(crate) count: Count,
+    pub(crate) count: LargeCount,
 }
 
 impl PropertyUsage {
