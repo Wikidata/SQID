@@ -6,7 +6,7 @@ use std::{
     fmt::Display,
     fs::{metadata, File},
     hash::Hash,
-    io::BufWriter,
+    io::{BufReader, BufWriter},
     os::unix::prelude::PermissionsExt,
     path::PathBuf,
 };
@@ -217,7 +217,7 @@ impl Settings {
     where
         T: for<'de> Deserialize<'de>,
     {
-        serde_json::from_reader(self.data_file(data_file)?)
+        serde_json::from_reader(BufReader::new(self.data_file(data_file)?))
             .context(format!("Failed to deserialise data file {}", data_file))
     }
 
