@@ -83,9 +83,11 @@ impl DumpStatistics {
             .iter()
             .map(|(class, record)| (*class, record.direct_superclasses.clone()))
             .collect::<HashMap<_, _>>();
-        let mut class_queue = self.classes.keys().cloned().collect::<VecDeque<_>>();
+        let mut class_queue = self.classes.keys().cloned().collect::<Vec<_>>();
 
-        while let Some(class) = class_queue.pop_front() {
+        while let Some(class) = class_queue.pop() {
+            class_queue.shrink_to_fit();
+
             let record = self.classes.entry(class).or_default();
             let mut done = HashSet::new();
             let mut superclasses = record
@@ -120,14 +122,21 @@ impl DumpStatistics {
             .classes
             .iter()
             .filter_map(|(class, record)| {
-                (record.direct_subclasses > 0 || record.direct_instances > 0)
-                    .then_some((*class, record.direct_superclasses.clone()))
+                (record.direct_subclasses > 0 || record.direct_instances > 0).then_some(*class)
             })
-            .collect::<VecDeque<_>>();
+            .collect::<Vec<_>>();
 
         log::info!("Found {} non-empty classes", classes.len());
 
-        while let Some((class, superclasses)) = classes.pop_front() {
+        while let Some(class) = classes.pop() {
+            classes.shrink_to_fit();
+
+            let superclasses = self
+                .classes
+                .get(&class)
+                .map(|record| record.direct_superclasses.clone())
+                .unwrap_or_default();
+
             for super_class in superclasses {
                 let record = self.classes.entry(super_class).or_default();
                 record.direct_subclasses += 1;
@@ -139,15 +148,20 @@ impl DumpStatistics {
 
         let mut classes = self
             .classes
-            .values()
-            .filter_map(|record| {
-                (!record.superclasses.is_empty()).then_some(record.superclasses.clone())
-            })
-            .collect::<VecDeque<_>>();
+            .iter()
+            .filter_map(|(item, record)| (!record.superclasses.is_empty()).then_some(*item))
+            .collect::<Vec<_>>();
 
         log::info!("Found {} subclasses", classes.len());
 
-        while let Some(superclasses) = classes.pop_front() {
+        while let Some(class) = classes.pop() {
+            classes.shrink_to_fit();
+
+            let superclasses = self
+                .classes
+                .get(&class)
+                .map(|record| record.superclasses.clone())
+                .unwrap_or_default();
             for super_class in superclasses {
                 if let Some(record) = self.classes.get_mut(&super_class) {
                     record.all_subclasses += 1;
