@@ -3,137 +3,157 @@ use std::collections::HashMap;
 use crate::{
     sparql,
     types::{
-        DataFile, Properties, Property, PropertyClassification, PropertyDataFile,
-        PropertyUsageRecord, Settings, Type,
+        Count, DataFile, Property, PropertyDataFile, PropertyLabelAndType, PropertyRecord,
+        PropertyUsage, Settings,
     },
 };
 use anyhow::Result;
 
 /// Updates statistics for properties.
 pub(super) fn update_property_records(settings: &Settings) -> Result<()> {
+    #[derive(Debug)]
+    struct Update {
+        label_and_type: PropertyLabelAndType,
+        usage: Vec<PropertyUsage>,
+    }
+
+    let mut updates = HashMap::<Property, Update>::new();
+
     log::info!("Fetching property ids, labels and types ...");
-    let labels_and_types = sparql::properties()?;
+    let mut labels_and_types = sparql::properties()?;
     log::info!("Fetched property ids, labels and types.");
-    log::trace!("{:?}", labels_and_types);
+
+    for label_and_type in labels_and_types.drain(..) {
+        updates
+            .entry(
+                label_and_type
+                    .property
+                    .as_property()
+                    .expect("is a property"),
+            )
+            .and_modify(|e| e.label_and_type = label_and_type.clone())
+            .or_insert_with(|| Update {
+                label_and_type,
+                usage: Vec::new(),
+            });
+    }
 
     log::info!("Fetching property usage statistics ...");
-    let usage = sparql::property_usage()?;
+    let mut usage = sparql::property_usage()?;
     log::info!("Fetched property usage statistics.");
-    log::trace!("{:?}", usage);
 
-    log::info!("Reading old statistics data ...");
-    let mut properties: Properties = settings.get_data(DataFile::Properties)?;
+    for usage in usage.drain(..) {
+        let property = usage.property();
+        if let Some(update) = updates.get_mut(&property) {
+            update.usage.push(usage);
+        } else {
+            log::warn!("Unknown type for property {property} with usage information, ignoring");
+        };
+    }
 
-    log::info!("Augmenting current property data ...");
-    properties.update_labels_and_types(labels_and_types.into_iter());
-    properties.update_usage(usage.into_iter());
-    log::trace!("{:?}", properties);
-    settings.replace_data(DataFile::Properties, &properties)?;
+    settings.update_data_file(
+        DataFile::Properties,
+        DataFile::Properties,
+        |property: &Property, record: &PropertyRecord| {
+            let mut result = record.clone();
+
+            if let Some(update) = updates.get(property) {
+                result.update_label_and_type(
+                    update.label_and_type.label.clone(),
+                    update.label_and_type.datatype,
+                );
+
+                for usage in &update.usage {
+                    result.update_usage(usage);
+                }
+            }
+
+            Ok(Some(result))
+        },
+    )?;
+
     log::info!("Augmented current property data.");
-
     settings.update_timestamp(DataFile::Properties)
 }
 
 /// Updates all derived property records.
 pub(super) fn update_derived_property_records(settings: &Settings) -> Result<()> {
-    let properties: Properties = settings.get_data(DataFile::Properties)?;
-
-    derive_property_classification(settings, &properties)?;
-    derive_related_properties(settings, &properties)?;
-    derive_url_patterns(settings, &properties)?;
-    derive_property_usage(settings, &properties)?;
-    derive_property_datatypes(settings, &properties)
+    derive_property_classification(settings)?;
+    derive_related_properties(settings)?;
+    derive_url_patterns(settings)?;
+    derive_property_usage(settings)?;
+    derive_property_datatypes(settings)
 }
 
 /// Derives the property classification from property statistics.
-fn derive_property_classification(settings: &Settings, properties: &Properties) -> Result<()> {
+fn derive_property_classification(settings: &Settings) -> Result<()> {
     log::info!("Deriving property classification ...");
 
-    let classification: HashMap<Property, PropertyClassification> = HashMap::from_iter(
-        properties
-            .0
-            .iter()
-            .map(|(pid, property)| (*pid, property.classification(pid))),
-    );
-
-    settings.replace_data(
+    settings.update_data_file(
+        DataFile::Properties,
         DataFile::SplitProperties(PropertyDataFile::Classification),
-        &classification,
+        |pid: &Property, record: &PropertyRecord| Ok(Some((*pid, record.classification(pid)))),
     )
 }
 
 /// Derives the list of related properties from property statistics.
-pub(super) fn derive_related_properties(
-    settings: &Settings,
-    properties: &Properties,
-) -> Result<()> {
+pub(super) fn derive_related_properties(settings: &Settings) -> Result<()> {
     log::info!("Deriving related properties ...");
 
-    let related: HashMap<Property, &HashMap<Property, _>> = HashMap::from_iter(
-        properties
-            .0
-            .iter()
-            .map(|(pid, property)| (*pid, &property.related_properties)),
-    );
+    fn related(
+        _pid: &Property,
+        record: &PropertyRecord,
+    ) -> Result<Option<HashMap<Property, Count>>> {
+        Ok(Some(record.related_properties.clone()))
+    }
 
-    settings.replace_data(
+    settings.update_data_file(
+        DataFile::Properties,
         DataFile::SplitProperties(PropertyDataFile::Related),
-        &related,
+        related,
     )?;
-    settings.replace_chunked_data(
+
+    settings.update_data_file_chunked(
+        DataFile::Properties,
         DataFile::SplitProperties(PropertyDataFile::Related),
-        &related,
+        related,
         10,
     )
 }
 
 /// Derives the list of URL patterns from property statistics.
-pub(super) fn derive_url_patterns(settings: &Settings, properties: &Properties) -> Result<()> {
+pub(super) fn derive_url_patterns(settings: &Settings) -> Result<()> {
     log::info!("Deriving URL patterns ...");
 
-    let patterns: HashMap<Property, &String> = HashMap::from_iter(
-        properties
-            .0
-            .iter()
-            .filter_map(|(pid, property)| Some((*pid, property.url_pattern.as_ref()?))),
-    );
+    fn patterns(_pid: &Property, record: &PropertyRecord) -> Result<Option<String>> {
+        Ok(record.url_pattern.clone())
+    }
 
-    settings.replace_data(
+    settings.update_data_file(
+        DataFile::Properties,
         DataFile::SplitProperties(PropertyDataFile::URLPatterns),
-        &patterns,
+        patterns,
     )
 }
 
 /// Derives the property usage statistics from property statistics.
-pub(super) fn derive_property_usage(settings: &Settings, properties: &Properties) -> Result<()> {
+pub(super) fn derive_property_usage(settings: &Settings) -> Result<()> {
     log::info!("Deriving property usage ...");
 
-    let usage: HashMap<Property, PropertyUsageRecord> = HashMap::from_iter(
-        properties
-            .0
-            .iter()
-            .map(|(pid, property)| (*pid, property.project_to_usage())),
-    );
-
-    settings.replace_data(DataFile::SplitProperties(PropertyDataFile::Usage), &usage)
+    settings.update_data_file(
+        DataFile::Properties,
+        DataFile::SplitProperties(PropertyDataFile::Usage),
+        |_pid: &Property, record: &PropertyRecord| Ok(Some(record.project_to_usage())),
+    )
 }
 
 /// Derives the property datatype information from property statistics.
-pub(super) fn derive_property_datatypes(
-    settings: &Settings,
-    properties: &Properties,
-) -> Result<()> {
+pub(super) fn derive_property_datatypes(settings: &Settings) -> Result<()> {
     log::info!("Deriving property datatypes ...");
 
-    let types: HashMap<Property, Type> = HashMap::from_iter(
-        properties
-            .0
-            .iter()
-            .filter_map(|(pid, property)| Some((*pid, property.datatype?))),
-    );
-
-    settings.replace_data(
+    settings.update_data_file(
+        DataFile::Properties,
         DataFile::SplitProperties(PropertyDataFile::Datatypes),
-        &types,
+        |_pid: &Property, record: &PropertyRecord| Ok(record.datatype),
     )
 }

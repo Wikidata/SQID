@@ -1,5 +1,6 @@
 use std::{
     convert::{TryFrom, TryInto},
+    fmt::Display,
     num::ParseIntError,
 };
 
@@ -159,7 +160,7 @@ impl From<Property> for Entity {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Item(pub(crate) Id);
 
@@ -255,7 +256,7 @@ impl From<Id> for Item {
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
 pub struct Property(pub(crate) Id);
 
@@ -306,6 +307,12 @@ impl TryFrom<String> for Property {
                 .unwrap_or(&str)
                 .parse()?,
         ))
+    }
+}
+
+impl Display for Property {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "P{}", self.0)
     }
 }
 

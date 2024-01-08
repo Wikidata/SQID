@@ -8,7 +8,7 @@ use super::{
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    ClassLabelAndUsage, Count, LargeCount,
+    Count, LargeCount,
 };
 
 const ENGLISH: &str = "en";
@@ -164,7 +164,7 @@ pub enum PropertyClassification {
     Wiki,
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct PropertyRecord {
     #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
@@ -300,7 +300,7 @@ impl Properties {
     }
 }
 
-#[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
 pub struct ClassRecord {
     #[serde(rename = "l", skip_serializing_if = "Option::is_none")]
@@ -351,18 +351,6 @@ impl ClassRecord {
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct Classes(pub(crate) HashMap<Item, ClassRecord>);
-
-impl Classes {
-    pub(crate) fn update_labels_and_usage<I: Iterator<Item = ClassLabelAndUsage>>(
-        &mut self,
-        iterator: I,
-    ) {
-        iterator.for_each(|item| {
-            let entry = self.0.entry(item.class).or_default();
-            entry.update_label_and_usage(item.label, item.usage);
-        });
-    }
-}
 
 #[derive(Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(default)]
@@ -1049,6 +1037,133 @@ pub(crate) mod formats {
                 assert!(result.is_ok());
                 assert_eq!(result.unwrap(), TEXT);
             }
+        }
+    }
+}
+
+pub(crate) mod stream {
+    use anyhow::{bail, Result};
+    use serde::Deserialize;
+    use serde_json::Deserializer;
+    use std::{
+        fmt::Debug,
+        io::{Cursor, Read},
+        slice,
+    };
+
+    const OPENING_BRACE: u8 = b'{';
+    const CLOSING_BRACE: u8 = b'}';
+    const COLON: u8 = b':';
+    const COMMA: u8 = b',';
+
+    #[derive(Debug)]
+    pub struct MapIter<Reader, Key, Record>
+    where
+        Reader: Read,
+        for<'a> Key: Deserialize<'a> + Debug + Default,
+        for<'a> Record: Deserialize<'a> + Debug + Default,
+    {
+        first: bool,
+        reader: Reader,
+        key: Key,
+        record: Record,
+    }
+
+    impl<Reader, Key, Record> MapIter<Reader, Key, Record>
+    where
+        Reader: Read,
+        for<'a> Key: Deserialize<'a> + Debug + Default,
+        for<'a> Record: Deserialize<'a> + Debug + Default,
+    {
+        pub fn new(reader: Reader) -> Self {
+            Self {
+                first: true,
+                reader,
+                key: Default::default(),
+                record: Default::default(),
+            }
+        }
+
+        fn try_read(&mut self) -> Result<Option<(&Key, &Record)>> {
+            if self.first {
+                self.first = false;
+
+                if Self::next_char(&mut self.reader)? == OPENING_BRACE {
+                    let peek = Self::next_char(&mut self.reader)?;
+
+                    if peek == CLOSING_BRACE {
+                        Ok(None)
+                    } else {
+                        match self.deserialize(Some(peek)) {
+                            Ok(()) => Ok(Some((&self.key, &self.record))),
+                            Err(err) => Err(err),
+                        }
+                    }
+                } else {
+                    bail!("expected an OPENING_BRACE");
+                }
+            } else {
+                match Self::next_char(&mut self.reader)? {
+                    COMMA => match self.deserialize(None) {
+                        Ok(()) => Ok(Some((&self.key, &self.record))),
+                        Err(err) => Err(err),
+                    },
+                    CLOSING_BRACE => Ok(None),
+                    _ => bail!("expected COMMA or CLOSING_BRACE"),
+                }
+            }
+        }
+
+        fn deserialize(&mut self, peek: Option<u8>) -> Result<()> {
+            if let Some(ch) = peek {
+                let mut reader = Cursor::new([ch]).chain(&mut self.reader);
+                Self::deserialize_in_place(&mut reader, &mut self.key)?;
+            } else {
+                Self::deserialize_in_place(&mut self.reader, &mut self.key)?;
+            }
+
+            let peek = Self::next_char(&mut self.reader)?;
+
+            if peek != COLON {
+                bail!("expected a COLON");
+            }
+
+            Self::deserialize_in_place(&mut self.reader, &mut self.record)
+        }
+
+        fn deserialize_in_place<R: Read, T>(reader: &mut R, place: &mut T) -> Result<()>
+        where
+            for<'a> T: Deserialize<'a>,
+        {
+            let mut json = Deserializer::from_reader(reader);
+            Ok(T::deserialize_in_place(&mut json, place)?)
+        }
+
+        fn next_char(mut reader: impl Read) -> Result<u8> {
+            let mut byte = 0u8;
+
+            loop {
+                reader.read_exact(slice::from_mut(&mut byte))?;
+
+                if !byte.is_ascii_whitespace() {
+                    return Ok(byte);
+                }
+            }
+        }
+    }
+
+    pub trait StreamingIterator<'a, Key, Record> {
+        fn next(&'a mut self) -> Option<Result<(&'a Key, &'a Record)>>;
+    }
+
+    impl<'a, Reader, Key, Record> StreamingIterator<'a, Key, Record> for MapIter<Reader, Key, Record>
+    where
+        Reader: Read,
+        for<'b> Key: Deserialize<'b> + Debug + Default,
+        for<'b> Record: Deserialize<'b> + Debug + Default,
+    {
+        fn next(&'a mut self) -> Option<Result<(&'a Key, &'a Record)>> {
+            self.try_read().transpose()
         }
     }
 }

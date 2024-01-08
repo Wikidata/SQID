@@ -1,11 +1,10 @@
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDate, Utc};
-use serde::{Deserialize, Serialize};
+use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
+use serde_json::Serializer as JSONSerializer;
 use std::{
-    collections::HashMap,
-    fmt::Display,
+    fmt::{Debug, Display},
     fs::{metadata, File},
-    hash::Hash,
     io::{BufReader, BufWriter},
     os::unix::prelude::PermissionsExt,
     path::PathBuf,
@@ -29,11 +28,13 @@ pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, Proper
 pub use sql::sitelinks;
 pub use statistics::DumpStatistics;
 
+use crate::types::json::stream::{MapIter, StreamingIterator};
+
 const DATA_FILE_MODE: u32 = 0o0644;
 
-type Id = u32;
-type Count = u32;
-type LargeCount = u64;
+pub(crate) type Id = u32;
+pub(crate) type Count = u32;
+pub(crate) type LargeCount = u64;
 
 /// Returns true if the value is zero. Used to skip serialisation for
 /// empty counters.
@@ -213,6 +214,104 @@ impl Settings {
         File::open(self.data_file_path(data_file))
     }
 
+    /// Update a data file, one record at a time.
+    pub fn update_data_file<Key, Record, Derived, Update>(
+        &self,
+        source_file: DataFile,
+        target_file: DataFile,
+        update: Update,
+    ) -> Result<()>
+    where
+        for<'a> Key: Deserialize<'a> + Serialize + Debug + Default,
+        for<'a> Record: Deserialize<'a> + Debug + Default,
+        Derived: Serialize,
+        Update: Fn(&Key, &Record) -> Result<Option<Derived>>,
+    {
+        log::info!("Reading old statistics data ({source_file}) ...");
+
+        let path = *self.data_directory.clone();
+        let mut file = NamedTempFile::new_in(path)?;
+        let reader = BufReader::new(self.data_file(source_file)?);
+        let mut serializer = JSONSerializer::new(BufWriter::new(file.as_file_mut()));
+
+        let mut seq = serializer.serialize_map(None)?;
+        let mut records = MapIter::new(reader);
+
+        while let Some(record) = records.next() {
+            let (key, record) = record?;
+
+            if let Some(updated) = update(key, record)? {
+                seq.serialize_entry(&key, &updated)?;
+            }
+        }
+
+        seq.end()?;
+        drop(serializer);
+
+        let file = file.persist(self.data_file_path(target_file))?;
+        file.set_permissions(PermissionsExt::from_mode(DATA_FILE_MODE))?;
+
+        log::info!("Updated statistics data ({target_file}) ...");
+
+        Ok(())
+    }
+
+    /// Update a chunked data file, one record at a time.
+    pub fn update_data_file_chunked<Key, Record, Derived, Update>(
+        &self,
+        source_file: DataFile,
+        target_file: DataFile,
+        update: Update,
+        chunk_size: usize,
+    ) -> Result<()>
+    where
+        for<'a> Key: Deserialize<'a> + Serialize + Debug + Default,
+        for<'a> Record: Deserialize<'a> + Debug + Default,
+        Derived: Serialize,
+        Update: Fn(&Key, &Record) -> Result<Option<Derived>>,
+    {
+        log::info!("Reading old statistics data ({source_file}) ...");
+
+        let path = *self.data_directory.clone();
+        let reader = BufReader::new(self.data_file(source_file)?);
+
+        let mut idx = 0;
+        let mut written = 0;
+        let mut file = NamedTempFile::new_in(&path)?;
+        let mut serializer = JSONSerializer::new(BufWriter::new(file.as_file_mut()));
+        let mut seq = serializer.serialize_map(None)?;
+        let mut records = MapIter::new(reader);
+
+        while let Some(record) = records.next() {
+            let (key, record) = record?;
+
+            if let Some(updated) = update(key, record)? {
+                seq.serialize_entry(&key, &updated)?;
+                written += 1;
+            }
+
+            if written >= chunk_size {
+                seq.end()?;
+                drop(serializer);
+
+                file.persist(self.data_file_path(target_file.with_chunk(idx)?))?;
+
+                file = NamedTempFile::new_in(&path)?;
+                serializer = JSONSerializer::new(BufWriter::new(file.as_file_mut()));
+                seq = serializer.serialize_map(None)?;
+
+                written = 0;
+                idx += 1;
+            }
+        }
+
+        seq.end()?;
+
+        log::info!("Updated statistics data chunks ({target_file}) ...");
+
+        Ok(())
+    }
+
     pub fn get_data<T>(&self, data_file: DataFile) -> Result<T>
     where
         T: for<'de> Deserialize<'de>,
@@ -252,28 +351,6 @@ impl Settings {
             serde_json::to_writer(BufWriter::new(file), value)
                 .context(format!("Failed to serialise data file {data_file}"))
         })
-    }
-
-    pub fn replace_chunked_data<K, V>(
-        &self,
-        data_file: DataFile,
-        value: &HashMap<K, V>,
-        chunk_size: usize,
-    ) -> Result<()>
-    where
-        K: Eq + Hash + Serialize,
-        V: Serialize,
-    {
-        value
-            .iter()
-            .collect::<Vec<_>>()
-            .chunks(chunk_size)
-            .enumerate()
-            .try_for_each(|(idx, chunk)| {
-                let items: HashMap<&K, &V> =
-                    HashMap::from_iter(chunk.iter().map(|(id, item)| (*id, *item)));
-                self.replace_data(data_file.with_chunk(idx)?, &items)
-            })
     }
 
     /// Update the timestamp for [`DataFile`] `data_file`.

@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use crate::{
     classes::derive_class_hierarchy,
     properties::derive_related_properties,
-    types::{ids::properties, DataFile, Properties},
+    types::{ids::properties, DataFile},
 };
 
 use super::{
@@ -13,7 +13,7 @@ use super::{
         dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
     },
-    Classes, Count, EntityStatistics, LargeCount, Settings, SiteRecord, Statistics, Type,
+    Count, EntityStatistics, LargeCount, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]
@@ -497,16 +497,24 @@ impl DumpStatistics {
         log::info!("Writing results");
 
         settings.replace_data(DataFile::Properties, &self.properties)?;
+
+        self.properties.clear();
+        self.properties.shrink_to_fit();
+
         settings.update_timestamp(DataFile::Properties)?;
 
         settings.replace_data(DataFile::Classes, &self.classes)?;
+
+        self.classes.clear();
+        self.classes.shrink_to_fit();
+
         settings.update_timestamp(DataFile::Classes)?;
 
         log::info!("Deriving updated property data");
-        derive_related_properties(settings, &Properties(self.properties))?;
+        derive_related_properties(settings)?;
 
         log::info!("Deriving updated class hierarchy");
-        derive_class_hierarchy(settings, &Classes(self.classes))?;
+        derive_class_hierarchy(settings)?;
 
         log::info!("Updating dump date");
         let dump_info = settings.dump_info.clone().expect("dump info should be set");

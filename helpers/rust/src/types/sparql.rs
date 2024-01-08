@@ -6,7 +6,7 @@ use super::{
     Count, LargeCount,
 };
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]
 pub struct PropertyLabelAndType {
     #[serde(rename = "id")]
     pub(crate) property: Entity,
