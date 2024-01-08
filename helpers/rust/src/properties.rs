@@ -40,7 +40,7 @@ pub(super) fn update_derived_property_records(settings: &Settings) -> Result<()>
 
     derive_property_classification(settings, &properties)?;
     derive_related_properties(settings, &properties)?;
-    derive_url_patters(settings, &properties)?;
+    derive_url_patterns(settings, &properties)?;
     derive_property_usage(settings, &properties)?;
     derive_property_datatypes(settings, &properties)
 }
@@ -88,7 +88,7 @@ pub(super) fn derive_related_properties(
 }
 
 /// Derives the list of URL patterns from property statistics.
-pub(super) fn derive_url_patters(settings: &Settings, properties: &Properties) -> Result<()> {
+pub(super) fn derive_url_patterns(settings: &Settings, properties: &Properties) -> Result<()> {
     log::info!("Deriving URL patterns ...");
 
     let patterns: HashMap<Property, &String> = HashMap::from_iter(
