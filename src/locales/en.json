@@ -11,7 +11,8 @@
     "logout": "Logout",
     "loggedInAs": "Logged in as {0}",
     "searchItem": "Search item",
-    "search": "Search"
+    "search": "Search",
+    "language": "{flag} {label}"
   },
   "footer": {
     "statDate": "Statistics based on data dump {date}",
@@ -93,7 +94,8 @@
     "propertyQualifiers": "Qualifiers",
     "propertyQualifiersDescription": "Other properties that are used as qualifiers for this property, together with the number of uses",
     "propertyAsQualifier": "Uses as qualifier",
-    "propertyInReference": "Uses in references"
+    "propertyInReference": "Uses in references",
+    "reference": "Reference"
   },
   "home": {
     "home": "A fresh look at Wikidata",
@@ -135,7 +137,7 @@
     "aliases": "Aliases",
     "sitelinks": "Site links",
     "freshness": "Data Freshness",
-		"refreshCycle": "Statistical data is computed from the data dump about once per week. Basic statisics (class and property names, usage counts for properties, direct instances of classes) are refreshed more frequently, about once per hour. All other data is live.",
+    "refreshCycle": "Statistical data is computed from the data dump about once per week. Basic statisics (class and property names, usage counts for properties, direct instances of classes) are refreshed more frequently, about once per hour. All other data is live.",
     "dumpDate": "Dump date",
     "propertyDate": "Property data refresh",
     "classDate": "Class data refresh",

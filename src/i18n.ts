@@ -3,6 +3,16 @@ import en from '@/locales/en.json'
 import axios from 'axios'
 import { nextTick } from 'vue'
 
+type LanguageRecord = { label: string; flag: string }
+export interface Languages {
+  [key: string]: LanguageRecord
+}
+
+export const LOCALES: Languages = {
+  en: { label: 'English', flag: '🇬🇧' },
+  de: { label: 'Deutsch', flag: '🇩🇪' },
+}
+
 const year = { year: 'numeric' }
 const month = { ...year, month: '2-digit' }
 const day = { ...month, day: '2-digit' }
@@ -49,7 +59,7 @@ export async function updateCurrentTranslation(locale: string) {
 }
 
 export async function loadMessages(locale: string) {
-  const messages = await import(/* @vite-ignore */ `@/locales${locale}.json`).then(
+  const messages = await import(/* @vite-ignore */ `./locales/${locale}.json`).then(
     (r: any) => r.default ?? r,
   )
 

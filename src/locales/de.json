@@ -11,7 +11,8 @@
     "logout": "Abmelden",
     "loggedInAs": "Angemeldet als {}",
     "searchItem": "Suche nach Item",
-    "search": "Suchen"
+    "search": "Suchen",
+    "language": "{flag} {label}"
   },
   "footer": {
     "statDate": "Statistiken Stand {date}",
@@ -90,7 +91,8 @@
     "propertyQualifiers": "Qualifikatoren",
     "propertyQualifiersDescription": "Andere Eigenschaften, die als Qualifikator für diese Eigenschaft benutzt werden, zusammen mit der Anzahl der Benutzungen",
     "propertyAsQualifier": "Verwendung als Qualifikator",
-    "propertyInReference": "Verwendung in Referenzen"
+    "propertyInReference": "Verwendung in Fundstellen",
+    "reference": "Fundstelle"
   },
   "home": {
     "home": "Ein frischer Blick auf Wikidata",
@@ -132,7 +134,7 @@
     "aliases": "Aliase",
     "sitelinks": "Sitelinks",
     "freshness": "Datenbestand",
-		"refreshCycle": "Statistische Daten werden aus dem Dump ungefähr wöchentlich berechnet. Einfachere Statistiken (Klassen- und Eigenschaftsnamen, Verwendungszahlen für Eigenschaften, direkte Instanzen von Klassen) werden öften (ungefähr stündlich) berechnet. Alle weiteren Daten sind aktuell.",
+    "refreshCycle": "Statistische Daten werden aus dem Dump ungefähr wöchentlich berechnet. Einfachere Statistiken (Klassen- und Eigenschaftsnamen, Verwendungszahlen für Eigenschaften, direkte Instanzen von Klassen) werden öften (ungefähr stündlich) berechnet. Alle weiteren Daten sind aktuell.",
     "dumpDate": "Dump-Datum",
     "propertyDate": "Aktualisierung der Eigenschafts-Daten",
     "classDate": "Aktualisierung der Klassen-Daten",
@@ -153,5 +155,4 @@
     "submitIssue": "Issue angelegt werden",
     "dontEatMe": "Bitte ess' mich nicht."
   }
-
 }

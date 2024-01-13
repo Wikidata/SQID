@@ -8,8 +8,11 @@
 
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useI18nStore } from '@/stores/i18n'
 
-// todo(mx0): maybe load translation here?
+const i18n = useI18n()
+const i18nStore = useI18nStore()
 </script>
 
 <style lang="less">

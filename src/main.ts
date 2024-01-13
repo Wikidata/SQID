@@ -30,8 +30,8 @@ library.add(faAngleRight)
 
 const app = createApp(App)
   .use(createPinia())
-  .use(router)
   .use(i18n)
+  .use(router)
   .component('font-awesome-icon', FontAwesomeIcon)
 
 app.mount('#app')

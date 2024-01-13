@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import HomeView from '@/views/HomeView.vue'
+import { i18n, LOCALES, loadMessages, updateCurrentTranslation } from '@/i18n'
+import type { RouteLocationNormalized } from 'vue-router'
+import { useI18nStore } from '@/stores/i18n'
 
 // todo(mx): implement navigation guards
 
@@ -14,7 +17,7 @@ const router = createRouter({
     {
       path: '/about',
       name: 'about',
-      component: () => import('../views/AboutView.vue'),
+      component: () => import('@/views/AboutView.vue'),
     },
     {
       path: '/status',
@@ -26,7 +29,8 @@ const router = createRouter({
       // todo(mx): fix this
       path: '/entity/:id',
       name: 'entity',
-      component: () => import('@/views/Entity.vue'),
+      //component: () => import('@/views/EntityView.vue'),
+      component: () => import('@/views/UnderConstructionView.vue'),
       props: true,
       //      beforeEnter: ensureEntityIsValid,
     },
@@ -70,6 +74,22 @@ const router = createRouter({
       redirect: { name: 'not-found' },
     },
   ],
+})
+
+router.beforeEach(async (to, _from) => {
+  const i18nStore = useI18nStore()
+
+  if (!('lang' in to.query)) {
+    return
+  }
+
+  const lang = to.query.lang
+
+  if (typeof lang != 'string') {
+    return
+  }
+
+  i18nStore.setLanguage(lang)
 })
 
 export default router
