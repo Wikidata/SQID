@@ -10,9 +10,14 @@
 import { RouterView } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useI18nStore } from '@/stores/i18n'
+import { usePreferredLanguages } from '@vueuse/core'
 
 const i18n = useI18n()
 const i18nStore = useI18nStore()
+
+const preferredLanguages = usePreferredLanguages()
+
+i18nStore.preferLanguages(preferredLanguages.value)
 </script>
 
 <style lang="less">
@@ -21,6 +26,13 @@ const i18nStore = useI18nStore()
   --green: #339966;
   --blue: #006699;
   --grey: #484848;
+}
+
+[data-bs-theme='dark'] {
+  --red: var(--bs-danger-text-emphasis);
+  --blue: var(--bs-primary-text-emphasis);
+  --green: var(--bs-info-text-emphasis);
+  --grey: var(--bs-secondary-text-emphasis);
 }
 
 #nav {

@@ -14,6 +14,9 @@ import {
   faArrowLeft,
   faAngleDown,
   faAngleRight,
+  faCircleHalfStroke,
+  faMoon,
+  faSun,
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -27,6 +30,9 @@ library.add(faArrowLeft)
 library.add(faAngleDown)
 library.add(faInfoCircle)
 library.add(faAngleRight)
+library.add(faCircleHalfStroke)
+library.add(faMoon)
+library.add(faSun)
 
 const app = createApp(App)
   .use(createPinia())

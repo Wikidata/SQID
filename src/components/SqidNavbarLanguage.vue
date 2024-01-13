@@ -2,10 +2,9 @@
   <b-nav-item-dropdown :text="current" right>
     <b-dropdown-item
       v-for="(lang, key) in i18nStore.languages"
-      :key="key"
+      :key
       @click="i18nStore.setLanguage(key as string)"
-      href="#"
-      >{{ t('pageTitle.language', lang) }}</b-dropdown-item
+      >{{ t('settings.language', lang) }}</b-dropdown-item
     >
   </b-nav-item-dropdown>
 </template>
@@ -19,6 +18,6 @@ const { t } = useI18n()
 const i18nStore = useI18nStore()
 const current = computed(() => {
   const lang = i18nStore.languages[i18nStore.language]
-  return t('pageTitle.language', lang)
+  return t('settings.language', lang)
 })
 </script>

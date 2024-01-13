@@ -1,11 +1,9 @@
 <template>
-  <b-navbar-nav>
-    <template v-for="(link, lidx) of navlinks" :key="lidx">
-      <b-nav-item :to="link.target" active-class="active" :exact="link.exact">{{
-        t(link.message)
-      }}</b-nav-item>
-    </template>
-  </b-navbar-nav>
+  <template v-for="(link, lidx) of navlinks" :key="lidx">
+    <b-nav-item :to="link.target" active-class="active" :exact="link.exact">{{
+      t(link.message)
+    }}</b-nav-item>
+  </template>
 </template>
 
 <script setup lang="ts">

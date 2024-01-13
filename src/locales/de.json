@@ -11,8 +11,15 @@
     "logout": "Abmelden",
     "loggedInAs": "Angemeldet als {}",
     "searchItem": "Suche nach Item",
-    "search": "Suchen",
-    "language": "{flag} {label}"
+    "search": "Suchen"
+  },
+  "settings": {
+    "language": "{flag} {label}",
+    "theme": {
+      "light": "{icon} hell",
+      "dark": "{icon} dunkel",
+      "auto": "{icon} automatisch"
+    }
   },
   "footer": {
     "statDate": "Statistiken Stand {date}",

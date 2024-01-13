@@ -11,8 +11,15 @@
     "logout": "Logout",
     "loggedInAs": "Logged in as {0}",
     "searchItem": "Search item",
-    "search": "Search",
-    "language": "{flag} {label}"
+    "search": "Search"
+  },
+  "settings": {
+    "language": "{flag} {label}",
+    "theme": {
+      "light": "{icon} light",
+      "dark": "{icon} dark",
+      "auto": "{icon} auto"
+    }
   },
   "footer": {
     "statDate": "Statistics based on data dump {date}",
