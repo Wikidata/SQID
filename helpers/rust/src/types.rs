@@ -294,7 +294,8 @@ impl Settings {
                 seq.end()?;
                 drop(serializer);
 
-                file.persist(self.data_file_path(target_file.with_chunk(idx)?))?;
+                file.persist(self.data_file_path(target_file.with_chunk(idx)?))?
+                    .set_permissions(PermissionsExt::from_mode(DATA_FILE_MODE))?;
 
                 file = NamedTempFile::new_in(&path)?;
                 serializer = JSONSerializer::new(BufWriter::new(file.as_file_mut()));
