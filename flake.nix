@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     utils.url = "github:gytis-ivaskevicius/flake-utils-plus";
 
     gitignoresrc = {
@@ -58,13 +59,12 @@
           buildInputs = with channels.nixpkgs; [
             (mkToolchain channels.nixpkgs)
             # inputs.node2nix.packages."${channels.nixpkgs.system}".node2nix
-            nodejs
-            nodePackages.eslint
-            nodePackages.typescript
-            nodePackages.typescript-language-server
+            channels.nixpkgs-unstable.nodejs
+            channels.nixpkgs-unstable.nodePackages.eslint
+            channels.nixpkgs-unstable.nodePackages.typescript
+            channels.nixpkgs-unstable.nodePackages.typescript-language-server
+            channels.nixpkgs-unstable.vue-language-server
             vscode-langservers-extracted
-            vscode-extensions.vue.volar
-            vscode-extensions.vue.vscode-typescript-vue-plugin
             cargo-audit
             cargo-license
             python312
