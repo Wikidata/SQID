@@ -10,7 +10,7 @@ export interface MWApiResult extends ApiResult {
 export interface WBApiResult extends ApiResult {
   entities?: ResultList<EntityResult>
   searchinfo?: SearchInfo
-  search?: ResultList<SearchResult>
+  search?: SearchResult[]
 }
 
 export interface ResultList<T> {
@@ -209,7 +209,7 @@ export interface MatchInfo {
 }
 
 export interface SearchResult {
-  reposity: string
+  repository: string
   id: string
   concepturi: string
   title: string

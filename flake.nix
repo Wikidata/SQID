@@ -2,7 +2,7 @@
   description = "SQID, a data browser for Wikidata";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     utils.url = "github:gytis-ivaskevicius/flake-utils-plus";
 
     gitignoresrc = {
@@ -22,7 +22,6 @@
       url = "github:oxalica/rust-overlay";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "utils/flake-utils";
       };
     };
   };
@@ -63,19 +62,19 @@
             nodePackages.eslint
             nodePackages.typescript
             nodePackages.typescript-language-server
-            nodePackages.volar
-            nodePackages.vscode-css-languageserver-bin
-            nodePackages.vscode-html-languageserver-bin
+            vscode-langservers-extracted
+            vscode-extensions.vue.volar
+            vscode-extensions.vue.vscode-typescript-vue-plugin
             cargo-audit
             cargo-license
-            python310
+            python312
             ansible
             openssl
             pkg-config
           ];
         };
 
-        formatter = channels.nixpkgs.alejandra;
+        formatter = channels.nixpkgs.nixfmt-rfc-style;
       };
     };
 }
