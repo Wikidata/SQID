@@ -1,14 +1,14 @@
 use std::{collections::HashMap, str::FromStr};
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use nom::{
-    IResult, ToUsize,
     branch::alt,
     bytes::complete::tag,
     character::complete::u64,
     combinator::{all_consuming, complete, map, opt},
     multi::{length_count, length_data},
     sequence::{delimited, preceded, separated_pair, terminated},
+    IResult, Parser, ToUsize,
 };
 
 #[derive(Debug, Eq, PartialEq)]
@@ -18,8 +18,9 @@ impl FromStr for Array {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (_, array) =
-            complete(all_consuming(array))(s).map_err(|_| anyhow!("Failed to parse array"))?;
+        let (_, array) = complete(all_consuming(array))
+            .parse(s)
+            .map_err(|_| anyhow!("Failed to parse array"))?;
 
         Ok(array)
     }
@@ -51,7 +52,8 @@ impl FromStr for Value {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (_, value) = complete(all_consuming(value))(s)
+        let (_, value) = complete(all_consuming(value))
+            .parse(s)
             .map_err(|_| anyhow!("Failed parsing the array value"))?;
 
         Ok(value)
@@ -112,7 +114,8 @@ fn array(input: &str) -> IResult<&str, Array> {
         tag("a:"),
         length_count(terminated(length, tag(":{")), key_value),
         tag("}"),
-    )(input)?;
+    )
+    .parse(input)?;
 
     Ok((rest, Array(pairs.into_iter().collect())))
 }
@@ -124,25 +127,28 @@ fn string(input: &str) -> IResult<&str, &str> {
             length_data(terminated(map(length, |len| len + 2), tag(":"))),
         ),
         |s: &str| &s[1..(s.len() - 1)],
-    )(input)
+    )
+    .parse(input)
 }
 
 fn length(input: &str) -> IResult<&str, usize> {
-    map(u64, |u| u.to_usize())(input)
+    map(u64, |u| u.to_usize()).parse(input)
 }
 
 fn key_value(input: &str) -> IResult<&str, (String, Value)> {
     map(
         terminated(separated_pair(string, tag(";"), value), opt(tag(";"))),
         |(k, v)| (k.to_owned(), v),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn value(input: &str) -> IResult<&str, Value> {
     alt((
         map(string, |str| Value::String(str.to_owned())),
         map(array, Value::Array),
-    ))(input)
+    ))
+    .parse(input)
 }
 
 #[cfg(test)]
@@ -151,7 +157,7 @@ mod test {
 
     #[test]
     fn parse_string() {
-        let result = complete(all_consuming(string))(r#"s:5:"paths""#);
+        let result = complete(all_consuming(string)).parse(r#"s:5:"paths""#);
 
         assert!(result.is_ok());
         assert_eq!("paths", result.unwrap().1);
