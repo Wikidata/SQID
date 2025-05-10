@@ -8,7 +8,7 @@ use super::{
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    ClassLabelAndUsage, Count, LargeCount,
+    Count, LargeCount,
 };
 
 const ENGLISH: &str = "en";
@@ -280,6 +280,7 @@ impl Properties {
         Default::default()
     }
 
+    #[allow(dead_code)]
     pub(crate) fn update_labels_and_types<I: Iterator<Item = PropertyLabelAndType>>(
         &mut self,
         iterator: I,
@@ -292,6 +293,7 @@ impl Properties {
         });
     }
 
+    #[allow(dead_code)]
     pub(crate) fn update_usage<I: Iterator<Item = PropertyUsage>>(&mut self, iterator: I) {
         iterator.for_each(|usage| {
             let entry = self.0.entry(usage.property()).or_default();

@@ -1,8 +1,8 @@
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use dirs::home_dir;
-use mysql::{Opts, Pool, prelude::Queryable};
+use mysql::{prelude::Queryable, Opts, Pool};
 
-use super::{SiteRecord, php::SitePaths};
+use super::{php::SitePaths, SiteRecord};
 
 pub const REPLICA_MY_CNF: &str = "replica.my.cnf";
 pub const HOST: &str = "wikidatawiki.analytics.db.svc.wikimedia.cloud";
@@ -37,6 +37,7 @@ impl Credentials {
     }
 }
 
+#[allow(clippy::to_string_trait_impl)]
 impl ToString for Credentials {
     fn to_string(&self) -> String {
         format!(
@@ -46,7 +47,7 @@ impl ToString for Credentials {
     }
 }
 
-fn query_sites(credentials: &Credentials) -> Result<impl Iterator<Item = (String, SiteRecord)>> {
+fn query_sites(credentials: Credentials) -> Result<impl Iterator<Item = (String, SiteRecord)>> {
     let opts =
         Opts::from_url(&credentials.to_string()).context("failed to parse connection URL")?;
     let pool = Pool::new(opts).context("failed to create connection pool")?;
@@ -73,7 +74,7 @@ fn query_sites(credentials: &Credentials) -> Result<impl Iterator<Item = (String
 pub fn sitelinks() -> Result<impl Iterator<Item = (String, SiteRecord)>> {
     let credentials = Credentials::from_replica_my_cnf()
         .context(anyhow::anyhow!("Failed to get credential information"))?;
-    query_sites(&credentials).context("failed to query for sites")
+    query_sites(credentials).context("failed to query for sites")
 }
 
 #[cfg(test)]

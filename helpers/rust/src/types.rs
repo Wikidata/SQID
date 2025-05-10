@@ -19,12 +19,13 @@ mod sparql;
 mod sql;
 mod statistics;
 
-pub use ids::{properties, Entity, Item, Property, Qualifier, Reference};
+#[allow(unused_imports)]
+pub use ids::{Entity, Item, Property};
 pub use json::{
-    formats::date::date_from_str, ClassRecord, Classes, EntityStatistics, Properties,
-    PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
+    formats::date::date_from_str, ClassRecord, EntityStatistics, PropertyRecord, SiteRecord,
+    Statistics, Type,
 };
-pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
+pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage};
 pub use sql::sitelinks;
 pub use statistics::DumpStatistics;
 
