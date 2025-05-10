@@ -2,28 +2,17 @@
   description = "SQID, a data browser for Wikidata";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     utils.url = "github:gytis-ivaskevicius/flake-utils-plus";
 
-    gitignoresrc = {
-      url = "github:hercules-ci/gitignore.nix";
+    dream2nix = {
+      url = "github:nix-community/dream2nix";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    node2nix = {
-      url = "github:svanderburg/node2nix";
-      inputs = {
-        flake-utils.follows = "utils/flake-utils";
-        nixpkgs.follows = "nixpkgs";
-      };
     };
 
     rust-overlay = {
       url = "github:oxalica/rust-overlay";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-      };
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
@@ -32,9 +21,8 @@
     utils,
     ...
   }: let
-    sqid-overlay = import ./nix {inherit (inputs) gitignoresrc;};
-    mkToolchain = pkgs:
-      pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+    sqid-overlay = import ./nix inputs;
+    mkToolchain = pkgs: pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
   in
     utils.lib.mkFlake {
       inherit self inputs;
@@ -48,33 +36,18 @@
 
       outputsBuilder = channels: {
         packages = rec {
-          sqid-helper = channels.nixpkgs.sqid-helper;
+          inherit (channels.nixpkgs) sqid sqid-helper;
+
           default = sqid-helper;
         };
 
-        devShell = channels.nixpkgs.mkShell {
-          RUST_LOG = "debug";
-          RUST_BACKTRACE = "1";
-
-          buildInputs = with channels.nixpkgs; [
-            (mkToolchain channels.nixpkgs)
-            # inputs.node2nix.packages."${channels.nixpkgs.system}".node2nix
-            channels.nixpkgs-unstable.nodejs
-            channels.nixpkgs-unstable.nodePackages.eslint
-            channels.nixpkgs-unstable.nodePackages.typescript
-            channels.nixpkgs-unstable.nodePackages.typescript-language-server
-            channels.nixpkgs-unstable.vue-language-server
-            vscode-langservers-extracted
-            cargo-audit
-            cargo-license
-            python312
-            ansible
-            openssl
-            pkg-config
-          ];
+        devShells.default = channels.nixpkgs.callPackage ./nix/sqid/devshell.nix {
+          inherit (inputs) dream2nix;
+          packageSets = channels;
+          rustToolchain = mkToolchain channels.nixpkgs;
         };
 
-        formatter = channels.nixpkgs.nixfmt-rfc-style;
+        formatter = channels.nixpkgs.treefmt-with-formatters;
       };
     };
 }

@@ -51,3 +51,4 @@ helpers/rust/target
 /.direnv/
 /target/
 /components.d.ts
+/.dream2nix/

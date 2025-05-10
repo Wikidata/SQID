@@ -30,4 +30,4 @@ mysql = "24.0"
 
 [dev-dependencies]
 serde_test = "1.0"
-test-log= "0.2.*"
+test-log = "0.2.*"

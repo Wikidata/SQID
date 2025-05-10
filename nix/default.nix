@@ -1,10 +1,13 @@
-{ gitignoresrc, ... }: final: prev:
-
+inputs: final: prev:
 let
-  gitignoreSource = (import gitignoresrc { inherit (final.pkgs) lib; }).gitignoreSource;
+  inherit (final.pkgs) callPackage;
 in
 {
-  sqid-helper = final.pkgs.callPackage ./sqid-helper {
-    inherit gitignoreSource;
+  sqid = callPackage ./sqid {
+    inherit (inputs) dream2nix;
+    packageSets.nixpkgs = final;
   };
+  sqid-helper = callPackage ./sqid-helper { };
+
+  treefmt-with-formatters = callPackage ./treefmt-with-formatters.nix { };
 }

@@ -1,0 +1,42 @@
+# One CLI to format the code tree - https://github.com/numtide/treefmt
+
+[formatter.nix]
+command = "nixfmt"
+options = ["--verify"]
+includes = ["*.nix"]
+excludes = []
+
+[formatter.rust]
+command = "rustfmt"
+excludes = []
+includes = ["*.rs"]
+options = ["--config", "skip_children=true", "--edition", "2024"]
+
+[formatter.taplo]
+command = "taplo"
+excludes = []
+includes = ["*.toml"]
+options = ["format"]
+
+[formatter.prettier]
+command = "prettier"
+excludes = []
+includes = [
+  "*.cjs",
+  "*.css",
+  "*.html",
+  "*.js",
+  "*.json",
+  "*.json5",
+  "*.jsx",
+  "*.md",
+  "*.mdx",
+  "*.mjs",
+  "*.scss",
+  "*.ts",
+  "*.tsx",
+  "*.vue",
+  "*.yaml",
+  "*.yml",
+]
+options = ["--write"]

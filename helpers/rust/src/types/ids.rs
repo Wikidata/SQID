@@ -4,7 +4,7 @@ use std::{
     num::ParseIntError,
 };
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
 
 use super::Id;
@@ -466,7 +466,7 @@ impl TryFrom<String> for Sense {
 
 impl From<Sense> for String {
     fn from(sense: Sense) -> Self {
-        format!("{}-S{}", sense.0 .0, sense.1)
+        format!("{}-S{}", sense.0.0, sense.1)
     }
 }
 
@@ -497,7 +497,7 @@ impl TryFrom<String> for Form {
 
 impl From<Form> for String {
     fn from(sense: Form) -> Self {
-        format!("{}-F{}", sense.0 .0, sense.1)
+        format!("{}-F{}", sense.0.0, sense.1)
     }
 }
 

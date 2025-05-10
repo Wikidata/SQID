@@ -8,7 +8,7 @@ use super::{
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    Count, LargeCount,
+    ClassLabelAndUsage, Count, LargeCount,
 };
 
 const ENGLISH: &str = "en";

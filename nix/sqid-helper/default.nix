@@ -1,17 +1,16 @@
-{ lib
-, cargo
-, gitignoreSource
-, openssl
-, pkg-config
-, rustPlatform
-, rustc
+{
+  lib,
+  cargo,
+  openssl,
+  pkg-config,
+  rustPlatform,
+  rustc,
 }:
-
 rustPlatform.buildRustPackage rec {
   pname = "sqid-helper";
   version = "0.1.0";
 
-  src = gitignoreSource ../../helpers/rust;
+  src = ../../helpers/rust;
 
   cargoLock = {
     lockFile = ../../Cargo.lock;
@@ -40,5 +39,4 @@ rustPlatform.buildRustPackage rec {
     homepage = "https://github.com/Wikidata/SQID";
     license = lib.licenses.asl20;
   };
-
 }
