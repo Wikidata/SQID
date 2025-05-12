@@ -1,19 +1,19 @@
 <template>
   <b-nav-item-dropdown right>
-    <template v-slot:button-content>
+    <template #button-content>
       <font-awesome-icon :icon />
     </template>
     <b-dropdown-item @click="theme = 'light'">
       <i18n-t keypath="settings.theme.light">
-        <template v-slot:icon><font-awesome-icon icon="sun" /></template> </i18n-t
+        <template #icon><font-awesome-icon icon="sun" /></template> </i18n-t
     ></b-dropdown-item>
     <b-dropdown-item @click="theme = 'dark'">
       <i18n-t keypath="settings.theme.dark">
-        <template v-slot:icon><font-awesome-icon icon="moon" /></template> </i18n-t
+        <template #icon><font-awesome-icon icon="moon" /></template> </i18n-t
     ></b-dropdown-item>
     <b-dropdown-item @click="theme = 'auto'">
       <i18n-t keypath="settings.theme.auto">
-        <template v-slot:icon><font-awesome-icon icon="circle-half-stroke" /></template> </i18n-t
+        <template #icon><font-awesome-icon icon="circle-half-stroke" /></template> </i18n-t
     ></b-dropdown-item>
   </b-nav-item-dropdown>
 </template>
@@ -23,7 +23,7 @@ import { useColorMode } from 'bootstrap-vue-next'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-const { t } = useI18n()
+useI18n()
 const theme = useColorMode({ emitAuto: true })
 
 const current = computed(() =>
@@ -41,7 +41,7 @@ const icon = computed(() => {
 })
 </script>
 
-<style scoped lang="less">
+<style scoped>
 svg {
   margin-right: 0.25em;
 }

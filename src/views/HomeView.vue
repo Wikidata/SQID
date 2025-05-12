@@ -1,73 +1,80 @@
 <template>
   <sqid-bars>
     <template #mainbar>
-      <h1 v-t="'home.home'" />
+      <h1>{{ t('home.home') }}</h1>
       <i18n-t tag="p" keypath="home.description">
         <template #wikidata
-          ><a place="wikidata" href="https://www.wikidata.org" v-t="'home.wikidata'"
-        /></template>
+          ><a href="https://www.wikidata.org">{{ t('home.wikidata') }}</a></template
+        >
         <template #reasonator
-          ><a place="reasonator" href="https://reasonator.toolforge.org/?" v-t="'home.reasonator'"
-        /></template>
+          ><a href="https://reasonator.toolforge.org/?">{{ t('home.reasonator') }}</a></template
+        >
       </i18n-t>
       <div>
-        <span v-t="'home.examples'" />
+        <h2>{{ t('home.examples') }}</h2>
         <ul>
           <i18n-t tag="li" keypath="home.examplesBach"
-            ><template #bach><entity-link entityId="Q1339" /></template
+            ><template #bach><sqid-entity-link entity-id="Q1339" /></template
           ></i18n-t>
           <i18n-t tag="li" keypath="home.examplesVolcano"
-            ><template #volcano><entity-link entityId="Q8072" /></template
+            ><template #volcano><sqid-entity-link entity-id="Q8072" /></template
           ></i18n-t>
           <i18n-t tag="li" keypath="home.examplesGalaxy"
-            ><template #galaxy><entity-link entityId="Q318" /></template
+            ><template #galaxy><sqid-entity-link entity-id="Q318" /></template
           ></i18n-t>
           <i18n-t tag="li" keypath="home.examplesSexOrGender"
-            ><template #sexOrGender><entity-link entityId="P21" /></template
+            ><template #sexOrGender><sqid-entity-link entity-id="P21" /></template
           ></i18n-t>
           <i18n-t tag="li" keypath="home.examplesInstrument"
-            ><template #instrument><entity-link entityId="P1303" /></template
+            ><template #instrument><sqid-entity-link entity-id="P1303" /></template
           ></i18n-t>
           <i18n-t tag="li" keypath="home.examplesProperty"
-            ><template #property><entity-link entityId="Q18616576" /></template
+            ><template #property><sqid-entity-link entity-id="Q18616576" /></template
           ></i18n-t>
         </ul>
       </div>
 
+      <h2>{{ t('home.properties') }}</h2>
       <i18n-t tag="p" keypath="home.propertiesDescription">
-        <template #properties><b v-t="'home.properties'" /></template>
+        <template #properties>{{ t('home.properties') }}</template>
         <template #propertyBrowser
           ><router-link :to="{ name: 'properties' }">
-            <b v-t="'home.propertyBrowser'" /> </router-link
-        ></template>
+            <b>{{ t('home.propertyBrowser') }}</b>
+          </router-link></template
+        >
       </i18n-t>
 
+      <h2>{{ t('home.classes') }}</h2>
       <i18n-t tag="p" keypath="home.classesDescription">
-        <template #classes><b v-t="'home.classes'" /></template>
-        <template #instanceOf><entity-link entityId="P31" /></template>
-        <template #subclassOf><entity-link entityId="P279" /></template>
+        <template #classes>{{ t('home.classes') }}</template>
+        <template #instanceOf><sqid-entity-link entity-id="P31" /></template>
+        <template #subclassOf><sqid-entity-link entity-id="P279" /></template>
         <template #classBrowser
-          ><router-link :to="{ name: 'classes' }"> <b v-t="'home.classBrowser'" /> </router-link
-        ></template>
+          ><router-link :to="{ name: 'classes' }">
+            <b>{{ t('home.classBrowser') }}</b>
+          </router-link></template
+        >
       </i18n-t>
 
+      <h2>{{ t('home.theData') }}</h2>
       <i18n-t tag="p" keypath="home.data">
-        <template #liveData><b v-t="'home.liveData'" /></template>
+        <template #liveData
+          ><b>{{ t('home.liveData') }}</b></template
+        >
         <template #wikidataAPI
-          ><a
-            place="wikidataAPI"
-            href="https://www.wikidata.org/w/api.php"
-            v-t="'home.wikidataAPI'"
-        /></template>
+          ><a href="https://www.wikidata.org/w/api.php">{{ t('home.wikidataAPI') }}</a></template
+        >
         <template #wdqs
-          ><a place="wdqs" href="https://query.wikidata.org/" v-t="'home.wdqs'"
-        /></template>
+          ><a href="https://query.wikidata.org/">{{ t('home.wdqs') }}</a></template
+        >
         <template #wdtk
-          ><a place="wdtk" href="https://github.com/Wikidata/Wikidata-Toolkit" v-t="'home.wdtk'"
-        /></template>
+          ><a href="https://github.com/Wikidata/Wikidata-Toolkit">{{ t('home.wdtk') }}</a></template
+        >
         <template #statusPage
-          ><router-link :to="{ name: 'status' }"> <b v-t="'home.statusPage'" /> </router-link
-        ></template>
+          ><router-link :to="{ name: 'status' }">
+            <b>{{ t('home.statusPage') }}</b>
+          </router-link></template
+        >
       </i18n-t>
     </template>
     <template #sidebar>
@@ -81,14 +88,14 @@ import { watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEntitiesTermsStore } from '@/stores/entities-terms'
 
-const i18n = useI18n()
+const { t, locale } = useI18n()
 
 watchEffect(async () => {
   const entitiesTerms = useEntitiesTermsStore()
 
   await entitiesTerms.requestLabels({
     entityIds: ['Q1339', 'Q8072', 'Q318', 'P21', 'P1303', 'Q18616576', 'P31', 'P279'],
-    lang: i18n.locale.value,
+    lang: locale.value,
   })
 })
 </script>

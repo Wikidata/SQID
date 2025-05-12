@@ -22,15 +22,15 @@
     }
   },
   "footer": {
+    "stats": "@:footer.statDate ({link})",
     "statDate": "Statistiken Stand {date}",
     "statLink": "Details",
-    "poweredBy": "Powered by",
-    "sourceCode": "Quelltext verfügbar auf {0}"
+    "sourceCode": "Quelltext verfügbar auf {github}"
   },
   "errors": {
     "pageNotFound": "Tut mir leid, ich konnte keine Seite unter dieser URI finden.",
     "pageNotFoundDescription": "Die URI, die hierher führte, scheint fehlerhaft zu sein.",
-    "noSuchEntity": "Tut mir leid, ich konnte keine Entität mit ID „{entityId}“ finden.",
+    "noSuchEntity": "Tut mir leid, ich konnte keine Entität mit ID „{entityId}“ finden. {entityUrl}",
     "noSuchEntityDescription": "Vielleicht wurde sie gelöscht. Vielleicht hat sie nie existiert. Vielleicht werden wir es nie wissen.",
     "invalidEntity": "Tut mir leid, ich koennte „{entityId}“ nicht als gültige ID einer Entität lesen.",
     "invalidEntityDescription": "Beim Versuch, „{entityId}“ als ID einer Entität zu lesen, trat der folgende Fehler auf: „{error}“.",
@@ -121,6 +121,7 @@
     "classBrowser": "Klassen-Browser",
     "data": "Die meisten von SQUID angezeigten Daten sind {liveData} aus der {wikidataAPI} oder vom {wdqs}. Komplexe Statistiken, die aktuell nicht live berechnet werden können, werden aus den wöchentlichen Daten-Dumps mit {wdtk} vorberechnet. Einige komplexe Statistiken können zwar per SPARQL berechnet werden, benötigen dafür aber zu viel Zeit; diese Statistiken werden stündlich berechnet. Auf der {statusPage} werden Informationen zum Datenbestand und allgemeine Statistiken aufgelistet.",
     "liveData": "live-Daten",
+    "theData": "Die Daten",
     "wikidataAPI": "Wikidata-API",
     "wdqs": "Wikidata-SPARQL-query-service",
     "wdtk": "Wikidata Toolkit",
@@ -151,7 +152,7 @@
   "about": {
     "about": "Über SQID",
     "aboutDescription": "SQID ist ein Projekt der {kbsGroup} der {tuDresden}. Zu den Entwicklern gehören {developersList} und {lastDeveloper}.",
-    "aboutImplementation": "SQID ist in TypeScript geschrieben und verwendet zusätzlich serverseitigen Code in Java und Python, um Daten zu extrahieren, abzufragen und aufzubereiten.",
+    "aboutImplementation": "SQID ist in TypeScript geschrieben und verwendet zusätzlich serverseitigen Code in Rust, um Daten zu extrahieren, abzufragen und aufzubereiten.",
     "kbsGroup": "Wissensbasierte Systeme-Gruppe",
     "meaning": "Was bedeutet SQID?",
     "meaningHypotheses": "Der Ursprung des Namens ist unbekannt, aber es scheint sich um eine Abkürzung für irgendetwas zu handeln. Aktuelle Hypothesen sind unter anderem: {hypotheses} Eine andere Theorie besagt, dass der Name tatsachlich durch die hohe intelligenz, das bewundernswerte Sozialverhalten und den scharfen Blick, die gleichwohl für viele {squids} wie auch für Wikidata-Editoren charakteristisch sind, inspiriert wurde.",
@@ -161,5 +162,9 @@
     "githubRepository": "öffentlichen Github-Repository",
     "submitIssue": "Issue angelegt werden",
     "dontEatMe": "Bitte ess' mich nicht."
+  },
+  "image": {
+    "missingImageDescription": "[Bildbeschreibung nicht verfügbar]",
+    "descriptiption": "{description} — aus Wikimedia Commons, siehe dort für Informationen zur Lizensierung"
   }
 }

@@ -1,11 +1,11 @@
 <template>
   <span>
     <template v-if="snaktype === 'value'">
-      <data-value :value="snak.datavalue" :propertyId="snak.property" :short="short" />
+      <sqid-data-value :value="snak.datavalue" :property-id="snak.property" :use-short-value />
     </template>
     <template v-else-if="snaktype === 'somevalue'">{{ t('entity.someValue') }}</template>
     <template v-else-if="snaktype === 'novalue'">{{ t('entity.noValue') }}</template>
-    <template v-else>unknown snaktype</template>
+    <template v-else>{{ t('errors.unknownSnakType') }}</template>
   </span>
 </template>
 
@@ -18,11 +18,11 @@ const { t } = useI18n()
 
 interface Props {
   snak: Snak
-  short?: boolean
+  useShortValue?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  short: false,
+  useShortValue: false,
 })
 
 const snaktype = computed(() => {
@@ -30,7 +30,7 @@ const snaktype = computed(() => {
 })
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 span.deprecated {
   text-decoration: line-through;
 }

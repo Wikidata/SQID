@@ -1,7 +1,7 @@
 <template>
   <span>
     <template v-if="value.type === 'wikibase-entityid'">
-      <entity-link :entityId="entityId" />
+      <entity-link :entity-id="entityId" />
     </template>
     <template v-else-if="value.type === 'string'">
       <template v-if="maybeLink">
@@ -11,24 +11,24 @@
     </template>
     <template v-else-if="value.type === 'time'"
       >{{ formatTime(timeValue) }}
-      <i18n-t keypath="entity.calendar" v-if="timeValue.calendar !== 'Q1985727'">
+      <i18n-t v-if="timeValue.calendar !== 'Q1985727'" keypath="entity.calendar">
         <template #calendar>
-          <entity-link :entityId="timeValue.calendar" />
+          <entity-link :entity-id="timeValue.calendar" />
         </template>
       </i18n-t>
     </template>
     <template v-else-if="value.type === 'quantity'">
-      <i18n-t keypath="entity.quantityUnit" v-if="unit !== '1'">
+      <i18n-t v-if="unit !== '1'" keypath="entity.quantityUnit">
         <template #amount>
           <span>{{ amount }}</span>
         </template>
         <template #unit>
           <span>
-            <entity-link :entityId="unit" />
+            <entity-link :entity-id="unit" />
           </span>
         </template>
       </i18n-t>
-      <i18n-t keypath="entity.quantityNoUnit" v-else>
+      <i18n-t v-else keypath="entity.quantityNoUnit">
         <template #amount>
           <span>{{ amount }}</span>
         </template>
@@ -36,9 +36,9 @@
     </template>
     <template v-else-if="value.type === 'globecoordinate'"
       >{{ globeCoordinateValue.coordinate }}
-      <i18n-t keypath="entity.globe" v-if="globeCoordinateValue.globe !== 'Q2'">
+      <i18n-t v-if="globeCoordinateValue.globe !== 'Q2'" keypath="entity.globe">
         <template #globe>
-          <entity-link :entityId="globeCoordinateValue.globe" />
+          <entity-link :entity-id="globeCoordinateValue.globe" />
         </template>
       </i18n-t>
     </template>
@@ -48,7 +48,9 @@
           ><span>{{ monolingualTextValue.text }}</span></template
         >
         <template #language
-          ><small>[{{ monolingualTextValue.language }}]</small></template
+          ><small>{{
+            t('entity.monolingualTextLanguage', { language: monolingualTextValue.language })
+          }}</small></template
         >
       </i18n-t>
     </template>
@@ -74,18 +76,18 @@ import { dateFromTimeData, coordinateFromGlobeCoordinate, type Timestamp } from 
 import { useStatisticsPropertiesStore } from '@/stores/statistics-properties'
 import { useEntitiesStore } from '@/stores/entities'
 
-const { t, d } = useI18n()
+const { t, d, locale } = useI18n()
 const entities = useEntitiesStore()
 const properties = useStatisticsPropertiesStore()
 
 interface Props {
   value: Datavalue
   propertyId: EntityId
-  short?: boolean
+  useShortValue?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  short: false,
+  useShortValue: false,
 })
 
 const datatype = ref<string | undefined>(undefined)
@@ -112,7 +114,7 @@ const globeCoordinateValue = computed(() =>
 function formatTime(date: Timestamp) {
   if (!date.time.toString().startsWith('Invalid')) {
     // valid date, use localised format
-    return d(date.time, date.format)
+    return d(date.time, date.format, locale)
   }
 
   // date is out of range for javascript Date objects, format manually
@@ -157,7 +159,7 @@ const stringValue = computed(() => {
 const shortenedStringValue = computed(() => {
   const { value } = props.value as StringDataValue
 
-  if (props.short && value.length > 15) {
+  if (props.useShortValue && value.length > 15) {
     return `${value.slice(0, 6)}..${value.slice(value.length - 6)}`
   }
 

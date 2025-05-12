@@ -1,6 +1,7 @@
 <template>
   <template v-for="(link, lidx) of navlinks" :key="lidx">
     <b-nav-item :to="link.target" active-class="active" :exact="link.exact">{{
+      // eslint-disable-next-line @intlify/vue-i18n/no-dynamic-keys
       t(link.message)
     }}</b-nav-item>
   </template>
@@ -12,7 +13,7 @@ import type { RouteLocation } from 'vue-router'
 
 const { t } = useI18n()
 
-const props = defineProps<{ navlinks: Array<Navlink> }>()
+defineProps<{ navlinks: Array<Navlink> }>()
 
 export interface Navlink {
   target: RouteLocation

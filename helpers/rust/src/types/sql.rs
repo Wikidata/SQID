@@ -1,8 +1,8 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use dirs::home_dir;
-use mysql::{prelude::Queryable, Opts, Pool};
+use mysql::{Opts, Pool, prelude::Queryable};
 
-use super::{php::SitePaths, SiteRecord};
+use super::{SiteRecord, php::SitePaths};
 
 pub const REPLICA_MY_CNF: &str = "replica.my.cnf";
 pub const HOST: &str = "wikidatawiki.analytics.db.svc.wikimedia.cloud";

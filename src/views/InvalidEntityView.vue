@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import type { EntityId } from '@/api/types'
+import { isError, type EntityId } from '@/api/types'
 import { parseEntityId } from '@/api/wikidata'
 import { ref, watchEffect } from 'vue'
 
@@ -26,8 +26,10 @@ const error = ref<string | null>(null)
 watchEffect(() => {
   try {
     parseEntityId(props.id)
-  } catch (err: any) {
-    error.value = err?.message
+  } catch (err) {
+    if (isError(err)) {
+      error.value = err.message
+    }
   }
 })
 </script>

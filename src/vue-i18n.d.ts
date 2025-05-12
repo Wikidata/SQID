@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { DefineLocaleMessage, DefineDateTimeFormat, DefineNumberFormat } from 'vue-i18n'
 import { enMessages } from '@/locales/en.json'
-import 'pinia'
 
 declare module 'vue-i18n' {
   export type DefineLocalMessage = typeof enMessages

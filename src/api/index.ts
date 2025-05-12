@@ -1,7 +1,10 @@
 import { http } from '@/http'
-import type { ApiResult, SparqlResult } from './types'
+import type { ApiQuery, ApiResult, SparqlResult } from './types'
 
-export async function apiRequest(endpoint: string, query: any): Promise<ApiResult> {
+export async function apiRequest<T extends ApiQuery>(
+  endpoint: string,
+  query: T,
+): Promise<ApiResult> {
   const response = await http.get(endpoint, {
     params: {
       format: 'json',

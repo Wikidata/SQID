@@ -16,14 +16,16 @@
     };
   };
 
-  outputs = inputs @ {
-    self,
-    utils,
-    ...
-  }: let
-    sqid-overlay = import ./nix inputs;
-    mkToolchain = pkgs: pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-  in
+  outputs =
+    inputs@{
+      self,
+      utils,
+      ...
+    }:
+    let
+      sqid-overlay = import ./nix inputs;
+      mkToolchain = pkgs: pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
+    in
     utils.lib.mkFlake {
       inherit self inputs;
 
@@ -46,6 +48,28 @@
           packageSets = channels;
           rustToolchain = mkToolchain channels.nixpkgs;
         };
+
+        apps =
+          let
+            inherit (channels.nixpkgs) python3 writeShellApplication system;
+
+            sqid-preview = utils.lib.mkApp {
+              drv = writeShellApplication {
+                name = "sqid-preview";
+
+                runtimeInputs = [ python3 ];
+
+                text = ''
+                  cd ${self.packages.${system}.sqid}/dist
+                  python3 -m http.server
+                '';
+              };
+            };
+          in
+          {
+            inherit sqid-preview;
+            default = sqid-preview;
+          };
 
         formatter = channels.nixpkgs.treefmt-with-formatters;
       };

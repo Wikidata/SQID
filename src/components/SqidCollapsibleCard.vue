@@ -1,6 +1,6 @@
 <template>
   <b-card header-tag="header" no-body>
-    <template v-slot:header>
+    <template #header>
       <sqid-collapse-button :id="id">
         <b>{{ header }}</b>
       </sqid-collapse-button>
@@ -11,21 +11,22 @@
   </b-card>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-@Component
-export default class SqidCollapsibleCard extends Vue {
-  @Prop({ required: true }) private header!: string
-  @Prop({ required: true }) private id!: string
-  @Prop({ default: false, type: Boolean }) private narrow!: boolean
+<script setup lang="ts">
+import { computed } from 'vue'
 
-  private get collapseId() {
-    return `collapse-${this.id}`
-  }
-}
+const props = withDefaults(
+  defineProps<{
+    header: string
+    id: string
+    useShortValue?: boolean
+  }>(),
+  { useShortValue: false },
+)
+
+const collapseId = computed(() => `collapse-${props.id}`)
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 .card {
   margin: 1.5em 0;
 }

@@ -5,10 +5,10 @@ use std::collections::{HashMap, HashSet};
 use strum::{Display, EnumIter, EnumString};
 
 use super::{
+    Count, LargeCount,
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    Count, LargeCount,
 };
 
 const ENGLISH: &str = "en";
@@ -1044,7 +1044,7 @@ pub(crate) mod formats {
 }
 
 pub(crate) mod stream {
-    use anyhow::{bail, Result};
+    use anyhow::{Result, bail};
     use serde::Deserialize;
     use serde_json::Deserializer;
     use std::{
@@ -1228,10 +1228,12 @@ mod test {
     #[test]
     fn deserialise_example_properties() {
         let mut data = String::new();
-        assert!(File::open("../../data/exampleData/properties.json")
-            .unwrap()
-            .read_to_string(&mut data)
-            .is_ok());
+        assert!(
+            File::open("../../data/exampleData/properties.json")
+                .unwrap()
+                .read_to_string(&mut data)
+                .is_ok()
+        );
 
         let properties: Result<Properties, _> = serde_json::from_str(&data);
         log::debug!("{:?}", properties);
@@ -1241,10 +1243,12 @@ mod test {
     #[test]
     fn deserialise_example_classes() {
         let mut data = String::new();
-        assert!(File::open("../../data/exampleData/classes.json")
-            .unwrap()
-            .read_to_string(&mut data)
-            .is_ok());
+        assert!(
+            File::open("../../data/exampleData/classes.json")
+                .unwrap()
+                .read_to_string(&mut data)
+                .is_ok()
+        );
 
         let classes: Result<Classes, _> = serde_json::from_str(&data);
         log::debug!("{:?}", classes);
@@ -1254,10 +1258,12 @@ mod test {
     #[test]
     fn deserialise_example_statistics() {
         let mut data = String::new();
-        assert!(File::open("../../data/exampleData/statistics.json")
-            .unwrap()
-            .read_to_string(&mut data)
-            .is_ok());
+        assert!(
+            File::open("../../data/exampleData/statistics.json")
+                .unwrap()
+                .read_to_string(&mut data)
+                .is_ok()
+        );
 
         let statistics: Result<Statistics, _> = serde_json::from_str(&data);
         log::debug!("{:?}", statistics);

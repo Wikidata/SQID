@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
-import type { Claim, EntityId } from '@/api/types'
+import type { EntityId } from '@/api/types'
 
 export interface ClassStatistics {
   directInstances: number
@@ -15,9 +15,7 @@ export interface ClassStatistics {
 
 export type ClassStatisticsMap = Map<EntityId, ClassStatistics>
 
-type Store = ReturnType<typeof useStatisticsClassesStore>
-
-export const useStatisticsClassesStore = defineStore('statistics-properties', () => {
+export const useStatisticsClassesStore = defineStore('statistics-classes', () => {
   const hierarchy = ref<ClassStatisticsMap>(new Map())
   const hierarchyRefreshed = ref(new Date(0))
 

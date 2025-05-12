@@ -1,9 +1,11 @@
 <template>
   <sqid-bars>
     <template #mainbar>
-      <h1 v-t="'errors.underConstruction'" />
+      <h1>{{ t('errors.underConstruction') }}</h1>
       <i18n-t tag="div" keypath="errors.underConstructionDescription">
-        <template #sqid><a href="https://tools.wmflabs.org/sqid/">SQID 1.0</a></template>
+        <template #sqid
+          ><a href="https://tools.wmflabs.org/sqid/">{{ t('errors.legacySqid') }}</a>
+        </template>
       </i18n-t>
     </template>
     <template #sidebar>
@@ -11,3 +13,9 @@
     </template>
   </sqid-bars>
 </template>
+
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+</script>

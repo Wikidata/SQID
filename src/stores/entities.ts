@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import { acceptHMRUpdate, defineStore } from 'pinia'
 
 import type { EntityId } from '@/api/types'
@@ -10,8 +9,11 @@ export const useEntitiesStore = defineStore('entities', () => {
     // todo(mx): implement this
   }
 
-  async function getPropertyDatatypes(this: Store, propertyId: EntityId) {
+  async function getPropertyDatatypes(this: Store, _propertyIds: [EntityId]) {
     // todo(mx): implement this
+    return {
+      get: (_id: EntityId) => 'unknown',
+    }
   }
 
   return {

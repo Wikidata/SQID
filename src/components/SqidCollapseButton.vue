@@ -6,20 +6,15 @@
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+<script setup lang="ts">
+import { computed } from 'vue'
 
-@Component
-export default class SqidCollapseButton extends Vue {
-  @Prop({ required: true }) private id!: string
+const props = defineProps<{ id: string }>()
 
-  private get collapseId() {
-    return `collapse-${this.id}`
-  }
-}
+const collapseId = computed(() => `collapse-${props.id}`)
 </script>
 
-<style lang="less" scoped>
+<style scoped>
 div {
   cursor: pointer;
 

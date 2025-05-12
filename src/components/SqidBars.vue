@@ -11,7 +11,7 @@
   </b-container>
 </template>
 
-<style lang="less">
+<style>
 .mainbar {
   margin-right: -1px;
   margin-bottom: 10px;

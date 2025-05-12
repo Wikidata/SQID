@@ -1,7 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
-import { i18n, LOCALES, loadMessages, updateCurrentTranslation } from '@/i18n'
-import type { RouteLocationNormalized } from 'vue-router'
 import { useI18nStore } from '@/stores/i18n'
 
 // todo(mx): implement navigation guards

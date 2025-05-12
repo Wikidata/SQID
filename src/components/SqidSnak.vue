@@ -1,9 +1,9 @@
 <template>
   <span>
-    <font-awesome-icon icon="arrow-left" v-if="reverse" />
-    <snak-value :snak="snak" :class="{ deprecated }" :short="short" />
-    <font-awesome-icon :title="t('entity.deprecatedStatement')" icon="ban" v-if="deprecated" />
-    <font-awesome-icon :title="t('entity.preferredStatement')" icon="star" v-if="preferred" />
+    <font-awesome-icon v-if="isReverseClaim" icon="arrow-left" />
+    <sqid-snak-value :snak="snak" :class="{ deprecated }" :use-short-value />
+    <font-awesome-icon v-if="deprecated" :title="t('entity.deprecatedStatement')" icon="ban" />
+    <font-awesome-icon v-if="preferred" :title="t('entity.preferredStatement')" icon="star" />
   </span>
 </template>
 
@@ -18,12 +18,12 @@ const props = withDefaults(
   defineProps<{
     snak: Snak
     rank: Rank
-    reverse: boolean
-    short: boolean
+    isReverseClaim?: boolean
+    useShortValue?: boolean
   }>(),
   {
-    reverse: false,
-    short: false,
+    isReverseClaim: false,
+    useShortValue: false,
   },
 )
 
@@ -31,7 +31,7 @@ const deprecated = computed(() => props.rank === 'deprecated')
 const preferred = computed(() => props.rank === 'preferred')
 </script>
 
-<style scoped lang="less">
+<style scoped>
 svg {
   margin-left: 1em;
   margin-right: 1em;

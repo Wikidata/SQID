@@ -1,13 +1,13 @@
 <template>
   <b-nav-form>
-    <b-button v-if="!isLoggedIn" @click="initiate" size="sm" class="my-2 my-sm-0">{{
+    <b-button v-if="!isLoggedIn" size="sm" class="my-2 my-sm-0" @click="initiate">{{
       t('pageTitle.login')
     }}</b-button>
     <div v-if="isLoggedIn">
       <i18n-t class="ml-sm-2" tag="span" keypath="pageTitle.loggedInAs">
         <a :href="'https://wikidata.org/wiki/User:' + username">{{ username }}</a>
       </i18n-t>
-      <b-button @click="logout" id="logoutButton" size="sm" class="my-2 ml-sm-2 my-sm-0">{{
+      <b-button id="logoutButton" size="sm" class="my-2 ml-sm-2 my-sm-0" @click="logout">{{
         t('pageTitle.logout')
       }}</b-button>
     </div>

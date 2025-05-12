@@ -46,7 +46,7 @@ export const useStatisticsStore = defineStore('statistics', () => {
       classesDate: new Date(0),
       refreshedDate: new Date(0),
       propertiesDate: new Date(0),
-      sitelinks: new Date(0),
+      sitelinks: 0,
       sites: new Map(),
     })
   }

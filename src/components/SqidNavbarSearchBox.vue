@@ -1,4 +1,12 @@
 <template>
+  <b-nav-form>
+    <b-form-input
+      id="search"
+      v-model="needle"
+      type="text"
+      :placeholder="t('pageTitle.searchItem')"
+    />
+  </b-nav-form>
   <!-- <vue-bootstrap-autocomplete
     v-model="entitySearch"
     :data="entities"
@@ -22,57 +30,82 @@
 </template>
 
 <script setup lang="ts">
-// import { Component, Model, Watch, Vue } from 'vue-property-decorator'
-// import VueBootstrapAutocomplete from '@vue-bootstrap-components/vue-bootstrap-autocomplete'
-import { ref } from 'vue'
-import _ from 'lodash'
+import { ref, watchEffect } from 'vue'
+//import _ from 'lodash'
 
-import router from '@/router'
 import { searchEntities } from '@/api/wikidata'
 import type { SearchResult } from '@/api/types'
 
-const MAX_SEARCH_SUGGESTIONS = 10
-const TYPEAHEAD_WORKAROUND_REGEX = /^(.*): : (.*) \( \((.*)\) \)$/
+import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { refDebounced } from '@vueuse/core'
 
-const entitySearch = ref('')
-const entities = ref<SearchResult[]>([])
+const { t } = useI18n()
+const _router = useRouter()
 
-const debouncedSearch = _.debounce(async (search) => {
+interface Props {
+  delay?: number
+  wait?: number
+  minCharacters?: number
+  maxSuggestions?: number
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  delay: 500,
+  wait: 1000,
+  minCharacters: 3,
+  maxSuggestions: 10,
+})
+
+const search = ref('')
+const needle = refDebounced(search, props.delay, { maxWait: props.wait })
+const candidates = ref<SearchResult[]>([])
+
+watchEffect(async () => {
   try {
-    const response = await searchEntities(search, { limit: MAX_SEARCH_SUGGESTIONS })
-    entities.value = []
-    for (const [_key, entity] of Object.entries(response)) {
-      entities.value.push(entity)
+    if (needle.value.length < props.minCharacters) {
+      return
     }
 
-    if (search.match(/^P\d+$/)) {
-      const properties = await searchEntities(search, {
-        limit: MAX_SEARCH_SUGGESTIONS,
-        kind: 'property',
-      })
+    const items = searchEntities(needle.value, { limit: props.maxSuggestions })
+    const properties = needle.value.match(/^P\d+$/)
+      ? searchEntities(needle.value, {
+          limit: props.maxSuggestions,
+          kind: 'property',
+        })
+      : Promise.resolve([])
 
-      for (const [_key, entity] of Object.entries(properties)) {
-        entities.value.push(entity)
-      }
-    }
-  } catch (err) {
+    candidates.value = (await properties).concat(await items)
+  } catch (_err) {
     // do nothing
   }
-}, 500)
+})
 
-function workAroundFilter(htmlText: string) {
-  // vue-bootstrap-typeahead filters results on the serialised values
-  // since we don't want to, e.g., exclude Q42 from the results for Q42
-  // simply because `Q42' does not appear in the label, so we shuffle
-  // things around manually
-  // todo(mx): figure out if this is still required
-  return htmlText
-    .replace(TYPEAHEAD_WORKAROUND_REGEX, '$2 <small>$1</small><br /><small>$3</small>')
-    .trim()
-}
-
-const entitySelected = (event: Event) => {
-  router.push({ name: 'entity', params: { id: event.target.dataset['id'] } })
-  entitySearch.value = entitySearch.value.replace(TYPEAHEAD_WORKAROUND_REGEX, '$2').trim()
-}
+// const debouncedSearch = _.debounce(async (search) => {
+//   try {
+//     const response = await searchEntities(search, { limit: props.maxSuggestions })
+//     entities.value = []
+//     for (const [_key, entity] of Object.entries(response)) {
+//       entities.value.push(entity)
+//     }
+//
+//     if (search.match(/^P\d+$/)) {
+//       const properties = await searchEntities(search, {
+//         limit: props.maxSuggestions,
+//         kind: 'property',
+//       })
+//
+//       for (const [_key, entity] of Object.entries(properties)) {
+//         entities.value.push(entity)
+//       }
+//     }
+//   } catch (err) {
+//     // do nothing
+//   }
+// }, 500)
+//
+// const entitySelected = (event: Event) => {
+//   router.push({ name: 'entity', params: { id: event.target.dataset['id'] } })
+//   entitySearch.value = entitySearch.value.replace(TYPEAHEAD_WORKAROUND_REGEX, '$2').trim()
+// }
 </script>

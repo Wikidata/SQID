@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 use super::{
+    Count, LargeCount,
     ids::{Entity, Item, Property, Qualifier, Reference},
     json::Type,
-    Count, LargeCount,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Serialize)]

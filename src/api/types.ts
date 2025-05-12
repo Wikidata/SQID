@@ -1,3 +1,7 @@
+export interface ApiQuery {
+  action: string
+}
+
 export interface ApiResult {
   batchcomplete?: string
   success?: number
@@ -49,6 +53,7 @@ export type PageResult = ImagePageResult
 
 export interface ImagePageResult {
   ns: number
+  pageid: number
   title: string
   missing: string
   known: string
@@ -66,6 +71,14 @@ export interface ImageInfo {
   url: string
   descriptionurl: string
   descriptionshorturl: string
+}
+
+export type ImageLabels = { [language: string]: string }
+
+export interface ImageResult {
+  entityId: EntityId
+  labels: ImageLabels
+  imageInfo: ImageInfo
 }
 
 export interface EntityResult {
@@ -87,10 +100,11 @@ export interface TermResult {
 export type ClaimType = 'statement'
 export type Rank = 'normal' | 'preferred' | 'deprecated'
 
+export type ClaimId = string
 export interface Claim {
   mainsnak: Snak
   type: ClaimType
-  id: string
+  id: ClaimId
   rank: Rank
   qualifiers?: ResultList<Snak[]>
   'qualifiers-order'?: EntityId[]
@@ -208,6 +222,16 @@ export interface MatchInfo {
   text: string
 }
 
+export interface SearchParams extends ApiQuery {
+  action: 'wbsearchentities'
+  search: string
+  language: string
+  type?: EntityKind
+  limit?: number
+  continue?: number
+  strictlanguage?: boolean
+}
+
 export interface SearchResult {
   repository: string
   id: string
@@ -221,7 +245,7 @@ export interface SearchResult {
   aliases: string[]
 }
 
-export type EntityKind = 'item' | 'property' | 'lexeme' | 'form' | 'sense'
+export type EntityKind = 'item' | 'property' | 'lexeme' | 'form' | 'sense' | 'commons-media'
 export type EntityId = string
 export type StatementId = string
 export interface EntityReference {
@@ -297,6 +321,14 @@ export interface QualifiedEntityValue {
   value: EntityIdValue
   qualifiers: Map<EntityId, Snak[]>
   id: string
+}
+
+export function isError(candidate: unknown): candidate is Error {
+  if (candidate && typeof candidate === 'object' && 'name' in candidate && 'message' in candidate) {
+    return true
+  }
+
+  return false
 }
 
 export class MalformedEntityIdError extends Error {

@@ -1,14 +1,14 @@
 use std::{collections::HashMap, str::FromStr};
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use nom::{
+    IResult, Parser, ToUsize,
     branch::alt,
     bytes::complete::tag,
     character::complete::u64,
     combinator::{all_consuming, complete, map, opt},
     multi::{length_count, length_data},
     sequence::{delimited, preceded, separated_pair, terminated},
-    IResult, Parser, ToUsize,
 };
 
 #[derive(Debug, Eq, PartialEq)]

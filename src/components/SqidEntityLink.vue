@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n'
 import type { EntityId } from '@/api/types'
 import { useEntitiesTermsStore } from '@/stores/entities-terms'
 
-const { locale } = useI18n()
+useI18n()
 const entitiesTerms = useEntitiesTermsStore()
 
 const props = defineProps<{ entityId: EntityId }>()
@@ -20,10 +20,6 @@ const label = ref<EntityId>('')
 watchEffect(async () => {
   label.value = props.entityId
   label.value = await entitiesTerms.getLabel({ entityId: props.entityId })
-})
-
-const language = computed(() => {
-  return locale
 })
 
 const destination = computed(() => {

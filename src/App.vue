@@ -12,7 +12,7 @@ import { useI18n } from 'vue-i18n'
 import { useI18nStore } from '@/stores/i18n'
 import { usePreferredLanguages } from '@vueuse/core'
 
-const i18n = useI18n()
+useI18n()
 const i18nStore = useI18nStore()
 
 const preferredLanguages = usePreferredLanguages()
@@ -20,7 +20,7 @@ const preferredLanguages = usePreferredLanguages()
 i18nStore.preferLanguages(preferredLanguages.value)
 </script>
 
-<style lang="less">
+<style>
 :root {
   --red: #990000;
   --green: #339966;

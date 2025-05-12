@@ -195,7 +195,6 @@ export const useEntitiesTermsStore = defineStore('entities-terms', () => {
   const inflightTerms = ref<InflightTermsMap>(new Map())
   const inflightLabels = ref<InflightLabelsMap>(new Map())
 
-  // eslint-disable-next-line vue/return-in-computed-property
   function $reset(this: Store) {
     this.$patch({
       labels: new Map(),

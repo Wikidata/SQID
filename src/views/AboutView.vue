@@ -1,43 +1,51 @@
 <template>
   <sqid-bars>
     <template #mainbar>
-      <h1 v-t="'about.about'" />
+      <h1>{{ t('about.about') }}</h1>
       <i18n-t tag="p" keypath="about.aboutDescription">
-        <template #kbsGroup><a :href="kbsLink" v-t="'about.kbsGroup'" /></template>
-        <template #tuDresden><a href="https://tu-dresden.de">TU Dresden</a></template>
-        <template #developersList
-          >Markus Krötzsch, Michael Günther, Markus Damm, Georg Wild</template
+        <template #kbsGroup
+          ><a :href="kbsLink">{{ t('about.kbsGroup') }}</a></template
         >
-        <template #lastDeveloper>Maximilian Marx</template>
+        <template #tuDresden
+          ><a href="https://tu-dresden.de">{{ t('about.tuDresden') }}</a></template
+        >
+        <template #developersList>{{ t('about.developersList') }}</template>
+        <template #lastDeveloper>{{ t('about.lastDeveloper') }}</template>
       </i18n-t>
 
-      <h2 v-t="'about.meaning'" />
+      <h2>{{ t('about.meaning') }}</h2>
       <i18n-t tag="p" keypath="about.meaningHypotheses">
         <template #hypotheses>
           <ul>
-            <li>Searching, Querying, and Interacting with Data</li>
-            <li>Sweet QIDs</li>
-            <li>SPARQL Querying Isn't Difficult</li>
-            <li>Surprisingly Quick Information Display</li>
-            <li>See Quality In Data</li>
-          </ul></template
+            <li>{{ t('about.hypothesis1') }}</li>
+            <li>{{ t('about.hypothesis2') }}</li>
+            <li>{{ t('about.hypothesis3') }}</li>
+            <li>{{ t('about.hypothesis4') }}</li>
+            <li>{{ t('about.hypothesis5') }}</li>
+          </ul>
+        </template>
+        <template #squids
+          ><a :href="squidLink">{{ t('about.squids') }}</a></template
         >
-        <template #squids><a :href="squidLink" v-t="'about.squids'" /></template>
       </i18n-t>
 
-      <h2 v-t="'about.contribute'" />
+      <h2>{{ t('about.contribute') }}</h2>
       <i18n-t tag="p" keypath="about.contributions">
         <template #githubRepository>
-          <a href="https://github.com/Wikidata/SQID/" v-t="'about.githubRepository'"
-        /></template>
+          <a href=" https://github.com/Wikidata/SQID/"
+            >{{ t('about.githubRepository') }}
+          </a></template
+        >
         <template #submitIssue
-          ><a href="https://github.com/Wikidata/SQID/issues" v-t="'about.submitIssue'"
-        /></template>
+          ><a href="https://github.com/Wikidata/SQID/issues"
+            >{{ t('about.submitIssue') }}
+          </a></template
+        >
       </i18n-t>
     </template>
     <template #sidebar>
       <sqid-image file="Squid_komodo.jpg" :width="260" />
-      <div style="text-align: center; width: 100%" v-t="'about.dontEatMe'" />
+      <div style="text-align: center; width: 100%">{{ t('about.dontEatMe') }}</div>
     </template>
   </sqid-bars>
 </template>
@@ -48,6 +56,7 @@ import { computed, ref, watchEffect } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const i18n = useI18n()
+const t = i18n.t
 
 const kbsLink = computed(
   () => `https://${i18n.locale.value === 'de' ? 'wbs' : 'kbs'}.inf.tu-dresden.de`,

@@ -15,6 +15,7 @@ import {
   type QualifiedEntityValue,
   EntityMissingError,
   MalformedEntityIdError,
+  type SearchParams,
 } from './types'
 import { apiRequest } from './index'
 import {
@@ -42,6 +43,7 @@ export async function getEntities(
   props: Props[],
   lang?: string,
   fallback = true,
+  endpoint = wikidataEndpoint,
 ): Promise<ResultList<EntityResult>> {
   const chunks = []
   const ids = entityIds.length
@@ -59,7 +61,7 @@ export async function getEntities(
 
   const results = await queue.addAll(
     chunks.map((chunk) => {
-      return () => getEntityChunk(chunk, props, lang, fallback)
+      return () => getEntityChunk(chunk, props, lang, fallback, endpoint)
     }),
   )
   const entities: ResultList<EntityResult> = {}
@@ -80,9 +82,10 @@ async function getEntityChunk(
   props: Props[],
   lang?: string,
   fallback = true,
+  endpoint = wikidataEndpoint,
 ): Promise<ResultList<EntityResult>> {
   const langCode = lang ?? i18n.global.locale.value
-  const response = (await apiRequest(wikidataEndpoint, {
+  const response = (await apiRequest(endpoint, {
     action: 'wbgetentities',
     ids: entityIds.join('|'),
     props: props.join('|'),
@@ -95,8 +98,13 @@ async function getEntityChunk(
 
 export type LabelsPromise = ReturnType<typeof getLabels>
 
-export async function getLabels(entityIds: string[], lang?: string, fallback = true) {
-  const entities = await getEntities(entityIds, ['labels'], lang, fallback)
+export async function getLabels(
+  entityIds: string[],
+  lang?: string,
+  fallback = true,
+  endpoint = wikidataEndpoint,
+) {
+  const entities = await getEntities(entityIds, ['labels'], lang, fallback, endpoint)
   const langCode = lang ?? i18n.global.locale.value
   const labels = new Map<string, Map<string, string>>()
   const nativeLabels = new Map<string, string>()
@@ -251,6 +259,8 @@ export function parseEntityId(entityId: string): EntityReference {
     case 'Q':
       kind = 'item'
       break
+    case 'M':
+      kind = 'commons-media'
     case 'L':
       kind = 'lexeme'
 
@@ -316,20 +326,20 @@ export async function searchEntities(
     offset?: number
     fallback?: boolean
   },
-): Promise<ResultList<SearchResult>> {
+): Promise<SearchResult[]> {
   const langCode = options.lang ?? i18n.global.locale.value
   const params = {
     action: 'wbsearchentities',
     search,
     language: langCode,
-  } as any
+  } as SearchParams
 
-  if (options.kind !== 'item') {
-    params.type = options.kind
+  if (options.kind ?? 'item' !== 'item') {
+    params.type = options.kind!
   }
 
-  if (options.limit !== 7) {
-    params.limit = options.limit
+  if (options.limit ?? 7 !== 7) {
+    params.limit = options.limit!
   }
 
   if (options.offset !== undefined) {
@@ -347,7 +357,7 @@ export async function searchEntities(
 
 export async function siteLinkUrls(entityId: EntityId) {
   const entities = await getEntities([entityId], ['sitelinks/urls'])
-  const urls: any = {}
+  const urls: { [site: string]: string } = {}
 
   if (entities !== undefined) {
     const entity = entities[entityId]

@@ -11,7 +11,11 @@
     "logout": "Logout",
     "loggedInAs": "Logged in as {0}",
     "searchItem": "Search item",
-    "search": "Search"
+    "search": "Search",
+    "sqidS": "S",
+    "sqidQ": "Q",
+    "sqidI": "I",
+    "sqidD": "D"
   },
   "settings": {
     "language": "{flag} {label}",
@@ -22,20 +26,27 @@
     }
   },
   "footer": {
+    "stats": "@:footer.statDate ({link})",
     "statDate": "Statistics based on data dump {date}",
     "statLink": "details",
-    "poweredBy": "Powered by",
-    "sourceCode": "Source code available on {0}"
+    "poweredBy": "Powered by {wdtk} & {wdqs}",
+    "sourceCode": "Source code available on {github}",
+    "wdtk": "@:home.wdtk",
+    "wdqs": "@:home.wdqs",
+    "github": "GitHub"
   },
   "errors": {
     "pageNotFound": "Sorry, I could not find any page with that URI.",
     "pageNotFoundDescription": "There seems to be an error in the URI you followed here.",
-    "noSuchEntity": "Sorry, I could not find any entity with ID “{entityId}”.",
+    "noSuchEntity": "Sorry, I could not find any entity with ID “{entityId}”. {entityUrl}",
+    "noSuchEntityUrl": "({url})",
     "noSuchEntityDescription": "Maybe it was deleted. Maybe it never existed. Maybe we'll never know.",
     "invalidEntity": "Sorry, I could not parse “{entityId}” as a valid entity ID.",
     "invalidEntityDescription": "While trying to read “{entityId}” as an entity ID, this error occured: “{error}”.",
     "underConstruction": "Sorry, this part of SQID is still under construction.",
-    "underConstructionDescription": "This rewrite of SQID is still under development. For the moment, you can still use {sqid}."
+    "underConstructionDescription": "This rewrite of SQID is still under development. For the moment, you can still use {sqid}.",
+    "legacySqid": "SQID 1.0",
+    "unknownSnakType": "unknown snaktype"
   },
   "entity": {
     "hierarchyStatements": "Class hierarchy",
@@ -59,6 +70,7 @@
     "calendar": "({calendar})",
     "globe": "on {globe}",
     "monolingualText": "{text} {language}",
+    "monolingualTextLanguage": "[{language}]",
     "quantityUnit": "{amount} {unit}",
     "quantityNoUnit": "{amount}",
     "someValue": "Unknown value",
@@ -102,7 +114,8 @@
     "propertyQualifiersDescription": "Other properties that are used as qualifiers for this property, together with the number of uses",
     "propertyAsQualifier": "Uses as qualifier",
     "propertyInReference": "Uses in references",
-    "reference": "Reference"
+    "reference": "Reference",
+    "qualifierValue": "{qualifier}: {value}"
   },
   "home": {
     "home": "A fresh look at Wikidata",
@@ -124,6 +137,7 @@
     "classBrowser": "class browser",
     "data": "Most data shown by SQID is {liveData} taken from the {wikidataAPI}  or the {wdqs}. Complex statistics that cannot currently be computed live are pre-computed from the weekly data dumps using {wdtk}. Some complex statistics can be fetched from SPARQL, but take too long to compute in the browser. These are updated every hour. See the {statusPage} for recency information and statistics on the current data.",
     "liveData": "live data",
+    "theData": "The data",
     "wikidataAPI": "Wikidata API",
     "wdqs": "Wikidata SPARQL query service",
     "wdtk": "Wikidata Toolkit",
@@ -149,13 +163,17 @@
     "propertyDate": "Property data refresh",
     "classDate": "Class data refresh",
     "clientDate": "Client-side data refresh",
-    "refreshedRecently": "Refreshed recently?"
+    "refreshedRecently": "Refreshed recently?",
+    "defaultNumber": "0"
   },
   "about": {
     "about": "About SQID",
     "aboutDescription": "SQID is a project of the {kbsGroup} of {tuDresden}. Developers include {developersList}, and {lastDeveloper}.",
-    "aboutImplementation": "SQID is programmed in TypeScript with additional server-side code in Java and Python to extract, query, and preprocess data.",
+    "aboutImplementation": "SQID is programmed in TypeScript with additional server-side code in Rust to extract, query, and preprocess data.",
     "kbsGroup": "Knowledge-Based Systems Group",
+    "tuDresden": "TU Dresden",
+    "developersList": "Markus Krötzsch, Michael Günther, Markus Damm, Georg Wild",
+    "lastDeveloper": "Maximilian Marx",
     "meaning": "What does SQID mean?",
     "meaningHypotheses": "The origin of the name is unknown, but it seems to be an abbreviation of something. Current hypotheses include: {hypotheses} Another possible theory is that the name is indeed inspired by the high intelligence, amazing social skills, and sharp vision that are characteristic for many {squids} and Wikidata editors alike.",
     "squids": "Cephalopods",
@@ -163,6 +181,15 @@
     "contributions": "All code is found in our {githubRepository}. Bugs and wishes are best reported by {submitIssue}. Pull requests are welcome.",
     "githubRepository": "public Github repository",
     "submitIssue": "submitting an issue there",
-    "dontEatMe": "Please don't eat me."
+    "dontEatMe": "Please don't eat me.",
+    "hypothesis1": "Searching, Querying, and Interacting with Data",
+    "hypothesis2": "Sweet QIDs",
+    "hypothesis3": "SPARQL Querying Isn't Difficult",
+    "hypothesis4": "Surprisingly Quick Information Display",
+    "hypothesis5": "See Quality in Data"
+  },
+  "image": {
+    "missingImageDescription": "[image description is not available]",
+    "description": "{description} — from Wikimedia Commons, check the linked page for licensing information"
   }
 }
