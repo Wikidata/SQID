@@ -154,7 +154,7 @@ impl From<Item> for Entity {
 impl From<Property> for Entity {
     fn from(property: Property) -> Self {
         Self {
-            id: property.0,
+            id: property.0.into(),
             kind: EntityKind::Property,
         }
     }
@@ -258,7 +258,7 @@ impl From<Id> for Item {
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Property(pub(crate) Id);
+pub struct Property(pub(crate) u16);
 
 pub mod properties {
     use super::Property;
@@ -280,7 +280,7 @@ pub mod properties {
 
 impl Property {
     pub fn new(id: Id) -> Self {
-        Self(id)
+        Self(id.try_into().expect("properties should fit into u16"))
     }
 
     pub fn is_hierarchy_property(&self) -> bool {
@@ -324,17 +324,17 @@ impl From<Property> for String {
 
 impl From<Id> for Property {
     fn from(id: Id) -> Self {
-        Self(id)
+        Self::new(id)
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Qualifier(pub(crate) Id);
+pub struct Qualifier(pub(crate) u16);
 
 impl Qualifier {
     pub fn new(id: Id) -> Self {
-        Self(id)
+        Self(id.try_into().expect("properties should fit into u16"))
     }
 
     pub(crate) fn to_property(self) -> Property {
@@ -368,17 +368,17 @@ impl From<Qualifier> for String {
 
 impl From<Id> for Qualifier {
     fn from(id: Id) -> Self {
-        Self(id)
+        Self::new(id)
     }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Deserialize, Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct Reference(pub(crate) Id);
+pub struct Reference(pub(crate) u16);
 
 impl Reference {
     pub fn new(id: Id) -> Self {
-        Self(id)
+        Self(id.try_into().expect("properties should fit into u16"))
     }
 
     pub(crate) fn to_property(self) -> Property {
@@ -406,7 +406,7 @@ impl From<Reference> for String {
 
 impl From<Id> for Reference {
     fn from(id: Id) -> Self {
-        Self(id)
+        Self::new(id)
     }
 }
 
