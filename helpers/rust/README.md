@@ -7,7 +7,7 @@ frequently-changing information is gathered from SPARQL and SQL
 queries.
 
 ## Building
-Use `podman` to build a suitable executable for Debian bookworm:
+Use `podman` to build a suitable executable for Debian trixie:
 ```bash
 podman build . --tag sqid-helper:LATEST
 podman run --rm -it --name sqid-helper sqid-helper:LATEST
@@ -23,7 +23,7 @@ toolforge jobs load toolforge.yaml
 
 This does the equivalent of running the following, but atomically.
 ```bash
-toolforge jobs run sqid-update-statistics --command './sqid-helper --data-path ~/projects/sqid/data' --image bookworm --cpu 1 --mem 512M --schedule '@hourly' --emails onfailure --filelog-stdout ~/logs/sqid-update-statistics.log --filelog-stderr ~/logs/sqid-update-statistics.log
-toolforge jobs run sqid-check-dump --command './sqid-helper --only=check-dump --data-path ~/projects/sqid/data' --image bookworm --cpu 1 --mem 6Gi --schedule '@hourly' --emails onfailure --filelog-stdout ~/logs/sqid-check-dump.log --filelog-stderr ~/logs/sqid-check-dump.log
+toolforge jobs run sqid-update-statistics --command './sqid-helper --data-path ~/projects/sqid/data' --image trixie --cpu 1 --mem 512M --schedule '@hourly' --emails onfailure --filelog-stdout ~/logs/sqid-update-statistics.log --filelog-stderr ~/logs/sqid-update-statistics.log
+toolforge jobs run sqid-check-dump --command './sqid-helper --only=check-dump --data-path ~/projects/sqid/data' --image trixie --cpu 1 --mem 7Gi --schedule '@hourly' --emails onfailure --filelog-stdout ~/logs/sqid-check-dump.log --filelog-stderr ~/logs/sqid-check-dump.log
 toolforge jobs run logrotate --command "logrotate -v ./.logrotate.conf --state ./.logrotate.state" --image mariadb --schedule '@daily'
 ```
