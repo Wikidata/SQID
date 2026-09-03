@@ -40,7 +40,7 @@ pub fn properties() -> Result<Vec<PropertyLabelAndType>> {
       WHERE {
         INCLUDE %properties .
         SERVICE wikibase:label {
-          bd:serviceParam wikibase:language "en" .
+          bd:serviceParam wikibase:language "mul,en" .
           ?id rdfs:label ?label .
         }
       }"#})?;
@@ -70,7 +70,7 @@ pub fn classes() -> Result<Vec<ClassLabelAndUsage>> {
       WHERE {
         INCLUDE %classes
         SERVICE wikibase:label {
-          bd:serviceParam wikibase:language "en" .
+          bd:serviceParam wikibase:language "mul,en" .
           ?id rdfs:label ?label .
         }
       }"#})?;
@@ -91,7 +91,7 @@ pub fn classes_fallback() -> Result<Vec<ClassLabelAndUsage>> {
       WHERE {
         INCLUDE %classes
         SERVICE wikibase:label {
-          bd:serviceParam wikibase:language "en" .
+          bd:serviceParam wikibase:language "mul,en" .
           ?id rdfs:label ?label .
         }
       }"#})?;
@@ -122,7 +122,7 @@ mod test {
                                  SELECT ?id ?label WHERE {
                                    VALUES (?id) { (wd:P31) (wd:P279) (wd:Q42) }
                                    ?id rdfs:label ?label .
-                                   FILTER(LANG(?label) = "en")
+                                   FILTER(LANG(?label) IN ("mul", "en"))
                                  } ORDER BY ASC(?id)"#});
         assert!(response.is_ok());
         let response = response.unwrap();
