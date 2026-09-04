@@ -1,3 +1,12 @@
 [workspace]
-members = [ "helpers/rust" ]
+members = ["helpers/rust"]
 resolver = "2"
+metadata.crane.name = "sqid-helper"
+
+[workspace.package]
+version = "0.1.0"
+description = "Update statistical data for SQID, a Wikidata browser"
+authors = ["Maximilian Marx <maximilian.marx@tu-dresden.de>"]
+homepage = "https://github.com/Wikidata/SQID"
+license = "Apache-2.0"
+edition = "2024"

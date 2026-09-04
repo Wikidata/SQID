@@ -48,3 +48,4 @@ helpers/rust/target
 .log
 /target/
 /.direnv/
+/.pre-commit-config.yaml
