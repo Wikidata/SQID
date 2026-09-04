@@ -1,5 +1,5 @@
 use crate::types::{
-    self, sitelinks, ClassRecord, DataFile, DumpInfo, DumpStatistics, Item, Settings, Statistics,
+    self, ClassRecord, DataFile, DumpInfo, DumpStatistics, Item, Settings, Statistics, sitelinks,
 };
 use anyhow::{Context, Result};
 use flate2::read::MultiGzDecoder;

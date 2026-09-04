@@ -1,8 +1,8 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use dirs::home_dir;
-use mysql::{prelude::Queryable, Opts, Pool};
+use mysql::{Opts, Pool, prelude::Queryable};
 
-use super::{php::SitePaths, SiteRecord};
+use super::{SiteRecord, php::SitePaths};
 
 pub const REPLICA_MY_CNF: &str = "replica.my.cnf";
 pub const HOST: &str = "wikidatawiki.analytics.db.svc.wikimedia.cloud";
@@ -46,7 +46,9 @@ impl ToString for Credentials {
     }
 }
 
-fn query_sites(credentials: &Credentials) -> Result<impl Iterator<Item = (String, SiteRecord)>> {
+fn query_sites(
+    credentials: &Credentials,
+) -> Result<impl Iterator<Item = (String, SiteRecord)> + use<>> {
     let opts =
         Opts::from_url(&credentials.to_string()).context("failed to parse connection URL")?;
     let pool = Pool::new(opts).context("failed to create connection pool")?;

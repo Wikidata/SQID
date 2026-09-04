@@ -5,10 +5,10 @@ use std::collections::{HashMap, HashSet};
 use strum::{Display, EnumIter, EnumString};
 
 use super::{
+    Count, LargeCount,
     ids::{Item, Property, Qualifier},
     is_zero,
     sparql::{PropertyLabelAndType, PropertyUsage, PropertyUsageType},
-    Count, LargeCount,
 };
 
 const ENGLISH: &str = "en";
@@ -1042,7 +1042,7 @@ pub(crate) mod formats {
 }
 
 pub(crate) mod stream {
-    use anyhow::{bail, Result};
+    use anyhow::{Result, bail};
     use serde::Deserialize;
     use serde_json::Deserializer;
     use std::{
@@ -1179,18 +1179,21 @@ mod test {
 
     #[test]
     fn deserialise_property_record() {
+        // editorconfig-checker-disable
         let property: Result<PropertyRecord, _> = serde_json::from_str(
-            r#"{ "qs": { "166": 1, "582": 1, "580": 1 },
-                 "e": 0,
-                 "d": "WikibaseItem",
-                 "i": 39562,
-                 "l": "director of photography",
-                 "q": 5,
-                 "pc": [ "22965162" ],
-                 "s": 41545,
-                 "r": { "214": 0, "1265": 1422, "131": 0, "2530": 21 }
+            r#"{
+                "qs": { "166": 1, "582": 1, "580": 1 },
+                "e": 0,
+                "d": "WikibaseItem",
+                "i": 39562,
+                "l": "director of photography",
+                "q": 5,
+                "pc": [ "22965162" ],
+                "s": 41545,
+                "r": { "214": 0, "1265": 1422, "131": 0, "2530": 21 }
                }"#,
         );
+        // editorconfig-checker-enable
         log::debug!("{:?}", property);
 
         let mut qualifiers = HashMap::new();
@@ -1226,10 +1229,12 @@ mod test {
     #[test]
     fn deserialise_example_properties() {
         let mut data = String::new();
-        assert!(File::open("../../data/exampleData/properties.json")
-            .unwrap()
-            .read_to_string(&mut data)
-            .is_ok());
+        assert!(
+            File::open("../../data/exampleData/properties.json")
+                .unwrap()
+                .read_to_string(&mut data)
+                .is_ok()
+        );
 
         let properties: Result<Properties, _> = serde_json::from_str(&data);
         log::debug!("{:?}", properties);
@@ -1239,10 +1244,12 @@ mod test {
     #[test]
     fn deserialise_example_classes() {
         let mut data = String::new();
-        assert!(File::open("../../data/exampleData/classes.json")
-            .unwrap()
-            .read_to_string(&mut data)
-            .is_ok());
+        assert!(
+            File::open("../../data/exampleData/classes.json")
+                .unwrap()
+                .read_to_string(&mut data)
+                .is_ok()
+        );
 
         let classes: Result<Classes, _> = serde_json::from_str(&data);
         log::debug!("{:?}", classes);
@@ -1252,10 +1259,12 @@ mod test {
     #[test]
     fn deserialise_example_statistics() {
         let mut data = String::new();
-        assert!(File::open("../../data/exampleData/statistics.json")
-            .unwrap()
-            .read_to_string(&mut data)
-            .is_ok());
+        assert!(
+            File::open("../../data/exampleData/statistics.json")
+                .unwrap()
+                .read_to_string(&mut data)
+                .is_ok()
+        );
 
         let statistics: Result<Statistics, _> = serde_json::from_str(&data);
         log::debug!("{:?}", statistics);

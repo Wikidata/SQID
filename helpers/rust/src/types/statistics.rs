@@ -1,19 +1,19 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::collections::{HashMap, HashSet, VecDeque};
 
 use crate::{
     classes::derive_class_hierarchy,
     properties::derive_related_properties,
-    types::{ids::properties, DataFile},
+    types::{DataFile, ids::properties},
 };
 
 use super::{
+    Count, EntityStatistics, LargeCount, Settings, SiteRecord, Statistics, Type,
     ids::{EntityKind, Item, Property},
     json::{
-        dump::{CommonData, Rank, Record, Sitelink},
         ClassRecord, PropertyRecord,
+        dump::{CommonData, Rank, Record, Sitelink},
     },
-    Count, EntityStatistics, LargeCount, Settings, SiteRecord, Statistics, Type,
 };
 
 #[derive(Debug, Default)]

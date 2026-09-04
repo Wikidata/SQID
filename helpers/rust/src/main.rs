@@ -14,6 +14,7 @@
     unused_extern_crates,
     variant_size_differences
 )]
+#![allow(unused_imports, dead_code)]
 
 use std::path::PathBuf;
 

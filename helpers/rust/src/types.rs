@@ -1,10 +1,10 @@
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use chrono::{DateTime, NaiveDate, Utc};
-use serde::{ser::SerializeMap, Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeMap};
 use serde_json::Serializer as JSONSerializer;
 use std::{
     fmt::{Debug, Display},
-    fs::{metadata, File},
+    fs::{File, metadata},
     io::{BufReader, BufWriter},
     os::unix::prelude::PermissionsExt,
     path::PathBuf,
@@ -19,10 +19,10 @@ mod sparql;
 mod sql;
 mod statistics;
 
-pub use ids::{properties, Entity, Item, Property, Qualifier, Reference};
+pub use ids::{Entity, Item, Property, Qualifier, Reference, properties};
 pub use json::{
-    formats::date::date_from_str, ClassRecord, Classes, EntityStatistics, Properties,
-    PropertyClassification, PropertyRecord, PropertyUsageRecord, SiteRecord, Statistics, Type,
+    ClassRecord, Classes, EntityStatistics, Properties, PropertyClassification, PropertyRecord,
+    PropertyUsageRecord, SiteRecord, Statistics, Type, formats::date::date_from_str,
 };
 pub use sparql::{ClassLabelAndUsage, PropertyLabelAndType, PropertyUsage, PropertyUsageType};
 pub use sql::sitelinks;
