@@ -1,8 +1,9 @@
 [package]
 name = "sqid-helper"
 version = "0.1.0"
-description = "Update statistics data for SQID, a Wikidata browser"
+description = "Update statistical data for SQID, a Wikidata browser"
 authors = ["Maximilian Marx <maximilian.marx@tu-dresden.de>"]
+homepage = "https://github.com/Wikidata/SQID"
 edition = "2021"
 license = "Apache-2.0"
 
