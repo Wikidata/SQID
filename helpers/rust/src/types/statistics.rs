@@ -171,7 +171,7 @@ impl DumpStatistics {
     }
 
     pub(crate) fn process_line(&mut self, line: &str) -> Result<()> {
-        let raw_record = line.trim_end_matches(&['\n', ',']);
+        let raw_record = line.trim_end_matches(['\n', ',']);
 
         if raw_record.is_empty() {
             return Ok(());
@@ -266,10 +266,10 @@ impl DumpStatistics {
         let mut pattern = None;
         if let Some(claims) = common.claims.get(&properties::FORMATTER_URL) {
             for claim in claims {
-                if let Some(value) = claim.mainsnak().as_data_value() {
-                    if pattern.is_none() || claim.rank() == Rank::Preferred {
-                        pattern = Some(value);
-                    }
+                if let Some(value) = claim.mainsnak().as_data_value()
+                    && (pattern.is_none() || claim.rank() == Rank::Preferred)
+                {
+                    pattern = Some(value);
                 }
             }
         }
@@ -391,7 +391,7 @@ impl DumpStatistics {
             });
         }
 
-        if self.total_entities % Self::REPORT_INTERVAL == 0 {
+        if self.total_entities.is_multiple_of(Self::REPORT_INTERVAL) {
             log::info!("Processed {} entities", self.total_entities);
         }
 

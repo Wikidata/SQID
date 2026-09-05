@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::{Context, Result, anyhow};
 use dirs::home_dir;
 use mysql::{Opts, Pool, prelude::Queryable};
@@ -37,9 +39,10 @@ impl Credentials {
     }
 }
 
-impl ToString for Credentials {
-    fn to_string(&self) -> String {
-        format!(
+impl Display for Credentials {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
             "mysql://{}:{}@{}/{}",
             self.user, self.password, HOST, DATABASE
         )

@@ -640,16 +640,12 @@ pub(crate) mod dump {
 
     #[derive(Copy, Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
     #[serde(rename_all = "camelCase")]
+    #[derive(Default)]
     pub enum Rank {
+        #[default]
         Normal,
         Preferred,
         Deprecated,
-    }
-
-    impl Default for Rank {
-        fn default() -> Self {
-            Self::Normal
-        }
     }
 
     #[allow(variant_size_differences, clippy::enum_variant_names)]

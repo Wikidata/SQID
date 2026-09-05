@@ -170,7 +170,7 @@ mod test {
         assert!(result.is_ok());
         let array = result.unwrap().0;
         assert_eq!(array.len(), 1);
-        assert!(array.get("inner").is_some());
+        assert!(array.contains_key("innner"));
         assert!(array.get("inner").unwrap().as_array().is_some());
         assert_eq!(array.get("inner").unwrap().as_array().unwrap().0.len(), 0);
     }
@@ -188,7 +188,7 @@ mod test {
             *array.get("file_path").unwrap(),
             Value::String("https://test-commons.wikimedia.org/w/$1".to_string())
         );
-        assert!(array.get("page_path").is_some());
+        assert!(array.contains_key("page_path"));
         assert_eq!(
             *array.get("page_path").unwrap(),
             Value::String("https://test-commons.wikimedia.org/wiki/$1".to_string())
